@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IDEA-BLADE | Assignment 01: Concept Package</title>
+<title>IDEA 403 | Senior Project Progress Update</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -15,901 +15,740 @@
   --accent: #00ff6e; --warn: #ffcc00; --red: #ff4444;
 }
 body { background:var(--bg); color:var(--text); font-family:'Rajdhani',sans-serif; font-size:15px; line-height:1.6; min-height:100vh; overflow-x:hidden; }
-#matrix-canvas { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none; opacity:0.55; }
-.page { position:relative; z-index:1; max-width:860px; margin:0 auto; padding:40px 32px 60px; }
+#matrix-canvas { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none; opacity:0.5; }
+
+/* PREFLIGHT OVERLAY */
+#preflight-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:999; align-items:center; justify-content:center; }
+#preflight-overlay.active { display:flex; }
+.preflight-modal { background:#091109; border:1px solid var(--green-border-strong); max-width:500px; width:92%; padding:28px 28px 24px; }
+.preflight-modal h2 { font-family:'Orbitron',sans-serif; font-size:13px; font-weight:700; color:var(--warn); letter-spacing:2px; margin-bottom:14px; }
+.preflight-modal p { font-size:13px; color:var(--text-dim); margin-bottom:12px; line-height:1.6; }
+.preflight-list { list-style:none; display:flex; flex-direction:column; gap:6px; margin-bottom:18px; }
+.preflight-list li { font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--red); padding:6px 10px; border:1px solid rgba(255,68,68,0.25); background:rgba(255,68,68,0.05); letter-spacing:0.5px; }
+.preflight-actions { display:flex; gap:10px; }
+.pf-btn { font-family:'Share Tech Mono',monospace; font-size:11px; letter-spacing:1px; text-transform:uppercase; padding:8px 18px; cursor:pointer; border:1px solid; }
+.pf-btn.proceed { background:none; color:var(--text-dim); border-color:var(--text-muted); }
+.pf-btn.proceed:hover { color:var(--text); border-color:var(--green-border); }
+.pf-btn.cancel { background:var(--green); color:var(--bg); border-color:var(--green); font-weight:700; }
+
+.page { position:relative; z-index:1; max-width:860px; margin:0 auto; padding:32px 32px 60px; }
+
+/* TOOLBAR */
+.toolbar { background:rgba(9,17,9,0.97); border:1px solid var(--green-border); margin-bottom:16px; padding:14px 16px; display:flex; flex-direction:column; gap:10px; position:sticky; top:0; z-index:100; }
+.progress-row { display:flex; align-items:center; gap:12px; }
+.progress-track { flex:1; height:4px; background:var(--green-dark); position:relative; overflow:hidden; }
+.progress-fill { height:100%; background:var(--green); width:0%; transition:width 0.4s ease; }
+.progress-label { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--text-dim); letter-spacing:1px; white-space:nowrap; min-width:120px; text-align:right; }
+.btn-row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.tool-btn { font-family:'Share Tech Mono',monospace; font-size:11px; letter-spacing:1px; text-transform:uppercase; background:none; border:1px solid var(--green-border-strong); color:var(--green-dim); padding:7px 16px; cursor:pointer; transition:all 0.2s; white-space:nowrap; }
+.tool-btn:hover { background:var(--green-dark); color:var(--green); border-color:var(--green); }
+.tool-btn.primary { background:var(--green); color:var(--bg); border-color:var(--green); font-weight:700; }
+.tool-btn.primary:hover { background:var(--accent); }
+.save-status { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--text-muted); letter-spacing:1px; margin-left:auto; transition:color 0.3s; }
+.save-status.flash { color:var(--green); }
 
 /* HEADER */
-.header { border:1px solid var(--green-border-strong); border-bottom:3px solid var(--green); background:rgba(9,17,9,0.97); padding:28px 32px 24px; margin-bottom:16px; position:relative; overflow:hidden; break-inside:avoid; }
+.header { border:1px solid var(--green-border-strong); border-bottom:3px solid var(--green); background:rgba(9,17,9,0.97); padding:28px 32px 24px; margin-bottom:16px; position:relative; overflow:hidden; }
 .header::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--green),transparent); }
 .header-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:20px; gap:16px; }
 .brand-label { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--green-dim); letter-spacing:3px; text-transform:uppercase; display:block; margin-bottom:4px; }
-.brand-title { font-family:'Orbitron',sans-serif; font-size:30px; font-weight:900; color:var(--accent); letter-spacing:4px; text-shadow:0 0 20px rgba(0,255,110,0.4); line-height:1; display:block; margin-bottom:4px; }
+.brand-title { font-family:'Orbitron',sans-serif; font-size:26px; font-weight:900; color:var(--accent); letter-spacing:3px; text-shadow:0 0 20px rgba(0,255,110,0.35); line-height:1; display:block; margin-bottom:4px; }
 .brand-sub { font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--text-dim); letter-spacing:2px; display:block; }
-.badge-num { font-family:'Orbitron',sans-serif; font-size:42px; font-weight:900; color:var(--green-dark); line-height:1; text-align:right; display:block; }
-.badge-label { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--green-dim); letter-spacing:2px; text-align:right; display:block; }
-.header-title { font-family:'Orbitron',sans-serif; font-size:14px; font-weight:700; color:var(--green); letter-spacing:4px; text-transform:uppercase; margin-bottom:20px; padding-bottom:12px; border-bottom:1px solid var(--green-border); }
-.student-grid { display:grid; grid-template-columns:2fr 1fr 1fr 0.7fr; gap:12px; margin-bottom:14px; }
-.info-field { display:flex; flex-direction:column; gap:4px; }
-.info-field label,.field-row label { font-family:'Share Tech Mono',monospace; font-size:9px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; display:block; }
-.info-field input,.field-row input[type="text"] { background:var(--bg-input); border:1px solid var(--green-border); border-bottom:1px solid var(--green-dim); color:var(--accent); font-family:'Rajdhani',sans-serif; font-size:15px; padding:9px 12px; outline:none; width:100%; transition:border-color 0.2s,box-shadow 0.2s; }
-.info-field input:focus,.field-row input[type="text"]:focus,.field-row textarea:focus { border-color:var(--green); box-shadow:0 0 10px rgba(0,229,102,0.15),inset 0 0 6px rgba(0,229,102,0.05); }
-.info-field input::placeholder,.field-row input::placeholder,.field-row textarea::placeholder { color:var(--text-muted); font-style:italic; font-size:13px; }
+.badge-sp { font-family:'Orbitron',sans-serif; font-size:15px; font-weight:900; color:var(--bg); background:var(--green); width:64px; height:64px; display:flex; align-items:center; justify-content:center; flex-shrink:0; letter-spacing:1px; line-height:1.1; text-align:center; flex-direction:column; }
+.badge-sp span { font-size:9px; letter-spacing:2px; font-weight:700; }
+.header-fields { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+.field-full { grid-column:1/-1; }
+.field-label { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--green-dim); letter-spacing:2px; text-transform:uppercase; display:block; margin-bottom:4px; }
+.field-input { width:100%; background:var(--bg-input); border:1px solid var(--green-border); color:var(--text); font-family:'Rajdhani',sans-serif; font-size:15px; font-weight:600; padding:8px 12px; outline:none; transition:border-color 0.2s; }
+.field-input:focus { border-color:var(--green); }
+.field-input::placeholder { color:var(--text-muted); font-weight:400; }
 
-/* COLLABORATION ROW */
-.collab-row { display:flex; align-items:center; gap:16px; padding-top:14px; border-top:1px solid var(--green-border); flex-wrap:wrap; }
-.collab-label { font-family:'Share Tech Mono',monospace; font-size:9px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; white-space:nowrap; }
-.collab-options { display:flex; gap:16px; }
-.collab-opt { display:flex; align-items:center; gap:6px; cursor:pointer; }
-.collab-opt input[type="radio"] { accent-color:var(--green); width:14px; height:14px; cursor:pointer; }
-.collab-opt span { font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--text-dim); letter-spacing:1px; }
-.collab-names { flex:1; min-width:200px; }
-.collab-names input { background:var(--bg-input); border:1px solid var(--green-border); border-bottom:1px solid var(--green-dim); color:var(--accent); font-family:'Rajdhani',sans-serif; font-size:14px; padding:7px 12px; outline:none; width:100%; transition:border-color 0.2s; }
-.collab-names input:focus { border-color:var(--green); }
-.collab-names input::placeholder { color:var(--text-muted); font-style:italic; font-size:12px; }
-.collab-note { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--text-muted); letter-spacing:1px; width:100%; }
+/* MODULE */
+.module { background:rgba(9,17,9,0.95); border:1px solid var(--green-border); margin-bottom:16px; position:relative; overflow:hidden; }
+.module::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,var(--green-dark),var(--green-border-strong),var(--green-dark)); }
+.module-header { padding:14px 20px 10px; border-bottom:1px solid var(--green-border); }
+.module-header-main { display:flex; align-items:center; gap:14px; margin-bottom:5px; }
+.module-num { font-family:'Orbitron',sans-serif; font-size:10px; font-weight:700; color:var(--green); letter-spacing:2px; background:var(--green-dark); padding:4px 8px; flex-shrink:0; }
+.module-title { font-family:'Orbitron',sans-serif; font-size:13px; font-weight:700; color:var(--text); letter-spacing:1px; flex:1; }
+.module-total-pts { font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--green); letter-spacing:1px; white-space:nowrap; font-weight:700; }
+.pts-breakdown { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--text-muted); letter-spacing:0.5px; padding-left:2px; }
+.pts-breakdown span { color:var(--text-dim); }
+.module-body { padding:20px; display:flex; flex-direction:column; gap:16px; }
 
-/* ACTION BAR */
-.action-bar { display:flex; gap:10px; margin-bottom:10px; align-items:center; flex-wrap:wrap; }
-.btn { font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:2px; padding:9px 16px; border:1px solid var(--green-border-strong); background:var(--green-dark); color:var(--accent); cursor:pointer; text-transform:uppercase; transition:background 0.2s; }
-.btn:hover { background:rgba(0,229,102,0.12); }
-.btn.secondary { border-color:var(--green-border); color:var(--text-dim); background:transparent; }
-.btn.secondary:hover { background:rgba(0,229,102,0.06); color:var(--accent); }
-.save-indicator { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--text-muted); letter-spacing:1px; margin-left:auto; transition:color 0.3s; }
-.save-indicator.flash { color:var(--green-dim); }
+/* PROMPT BLOCK */
+.prompt { background:var(--bg-input); border:1px solid var(--green-border); padding:12px 14px; border-left:3px solid var(--green); }
+.prompt-q { font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--green); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px; }
+.prompt-desc { font-size:13px; color:var(--text-dim); line-height:1.5; margin-bottom:10px; }
+.prompt-desc em { color:var(--warn); font-style:normal; font-family:'Share Tech Mono',monospace; font-size:11px; }
 
-/* SUBMISSION INSTRUCTIONS */
-.submit-callout { border:1px solid rgba(255,204,0,0.2); background:rgba(255,204,0,0.04); padding:12px 16px; margin-bottom:16px; }
-.submit-callout-title { font-family:'Orbitron',sans-serif; font-size:9px; letter-spacing:3px; color:var(--warn); text-transform:uppercase; margin-bottom:8px; }
-.submit-steps { display:flex; gap:0; flex-wrap:wrap; }
-.submit-step { display:flex; align-items:flex-start; gap:8px; flex:1; min-width:140px; padding:4px 8px; }
-.step-num { font-family:'Orbitron',sans-serif; font-size:11px; font-weight:700; color:var(--warn); flex-shrink:0; line-height:1.4; }
-.step-text { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--text-dim); letter-spacing:0.5px; line-height:1.5; }
-.step-text em { color:var(--accent); font-style:normal; }
+/* TEXTAREA */
+.response-area { width:100%; min-height:90px; background:rgba(4,8,4,0.85); border:1px solid var(--green-border); color:var(--text); font-family:'Rajdhani',sans-serif; font-size:14px; line-height:1.6; padding:10px 12px; resize:vertical; outline:none; transition:border-color 0.2s; }
+.response-area:focus { border-color:var(--green); }
+.response-area::placeholder { color:var(--text-muted); }
+.counter-row { display:flex; justify-content:flex-end; margin-top:4px; }
+.sent-counter { font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:1px; }
+.sent-counter.none { color:var(--red); }
+.sent-counter.warn { color:var(--warn); }
+.sent-counter.good { color:var(--green); }
 
-/* CONSTRAINTS BLOCK */
-.constraints-block { border:1px solid var(--green-border); background:rgba(9,17,9,0.97); margin-bottom:20px; }
-.constraints-header { display:flex; align-items:center; gap:10px; padding:10px 20px; border-bottom:1px solid var(--green-border); background:rgba(0,229,102,0.04); }
-.constraints-header-label { font-family:'Orbitron',sans-serif; font-size:10px; font-weight:700; letter-spacing:3px; color:var(--green-dim); text-transform:uppercase; flex:1; }
-.constraints-note { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--text-muted); letter-spacing:1px; }
-.constraints-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:0; }
-.constraint-item { padding:12px 14px; border-right:1px solid var(--green-border); display:flex; flex-direction:column; gap:3px; }
-.constraint-item:last-child,.constraint-item:nth-child(4) { border-right:none; }
-.constraint-item:nth-child(n+5) { border-top:1px solid var(--green-border); }
-.c-label { font-family:'Share Tech Mono',monospace; font-size:8px; letter-spacing:2px; color:var(--text-muted); text-transform:uppercase; }
-.c-val { font-family:'Orbitron',sans-serif; font-size:13px; font-weight:700; color:var(--accent); line-height:1.2; }
-.c-sub { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--text-dim); letter-spacing:1px; }
+/* STATUS TABLE */
+.status-table { width:100%; border-collapse:collapse; font-size:13px; }
+.status-table th { font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--green-dim); padding:8px 10px; border-bottom:1px solid var(--green-border); text-align:left; background:rgba(0,229,102,0.04); }
+.status-table td { padding:5px 8px; border-bottom:1px solid rgba(0,229,102,0.07); vertical-align:middle; transition:background 0.2s; }
+.status-table td input, .status-table td select { background:transparent; border:none; color:var(--text); font-family:'Rajdhani',sans-serif; font-size:13px; padding:4px 6px; outline:none; width:100%; }
+.status-table td select option { background:#091109; color:var(--text); }
+.status-table tr.s-complete td { background:rgba(0,229,102,0.07); }
+.status-table tr.s-complete td input, .status-table tr.s-complete td select { color:#7ee8a2; }
+.status-table tr.s-progress td { background:rgba(255,204,0,0.07); }
+.status-table tr.s-progress td input, .status-table tr.s-progress td select { color:#ffcc00; }
+.status-table tr.s-blocked td { background:rgba(255,68,68,0.07); }
+.status-table tr.s-blocked td input, .status-table tr.s-blocked td select { color:#ff8888; }
+.add-row-btn { font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--text-muted); background:none; border:1px dashed var(--text-muted); padding:5px 14px; cursor:pointer; width:100%; margin-top:6px; letter-spacing:1px; transition:all 0.2s; }
+.add-row-btn:hover { color:var(--green-dim); border-color:var(--green-border); }
 
-/* TOTAL BAR */
-.total-bar { display:flex; align-items:center; justify-content:space-between; padding:10px 16px; background:var(--green-dark); border:1px solid var(--green-border); margin-bottom:20px; font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--green-dim); letter-spacing:2px; }
-.total-bar strong { color:var(--accent); font-size:13px; letter-spacing:3px; }
+/* IMAGE UPLOAD */
+.upload-zone { border:1px dashed var(--green-border-strong); padding:18px; text-align:center; cursor:pointer; transition:all 0.2s; background:rgba(0,229,102,0.02); }
+.upload-zone:hover { border-color:var(--green); background:rgba(0,229,102,0.05); }
+.upload-zone input { display:none; }
+.upload-zone-label { font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--text-dim); letter-spacing:1px; cursor:pointer; display:block; }
+.upload-zone-label span { color:var(--green); }
+.img-count-row { display:flex; justify-content:flex-end; margin-top:6px; }
+.img-count { font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:1px; }
+.img-count.none { color:var(--red); }
+.img-count.warn { color:var(--warn); }
+.img-count.good { color:var(--green); }
+.image-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:8px; margin-top:8px; }
+.image-thumb { position:relative; background:var(--bg-input); border:1px solid var(--green-border); }
+.image-thumb img { width:100%; display:block; max-height:130px; object-fit:cover; }
+.image-thumb .img-remove { position:absolute; top:4px; right:4px; background:rgba(0,0,0,0.85); color:var(--red); border:1px solid var(--red); font-size:10px; cursor:pointer; padding:2px 6px; font-family:'Share Tech Mono',monospace; line-height:1; }
+.image-thumb .img-caption { width:100%; background:var(--bg-input); border:none; border-top:1px solid var(--green-border); color:var(--text-dim); font-family:'Rajdhani',sans-serif; font-size:11px; padding:4px 6px; outline:none; }
 
-/* MODULES */
-.module { border:1px solid var(--green-border); background:rgba(9,17,9,0.97); margin-bottom:20px; position:relative; break-inside:avoid; }
-.module::before { content:''; position:absolute; top:0; left:0; width:3px; height:100%; background:linear-gradient(180deg,var(--green),var(--green-dark)); }
-.module-header { display:flex; align-items:center; gap:12px; padding:12px 20px 12px 24px; border-bottom:1px solid var(--green-border); background:rgba(0,229,102,0.04); }
-.mod-num { font-family:'Orbitron',sans-serif; font-size:10px; font-weight:700; color:var(--green-dim); letter-spacing:1px; background:var(--green-dark); padding:3px 8px; border:1px solid var(--green-border); }
-.mod-title { font-family:'Orbitron',sans-serif; font-size:11px; font-weight:700; letter-spacing:3px; color:var(--green); flex:1; text-transform:uppercase; }
-.mod-pts { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--warn); letter-spacing:2px; background:rgba(255,204,0,0.07); border:1px solid rgba(255,204,0,0.2); padding:3px 10px; }
-.rubric-toggle { font-family:'Share Tech Mono',monospace; font-size:9px; letter-spacing:1px; padding:3px 10px; border:1px solid var(--green-border); background:transparent; color:var(--text-muted); cursor:pointer; text-transform:uppercase; transition:color 0.2s,background 0.2s,border-color 0.2s; white-space:nowrap; }
-.rubric-toggle:hover { color:var(--accent); background:rgba(0,229,102,0.06); }
-.rubric-toggle.open { color:var(--green-dim); border-color:var(--green-dim); }
-.module-body { padding:20px 24px; display:flex; flex-direction:column; gap:14px; }
+/* RUBRIC */
+.rubric-toggle { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--text-muted); letter-spacing:2px; text-transform:uppercase; background:none; border:1px solid var(--text-muted); padding:5px 10px; cursor:pointer; display:block; width:100%; text-align:left; transition:all 0.2s; margin-top:4px; }
+.rubric-toggle:hover { color:var(--green-dim); border-color:var(--green-border); }
+.rubric-panel { display:none; margin-top:8px; border:1px solid var(--green-border); background:rgba(0,229,102,0.02); }
+.rubric-panel.open { display:block; }
+.rubric-panel table { width:100%; border-collapse:collapse; font-size:12px; }
+.rubric-panel th { font-family:'Share Tech Mono',monospace; font-size:9px; letter-spacing:2px; color:var(--green-dim); padding:7px 12px; border-bottom:1px solid var(--green-border); text-align:left; text-transform:uppercase; }
+.rubric-panel td { padding:7px 12px; border-bottom:1px solid rgba(0,229,102,0.06); color:var(--text-dim); line-height:1.5; vertical-align:top; }
+.rubric-panel td:first-child { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--green); white-space:nowrap; }
+.rubric-panel td:last-child { font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--warn); text-align:right; white-space:nowrap; }
 
-/* RUBRIC PANEL */
-.rubric-panel { max-height:0; overflow:hidden; transition:max-height 0.35s ease; }
-.rubric-panel.open { max-height:600px; border-top:1px solid var(--green-border); }
-.rubric-inner { padding:12px 24px 16px; background:rgba(0,229,102,0.02); }
-.rubric-title-row { font-family:'Share Tech Mono',monospace; font-size:9px; letter-spacing:2px; color:var(--text-muted); text-transform:uppercase; padding-bottom:8px; border-bottom:1px solid var(--green-border); margin-bottom:2px; display:flex; justify-content:space-between; }
-.rubric-row { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; padding:7px 0; border-bottom:1px solid rgba(0,229,102,0.05); }
-.rubric-row:last-child { border-bottom:none; }
-.rubric-criteria { font-size:13px; color:var(--text-dim); line-height:1.5; flex:1; }
-.rubric-criteria strong { color:var(--text); font-weight:600; }
-.rubric-pts { font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--warn); white-space:nowrap; padding-top:2px; }
+/* DECLARATION */
+.declaration { background:rgba(9,17,9,0.97); border:1px solid var(--green-border-strong); padding:20px 24px; margin-bottom:16px; }
+.section-eyebrow { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--green-dim); letter-spacing:3px; text-transform:uppercase; margin-bottom:10px; }
+.declaration p { font-size:13px; color:var(--text-dim); line-height:1.7; }
+.sig-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:16px; }
+.sig-field { border-top:1px solid var(--green-border-strong); padding-top:6px; }
+.sig-field label { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--green-dim); letter-spacing:2px; text-transform:uppercase; display:block; margin-bottom:4px; }
+.sig-field input { width:100%; background:transparent; border:none; color:var(--text); font-family:'Rajdhani',sans-serif; font-size:14px; outline:none; }
 
-/* FORM FIELDS */
-.field-row { display:flex; flex-direction:column; gap:5px; }
-.field-row textarea { background:var(--bg-input); border:1px solid var(--green-border); border-bottom:1px solid var(--green-dim); color:var(--accent); font-family:'Rajdhani',sans-serif; font-size:15px; padding:10px 12px; outline:none; resize:none; overflow:hidden; width:100%; min-height:80px; transition:border-color 0.2s,box-shadow 0.2s; }
-.sent-count { font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:1px; padding:4px 8px; border-left:2px solid var(--text-muted); color:var(--text-muted); transition:color 0.2s,border-color 0.2s; display:flex; align-items:center; gap:6px; }
-.sent-count.met { color:var(--green-dim); border-left-color:var(--green-dim); }
-.sent-count.unmet.active { color:var(--red); border-left-color:var(--red); }
-.sent-dot { display:inline-block; width:6px; height:6px; border-radius:50%; background:currentColor; flex-shrink:0; }
-.prompt { font-size:13px; color:var(--text-dim); font-style:italic; line-height:1.7; padding:10px 14px; border-left:2px solid var(--green-dark); background:rgba(0,229,102,0.03); }
-.sub-label { font-family:'Orbitron',sans-serif; font-size:9px; font-weight:700; color:var(--green-dim); letter-spacing:3px; text-transform:uppercase; padding:6px 0 2px; border-bottom:1px solid var(--green-dark); margin-bottom:2px; }
-.working-note { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--warn); letter-spacing:1px; padding:4px 10px; border:1px solid rgba(255,204,0,0.2); background:rgba(255,204,0,0.04); display:inline-block; margin-bottom:2px; }
-.identity-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+/* INSTRUCTOR SECTION - screen hidden, print visible */
+.instructor-section { display:none; }
 
-/* MISC */
-.rules-callout { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
-.rule-item { background:var(--green-dark); border:1px solid var(--green-border); padding:10px 12px; display:flex; flex-direction:column; gap:4px; align-items:center; text-align:center; }
-.rule-label { font-family:'Share Tech Mono',monospace; font-size:8px; letter-spacing:1.5px; color:var(--text-dim); text-transform:uppercase; }
-.rule-val { font-family:'Orbitron',sans-serif; font-size:13px; font-weight:700; color:var(--accent); }
-.drop-zone { border:1px dashed var(--green-border); background:var(--bg-input); padding:24px 20px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:8px; cursor:pointer; transition:background 0.2s,border-color 0.2s; user-select:none; }
-.drop-zone:hover,.drop-zone.drag-over { background:rgba(0,229,102,0.07); border-color:var(--green-dim); }
-.drop-icon { font-family:'Orbitron',sans-serif; font-size:18px; color:var(--green-dark); letter-spacing:2px; }
-.drop-label { font-family:'Orbitron',sans-serif; font-size:10px; letter-spacing:3px; color:var(--green-dim); text-transform:uppercase; }
-.drop-sub { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--text-muted); letter-spacing:1px; }
-.sketch-preview { display:flex; flex-wrap:wrap; gap:10px; margin-top:4px; }
-.preview-item { position:relative; border:1px solid var(--green-border); background:#000; display:flex; flex-direction:column; }
-.preview-item img { max-height:130px; max-width:180px; min-width:80px; object-fit:contain; display:block; }
-.preview-label { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--text-muted); padding:3px 6px; letter-spacing:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:180px; background:var(--bg-module); }
-.remove-img { position:absolute; top:3px; right:3px; background:rgba(255,0,0,0.6); border:none; color:#fff; font-size:12px; width:18px; height:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; }
-.remove-img:hover { background:rgba(255,0,0,0.9); }
+/* CHECKLIST */
+.module .checklist { list-style:none; display:flex; flex-direction:column; gap:6px; }
+.module .checklist li { display:flex; align-items:flex-start; gap:10px; font-size:13px; color:var(--text-dim); line-height:1.5; }
+.module .checklist li::before { content:'[ ]'; font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--green-dim); flex-shrink:0; margin-top:2px; }
 
-/* MFG TABLE */
-.mfg-table { width:100%; border-collapse:collapse; font-size:13px; }
-.mfg-table th { font-family:'Share Tech Mono',monospace; font-size:9px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; text-align:left; padding:8px 10px; border-bottom:1px solid var(--green-border); background:rgba(0,229,102,0.04); }
-.mfg-table th:first-child { width:36px; text-align:center; }
-.mfg-table th:nth-child(2),.mfg-table th:nth-child(3) { width:22%; }
-.mfg-table td { padding:3px 4px; border-bottom:1px solid var(--text-muted); vertical-align:top; }
-.mfg-table td:first-child { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--green-dim); padding:10px 10px; text-align:center; }
-.mfg-table tr.extra td { opacity:0.45; }
-.mfg-table textarea { background:transparent; border:none; border-bottom:1px solid var(--green-dark); color:var(--accent); font-family:'Rajdhani',sans-serif; font-size:14px; padding:8px 8px; width:100%; outline:none; resize:none; overflow:hidden; height:0; min-height:36px; display:block; line-height:1.4; transition:border-color 0.2s,background 0.2s; }
-.mfg-table textarea:focus { border-bottom-color:var(--green); background:rgba(0,229,102,0.04); box-shadow:none; }
-.mfg-table textarea::placeholder { color:var(--text-muted); font-style:italic; font-size:12px; }
-
-/* AM DEMO */
-.am-demo-wrap { border:1px solid var(--green-border); background:rgba(4,8,4,0.9); padding:20px; display:flex; gap:24px; align-items:flex-start; flex-wrap:wrap; }
-.am-canvas-col { display:flex; flex-direction:column; align-items:center; gap:10px; flex-shrink:0; }
-canvas#am-canvas { border:1px solid var(--green-border); background:#020602; display:block; }
-.am-slider-row { display:flex; align-items:center; gap:8px; width:200px; }
-.am-slider-row input[type="range"] { flex:1; accent-color:var(--green); cursor:pointer; }
-.am-slider-label { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--text-muted); letter-spacing:1px; }
-.am-spin-btn { font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:2px; padding:7px 14px; border:1px solid var(--green-border-strong); background:var(--green-dark); color:var(--accent); cursor:pointer; text-transform:uppercase; transition:background 0.2s; width:100%; }
-.am-spin-btn:hover { background:rgba(0,229,102,0.14); }
-.am-spin-btn:disabled { opacity:0.4; cursor:not-allowed; }
-.am-metrics-col { flex:1; min-width:200px; display:flex; flex-direction:column; gap:8px; }
-.am-edu { font-family:'Rajdhani',sans-serif; font-size:14px; color:var(--text-dim); line-height:1.65; border-left:2px solid var(--green-dark); padding:8px 14px; background:rgba(0,229,102,0.025); }
-.am-edu strong { color:var(--green); font-weight:600; }
-.am-metric { display:flex; flex-direction:column; gap:3px; }
-.am-metric-label { font-family:'Share Tech Mono',monospace; font-size:9px; letter-spacing:2px; color:var(--text-muted); text-transform:uppercase; }
-.am-metric-bar-wrap { height:6px; background:var(--green-dark); border:1px solid var(--green-border); overflow:hidden; }
-.am-metric-bar { height:100%; background:var(--green); transition:width 0.4s ease; }
-.am-metric-val { font-family:'Orbitron',sans-serif; font-size:11px; color:var(--accent); letter-spacing:1px; }
-.am-status { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--text-dim); letter-spacing:1px; min-height:18px; text-align:center; }
-
-/* TANGENT DIAGRAM */
-.tangent-diagram-wrap { border:1px solid var(--green-border); background:rgba(4,8,4,0.9); padding:16px; display:flex; flex-direction:column; gap:10px; }
-.tangent-diagram-title { font-family:'Share Tech Mono',monospace; font-size:9px; letter-spacing:2px; color:var(--text-muted); text-transform:uppercase; }
-canvas#tangent-canvas { display:block; width:100%; max-width:520px; margin:0 auto; }
-
-/* PRINT MIRRORS */
-.print-mirror { display:none; color:var(--accent); font-family:'Rajdhani',sans-serif; font-size:15px; line-height:1.65; white-space:pre-wrap; word-break:break-word; padding:10px 12px; border:1px solid var(--green-border); border-bottom:1px solid var(--green-dim); background:var(--bg-input); min-height:34px; width:100%; }
-.print-mirror.single-line { white-space:normal; overflow:visible; min-height:auto; }
-
-/* FOOTER */
-.footer { display:flex; justify-content:space-between; align-items:center; margin-top:32px; padding:14px 20px; border:1px solid var(--green-border); background:rgba(9,17,9,0.97); font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--text-dim); letter-spacing:2px; flex-wrap:wrap; gap:10px; }
-.footer-pts { font-family:'Orbitron',sans-serif; font-size:14px; font-weight:700; color:var(--warn); letter-spacing:3px; }
-
+/* PRINT */
 @media print {
-  * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
-  #matrix-canvas,.action-bar,.sent-count,.drop-zone,.remove-img,.am-spin-btn,.am-slider-row,.rubric-toggle,.rubric-panel,.submit-callout { display:none !important; }
-  input[type="text"],input[type="radio"],textarea { display:none !important; }
-  .collab-opt span { display:none; }
-  .print-mirror { display:block !important; }
-  .sketch-preview { display:flex !important; }
-  .tangent-canvas-wrap canvas { display:none !important; }
-  .module,.header { break-inside:avoid; page-break-inside:avoid; }
-  .page { padding:16px 24px 40px; }
-  .brand-title { text-shadow:none !important; }
-  .module,.header,.total-bar,.footer,.am-demo-wrap,.constraints-block { background:rgba(9,17,9,1) !important; }
+  #matrix-canvas, .toolbar, #preflight-overlay { display:none !important; }
+  body { background:#060c06 !important; color:#d4f0dc !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .page { padding:16px 20px; max-width:100%; }
+  .module, .header, .declaration, .instructor-section { break-inside:avoid; }
+  .rubric-panel, .rubric-toggle, .upload-zone, .add-row-btn { display:none !important; }
+  .image-thumb .img-remove { display:none; }
+  textarea { overflow:hidden; resize:none; }
+
+  .instructor-section {
+    display:block !important;
+    margin:24px 0 16px;
+    border:1px solid rgba(0,229,102,0.4);
+    background:rgba(4,8,4,0.9);
+    padding:18px 22px;
+    break-inside:avoid;
+  }
+  .instructor-section .ins-eyebrow {
+    font-family:'Share Tech Mono',monospace; font-size:9px; letter-spacing:4px;
+    text-transform:uppercase; color:rgba(0,229,102,0.5); margin-bottom:14px; display:block;
+  }
+  .instructor-section table { width:100%; border-collapse:collapse; font-size:12px; }
+  .instructor-section th {
+    font-family:'Share Tech Mono',monospace; font-size:9px; letter-spacing:2px;
+    text-transform:uppercase; color:rgba(0,229,102,0.4); padding:5px 10px;
+    border-bottom:1px solid rgba(0,229,102,0.15); text-align:left;
+  }
+  .instructor-section td { padding:7px 10px; border-bottom:1px solid rgba(0,229,102,0.08); color:rgba(212,240,220,0.6); font-size:12px; }
+  .instructor-section td.score-cell {
+    text-align:right; font-family:'Share Tech Mono',monospace;
+    border-bottom:1px solid rgba(0,229,102,0.12); min-width:80px;
+  }
+  .instructor-section .total-row td { border-top:1px solid rgba(0,229,102,0.3); font-weight:600; color:rgba(212,240,220,0.85); padding-top:9px; }
+  .instructor-section .notes-area { margin-top:14px; border-top:1px solid rgba(0,229,102,0.15); padding-top:10px; }
+  .instructor-section .notes-label {
+    font-family:'Share Tech Mono',monospace; font-size:9px; letter-spacing:2px;
+    text-transform:uppercase; color:rgba(0,229,102,0.4); display:block; margin-bottom:28px;
+  }
+  .instructor-section .notes-line {
+    border-bottom:1px solid rgba(0,229,102,0.15); margin-bottom:14px; height:1px;
+  }
 }
 </style>
 </head>
 <body>
 <canvas id="matrix-canvas"></canvas>
+
+<!-- PREFLIGHT MODAL -->
+<div id="preflight-overlay">
+  <div class="preflight-modal">
+    <h2>Incomplete Fields Detected</h2>
+    <p>The following items are missing or below the minimum requirement. You can go back and fix them, or proceed to print anyway.</p>
+    <ul class="preflight-list" id="preflight-list"></ul>
+    <div class="preflight-actions">
+      <button class="pf-btn cancel" onclick="closePreflight()">Go Back &amp; Fix</button>
+      <button class="pf-btn proceed" onclick="closePreflight(); window.print()">Print Anyway</button>
+    </div>
+  </div>
+</div>
+
 <div class="page">
 
-<!-- HEADER -->
-<div class="header">
-  <div class="header-top">
-    <div class="header-brand">
-      <span class="brand-label">Don Bosco Technical Institute &nbsp;|&nbsp; IDEA-113</span>
-      <span class="brand-title">IDEA-BLADE</span>
-      <span class="brand-sub">Battle-Tops Design and Manufacturing Program</span>
+  <!-- TOOLBAR -->
+  <div class="toolbar" id="toolbar">
+    <div class="progress-row">
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+      <span class="progress-label" id="progress-label">0 of 16 complete</span>
     </div>
-    <div class="header-badge">
-      <span class="badge-num">01</span>
-      <span class="badge-label">Assignment</span>
-    </div>
-  </div>
-  <div class="header-title">Concept Package</div>
-  <div class="student-grid">
-    <div class="info-field">
-      <label>Operator (Student Name)</label>
-      <input type="text" id="student-name" data-field="student-name" placeholder="Full name" autocomplete="off">
-      <div class="print-mirror single-line" data-mirror="student-name"></div>
-    </div>
-    <div class="info-field">
-      <label>Date</label>
-      <input type="text" data-field="student-date" placeholder="MM / DD / YYYY" autocomplete="off">
-      <div class="print-mirror single-line" data-mirror="student-date"></div>
-    </div>
-    <div class="info-field">
-      <label>Period</label>
-      <input type="text" data-field="student-period" placeholder="—" autocomplete="off">
-      <div class="print-mirror single-line" data-mirror="student-period"></div>
-    </div>
-    <div class="info-field">
-      <label>Due Date</label>
-      <input type="text" data-field="due-date" placeholder="—" autocomplete="off">
-      <div class="print-mirror single-line" data-mirror="due-date"></div>
+    <div class="btn-row">
+      <button class="tool-btn primary" onclick="printPreflight()">Print / Export PDF</button>
+      <button class="tool-btn" onclick="saveProgress()">Save Progress</button>
+      <button class="tool-btn" onclick="downloadHTML()">Download with Data</button>
+      <button class="tool-btn" onclick="clearAll()">Clear All</button>
+      <span class="save-status" id="save-status">Not yet saved</span>
     </div>
   </div>
-  <div class="collab-row">
-    <span class="collab-label">Collaboration</span>
-    <div class="collab-options">
-      <label class="collab-opt"><input type="radio" name="collab" value="solo" data-field="collab-status"> <span>Working solo</span></label>
-      <label class="collab-opt"><input type="radio" name="collab" value="collab" data-field="collab-status"> <span>Collaborating</span></label>
-    </div>
-    <div class="collab-names">
-      <input type="text" data-field="collab-names" placeholder="Collaborator name(s) — designs still compete independently" autocomplete="off">
-      <div class="print-mirror single-line" data-mirror="collab-names"></div>
-    </div>
-    <span class="collab-note">* Individual grades. Designs compete independently regardless of collaboration.</span>
-  </div>
-</div>
 
-<!-- ACTION BAR -->
-<div class="action-bar">
-  <button class="btn" onclick="downloadHTML()">[ Download Progress ]</button>
-  <button class="btn secondary" onclick="clearProgress()">[ Clear All ]</button>
-  <button class="btn secondary" onclick="window.print()">[ Print / PDF ]</button>
-  <span class="save-indicator" id="save-indicator">Auto-save on</span>
-</div>
-
-<!-- SUBMISSION INSTRUCTIONS -->
-<div class="submit-callout">
-  <div class="submit-callout-title">Submission Instructions</div>
-  <div class="submit-steps">
-    <div class="submit-step"><div class="step-num">01</div><div class="step-text">Complete all 6 modules below</div></div>
-    <div class="submit-step"><div class="step-num">02</div><div class="step-text">Click <em>Print / PDF</em> above</div></div>
-    <div class="submit-step"><div class="step-num">03</div><div class="step-text">Select <em>Save as PDF</em> in the print dialog</div></div>
-    <div class="submit-step"><div class="step-num">04</div><div class="step-text">Enable <em>Background graphics</em> in print options to retain styling</div></div>
-    <div class="submit-step"><div class="step-num">05</div><div class="step-text">Upload the PDF to <em>Google Classroom</em></div></div>
-  </div>
-</div>
-
-<!-- CONSTRAINTS REFERENCE -->
-<div class="constraints-block">
-  <div class="constraints-header">
-    <span class="constraints-header-label">Design Constraints Reference</span>
-    <span class="constraints-note">Keep these in mind while filling out this assignment</span>
-  </div>
-  <div class="constraints-grid">
-    <div class="constraint-item">
-      <span class="c-label">Max Diameter</span>
-      <span class="c-val">5"</span>
-      <span class="c-sub">Full assembled top</span>
-    </div>
-    <div class="constraint-item">
-      <span class="c-label">Full Height</span>
-      <span class="c-val">3" ± 0.05"</span>
-      <span class="c-sub">Below hex extension</span>
-    </div>
-    <div class="constraint-item">
-      <span class="c-label">Hex Extension</span>
-      <span class="c-val">0.5" ± 0.05"</span>
-      <span class="c-sub">Above full height - top only, no through-shaft required</span>
-    </div>
-    <div class="constraint-item">
-      <span class="c-label">Max Weight</span>
-      <span class="c-val">2 lbs</span>
-      <span class="c-sub">907g — including hex shaft</span>
-    </div>
-    <div class="constraint-item">
-      <span class="c-label">Min Processes</span>
-      <span class="c-val">3</span>
-      <span class="c-sub">Distinct manufacturing processes</span>
-    </div>
-    <div class="constraint-item">
-      <span class="c-label">Fastener Rule</span>
-      <span class="c-val">1 min</span>
-      <span class="c-sub">At least one fastener required per design</span>
-    </div>
-    <div class="constraint-item">
-      <span class="c-label">Competition</span>
-      <span class="c-val">Double Elim</span>
-      <span class="c-sub">10-person bracket — individual designs</span>
-    </div>
-    <div class="constraint-item">
-      <span class="c-label">Blade Contact</span>
-      <span class="c-val">1 – 6 pts</span>
-      <span class="c-sub">0.25" depth min, 30° angle min</span>
-    </div>
-  </div>
-</div>
-
-<div class="total-bar">
-  <span>Assignment Weight</span>
-  <strong>50 Points</strong>
-  <span>Complete all 6 modules &nbsp;|&nbsp; Click [ Rubric ] in any module to see grading criteria</span>
-</div>
-
-<!-- MODULE 01 -->
-<div class="module">
-  <div class="module-header">
-    <span class="mod-num">01</span>
-    <span class="mod-title">Blade Identity</span>
-    <span class="mod-pts">10 pts</span>
-    <button class="rubric-toggle" id="rt-01" onclick="toggleRubric(1)">[ Rubric ]</button>
-  </div>
-  <div class="module-body">
-    <div class="working-note">* All fields in this module are working drafts - names, themes, and taglines may evolve as your design develops.</div>
-    <p class="prompt">Start defining who your blade is. Think of this like building a character - it has a name, a personality, a look, and a way it fights. The more thought you put in here, the clearer your design direction will be when you start drawing.</p>
-    <div class="sub-label">Identity</div>
-    <div class="identity-grid">
-      <div class="field-row">
-        <label>Working Blade Name</label>
-        <input type="text" data-field="blade-name" placeholder="What are you considering calling it?" autocomplete="off">
-        <div class="print-mirror single-line" data-mirror="blade-name"></div>
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <span class="brand-label">IDEA 403 &nbsp;/&nbsp; Senior Capstone</span>
+        <span class="brand-title">PROGRESS UPDATE</span>
+        <span class="brand-sub">Individual Assignment &nbsp;//&nbsp; Print to PDF &amp; Submit</span>
       </div>
-      <div class="field-row">
-        <label>Working Combat Tagline</label>
-        <input type="text" data-field="blade-tagline" placeholder="A battle cry or motto - can be rough." autocomplete="off">
-        <div class="print-mirror single-line" data-mirror="blade-tagline"></div>
+      <div class="badge-sp">SP<span>403</span></div>
+    </div>
+    <div class="header-fields">
+      <div class="field-full">
+        <span class="field-label">Project Title</span>
+        <input class="field-input" id="f_project" placeholder="Your project title" autocomplete="off" oninput="updateCompletion()">
+      </div>
+      <div>
+        <span class="field-label">Student Name</span>
+        <input class="field-input" id="f_name" placeholder="Last, First" autocomplete="off" oninput="updateCompletion()">
+      </div>
+      <div>
+        <span class="field-label">Period</span>
+        <input class="field-input" id="f_period" placeholder="e.g. 3" autocomplete="off" oninput="updateCompletion()">
+      </div>
+      <div>
+        <span class="field-label">Date</span>
+        <input class="field-input" id="f_date" placeholder="MM / DD / YYYY" autocomplete="off" oninput="updateCompletion()">
       </div>
     </div>
-    <div class="sub-label">Theme</div>
-    <div class="field-row">
-      <label>Working Theme Declaration</label>
-      <input type="text" data-field="blade-theme" placeholder="One sentence: what does this blade represent?" autocomplete="off">
-      <div class="print-mirror single-line" data-mirror="blade-theme"></div>
-    </div>
-    <div class="field-row">
-      <label>Theme Inspiration - Where did this idea come from? What drew you to it?</label>
-      <textarea data-field="blade-inspiration" placeholder="Describe where your theme came from. A movie? A feeling? Something from nature? History? What made you choose this over everything else?"></textarea>
-      <div class="print-mirror" data-mirror="blade-inspiration"></div>
-      <div class="sent-count" data-min="2" data-field-ref="blade-inspiration"><span class="sent-dot"></span><span><span class="current">0</span> / 2 sentences minimum</span></div>
-    </div>
-    <div class="sub-label">Visual Mood and Combat Personality</div>
-    <div class="field-row">
-      <label>Visual Mood - Describe the look and feel in 3-5 words</label>
-      <input type="text" data-field="blade-mood" placeholder="e.g. dark, jagged, ancient, burning, mechanical..." autocomplete="off">
-      <div class="print-mirror single-line" data-mirror="blade-mood"></div>
-    </div>
-    <div class="field-row">
-      <label>Combat Style and Personality - How does this blade fight?</label>
-      <textarea data-field="blade-personality" placeholder="Describe the fighting character of your blade. Does it charge forward? Does it wear opponents down? Is it built for brutal impact or evasion and deflection? How does its personality connect to its theme?"></textarea>
-      <div class="print-mirror" data-mirror="blade-personality"></div>
-      <div class="sent-count" data-min="2" data-field-ref="blade-personality"><span class="sent-dot"></span><span><span class="current">0</span> / 2 sentences minimum</span></div>
-    </div>
   </div>
-  <div class="rubric-panel" id="rubric-01">
-    <div class="rubric-inner">
-      <div class="rubric-title-row"><span>Grading Criteria</span><span>Points</span></div>
-      <div class="rubric-row"><div class="rubric-criteria">Name and tagline are <strong>present and considered</strong> - not placeholder text like "Blade 1" or "TBD"</div><div class="rubric-pts">2 pts</div></div>
-      <div class="rubric-row"><div class="rubric-criteria">Theme declaration is <strong>specific</strong> - names a clear concept, not vague ("a cool design" earns 0; "an anglerfish from the deep sea" earns full)</div><div class="rubric-pts">2 pts</div></div>
-      <div class="rubric-row"><div class="rubric-criteria">Theme inspiration shows <strong>genuine reasoning</strong> for the choice - min 2 sentences met</div><div class="rubric-pts">2 pts</div></div>
-      <div class="rubric-row"><div class="rubric-criteria">Visual mood uses <strong>specific descriptive language</strong>, not generic words like "cool" or "good"</div><div class="rubric-pts">1 pt</div></div>
-      <div class="rubric-row"><div class="rubric-criteria">Combat personality <strong>describes a fighting style AND connects it to the theme</strong> - min 2 sentences met</div><div class="rubric-pts">3 pts</div></div>
-    </div>
-  </div>
-</div>
 
-<!-- MODULE 02 -->
-<div class="module">
-  <div class="module-header">
-    <span class="mod-num">02</span>
-    <span class="mod-title">Design Rationale</span>
-    <span class="mod-pts">10 pts</span>
-    <button class="rubric-toggle" id="rt-02" onclick="toggleRubric(2)">[ Rubric ]</button>
-  </div>
-  <div class="module-body">
-    <p class="prompt">This is where your idea becomes a design. The goal is to translate your theme into actual geometry - specific shapes, silhouettes, edges, and forms. Think beyond color and decals. Anyone can paint something to look like an ocean. But can you design a blade that moves like one?</p>
-    <div class="sub-label">Step 1 - Visual Characteristics</div>
-    <div class="field-row">
-      <label>What are the defining visual and physical characteristics of your theme? Think about shapes, textures, movement, energy, and edges.</label>
-      <textarea data-field="rationale-characteristics" placeholder="List and describe 3-5 visual characteristics that define your theme. For example: if your theme is 'Volcano,' the characteristics might be - jagged irregular edges, a wide heavy base, a narrow violent peak, asymmetric explosive forms, and layered surfaces that suggest built-up pressure."></textarea>
-      <div class="print-mirror" data-mirror="rationale-characteristics"></div>
-      <div class="sent-count" data-min="3" data-field-ref="rationale-characteristics"><span class="sent-dot"></span><span><span class="current">0</span> / 3 sentences minimum</span></div>
+  <!-- MODULE 01 -->
+  <div class="module">
+    <div class="module-header">
+      <div class="module-header-main">
+        <span class="module-num">MOD 01</span>
+        <span class="module-title">Project Summary</span>
+        <span class="module-total-pts">10 pts</span>
+      </div>
+      <div class="pts-breakdown"><span>01-A: 4 pts</span> &nbsp;&middot;&nbsp; <span>01-B: 4 pts</span> &nbsp;&middot;&nbsp; <span>01-C: 2 pts</span></div>
     </div>
-    <div class="sub-label">Step 2 - Form Follows Theme</div>
-    <div class="field-row">
-      <label>For each characteristic above, describe where and how it appears in your blade's geometry. Name the specific parts of the blade this affects.</label>
-      <textarea data-field="rationale-form" placeholder="Be specific. Don't say 'the blade looks aggressive.' Say 'the blade arms angle sharply forward at 45 degrees like claws, and the tips are pointed rather than rounded to create a threatening profile.' Connect each design choice back to a characteristic from Step 1."></textarea>
-      <div class="print-mirror" data-mirror="rationale-form"></div>
-      <div class="sent-count" data-min="4" data-field-ref="rationale-form"><span class="sent-dot"></span><span><span class="current">0</span> / 4 sentences minimum</span></div>
-    </div>
-    <div class="sub-label">Step 3 - The Blind Test</div>
-    <div class="field-row">
-      <label>If someone saw just the shape of your blade - no name, no paint, no labels - would they be able to guess your theme? Explain why or why not.</label>
-      <textarea data-field="rationale-blindtest" placeholder="If they could guess it, what would give it away? If they couldn't, what does that mean for your design - and what might you change?"></textarea>
-      <div class="print-mirror" data-mirror="rationale-blindtest"></div>
-      <div class="sent-count" data-min="2" data-field-ref="rationale-blindtest"><span class="sent-dot"></span><span><span class="current">0</span> / 2 sentences minimum</span></div>
-    </div>
-  </div>
-  <div class="rubric-panel" id="rubric-02">
-    <div class="rubric-inner">
-      <div class="rubric-title-row"><span>Grading Criteria</span><span>Points</span></div>
-      <div class="rubric-row"><div class="rubric-criteria"><strong>Step 1:</strong> 3 or more distinct characteristics listed and described with enough detail to be actionable - min 3 sentences met</div><div class="rubric-pts">3 pts</div></div>
-      <div class="rubric-row"><div class="rubric-criteria"><strong>Step 2:</strong> Specific geometry named (parts, angles, profiles), each choice directly linked to a characteristic from Step 1 - min 4 sentences met</div><div class="rubric-pts">4 pts</div></div>
-      <div class="rubric-row"><div class="rubric-criteria"><strong>Step 3:</strong> Honest self-assessment with reasoning - identifies what communicates theme and acknowledges what doesn't - min 2 sentences met</div><div class="rubric-pts">3 pts</div></div>
-    </div>
-  </div>
-</div>
+    <div class="module-body">
 
-<!-- MODULE 03 -->
-<div class="module">
-  <div class="module-header">
-    <span class="mod-num">03</span>
-    <span class="mod-title">Angular Momentum Analysis</span>
-    <span class="mod-pts">10 pts</span>
-    <button class="rubric-toggle" id="rt-03" onclick="toggleRubric(3)">[ Rubric ]</button>
+      <div class="prompt">
+        <div class="prompt-q">01-A &mdash; What is your project?</div>
+        <div class="prompt-desc">Describe it clearly enough that someone unfamiliar with your work would understand what it is and what it does. No vague language. <em>Min. 2 sentences</em></div>
+        <textarea class="response-area" id="q_01a" placeholder="Describe your project..." oninput="autoResize(this); updateCounter(this,'c_01a',2); updateCompletion()"></textarea>
+        <div class="counter-row"><span class="sent-counter none" id="c_01a">0 / 2 sentences</span></div>
+      </div>
+
+      <div class="prompt">
+        <div class="prompt-q">01-B &mdash; What problem does it solve or what purpose does it serve?</div>
+        <div class="prompt-desc">Explain the need, goal, or outcome your project addresses. Why does this project exist? <em>Min. 2 sentences</em></div>
+        <textarea class="response-area" id="q_01b" placeholder="Describe the purpose or problem..." oninput="autoResize(this); updateCounter(this,'c_01b',2); updateCompletion()"></textarea>
+        <div class="counter-row"><span class="sent-counter none" id="c_01b">0 / 2 sentences</span></div>
+      </div>
+
+      <div class="prompt">
+        <div class="prompt-q">01-C &mdash; Where is this project in its development cycle?</div>
+        <div class="prompt-desc">Choose one stage and justify your choice in 1-2 sentences: <em>concept &nbsp;/&nbsp; early design &nbsp;/&nbsp; active development &nbsp;/&nbsp; testing &amp; refinement &nbsp;/&nbsp; near-complete</em></div>
+        <textarea class="response-area" id="q_01c" placeholder="Stage and justification..." oninput="autoResize(this); updateCounter(this,'c_01c',1); updateCompletion()" style="min-height:64px;"></textarea>
+        <div class="counter-row"><span class="sent-counter none" id="c_01c">0 / 1 sentence</span></div>
+      </div>
+
+      <button class="rubric-toggle" onclick="toggleRubric('r_01')">Full Rubric &darr;</button>
+      <div class="rubric-panel" id="r_01">
+        <table>
+          <tr><th>Item</th><th>Full Credit</th><th>Pts</th></tr>
+          <tr><td>01-A</td><td>Project described specifically; a reader unfamiliar with it understands what it is.</td><td>4</td></tr>
+          <tr><td>01-B</td><td>Purpose or problem articulated clearly. The "why" is credible and present.</td><td>4</td></tr>
+          <tr><td>01-C</td><td>Correct stage identified with a specific, defensible justification.</td><td>2</td></tr>
+        </table>
+      </div>
+    </div>
   </div>
-  <div class="module-body">
-    <p class="prompt">Before you write your analysis, use the demo below to build an intuition for angular momentum. Interact with it, then answer the questions that follow.</p>
-    <div class="am-demo-wrap">
-      <div class="am-canvas-col">
-        <canvas id="am-canvas" width="200" height="200"></canvas>
-        <div class="am-slider-row">
-          <span class="am-slider-label">CENTER</span>
-          <input type="range" id="am-slider" min="0" max="100" value="30">
-          <span class="am-slider-label">EDGE</span>
+
+  <!-- MODULE 02 -->
+  <div class="module">
+    <div class="module-header">
+      <div class="module-header-main">
+        <span class="module-num">MOD 02</span>
+        <span class="module-title">Progress Log</span>
+        <span class="module-total-pts">14 pts</span>
+      </div>
+      <div class="pts-breakdown"><span>02-A: 6 pts</span> &nbsp;&middot;&nbsp; <span>02-B (evidence): 8 pts</span></div>
+    </div>
+    <div class="module-body">
+
+      <div class="prompt">
+        <div class="prompt-q">02-A &mdash; What have you completed since the last check-in?</div>
+        <div class="prompt-desc">Be concrete. "I worked on it" receives no credit. Describe specifically what exists now that did not exist before. <em>Min. 3 sentences</em></div>
+        <textarea class="response-area" id="q_02a" placeholder="List completed work specifically..." oninput="autoResize(this); updateCounter(this,'c_02a',3); updateCompletion()"></textarea>
+        <div class="counter-row"><span class="sent-counter none" id="c_02a">0 / 3 sentences</span></div>
+      </div>
+
+      <div class="prompt">
+        <div class="prompt-q">02-B &mdash; Evidence of Progress</div>
+        <div class="prompt-desc">Upload photos, screenshots, sketches, diagrams, or any documentation showing your project's current state. Add a caption to each. <em>Min. 2 images required</em></div>
+        <div class="upload-zone" onclick="document.getElementById('img_02b').click()">
+          <input type="file" id="img_02b" accept="image/*" multiple onchange="addImages('grid_02b',this)">
+          <label class="upload-zone-label" for="img_02b"><span>+ Add Images</span> &nbsp;&mdash;&nbsp; photos, screenshots, sketches, diagrams</label>
         </div>
-        <button class="am-spin-btn" id="am-spin-btn" onclick="spinDemo()">[ Spin It ]</button>
-        <div class="am-status" id="am-status">Drag the slider to redistribute mass</div>
+        <div class="img-count-row"><span class="img-count none" id="img_count">0 / 2 images</span></div>
+        <div class="image-grid" id="grid_02b"></div>
       </div>
-      <div class="am-metrics-col">
-        <div class="am-edu">
-          <strong>Angular Momentum</strong> is the spinning power of a rotating object. It depends on how fast it spins and how its mass is spread out.<br><br>
-          <strong>Moment of Inertia (I)</strong> describes how mass is distributed relative to the spin axis. Mass farther from the center contributes more - this is why a figure skater speeds up when pulling their arms in.<br><br>
-          <strong>For your blade:</strong> more mass at the edge means more angular momentum at the same speed - harder to stop, but also harder to spin up. Try both extremes on the demo.
+
+      <button class="rubric-toggle" onclick="toggleRubric('r_02')">Full Rubric &darr;</button>
+      <div class="rubric-panel" id="r_02">
+        <table>
+          <tr><th>Item</th><th>Full Credit</th><th>Pts</th></tr>
+          <tr><td>02-A</td><td>Completed work described with specific, concrete language. Demonstrates meaningful forward movement.</td><td>6</td></tr>
+          <tr><td>02-B</td><td>At least 2 images present, each directly documenting the current state of the project. Captions are present and accurate.</td><td>8</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODULE 03 -->
+  <div class="module">
+    <div class="module-header">
+      <div class="module-header-main">
+        <span class="module-num">MOD 03</span>
+        <span class="module-title">Current State Breakdown</span>
+        <span class="module-total-pts">12 pts</span>
+      </div>
+      <div class="pts-breakdown"><span>03-A (table): 7 pts</span> &nbsp;&middot;&nbsp; <span>03-B: 5 pts</span></div>
+    </div>
+    <div class="module-body">
+
+      <div class="prompt">
+        <div class="prompt-q">03-A &mdash; Component / Task Status</div>
+        <div class="prompt-desc">List every major component or task in your project. Be honest with status - inaccuracy is penalized, partial progress is not.</div>
+        <table class="status-table">
+          <thead><tr><th style="width:42%;">Component / Task</th><th style="width:26%;">Status</th><th>Notes</th></tr></thead>
+          <tbody id="status_body">
+            <tr><td><input placeholder="e.g. Housing design"></td><td><select onchange="colorRow(this)"><option value="">-- select --</option><option>Complete</option><option>In Progress</option><option>Not Started</option><option>Blocked</option></select></td><td><input placeholder="Optional"></td></tr>
+            <tr><td><input placeholder="e.g. Material sourcing"></td><td><select onchange="colorRow(this)"><option value="">-- select --</option><option>Complete</option><option>In Progress</option><option>Not Started</option><option>Blocked</option></select></td><td><input placeholder="Optional"></td></tr>
+            <tr><td><input placeholder="e.g. Assembly / build"></td><td><select onchange="colorRow(this)"><option value="">-- select --</option><option>Complete</option><option>In Progress</option><option>Not Started</option><option>Blocked</option></select></td><td><input placeholder="Optional"></td></tr>
+          </tbody>
+        </table>
+        <button class="add-row-btn" onclick="addStatusRow()">+ Add Row</button>
+      </div>
+
+      <div class="prompt">
+        <div class="prompt-q">03-B &mdash; Honest Assessment</div>
+        <div class="prompt-desc">In your own words: where does the project actually stand right now? Be direct. No inflation. <em>Min. 2 sentences</em></div>
+        <textarea class="response-area" id="q_03b" placeholder="Your honest current state..." oninput="autoResize(this); updateCounter(this,'c_03b',2); updateCompletion()" style="min-height:72px;"></textarea>
+        <div class="counter-row"><span class="sent-counter none" id="c_03b">0 / 2 sentences</span></div>
+      </div>
+
+      <button class="rubric-toggle" onclick="toggleRubric('r_03')">Full Rubric &darr;</button>
+      <div class="rubric-panel" id="r_03">
+        <table>
+          <tr><th>Item</th><th>Full Credit</th><th>Pts</th></tr>
+          <tr><td>03-A</td><td>All major components/tasks present. Status selections accurate and match actual project state.</td><td>7</td></tr>
+          <tr><td>03-B</td><td>Written assessment is specific and honest. Matches the table. No vague or inflated claims.</td><td>5</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODULE 04 -->
+  <div class="module">
+    <div class="module-header">
+      <div class="module-header-main">
+        <span class="module-num">MOD 04</span>
+        <span class="module-title">Remaining Work &amp; Planning</span>
+        <span class="module-total-pts">14 pts</span>
+      </div>
+      <div class="pts-breakdown"><span>04-A: 4 pts</span> &nbsp;&middot;&nbsp; <span>04-B (timeline + contingency): 6 pts</span> &nbsp;&middot;&nbsp; <span>04-C: 4 pts</span></div>
+    </div>
+    <div class="module-body">
+
+      <div class="prompt">
+        <div class="prompt-q">04-A &mdash; What still needs to be completed?</div>
+        <div class="prompt-desc">List everything that remains before your project is finished. Be specific about each outstanding task - do not summarize. <em>Min. 3 sentences</em></div>
+        <textarea class="response-area" id="q_04a" placeholder="All remaining work..." oninput="autoResize(this); updateCounter(this,'c_04a',3); updateCompletion()"></textarea>
+        <div class="counter-row"><span class="sent-counter none" id="c_04a">0 / 3 sentences</span></div>
+      </div>
+
+      <div class="prompt">
+        <div class="prompt-q">04-B &mdash; Milestone Timeline &amp; Contingency</div>
+        <div class="prompt-desc">Assign a real target date (MM/DD) to each remaining task. Cross-reference the <a href="https://www.boscotech.edu/student-life/calendar" target="_blank" style="color:var(--green);text-decoration:none;border-bottom:1px solid var(--green-border);">DBTI Academic Calendar</a> for school events, breaks, and deadlines. Then answer: what is your plan if you fall behind? "I will work harder" is not a plan. <em>Min. 2 sentences for contingency</em></div>
+        <table class="status-table" style="margin-bottom:12px;">
+          <thead><tr><th style="width:52%;">Remaining Task</th><th style="width:20%;">Target Date</th><th>Dependencies / Notes</th></tr></thead>
+          <tbody id="timeline_body">
+            <tr><td><input placeholder="Task description"></td><td><input placeholder="MM/DD"></td><td><input placeholder="Optional"></td></tr>
+            <tr><td><input placeholder="Task description"></td><td><input placeholder="MM/DD"></td><td><input placeholder="Optional"></td></tr>
+            <tr><td><input placeholder="Task description"></td><td><input placeholder="MM/DD"></td><td><input placeholder="Optional"></td></tr>
+          </tbody>
+        </table>
+        <button class="add-row-btn" onclick="addTimelineRow()" style="margin-bottom:12px;">+ Add Row</button>
+        <div style="border-top:1px solid var(--green-border); padding-top:12px; margin-top:4px;">
+          <div style="font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--green-dim); letter-spacing:1px; margin-bottom:6px;">CONTINGENCY PLAN &mdash; if your timeline slips</div>
+          <textarea class="response-area" id="q_04b" placeholder="Identify the most likely risk and your specific plan to address it..." oninput="autoResize(this); updateCounter(this,'c_04b',2); updateCompletion()" style="min-height:72px;"></textarea>
+          <div class="counter-row"><span class="sent-counter none" id="c_04b">0 / 2 sentences</span></div>
         </div>
-        <div class="am-metric"><div class="am-metric-label">Moment of Inertia</div><div class="am-metric-bar-wrap"><div class="am-metric-bar" id="bar-inertia" style="width:25%"></div></div><div class="am-metric-val" id="val-inertia">Low</div></div>
-        <div class="am-metric"><div class="am-metric-label">Spin Stability</div><div class="am-metric-bar-wrap"><div class="am-metric-bar" id="bar-stability" style="width:25%"></div></div><div class="am-metric-val" id="val-stability">Low</div></div>
-        <div class="am-metric"><div class="am-metric-label">Impact Resistance</div><div class="am-metric-bar-wrap"><div class="am-metric-bar" id="bar-impact" style="width:25%"></div></div><div class="am-metric-val" id="val-impact">Low</div></div>
-        <div class="am-metric"><div class="am-metric-label">Spin-Up Speed</div><div class="am-metric-bar-wrap"><div class="am-metric-bar" id="bar-spinup" style="width:80%"></div></div><div class="am-metric-val" id="val-spinup">Fast</div></div>
+      </div>
+
+      <div class="prompt">
+        <div class="prompt-q">04-C &mdash; What do you need?</div>
+        <div class="prompt-desc">Identify any resources, materials, approvals, equipment access, or help you are waiting on or will need before you can finish. If nothing is blocking you, state that explicitly. <em>Min. 2 sentences</em></div>
+        <textarea class="response-area" id="q_04c" placeholder="Resources, approvals, help, or equipment you are waiting on..." oninput="autoResize(this); updateCounter(this,'c_04c',2); updateCompletion()" style="min-height:72px;"></textarea>
+        <div class="counter-row"><span class="sent-counter none" id="c_04c">0 / 2 sentences</span></div>
+      </div>
+
+      <button class="rubric-toggle" onclick="toggleRubric('r_04')">Full Rubric &darr;</button>
+      <div class="rubric-panel" id="r_04">
+        <table>
+          <tr><th>Item</th><th>Full Credit</th><th>Pts</th></tr>
+          <tr><td>04-A</td><td>All remaining work itemized. Specific language. Nothing major omitted.</td><td>4</td></tr>
+          <tr><td>04-B</td><td>Every task has a real date. Timeline is realistic. Contingency plan is actionable and specific.</td><td>6</td></tr>
+          <tr><td>04-C</td><td>Needs are specific and credible. Explicitly stated if none. Not vague ("just time").</td><td>4</td></tr>
+        </table>
       </div>
     </div>
-    <div class="sub-label">Your Analysis</div>
-    <div class="field-row">
-      <label>Mass Distribution Strategy - Where are you concentrating mass and why?</label>
-      <textarea data-field="mass-distribution" placeholder="Describe specifically where most of the mass in your design will be located. Be concrete - is it in a heavy outer ring? A thick central disc? Dense blade arms? Why did you make that choice?"></textarea>
-      <div class="print-mirror" data-mirror="mass-distribution"></div>
-      <div class="sent-count" data-min="3" data-field-ref="mass-distribution"><span class="sent-dot"></span><span><span class="current">0</span> / 3 sentences minimum</span></div>
-    </div>
-    <div class="field-row">
-      <label>Performance Trade-offs - What does your distribution gain and what does it sacrifice?</label>
-      <textarea data-field="mass-effect" placeholder="Using what you learned in the demo, explain the trade-off your design makes. Every choice has a cost - acknowledge both sides."></textarea>
-      <div class="print-mirror" data-mirror="mass-effect"></div>
-      <div class="sent-count" data-min="3" data-field-ref="mass-effect"><span class="sent-dot"></span><span><span class="current">0</span> / 3 sentences minimum</span></div>
-    </div>
   </div>
-  <div class="rubric-panel" id="rubric-03">
-    <div class="rubric-inner">
-      <div class="rubric-title-row"><span>Grading Criteria</span><span>Points</span></div>
-      <div class="rubric-row"><div class="rubric-criteria"><strong>Mass Distribution:</strong> names specific parts or regions of the design, explains the reasoning behind placement - min 3 sentences met</div><div class="rubric-pts">5 pts</div></div>
-      <div class="rubric-row"><div class="rubric-criteria"><strong>Trade-offs:</strong> addresses both what the distribution gains AND what it costs (e.g. stability vs. spin-up speed) - min 3 sentences met</div><div class="rubric-pts">5 pts</div></div>
-    </div>
-  </div>
-</div>
 
-<!-- MODULE 04 -->
-<div class="module">
-  <div class="module-header">
-    <span class="mod-num">04</span>
-    <span class="mod-title">Technical Sketches</span>
-    <span class="mod-pts">10 pts</span>
-    <button class="rubric-toggle" id="rt-04" onclick="toggleRubric(4)">[ Rubric ]</button>
-  </div>
-  <div class="module-body">
-    <p class="prompt">Minimum one top view and one side view. These are not CAD drawings but must be more than rough thumbnails - proportion, blade geometry, and overall shape must be clearly readable. Annotate with approximate dimensions. Click to add files or drag and drop. You can add more images across multiple sessions.</p>
-    <div class="drop-zone" id="sketch-drop-zone">
-      <div class="drop-icon">[ + ]</div>
-      <div class="drop-label">Click or Drag to Add Sketches</div>
-      <div class="drop-sub">Top view + Side view required &nbsp;|&nbsp; Add more at any time</div>
-    </div>
-    <input type="file" id="sketch-file-input" accept="image/*" multiple style="display:none">
-    <div class="sketch-preview" id="sketch-preview"></div>
-  </div>
-  <div class="rubric-panel" id="rubric-04">
-    <div class="rubric-inner">
-      <div class="rubric-title-row"><span>Grading Criteria</span><span>Points</span></div>
-      <div class="rubric-row"><div class="rubric-criteria"><strong>Top view</strong> is present and legible - blade geometry and overall shape are readable, not just an outline</div><div class="rubric-pts">3 pts</div></div>
-      <div class="rubric-row"><div class="rubric-criteria"><strong>Side view</strong> is present and legible - height profile and proportions are visible</div><div class="rubric-pts">3 pts</div></div>
-      <div class="rubric-row"><div class="rubric-criteria">At least one sketch includes <strong>dimensions or annotations</strong> calling out key measurements or features</div><div class="rubric-pts">2 pts</div></div>
-      <div class="rubric-row"><div class="rubric-criteria"><strong>Design intent is clear</strong> from sketches alone - a classmate could understand the basic form without reading the other modules</div><div class="rubric-pts">2 pts</div></div>
+  <!-- DECLARATION -->
+  <div class="declaration">
+    <div class="section-eyebrow">Academic Integrity Declaration</div>
+    <p>The work described in this document is my own. All reported progress reflects effort I personally completed. I understand that misrepresenting my project status - including inflating progress, omitting known problems, or copying another student's submission - constitutes academic dishonesty.</p>
+    <div class="sig-row">
+      <div class="sig-field">
+        <label>Student Signature (type full name)</label>
+        <input type="text" id="sig_student" placeholder="Type your full name" oninput="updateCompletion()">
+      </div>
+      <div class="sig-field">
+        <label>Date</label>
+        <input type="text" id="sig_date" placeholder="MM / DD / YYYY">
+      </div>
     </div>
   </div>
-</div>
 
-<!-- MODULE 05 -->
-<div class="module">
-  <div class="module-header">
-    <span class="mod-num">05</span>
-    <span class="mod-title">Manufacturing Plan</span>
-    <span class="mod-pts">5 pts</span>
-    <button class="rubric-toggle" id="rt-05" onclick="toggleRubric(5)">[ Rubric ]</button>
-  </div>
-  <div class="module-body">
-    <p class="prompt">Identify at least 3 manufacturing processes you plan to use. For each, list which component(s) it will produce and briefly explain why that process is the right choice. Note: two variations of the same process (e.g. two different print settings) count as one.</p>
-    <table class="mfg-table">
-      <thead><tr><th>#</th><th>Process</th><th>Component(s)</th><th>Why This Process?</th></tr></thead>
+  <!-- INSTRUCTOR SECTION (print only) -->
+  <div class="instructor-section">
+    <span class="ins-eyebrow">Instructor Use Only</span>
+    <table>
+      <thead><tr><th>Module</th><th>Description</th><th class="score-cell">Score</th></tr></thead>
       <tbody>
-        <tr><td>01</td><td><textarea data-field="mfg-01-p" placeholder="e.g. FDM 3D Printing" rows="1"></textarea><div class="print-mirror single-line" data-mirror="mfg-01-p"></div></td><td><textarea data-field="mfg-01-c" placeholder="e.g. Top body" rows="1"></textarea><div class="print-mirror single-line" data-mirror="mfg-01-c"></div></td><td><textarea data-field="mfg-01-w" placeholder="Brief justification..." rows="1"></textarea><div class="print-mirror single-line" data-mirror="mfg-01-w"></div></td></tr>
-        <tr><td>02</td><td><textarea data-field="mfg-02-p" placeholder="e.g. Plasma Cutting" rows="1"></textarea><div class="print-mirror single-line" data-mirror="mfg-02-p"></div></td><td><textarea data-field="mfg-02-c" placeholder="e.g. Steel blades" rows="1"></textarea><div class="print-mirror single-line" data-mirror="mfg-02-c"></div></td><td><textarea data-field="mfg-02-w" placeholder="Brief justification..." rows="1"></textarea><div class="print-mirror single-line" data-mirror="mfg-02-w"></div></td></tr>
-        <tr><td>03</td><td><textarea data-field="mfg-03-p" placeholder="e.g. ..." rows="1"></textarea><div class="print-mirror single-line" data-mirror="mfg-03-p"></div></td><td><textarea data-field="mfg-03-c" placeholder="..." rows="1"></textarea><div class="print-mirror single-line" data-mirror="mfg-03-c"></div></td><td><textarea data-field="mfg-03-w" placeholder="..." rows="1"></textarea><div class="print-mirror single-line" data-mirror="mfg-03-w"></div></td></tr>
-        <tr class="extra"><td>04</td><td><textarea data-field="mfg-04-p" placeholder="Optional" rows="1"></textarea><div class="print-mirror single-line" data-mirror="mfg-04-p"></div></td><td><textarea data-field="mfg-04-c" placeholder="..." rows="1"></textarea><div class="print-mirror single-line" data-mirror="mfg-04-c"></div></td><td><textarea data-field="mfg-04-w" placeholder="..." rows="1"></textarea><div class="print-mirror single-line" data-mirror="mfg-04-w"></div></td></tr>
-        <tr class="extra"><td>05</td><td><textarea data-field="mfg-05-p" placeholder="Optional" rows="1"></textarea><div class="print-mirror single-line" data-mirror="mfg-05-p"></div></td><td><textarea data-field="mfg-05-c" placeholder="..." rows="1"></textarea><div class="print-mirror single-line" data-mirror="mfg-05-c"></div></td><td><textarea data-field="mfg-05-w" placeholder="..." rows="1"></textarea><div class="print-mirror single-line" data-mirror="mfg-05-w"></div></td></tr>
+        <tr><td>MOD 01</td><td>Project Summary</td><td class="score-cell">_____ / 10</td></tr>
+        <tr><td>MOD 02</td><td>Progress Log</td><td class="score-cell">_____ / 14</td></tr>
+        <tr><td>MOD 03</td><td>Current State Breakdown</td><td class="score-cell">_____ / 12</td></tr>
+        <tr><td>MOD 04</td><td>Remaining Work &amp; Planning</td><td class="score-cell">_____ / 14</td></tr>
       </tbody>
+      <tfoot>
+        <tr class="total-row"><td colspan="2"><strong>Total</strong></td><td class="score-cell"><strong>_____ / 50</strong></td></tr>
+      </tfoot>
     </table>
-  </div>
-  <div class="rubric-panel" id="rubric-05">
-    <div class="rubric-inner">
-      <div class="rubric-title-row"><span>Grading Criteria</span><span>Points</span></div>
-      <div class="rubric-row"><div class="rubric-criteria"><strong>3 or more distinct processes</strong> identified - similar processes (two print profiles, two cut methods) count as one</div><div class="rubric-pts">2 pts</div></div>
-      <div class="rubric-row"><div class="rubric-criteria">Each process is <strong>mapped to a specific named component</strong> - not "various parts"</div><div class="rubric-pts">2 pts</div></div>
-      <div class="rubric-row"><div class="rubric-criteria">Justifications are <strong>specific and reasonable</strong> - "because it can make complex shapes" is acceptable; "because it is the right process" is not</div><div class="rubric-pts">1 pt</div></div>
+    <div class="notes-area">
+      <span class="notes-label">Comments</span>
+      <div class="notes-line"></div>
+      <div class="notes-line"></div>
+      <div class="notes-line"></div>
     </div>
   </div>
-</div>
 
-<!-- MODULE 06 -->
-<div class="module">
-  <div class="module-header">
-    <span class="mod-num">06</span>
-    <span class="mod-title">Blade Engagement Justification</span>
-    <span class="mod-pts">5 pts</span>
-    <button class="rubric-toggle" id="rt-06" onclick="toggleRubric(6)">[ Rubric ]</button>
-  </div>
-  <div class="module-body">
-    <div class="rules-callout">
-      <div class="rule-item"><span class="rule-label">Min. Protrusion Depth</span><span class="rule-val">0.25"</span></div>
-      <div class="rule-item"><span class="rule-label">Min. Angle of Attack</span><span class="rule-val">30&deg; from tangent</span></div>
-      <div class="rule-item"><span class="rule-label">Max. Contact Points</span><span class="rule-val">6</span></div>
+  <!-- SUBMISSION CHECKLIST -->
+  <div class="module">
+    <div class="module-header">
+      <div class="module-header-main">
+        <span class="module-num">SUB</span>
+        <span class="module-title">Before You Submit</span>
+      </div>
     </div>
-
-    <div class="tangent-diagram-wrap">
-      <div class="tangent-diagram-title">Angle of Attack - What "30 degrees from tangent" means</div>
-      <canvas id="tangent-canvas" width="520" height="210"></canvas>
-    </div>
-
-    <p class="prompt">Using your sketch or a labeled diagram, identify your contact points and explain how your blade geometry satisfies each requirement above. State the number of contact points and describe the angle and depth of each leading edge. Designs that do not meet all three requirements will not pass inspection.</p>
-    <div class="field-row">
-      <label>Number of Contact Points in Your Design</label>
-      <input type="text" data-field="eng-count" placeholder="e.g. 4 contact points" autocomplete="off">
-      <div class="print-mirror single-line" data-mirror="eng-count"></div>
-    </div>
-    <div class="field-row">
-      <label>Engagement Justification</label>
-      <textarea data-field="eng-justification" placeholder="Describe how each requirement is met. Reference your sketches by view name (top view, side view, etc.)"></textarea>
-      <div class="print-mirror" data-mirror="eng-justification"></div>
-      <div class="sent-count" data-min="3" data-field-ref="eng-justification"><span class="sent-dot"></span><span><span class="current">0</span> / 3 sentences minimum</span></div>
+    <div class="module-body">
+      <ul class="checklist">
+        <li>Project title, name, period, and date are all filled in the header</li>
+        <li>All text responses meet the minimum sentence counts shown in green</li>
+        <li>At least 2 images are uploaded in Module 02 with captions</li>
+        <li>Module 03 status table includes all major components or tasks</li>
+        <li>Module 04 timeline uses real dates in MM/DD format</li>
+        <li>Contingency plan in Module 04 is specific and actionable</li>
+        <li>Module 04-C explicitly states what you need (or that nothing is blocking you)</li>
+        <li>Academic integrity declaration is signed with your full name</li>
+        <li>Document exported to PDF using the Print / Export PDF button above</li>
+        <li>PDF attached directly to the Google Classroom assignment (not a link)</li>
+      </ul>
     </div>
   </div>
-  <div class="rubric-panel" id="rubric-06">
-    <div class="rubric-inner">
-      <div class="rubric-title-row"><span>Grading Criteria</span><span>Points</span></div>
-      <div class="rubric-row"><div class="rubric-criteria">Contact point count is <strong>stated and falls within the allowed range</strong> (1 to 6)</div><div class="rubric-pts">1 pt</div></div>
-      <div class="rubric-row"><div class="rubric-criteria">Protrusion depth of <strong>0.25" minimum is explicitly addressed</strong> in the written justification</div><div class="rubric-pts">1 pt</div></div>
-      <div class="rubric-row"><div class="rubric-criteria">Angle of attack of <strong>30° from tangent is addressed and referenced in a sketch</strong> - student demonstrates understanding of what "from tangent" means</div><div class="rubric-pts">2 pts</div></div>
-      <div class="rubric-row"><div class="rubric-criteria">Sketch views are <strong>referenced by name</strong> (top view, side view, etc.) in the justification</div><div class="rubric-pts">1 pt</div></div>
-    </div>
-  </div>
-</div>
-
-<div class="footer">
-  <span>IDEA-BLADE &nbsp;|&nbsp; Assignment 01 &nbsp;|&nbsp; Don Bosco Technical Institute &nbsp;|&nbsp; IDEA-113</span>
-  <span class="footer-pts">50 Points Total</span>
-  <button class="btn" onclick="window.print()" style="font-size:9px;padding:6px 12px;">[ Print / PDF ]</button>
-</div>
 
 </div>
+
 <script>
-/* ===== MATRIX RAIN ===== */
+/* MATRIX RAIN */
 (function(){
-  const canvas=document.getElementById('matrix-canvas'),ctx=canvas.getContext('2d');
-  const chars='ｦｧｨｩｪｫｬｭｮｯｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ01234567890123></>+-=#'.split('');
-  let drops=[],cols=0,lastTime=0;
-  const COL_W=18,FS=14,FPS=16;
-  function init(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;cols=Math.floor(canvas.width/COL_W);drops=Array.from({length:cols},()=>Math.random()*-50);ctx.fillStyle='#060c06';ctx.fillRect(0,0,canvas.width,canvas.height);}
-  function draw(ts){requestAnimationFrame(draw);if(ts-lastTime<1000/FPS)return;lastTime=ts;ctx.fillStyle='rgba(6,12,6,0.06)';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.font=FS+'px "Share Tech Mono",monospace';for(let i=0;i<cols;i++){const ch=chars[Math.floor(Math.random()*chars.length)];const y=drops[i]*COL_W;ctx.fillStyle=Math.random()>0.95?'rgba(180,255,210,0.7)':'rgba(0,180,80,0.22)';ctx.fillText(ch,i*COL_W,y);if(y>canvas.height&&Math.random()>0.97)drops[i]=0;drops[i]+=0.5;}}
-  init();requestAnimationFrame(draw);window.addEventListener('resize',init);
+  const c=document.getElementById('matrix-canvas'), ctx=c.getContext('2d');
+  let cols,drops;
+  const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&';
+  function resize(){ c.width=window.innerWidth; c.height=window.innerHeight; cols=Math.floor(c.width/20); drops=Array(cols).fill(1); }
+  function draw(){
+    ctx.fillStyle='rgba(6,12,6,0.05)'; ctx.fillRect(0,0,c.width,c.height);
+    for(let i=0;i<drops.length;i++){
+      ctx.fillStyle=Math.random()>0.98?'#00ff6e':'rgba(0,229,102,0.55)';
+      ctx.font='13px Share Tech Mono,monospace';
+      ctx.fillText(chars[Math.floor(Math.random()*chars.length)],i*20,drops[i]*20);
+      if(drops[i]*20>c.height&&Math.random()>0.975)drops[i]=0;
+      drops[i]++;
+    }
+  }
+  resize(); window.addEventListener('resize',resize); setInterval(draw,50);
 })();
 
-/* ===== TANGENT DIAGRAM ===== */
-function drawTangentDiagram(){
-  const canvas=document.getElementById('tangent-canvas');
-  if(!canvas)return;
-  const ctx=canvas.getContext('2d');
-  const W=canvas.width,H=canvas.height;
-  ctx.clearRect(0,0,W,H);
+/* AUTO RESIZE */
+function autoResize(el){ el.style.height='auto'; el.style.height=(el.scrollHeight+2)+'px'; }
 
-  function panel(cx,cy,R,attackAngleDeg,good){
-    const green='rgba(0,229,102,', red='rgba(255,68,68,', warn='rgba(255,204,0,';
-    // blade rotation circle
-    ctx.strokeStyle=green+'0.2)';ctx.lineWidth=1;
-    ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.stroke();
-    // centre dot
-    ctx.fillStyle=green+'0.25)';ctx.beginPath();ctx.arc(cx,cy,3,0,Math.PI*2);ctx.fill();
-
-    // contact point at top-right (angle -50 deg from positive x)
-    const cpA=-0.87; // radians
-    const cpx=cx+R*Math.cos(cpA), cpy=cy+R*Math.sin(cpA);
-
-    // tangent direction at contact point (90 deg clockwise from radius for CW spin)
-    const tA=cpA+Math.PI/2;
-    const tLen=44;
-
-    // draw tangent line (dashed)
-    ctx.strokeStyle=green+'0.35)';ctx.lineWidth=1.2;ctx.setLineDash([4,4]);
-    ctx.beginPath();
-    ctx.moveTo(cpx-Math.cos(tA)*tLen,cpy-Math.sin(tA)*tLen);
-    ctx.lineTo(cpx+Math.cos(tA)*tLen,cpy+Math.sin(tA)*tLen);
-    ctx.stroke();ctx.setLineDash([]);
-
-    // motion arrow at end of tangent
-    const ax=cpx+Math.cos(tA)*(tLen-6),ay=cpy+Math.sin(tA)*(tLen-6);
-    ctx.fillStyle=green+'0.45)';ctx.beginPath();
-    ctx.moveTo(ax+Math.cos(tA)*7,ay+Math.sin(tA)*7);
-    ctx.lineTo(ax+Math.cos(tA-2.5)*5,ay+Math.sin(tA-2.5)*5);
-    ctx.lineTo(ax+Math.cos(tA+2.5)*5,ay+Math.sin(tA+2.5)*5);
-    ctx.closePath();ctx.fill();
-
-    // tangent label
-    ctx.fillStyle=green+'0.5)';ctx.font='9px "Share Tech Mono",monospace';ctx.textAlign='center';
-    ctx.fillText('direction of spin',cpx+Math.cos(tA)*(tLen+12),cpy+Math.sin(tA)*(tLen+12));
-
-    // blade edge direction (rotate from tangent by attackAngleDeg)
-    const eA=tA-(attackAngleDeg*Math.PI/180);
-    const eLen=58;
-    const blade_col=good?green+0.9+')':red+0.75+')';
-    ctx.strokeStyle=blade_col;ctx.lineWidth=2.5;
-    ctx.beginPath();ctx.moveTo(cpx,cpy);ctx.lineTo(cpx-Math.cos(eA)*eLen,cpy-Math.sin(eA)*eLen);ctx.stroke();
-
-    // blade body fill (wedge from edge to center area)
-    ctx.fillStyle=good?green+'0.08)':red+'0.06)';
-    ctx.beginPath();ctx.moveTo(cpx,cpy);
-    ctx.lineTo(cpx-Math.cos(eA)*eLen,cpy-Math.sin(eA)*eLen);
-    ctx.lineTo(cx,cy);ctx.closePath();ctx.fill();
-
-    // contact point dot
-    ctx.fillStyle=good?green+'0.95)':red+'0.8)';
-    ctx.beginPath();ctx.arc(cpx,cpy,5,0,Math.PI*2);ctx.fill();
-
-    // angle arc between tangent and edge
-    const arcR=22;
-    ctx.strokeStyle=warn+'0.8)';ctx.lineWidth=1.5;
-    ctx.beginPath();
-    const a1=tA,a2=tA-(attackAngleDeg*Math.PI/180);
-    ctx.arc(cpx,cpy,arcR,Math.min(a1,a2),Math.max(a1,a2));
-    ctx.stroke();
-
-    // angle label
-    const midA=(a1+a2)/2;
-    ctx.fillStyle=warn+'0.95)';ctx.font='bold 11px "Share Tech Mono",monospace';ctx.textAlign='center';
-    ctx.fillText(attackAngleDeg+'°',cpx+Math.cos(midA)*(arcR+14),cpy+Math.sin(midA)*(arcR+14)+4);
-
-    // title and result
-    const titleCol=good?green+'0.85)':red+'0.85)';
-    ctx.fillStyle=titleCol;ctx.font='bold 10px "Orbitron",monospace';ctx.textAlign='center';
-    ctx.fillText(good?'COMPLIANT':'NON-COMPLIANT',cx,cy-R-16);
-
-    const resultCol=good?green+'0.65)':red+'0.6)';
-    ctx.fillStyle=resultCol;ctx.font='9px "Share Tech Mono",monospace';ctx.textAlign='center';
-    ctx.fillText(good?'catches - max engagement':'deflects - minimal engagement',cx,cy+R+18);
-
-    ctx.textAlign='left';
-  }
-
-  // divider
-  ctx.strokeStyle='rgba(0,100,50,0.25)';ctx.lineWidth=1;ctx.setLineDash([4,6]);
-  ctx.beginPath();ctx.moveTo(W/2,12);ctx.lineTo(W/2,H-12);ctx.stroke();ctx.setLineDash([]);
-
-  panel(W*0.27,H*0.5,72,12,false); // bad: 12 deg
-  panel(W*0.75,H*0.5,72,42,true);  // good: 42 deg
+/* SENTENCE COUNTER */
+function countSentences(text){ return text.trim().length===0?0:(text.match(/[^.!?]*[.!?]+/g)||[]).length; }
+function updateCounter(el,cid,min){
+  const n=countSentences(el.value);
+  const s=document.getElementById(cid);
+  s.textContent=n+' / '+min+(min===1?' sentence':' sentences');
+  s.className='sent-counter '+(n===0?'none':n<min?'warn':'good');
 }
 
-/* ===== AM DEMO ===== */
-(function(){
-  const canvas=document.getElementById('am-canvas'),ctx=canvas.getContext('2d');
-  const slider=document.getElementById('am-slider');
-  const spinBtn=document.getElementById('am-spin-btn');
-  const statusEl=document.getElementById('am-status');
-  const CX=100,CY=100,R=82,DOT_COUNT=20;
-  let rotAngle=0,spinning=false;
-
-  function drawDisc(edgePct,rotation){
-    ctx.clearRect(0,0,200,200);
-    ctx.strokeStyle='rgba(0,200,80,0.3)';ctx.lineWidth=1;
-    for(let ring=0;ring<3;ring++){ctx.beginPath();ctx.arc(CX,CY,(R/3)*(ring+1),0,Math.PI*2);ctx.stroke();}
-    ctx.strokeStyle='rgba(0,229,102,0.5)';ctx.lineWidth=1.5;
-    ctx.beginPath();ctx.arc(CX,CY,R,0,Math.PI*2);ctx.stroke();
-    const dotR=8+(R-22)*(edgePct/100);
-    const spread=Math.PI*2*(0.05+0.2*(1-edgePct/100));
-    for(let i=0;i<DOT_COUNT;i++){
-      const base=(i/DOT_COUNT)*Math.PI*2+rotation;
-      const r=dotR+Math.sin(i*3.7)*dotR*0.15*(1-edgePct/100);
-      const x=CX+Math.cos(base+Math.sin(i*7.3)*spread)*r;
-      const y=CY+Math.sin(base+Math.sin(i*7.3)*spread)*r;
-      ctx.fillStyle=`rgba(0,229,102,${0.5+0.5*(edgePct/100)})`;
-      ctx.beginPath();ctx.arc(x,y,3.5,0,Math.PI*2);ctx.fill();
-    }
-    ctx.fillStyle='rgba(0,229,102,0.6)';ctx.beginPath();ctx.arc(CX,CY,5,0,Math.PI*2);ctx.fill();
-  }
-
-  function updateMetrics(edgePct){
-    const t=edgePct/100;
-    const vals={inertia:0.15+0.85*t,stability:0.12+0.88*t,impact:0.1+0.9*t,spinup:1-0.75*t};
-    function lab(v){return v<0.4?'Low':v<0.7?'Medium':'High';}
-    for(const[k,v]of Object.entries(vals)){
-      const bar=document.getElementById('bar-'+k),val=document.getElementById('val-'+k);
-      if(bar)bar.style.width=Math.round(v*100)+'%';
-      if(val)val.textContent=k==='spinup'?(v<0.4?'Slow':v<0.7?'Moderate':'Fast'):lab(v);
-    }
-  }
-
-  function render(){drawDisc(parseInt(slider.value),rotAngle);updateMetrics(parseInt(slider.value));}
-  slider.addEventListener('input',()=>{if(!spinning)render();});
-  render();
-
-  window.spinDemo=function(){
-    if(spinning)return;spinning=true;spinBtn.disabled=true;statusEl.textContent='Spinning...';
-    const edgePct=parseInt(slider.value),t=edgePct/100;
-    const duration=2000+5000*t,start=performance.now();
-    function frame(now){
-      const p=Math.min((now-start)/duration,1);
-      rotAngle+=0.18*(1-p);drawDisc(edgePct,rotAngle);
-      if(p<1){requestAnimationFrame(frame);}
-      else{spinning=false;spinBtn.disabled=false;
-        statusEl.textContent=edgePct>60?'Long spin - high moment of inertia!':edgePct>30?'Moderate spin duration.':'Short spin - low moment of inertia.';
-        setTimeout(()=>{statusEl.textContent='Drag the slider to redistribute mass';},2800);render();}
-    }
-    requestAnimationFrame(frame);
-  };
-})();
-
-/* ===== RUBRIC TOGGLES ===== */
-function toggleRubric(n){
-  const panel=document.getElementById('rubric-0'+n);
-  const btn=document.getElementById('rt-0'+n);
-  const open=panel.classList.toggle('open');
-  btn.classList.toggle('open',open);
-  btn.textContent=open?'[ Close ]':'[ Rubric ]';
+/* RUBRIC TOGGLE */
+function toggleRubric(id){
+  const p=document.getElementById(id), b=p.previousElementSibling;
+  p.classList.toggle('open');
+  b.textContent=p.classList.contains('open')?'Hide Rubric \u2191':'Full Rubric \u2193';
 }
 
-/* ===== FORM FUNCTIONALITY ===== */
-const STORAGE_KEY='ideablade_a01_v4';
-const images=[];
-let saveTimer=null;
-
-function countSentences(text){
-  if(!text.trim())return 0;
-  const m=text.trim().match(/[^.!?]+[.!?]+/g)||[];
-  const left=text.trim().replace(/[^.!?]+[.!?]+/g,'').trim();
-  return m.length+(left.length>10?1:0);
+/* STATUS ROW COLOR */
+function colorRow(sel){
+  const tr=sel.closest('tr');
+  tr.className='';
+  if(sel.value==='Complete') tr.className='s-complete';
+  else if(sel.value==='In Progress') tr.className='s-progress';
+  else if(sel.value==='Blocked') tr.className='s-blocked';
 }
 
-function autoResize(ta){ta.style.height='0';ta.style.height=ta.scrollHeight+'px';}
-function resizeAll(){document.querySelectorAll('textarea[data-field]').forEach(autoResize);}
-
-function updateMirror(field,value){
-  const m=document.querySelector(`[data-mirror="${field}"]`);
-  if(m)m.textContent=value;
+/* ADD TABLE ROWS */
+function addStatusRow(){
+  const tb=document.getElementById('status_body'), tr=document.createElement('tr');
+  tr.innerHTML='<td><input placeholder="Component or task"></td><td><select onchange="colorRow(this)"><option value="">-- select --</option><option>Complete</option><option>In Progress</option><option>Not Started</option><option>Blocked</option></select></td><td><input placeholder="Optional"></td>';
+  tb.appendChild(tr);
+}
+function addTimelineRow(){
+  const tb=document.getElementById('timeline_body'), tr=document.createElement('tr');
+  tr.innerHTML='<td><input placeholder="Task description"></td><td><input placeholder="MM/DD"></td><td><input placeholder="Optional"></td>';
+  tb.appendChild(tr);
 }
 
-function updateCounter(fieldId,text){
-  const counter=document.querySelector(`.sent-count[data-field-ref="${fieldId}"]`);
-  if(!counter)return;
-  const min=parseInt(counter.dataset.min),count=countSentences(text);
-  counter.querySelector('.current').textContent=count;
-  const has=text.trim().length>0;
-  counter.classList.toggle('met',count>=min);
-  counter.classList.toggle('unmet',has&&count<min);
-  counter.classList.toggle('active',has);
+/* IMAGE UPLOAD */
+function updateImageCount(){
+  const n=document.querySelectorAll('#grid_02b .image-thumb').length;
+  const el=document.getElementById('img_count');
+  el.textContent=n+' / 2 images';
+  el.className='img-count '+(n===0?'none':n<2?'warn':'good');
+  updateCompletion();
 }
-
-function flashSave(){
-  const el=document.getElementById('save-indicator');
-  el.textContent='Saved';el.classList.add('flash');
-  clearTimeout(saveTimer);
-  saveTimer=setTimeout(()=>{el.textContent='Auto-save on';el.classList.remove('flash');},1500);
-}
-
-function saveToStorage(){
-  const data={};
-  document.querySelectorAll('[data-field]').forEach(el=>{
-    if(el.type==='radio'){if(el.checked)data[el.dataset.field]=el.value;}
-    else data[el.dataset.field]=el.value;
+function addImages(gridId,input){
+  const grid=document.getElementById(gridId);
+  Array.from(input.files).forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const wrap=document.createElement('div'); wrap.className='image-thumb';
+      const img=document.createElement('img'); img.src=e.target.result;
+      const rm=document.createElement('button'); rm.className='img-remove'; rm.textContent='✕';
+      rm.onclick=()=>{ wrap.remove(); updateImageCount(); };
+      const cap=document.createElement('input'); cap.className='img-caption'; cap.placeholder='Caption...';
+      wrap.appendChild(rm); wrap.appendChild(img); wrap.appendChild(cap);
+      grid.appendChild(wrap);
+      updateImageCount();
+    };
+    reader.readAsDataURL(file);
   });
-  data._images=images.map(i=>({name:i.name,dataUrl:i.dataUrl}));
-  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(data));flashSave();}
-  catch(e){document.getElementById('save-indicator').textContent='Storage full - download progress';}
+  input.value='';
 }
 
-function loadData(data){
-  if(!data)return;
-  Object.entries(data).forEach(([key,val])=>{
-    if(key==='_images'){val.forEach(i=>{images.push(i);renderImageItem(i.dataUrl,i.name);});return;}
-    const els=document.querySelectorAll(`[data-field="${key}"]`);
-    els.forEach(el=>{
-      if(el.type==='radio'){el.checked=(el.value===val);}
-      else{el.value=val;if(el.tagName==='TEXTAREA')requestAnimationFrame(()=>autoResize(el));updateMirror(key,val);updateCounter(key,val);}
+/* COMPLETION TRACKER */
+const CHECKS = [
+  {id:'f_project', type:'field'}, {id:'f_name', type:'field'},
+  {id:'f_period', type:'field'}, {id:'f_date', type:'field'},
+  {id:'q_01a', type:'sentences', min:2}, {id:'q_01b', type:'sentences', min:2},
+  {id:'q_01c', type:'sentences', min:1}, {id:'q_02a', type:'sentences', min:3},
+  {type:'images', min:2},
+  {id:'q_03b', type:'sentences', min:2},
+  {type:'statustable'},
+  {id:'q_04a', type:'sentences', min:3}, {id:'q_04b', type:'sentences', min:2},
+  {id:'q_04c', type:'sentences', min:2},
+  {type:'timeline'},
+  {id:'sig_student', type:'field'}
+];
+function updateCompletion(){
+  let done=0;
+  CHECKS.forEach(c=>{
+    if(c.type==='field'){ if(document.getElementById(c.id)?.value.trim()) done++; }
+    else if(c.type==='sentences'){ if(countSentences(document.getElementById(c.id)?.value||'')>=c.min) done++; }
+    else if(c.type==='images'){ if(document.querySelectorAll('#grid_02b .image-thumb').length>=c.min) done++; }
+    else if(c.type==='statustable'){ let f=false; document.querySelectorAll('#status_body tr').forEach(r=>{ if(r.querySelector('input')?.value.trim()) f=true; }); if(f) done++; }
+    else if(c.type==='timeline'){ let f=false; document.querySelectorAll('#timeline_body tr').forEach(r=>{ const ins=[...r.querySelectorAll('input')]; if(ins[0]?.value.trim()&&ins[1]?.value.trim()) f=true; }); if(f) done++; }
+  });
+  const total=CHECKS.length, pct=Math.round((done/total)*100);
+  document.getElementById('progress-fill').style.width=pct+'%';
+  document.getElementById('progress-label').textContent=done+' of '+total+' complete';
+}
+
+/* SAVE / RESTORE */
+const SAVE_KEY='idea403_pu_v2';
+let lastSaveTime=null;
+
+function gatherData(){
+  const d={};
+  document.querySelectorAll('input[id^="f_"],textarea[id^="q_"],input[id^="sig_"]').forEach(el=>d[el.id]=el.value);
+  d._status=[...document.querySelectorAll('#status_body tr')].map(tr=>[...tr.querySelectorAll('input,select')].map(i=>i.value));
+  d._timeline=[...document.querySelectorAll('#timeline_body tr')].map(tr=>[...tr.querySelectorAll('input')].map(i=>i.value));
+  d._imgs=[...document.querySelectorAll('#grid_02b .image-thumb')].map(t=>({src:t.querySelector('img').src,cap:t.querySelector('input').value}));
+  return d;
+}
+
+function restoreData(d){
+  Object.keys(d).forEach(k=>{
+    if(k.startsWith('_')) return;
+    const el=document.getElementById(k); if(el){ el.value=d[k]; if(el.tagName==='TEXTAREA') autoResize(el); }
+  });
+  if(d._status){
+    const tb=document.getElementById('status_body');
+    d._status.forEach((row,i)=>{
+      if(i>=tb.rows.length) addStatusRow();
+      const cells=[...tb.rows[i].querySelectorAll('input,select')];
+      row.forEach((v,j)=>{ if(cells[j]){ cells[j].value=v; if(cells[j].tagName==='SELECT') colorRow(cells[j]); }});
     });
+  }
+  if(d._timeline){
+    const tb=document.getElementById('timeline_body');
+    d._timeline.forEach((row,i)=>{
+      if(i>=tb.rows.length) addTimelineRow();
+      const inputs=[...tb.rows[i].querySelectorAll('input')];
+      row.forEach((v,j)=>{ if(inputs[j]) inputs[j].value=v; });
+    });
+  }
+  if(d._imgs){
+    const grid=document.getElementById('grid_02b'); grid.innerHTML='';
+    d._imgs.forEach(img=>{
+      const wrap=document.createElement('div'); wrap.className='image-thumb';
+      const im=document.createElement('img'); im.src=img.src;
+      const rm=document.createElement('button'); rm.className='img-remove'; rm.textContent='✕';
+      rm.onclick=()=>{ wrap.remove(); updateImageCount(); };
+      const cap=document.createElement('input'); cap.className='img-caption'; cap.placeholder='Caption...'; cap.value=img.cap||'';
+      wrap.appendChild(rm); wrap.appendChild(im); wrap.appendChild(cap);
+      grid.appendChild(wrap);
+    });
+    updateImageCount();
+  }
+  const mins={q_01a:2,q_01b:2,q_01c:1,q_02a:3,q_03b:2,q_04a:3,q_04b:2,q_04c:2};
+  Object.entries(mins).forEach(([id,min])=>{
+    const el=document.getElementById(id);
+    if(el) updateCounter(el,id.replace('q_','c_'),min);
   });
+  updateCompletion();
 }
 
-function loadFromStorage(){
-  try{const raw=localStorage.getItem(STORAGE_KEY);if(raw)loadData(JSON.parse(raw));}catch(e){}
+function saveProgress(){
+  localStorage.setItem(SAVE_KEY,JSON.stringify(gatherData()));
+  lastSaveTime=Date.now();
+  const s=document.getElementById('save-status');
+  s.textContent='Saved'; s.classList.add('flash');
+  setTimeout(()=>s.classList.remove('flash'),1500);
 }
+function clearAll(){ if(!confirm('Clear all data? This cannot be undone.')) return; localStorage.removeItem(SAVE_KEY); location.reload(); }
 
+/* AUTOSAVE TIMER */
+setInterval(saveProgress,30000);
+setInterval(()=>{
+  if(!lastSaveTime) return;
+  const s=Math.floor((Date.now()-lastSaveTime)/1000);
+  const label=s<5?'just now':s<60?s+'s ago':Math.floor(s/60)+'m ago';
+  if(!document.getElementById('save-status').classList.contains('flash'))
+    document.getElementById('save-status').textContent='Saved '+label;
+},1000);
+
+/* PREFLIGHT */
+function printPreflight(){
+  const issues=[];
+  if(!document.getElementById('f_project').value.trim()) issues.push('Header: Project title is empty');
+  if(!document.getElementById('f_name').value.trim()) issues.push('Header: Student name is empty');
+  if(!document.getElementById('f_date').value.trim()) issues.push('Header: Date is empty');
+  const mins={q_01a:{n:2,label:'01-A'},q_01b:{n:2,label:'01-B'},q_01c:{n:1,label:'01-C'},q_02a:{n:3,label:'02-A'},q_03b:{n:2,label:'03-B'},q_04a:{n:3,label:'04-A'},q_04b:{n:2,label:'04-B (contingency)'},q_04c:{n:2,label:'04-C'}};
+  Object.entries(mins).forEach(([id,{n,label}])=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    const cnt=countSentences(el.value);
+    if(cnt<n) issues.push('Module '+label+': '+cnt+' of '+n+(n===1?' sentence':' sentences')+' written');
+  });
+  const imgCount=document.querySelectorAll('#grid_02b .image-thumb').length;
+  if(imgCount<2) issues.push('Module 02-B: '+imgCount+' of 2 required images uploaded');
+  if(!document.getElementById('sig_student').value.trim()) issues.push('Declaration: Signature (full name) is missing');
+  if(issues.length===0){ window.print(); return; }
+  const list=document.getElementById('preflight-list');
+  list.innerHTML=issues.map(i=>'<li>'+i+'</li>').join('');
+  document.getElementById('preflight-overlay').classList.add('active');
+}
+function closePreflight(){ document.getElementById('preflight-overlay').classList.remove('active'); }
+
+/* DOWNLOAD WITH DATA */
 function downloadHTML(){
-  const clone=document.documentElement.cloneNode(true);
-  const old=clone.querySelector('#__ib_data__');if(old)old.remove();
-  const data={};
-  document.querySelectorAll('[data-field]').forEach(el=>{
-    if(el.type==='radio'){if(el.checked)data[el.dataset.field]=el.value;}
-    else data[el.dataset.field]=el.value;
-  });
-  data._images=images.map(i=>({name:i.name,dataUrl:i.dataUrl}));
-  const sc=document.createElement('script');sc.id='__ib_data__';
-  sc.textContent=`window.__IB_DATA__=${JSON.stringify(data)};`;
-  clone.querySelector('head').appendChild(sc);
-  const name=(document.querySelector('[data-field="student-name"]')?.value||'Student').trim().replace(/\s+/g,'_')||'Student';
-  const html='<!DOCTYPE html>\n'+clone.outerHTML;
-  const blob=new Blob([html],{type:'text/html'});
+  const data=gatherData();
+  const dataTag='<script id="__saved__" type="application/json">'+JSON.stringify(data)+'<\/script>';
+  let html=document.documentElement.outerHTML;
+  html=html.replace(/<script id="__saved__"[\s\S]*?<\/script>/g,'');
+  html=html.replace('</body>',dataTag+'</body>');
+  const blob=new Blob(['<!DOCTYPE html>\n'+html],{type:'text/html'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
-  a.href=url;a.download=`IDEABLADE_A01_${name}.html`;
-  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  a.href=url;
+  a.download='IDEA403_ProgressUpdate_'+(document.getElementById('f_name').value||'student').replace(/[^a-zA-Z0-9]/g,'_')+'.html';
+  a.click();
   URL.revokeObjectURL(url);
 }
 
-function clearProgress(){
-  if(!confirm('Clear all progress? This cannot be undone.'))return;
-  localStorage.removeItem(STORAGE_KEY);
-  document.querySelectorAll('[data-field]').forEach(el=>{if(el.type!=='radio')el.value='';else el.checked=false;});
-  document.querySelectorAll('[data-mirror]').forEach(el=>{el.textContent='';});
-  document.querySelectorAll('textarea[data-field]').forEach(ta=>{ta.style.height='';});
-  document.querySelectorAll('.sent-count').forEach(sc=>{sc.querySelector('.current').textContent='0';sc.classList.remove('met','unmet','active');});
-  images.length=0;document.getElementById('sketch-preview').innerHTML='';
-}
-
-function renderImageItem(dataUrl,name){
-  const preview=document.getElementById('sketch-preview');
-  const wrapper=document.createElement('div');wrapper.className='preview-item';
-  const img=document.createElement('img');img.src=dataUrl;
-  const label=document.createElement('div');label.className='preview-label';label.textContent=name;
-  const btn=document.createElement('button');btn.className='remove-img';btn.textContent='\u00D7';
-  btn.onclick=()=>{const idx=images.findIndex(i=>i.dataUrl===dataUrl);if(idx!==-1)images.splice(idx,1);wrapper.remove();saveToStorage();};
-  wrapper.appendChild(btn);wrapper.appendChild(img);wrapper.appendChild(label);
-  preview.appendChild(wrapper);
-}
-
-function addImageFiles(files){
-  Array.from(files).forEach(file=>{
-    if(!file.type.startsWith('image/'))return;
-    const reader=new FileReader();
-    reader.onload=e=>{const img={name:file.name,dataUrl:e.target.result};images.push(img);renderImageItem(img.dataUrl,img.name);saveToStorage();};
-    reader.readAsDataURL(file);
-  });
-}
-
-document.addEventListener('DOMContentLoaded',()=>{
-  document.querySelectorAll('textarea[data-field]').forEach(ta=>{
-    ta.addEventListener('input',()=>{autoResize(ta);updateMirror(ta.dataset.field,ta.value);updateCounter(ta.dataset.field,ta.value);saveToStorage();});
-  });
-  document.querySelectorAll('input[type="text"][data-field]').forEach(inp=>{
-    inp.addEventListener('input',()=>{updateMirror(inp.dataset.field,inp.value);saveToStorage();});
-  });
-  document.querySelectorAll('input[type="radio"][data-field]').forEach(r=>{
-    r.addEventListener('change',()=>saveToStorage());
-  });
-
-  const fileInput=document.getElementById('sketch-file-input');
-  const dropZone=document.getElementById('sketch-drop-zone');
-  dropZone.addEventListener('click',()=>fileInput.click());
-  fileInput.addEventListener('change',()=>{addImageFiles(fileInput.files);fileInput.value='';});
-  dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('drag-over');});
-  dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('drag-over'));
-  dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('drag-over');addImageFiles(e.dataTransfer.files);});
-
-  if(window.__IB_DATA__){localStorage.setItem(STORAGE_KEY,JSON.stringify(window.__IB_DATA__));}
-  loadFromStorage();
-
-  window.addEventListener('resize',resizeAll);
-  document.fonts.ready.then(()=>{resizeAll();drawTangentDiagram();});
-  requestAnimationFrame(()=>{resizeAll();drawTangentDiagram();});
+/* INIT */
+window.addEventListener('load',()=>{
+  const saved=document.getElementById('__saved__');
+  if(saved){ try{ restoreData(JSON.parse(saved.textContent)); }catch(e){} }
+  else{
+    const ls=localStorage.getItem(SAVE_KEY);
+    if(ls){ try{ restoreData(JSON.parse(ls)); document.getElementById('save-status').textContent='Restored'; }catch(e){} }
+  }
+  document.querySelectorAll('textarea').forEach(autoResize);
+  updateCompletion();
 });
 </script>
 </body>
