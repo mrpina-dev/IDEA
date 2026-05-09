@@ -1,4 +1,4 @@
-**URL:** https://mrpina-dev.github.io/boscotech-assignments
+**URL:** https://mrpina-dev.github.io/IDEA
 
 \---
 
@@ -17,7 +17,7 @@ Assignments open directly in your browser. No download required.
 
 To add a new assignment, upload the HTML file to this repository. It will be live at:
 
-`https://mrpina-dev.github.io/boscotech-assignments/filename.html`
+`https://mrpina-dev.github.io/IDEA/filename.html`
 
 Naming convention: `idea113-blade-01.html`, `idea403-senior-progress.html`, etc.
 
