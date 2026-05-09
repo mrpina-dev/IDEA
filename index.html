@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IDEA — Integrated Design, Engineering & Art</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600&display=swap');
+
+:root {
+  --bg0: #020A04;
+  --bg1: #050F07;
+  --bg2: #081209;
+  --green: #00FF41;
+  --gold: #C8FF00;
+  --cyan: #00F0FF;
+  --amber: #FF8C00;
+  --teal: #00AA88;
+  --white: #E8FFE8;
+  --dim: #4A7A52;
+  --ice: #88DDFF;
+  --glow-green: 0 0 10px rgba(0,255,65,0.8), 0 0 28px rgba(0,255,65,0.3);
+  --glow-gold: 0 0 10px rgba(200,255,0,0.8), 0 0 28px rgba(200,255,0,0.3);
+  --glow-cyan: 0 0 10px rgba(0,240,255,0.8), 0 0 28px rgba(0,240,255,0.3);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg0);
+  color: var(--white);
+  font-family: 'Share Tech Mono', monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* CANVAS */
+#bg-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.35;
+}
+
+/* SCROLL PROGRESS */
+#scroll-bar {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  width: 0%;
+  background: var(--green);
+  box-shadow: var(--glow-green);
+  z-index: 1000;
+  transition: width 0.1s linear;
+}
+
+/* HEADER */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(2, 10, 4, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0,255,65,0.15);
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+}
+
+.logo {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 900;
+  font-size: 1.5rem;
+  color: var(--green);
+  text-shadow: var(--glow-green);
+  letter-spacing: 0.15em;
+  text-decoration: none;
+}
+
+.logo span {
+  color: var(--gold);
+  text-shadow: var(--glow-gold);
+}
+
+nav {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+nav a {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--dim);
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color 0.2s, text-shadow 0.2s;
+  cursor: pointer;
+}
+
+nav a:hover {
+  color: var(--green);
+  text-shadow: var(--glow-green);
+}
+
+.header-tag {
+  font-size: 0.6rem;
+  color: var(--dim);
+  letter-spacing: 0.08em;
+  font-family: 'Share Tech Mono', monospace;
+}
+
+/* HERO */
+.hero {
+  position: relative;
+  z-index: 1;
+  padding: 6rem 2rem 4rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.hero-eyebrow {
+  font-size: 0.65rem;
+  letter-spacing: 0.25em;
+  color: var(--teal);
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  font-family: 'Orbitron', sans-serif;
+}
+
+.hero h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 900;
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  line-height: 1.05;
+  color: var(--white);
+  margin-bottom: 0.5rem;
+}
+
+.hero h1 .accent {
+  color: var(--green);
+  text-shadow: var(--glow-green);
+}
+
+.hero-sub {
+  font-size: 0.85rem;
+  color: var(--dim);
+  letter-spacing: 0.05em;
+  margin-top: 1.2rem;
+  max-width: 500px;
+  line-height: 1.7;
+}
+
+.hero-meta {
+  display: flex;
+  gap: 2.5rem;
+  margin-top: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.hero-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.hero-stat .value {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--green);
+  text-shadow: var(--glow-green);
+  animation: breathe 3s ease-in-out infinite;
+}
+
+.hero-stat .label {
+  font-size: 0.6rem;
+  color: var(--dim);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+@keyframes breathe {
+  0%, 100% { text-shadow: 0 0 8px rgba(0,255,65,0.6), 0 0 20px rgba(0,255,65,0.2); }
+  50% { text-shadow: 0 0 16px rgba(0,255,65,1), 0 0 40px rgba(0,255,65,0.5); }
+}
+
+.divider {
+  position: relative;
+  z-index: 1;
+  max-width: 1100px;
+  margin: 0 auto 3rem;
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(0,255,65,0.3), transparent);
+}
+
+.divider-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  color: var(--dim);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* COURSE SECTION */
+.courses {
+  position: relative;
+  z-index: 1;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 2rem 6rem;
+  display: grid;
+  gap: 2rem;
+}
+
+.course-card {
+  background: var(--bg1);
+  border: 1px solid rgba(0,255,65,0.12);
+  border-radius: 4px;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.65s ease, transform 0.65s ease, border-color 0.3s;
+  position: relative;
+}
+
+.course-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.course-card:hover {
+  border-color: rgba(0,255,65,0.35);
+}
+
+.course-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,255,65,0.04) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none;
+}
+
+.course-card:hover::before {
+  opacity: 1;
+}
+
+.course-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.2rem 1.5rem;
+  border-bottom: 1px solid rgba(0,255,65,0.1);
+  background: var(--bg2);
+}
+
+.course-id {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--green);
+  letter-spacing: 0.1em;
+}
+
+.course-meta {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.course-badge {
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.6rem;
+  border-radius: 2px;
+  font-family: 'Orbitron', sans-serif;
+}
+
+.badge-grade {
+  color: var(--gold);
+  border: 1px solid rgba(200,255,0,0.3);
+  background: rgba(200,255,0,0.05);
+}
+
+.badge-block {
+  color: var(--cyan);
+  border: 1px solid rgba(0,240,255,0.3);
+  background: rgba(0,240,255,0.05);
+}
+
+.assignment-list {
+  padding: 1rem 0;
+}
+
+.assignment-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid rgba(0,255,65,0.05);
+  transition: background 0.2s, transform 0.2s, padding-left 0.2s;
+  cursor: default;
+}
+
+.assignment-item:last-child {
+  border-bottom: none;
+}
+
+.assignment-item.linked {
+  cursor: pointer;
+}
+
+.assignment-item.linked:hover {
+  background: rgba(0,255,65,0.04);
+  padding-left: 1.8rem;
+}
+
+.assignment-item a {
+  text-decoration: none;
+  color: inherit;
+  display: contents;
+}
+
+.assignment-name {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.82rem;
+  color: var(--white);
+  letter-spacing: 0.03em;
+}
+
+.assignment-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+.dot-live {
+  background: var(--green);
+  box-shadow: 0 0 6px rgba(0,255,65,0.8);
+  animation: pulse-dot 2.5s ease-in-out infinite;
+}
+
+.dot-soon {
+  background: var(--dim);
+}
+
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 4px rgba(0,255,65,0.6); }
+  50% { box-shadow: 0 0 10px rgba(0,255,65,1); }
+}
+
+.assignment-code {
+  font-size: 0.62rem;
+  color: var(--dim);
+  letter-spacing: 0.08em;
+}
+
+.assignment-status {
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-family: 'Orbitron', sans-serif;
+}
+
+.status-live { color: var(--green); }
+.status-soon { color: var(--dim); }
+
+.empty-state {
+  padding: 2rem 1.5rem;
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--dim);
+  letter-spacing: 0.08em;
+}
+
+/* FOOTER */
+footer {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid rgba(0,255,65,0.1);
+  padding: 2rem;
+  text-align: center;
+}
+
+.footer-logo {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--dim);
+  letter-spacing: 0.2em;
+  margin-bottom: 0.5rem;
+}
+
+.footer-sub {
+  font-size: 0.6rem;
+  color: rgba(74,122,82,0.6);
+  letter-spacing: 0.1em;
+}
+
+/* SCANLINE OVERLAY */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.08) 2px,
+    rgba(0,0,0,0.08) 4px
+  );
+  pointer-events: none;
+  z-index: 999;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .course-card { opacity: 1; transform: none; transition: none; }
+  .hero-stat .value { animation: none; }
+  .dot-live { animation: none; }
+  * { transition-duration: 0.01ms !important; }
+}
+</style>
+</head>
+<body>
+
+<div id="scroll-bar"></div>
+<canvas id="bg-canvas"></canvas>
+
+<header>
+  <a class="logo" href="#">IDEA<span>.</span></a>
+  <nav>
+    <a href="#idea-113">IDEA-113</a>
+    <a href="#idea-208">IDEA-208</a>
+    <a href="#idea-403">IDEA-403</a>
+  </nav>
+  <div class="header-tag">mrpina-dev.github.io/IDEA</div>
+</header>
+
+<section class="hero">
+  <div class="hero-eyebrow">Don Bosco Technical Institute &mdash; Technology Pathway</div>
+  <h1>Integrated Design,<br>Engineering <span class="accent">&</span> Art</h1>
+  <p class="hero-sub">
+    Assignment portal for the IDEA pathway. Click an assignment to open it in your browser, complete your work, export a PDF, and submit to Google Classroom.
+  </p>
+  <div class="hero-meta">
+    <div class="hero-stat">
+      <span class="value">3</span>
+      <span class="label">Active Courses</span>
+    </div>
+    <div class="hero-stat">
+      <span class="value" style="color:var(--gold);text-shadow:var(--glow-gold);animation-delay:0.8s">1.5</span>
+      <span class="label">Hours / Day</span>
+    </div>
+    <div class="hero-stat">
+      <span class="value" style="color:var(--cyan);text-shadow:var(--glow-cyan);animation-delay:1.6s">Mr. Pina</span>
+      <span class="label">Instructor</span>
+    </div>
+  </div>
+</section>
+
+<div class="divider">
+  <div class="divider-line"></div>
+  <div class="divider-label">Courses &amp; Assignments</div>
+  <div class="divider-line"></div>
+</div>
+
+<div class="courses">
+
+  <!-- IDEA-113 -->
+  <div class="course-card" id="idea-113">
+    <div class="course-header">
+      <div class="course-id">IDEA-113</div>
+      <div class="course-meta">
+        <span class="course-badge badge-grade">Freshman</span>
+        <span class="course-badge badge-block">Block 1</span>
+      </div>
+    </div>
+    <div class="assignment-list">
+      <div class="assignment-item linked" onclick="window.open('idea113-blade-01.html','_blank')">
+        <div class="assignment-name">
+          <div class="assignment-dot dot-live"></div>
+          IDEA-Blade — Assignment 01: Concept Package
+        </div>
+        <div style="display:flex;align-items:center;gap:1.5rem">
+          <span class="assignment-code">idea113-blade-01</span>
+          <span class="assignment-status status-live">Live</span>
+        </div>
+      </div>
+      <div class="assignment-item linked" onclick="window.open('idea113-hook-peerreview.html','_blank')">
+        <div class="assignment-name">
+          <div class="assignment-dot dot-live"></div>
+          Hook Project — Peer Review
+        </div>
+        <div style="display:flex;align-items:center;gap:1.5rem">
+          <span class="assignment-code">idea113-hook-peer</span>
+          <span class="assignment-status status-live">Live</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IDEA-208 -->
+  <div class="course-card" id="idea-208">
+    <div class="course-header">
+      <div class="course-id">IDEA-208</div>
+      <div class="course-meta">
+        <span class="course-badge badge-grade">Sophomore</span>
+        <span class="course-badge badge-block">Block 2</span>
+      </div>
+    </div>
+    <div class="assignment-list">
+      <div class="empty-state">No assignments posted yet.</div>
+    </div>
+  </div>
+
+  <!-- IDEA-403 -->
+  <div class="course-card" id="idea-403">
+    <div class="course-header">
+      <div class="course-id">IDEA-403</div>
+      <div class="course-meta">
+        <span class="course-badge badge-grade">Senior</span>
+        <span class="course-badge badge-block">Block 4</span>
+      </div>
+    </div>
+    <div class="assignment-list">
+      <div class="assignment-item linked" onclick="window.open('idea403-senior-progress.html','_blank')">
+        <div class="assignment-name">
+          <div class="assignment-dot dot-live"></div>
+          Senior Project — Progress Check
+        </div>
+        <div style="display:flex;align-items:center;gap:1.5rem">
+          <span class="assignment-code">idea403-progress</span>
+          <span class="assignment-status status-live">Live</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-logo">IDEA &mdash; Integrated Design, Engineering &amp; Art</div>
+  <div class="footer-sub">Don Bosco Technical Institute &bull; Rosemead, CA &bull; mrpina-dev.github.io/IDEA</div>
+</footer>
+
+<script>
+// Scroll progress bar
+const scrollBar = document.getElementById('scroll-bar');
+window.addEventListener('scroll', () => {
+  const total = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = total > 0 ? (window.scrollY / total) * 100 : 0;
+  scrollBar.style.width = pct + '%';
+}, { passive: true });
+
+// Intersection observer - fade in cards
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.08 });
+
+document.querySelectorAll('.course-card').forEach((el, i) => {
+  el.style.transitionDelay = (i * 0.12) + 's';
+  observer.observe(el);
+});
+
+// Canvas particle background
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [];
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+function rand(min, max) { return Math.random() * (max - min) + min; }
+
+class Particle {
+  constructor() { this.reset(); }
+  reset() {
+    this.x = rand(0, W);
+    this.y = rand(0, H);
+    this.size = rand(0.8, 2.2);
+    this.speedX = rand(-0.15, 0.15);
+    this.speedY = rand(-0.25, -0.05);
+    this.opacity = rand(0.2, 0.9);
+    this.fadeSpeed = rand(0.002, 0.006);
+    this.fading = false;
+  }
+  update() {
+    this.x += this.speedX;
+    this.y += this.speedY;
+    if (this.fading) {
+      this.opacity -= this.fadeSpeed * 3;
+    } else {
+      this.opacity += this.fadeSpeed;
+      if (this.opacity >= 0.9) this.fading = true;
+    }
+    if (this.y < -10 || this.opacity <= 0) this.reset();
+  }
+  draw() {
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, this.opacity);
+    ctx.fillStyle = '#00FF41';
+    ctx.shadowBlur = 4;
+    ctx.shadowColor = '#00FF41';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+for (let i = 0; i < 120; i++) particles.push(new Particle());
+
+let rafId;
+function animate() {
+  ctx.clearRect(0, 0, W, H);
+  particles.forEach(p => { p.update(); p.draw(); });
+  rafId = requestAnimationFrame(animate);
+}
+
+// Respect prefers-reduced-motion
+const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+if (!mq.matches) {
+  animate();
+} else {
+  canvas.style.display = 'none';
+  document.querySelectorAll('.course-card').forEach(el => el.classList.add('visible'));
+}
+</script>
+</body>
+</html>
