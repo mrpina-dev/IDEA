@@ -289,7 +289,6 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
 </head>
 <body>
 
-<!-- Animated canvas background -->
 <canvas id="bg-canvas"></canvas>
 
 <div id="scroll-bar"></div>
@@ -323,7 +322,6 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
 
 <div id="main">
 
-<!-- TITLE -->
 <div id="title-block">
   <div class="tbl-top">
     <div class="tbl-main">
@@ -346,7 +344,6 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
   </div>
 </div>
 
-<!-- INSTRUCTIONS -->
 <div id="inst-wrap">
   <div class="inst-head" onclick="togInst()">
     <span class="inst-head-label">How to Use This Document</span>
@@ -367,7 +364,6 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
   </div>
 </div>
 
-<!-- MODULE 01 -->
 <div class="module" id="mod-1">
   <div class="mod-hdr"><div class="mod-num">MODULE 01</div><div class="mod-title">Part Concept</div><div class="mod-pts">10 PTS</div><button class="rub-btn" onclick="togRub('rub-1')">RUBRIC</button><div class="mod-dot" id="dot-1"></div></div>
   <div class="rub-panel" id="rub-1"><table class="rub-table"><tr><th>PTS</th><th>DESCRIPTOR</th></tr><tr><td>10</td><td>Part clearly named and described. Geometry communicated well enough for someone else to visualize.</td></tr><tr><td>7</td><td>Named but description vague.</td></tr><tr><td>4</td><td>Minimal. Form unclear.</td></tr><tr><td>0</td><td>Not submitted.</td></tr></table></div>
@@ -386,7 +382,6 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
   </div>
 </div>
 
-<!-- MODULE 02 -->
 <div class="module" id="mod-2">
   <div class="mod-hdr"><div class="mod-num">MODULE 02</div><div class="mod-title">Hand Sketch</div><div class="mod-pts">10 PTS</div><button class="rub-btn" onclick="togRub('rub-2')">RUBRIC</button><div class="mod-dot" id="dot-2"></div></div>
   <div class="rub-panel" id="rub-2"><table class="rub-table"><tr><th>PTS</th><th>DESCRIPTOR</th></tr><tr><td>10</td><td>Sketch present, hand drawn, shows general form clearly enough as a modeling reference.</td></tr><tr><td>6</td><td>Present and hand drawn but ambiguous or doesn't match Module 01.</td></tr><tr><td>2</td><td>Digitally generated, printed, or traced.</td></tr><tr><td>0</td><td>Not submitted.</td></tr></table></div>
@@ -408,7 +403,6 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
   </div>
 </div>
 
-<!-- MODULE 03 -->
 <div class="module" id="mod-3">
   <div class="mod-hdr"><div class="mod-num">MODULE 03</div><div class="mod-title">Moldability Pre-Check</div><div class="mod-pts">15 PTS</div><button class="rub-btn" onclick="togRub('rub-3')">RUBRIC</button><div class="mod-dot" id="dot-3"></div></div>
   <div class="rub-panel" id="rub-3"><table class="rub-table"><tr><th>PTS</th><th>DESCRIPTOR</th></tr><tr><td>15</td><td>Draft direction clearly described. Min 2 features audited with risk assessed. Parting line described with geometric rationale.</td></tr><tr><td>10</td><td>Most fields complete. One vague.</td></tr><tr><td>5</td><td>Partial. Undercut table nearly empty.</td></tr><tr><td>0</td><td>Not submitted.</td></tr></table></div>
@@ -458,7 +452,6 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
   </div>
 </div>
 
-<!-- MODULE 04 -->
 <div class="module" id="mod-4">
   <div class="mod-hdr"><div class="mod-num">MODULE 04</div><div class="mod-title">SolidWorks Model</div><div class="mod-pts">15 PTS</div><button class="rub-btn" onclick="togRub('rub-4')">RUBRIC</button><div class="mod-dot" id="dot-4"></div></div>
   <div class="rub-panel" id="rub-4"><table class="rub-table"><tr><th>PTS</th><th>DESCRIPTOR</th></tr><tr><td>15</td><td>Model views uploaded. Both draft analysis images present. Size check compliant. Nozzle limit acknowledged. File named. Confirmations checked.</td></tr><tr><td>10</td><td>One draft analysis missing, size non-compliant, or nozzle ack missing.</td></tr><tr><td>5</td><td>Single screenshot or file name missing.</td></tr><tr><td>0</td><td>Not submitted.</td></tr></table></div>
@@ -578,32 +571,25 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
   </div>
 </div>
 
-</div><!-- /main -->
-
-<script>
+</div><script>
 'use strict';
 
 /* ════════════════════════════════════════════════════
-   CANVAS — animated blueprint background
-   Tested in Chrome. Uses DPR scaling, simple primitives.
+   CANVAS — Subtle Technical Blueprint
    ════════════════════════════════════════════════════ */
 (function initBackground() {
   function start() {
     var canvas = document.getElementById('bg-canvas');
-    if (!canvas) { console.warn('canvas not found'); return; }
+    if (!canvas) return;
     var ctx = canvas.getContext('2d');
-    if (!ctx) { console.warn('no 2d context'); return; }
 
     var W = 0, H = 0, DPR = 1;
-    var MAJOR = 120;        // major grid spacing
-    var MINOR = 30;         // minor grid spacing
-    var time = 0;
-
-    var mouseX = -2000, mouseY = -2000;
-    var lastMouseX = mouseX, lastMouseY = mouseY;
-    var trail = [];         // mouse trail particles
-    var ripples = [];       // click ripple expansions
-    var particles = [];     // moving traces along grid lines
+    var MAJOR = 100; // Crosshair spacing
+    var MINOR = 20;  // Standard grid spacing
+    
+    // Smooth mouse tracking variables
+    var mouseX = -1000, mouseY = -1000;
+    var targetX = -1000, targetY = -1000;
 
     function resize() {
       DPR = window.devicePixelRatio || 1;
@@ -618,230 +604,55 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
     window.addEventListener('resize', resize);
     resize();
 
-    /* ── PARTICLE SPAWNING ── */
-    function spawnParticle() {
-      var horizontal = Math.random() < 0.5;
-      var dir = Math.random() < 0.5 ? 1 : -1;
-      var len = 70 + Math.random() * 60;
-      var sp = 1.2 + Math.random() * 1.8;
-      var gold = Math.random() < 0.12;
-      if (horizontal) {
-        var gy = Math.floor(Math.random() * (H / MAJOR)) * MAJOR;
-        particles.push({
-          type: 'h', gy: gy,
-          x: dir === 1 ? -len : W + len,
-          dir: dir, sp: sp, len: len,
-          alpha: 0.6 + Math.random() * 0.35,
-          gold: gold
-        });
-      } else {
-        var gx = Math.floor(Math.random() * (W / MAJOR)) * MAJOR;
-        particles.push({
-          type: 'v', gx: gx,
-          y: dir === 1 ? -len : H + len,
-          dir: dir, sp: sp, len: len,
-          alpha: 0.6 + Math.random() * 0.35,
-          gold: gold
-        });
-      }
-    }
-    // Seed initial
-    for (var i = 0; i < 18; i++) spawnParticle();
-
-    /* ── MOUSE ── */
+    // Update target on mouse move
     window.addEventListener('mousemove', function(e) {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-      // add trail point
-      var dx = mouseX - lastMouseX;
-      var dy = mouseY - lastMouseY;
-      var dist = Math.sqrt(dx*dx + dy*dy);
-      if (dist > 4) {
-        trail.push({ x: mouseX, y: mouseY, life: 1, born: time });
-        if (trail.length > 35) trail.shift();
-        lastMouseX = mouseX;
-        lastMouseY = mouseY;
-      }
+      targetX = e.clientX;
+      targetY = e.clientY;
     });
 
-    window.addEventListener('click', function(e) {
-      // ignore clicks on UI elements that have their own handling
-      var t = e.target;
-      if (t.closest && (t.closest('button') || t.closest('input') || t.closest('a') || t.closest('select') || t.closest('textarea') || t.closest('label') || t.closest('.ck') || t.closest('.img-card'))) return;
-      ripples.push({ x: e.clientX, y: e.clientY, r: 0, alpha: 1, gold: false });
-      ripples.push({ x: e.clientX, y: e.clientY, r: 0, alpha: 0.6, gold: true });
-      // fire 4 fast particles from nearest intersection
-      var gx = Math.round(e.clientX / MAJOR) * MAJOR;
-      var gy = Math.round(e.clientY / MAJOR) * MAJOR;
-      [['h',1],['h',-1],['v',1],['v',-1]].forEach(function(d) {
-        if (d[0] === 'h') {
-          particles.push({type:'h',gy:gy,x:gx,dir:d[1],sp:5,len:100,alpha:1,gold:false});
-        } else {
-          particles.push({type:'v',gx:gx,y:gy,dir:d[1],sp:5,len:100,alpha:1,gold:false});
-        }
-      });
-    });
-
-    /* ── FRAME ── */
     function frame() {
-      time++;
+      // Ease the actual mouse position toward the target for a smoother light effect
+      mouseX += (targetX - mouseX) * 0.15;
+      mouseY += (targetY - mouseY) * 0.15;
+
       ctx.clearRect(0, 0, W, H);
 
-      /* MINOR GRID */
-      ctx.lineWidth = 0.5;
-      ctx.strokeStyle = 'rgba(0,255,65,0.05)';
-      ctx.beginPath();
-      for (var x = 0; x <= W; x += MINOR) { ctx.moveTo(x + 0.5, 0); ctx.lineTo(x + 0.5, H); }
-      for (var y = 0; y <= H; y += MINOR) { ctx.moveTo(0, y + 0.5); ctx.lineTo(W, y + 0.5); }
-      ctx.stroke();
-
-      /* MAJOR GRID */
+      // 1. Draw the faint, static background grid
       ctx.lineWidth = 1;
-      ctx.strokeStyle = 'rgba(0,255,65,0.14)';
+      ctx.strokeStyle = 'rgba(0, 255, 65, 0.04)';
       ctx.beginPath();
-      for (var x2 = 0; x2 <= W; x2 += MAJOR) { ctx.moveTo(x2 + 0.5, 0); ctx.lineTo(x2 + 0.5, H); }
-      for (var y2 = 0; y2 <= H; y2 += MAJOR) { ctx.moveTo(0, y2 + 0.5); ctx.lineTo(W, y2 + 0.5); }
+      for (var x = 0; x <= W; x += MINOR) { ctx.moveTo(x, 0); ctx.lineTo(x, H); }
+      for (var y = 0; y <= H; y += MINOR) { ctx.moveTo(0, y); ctx.lineTo(W, y); }
       ctx.stroke();
 
-      /* PULSING INTERSECTION DOTS — react to mouse proximity */
-      var basePulse = 0.5 + 0.5 * Math.sin(time * 0.025);
-      for (var ix = MAJOR; ix < W; ix += MAJOR) {
-        for (var iy = MAJOR; iy < H; iy += MAJOR) {
-          var dx = ix - mouseX;
-          var dy = iy - mouseY;
-          var d = Math.sqrt(dx * dx + dy * dy);
-          var intensity = 0.2 + basePulse * 0.2;
-          if (d < 220) intensity += (1 - d / 220) * 0.75;
-          intensity = Math.min(intensity, 1);
-          var sz = 1.5 + intensity * 3.5;
-          ctx.fillStyle = 'rgba(0,255,65,' + intensity.toFixed(3) + ')';
-          ctx.beginPath();
-          ctx.arc(ix, iy, sz, 0, Math.PI * 2);
-          ctx.fill();
-          if (d < 150) {
-            // bloom around dot
-            var bg = ctx.createRadialGradient(ix, iy, 0, ix, iy, sz * 4);
-            bg.addColorStop(0, 'rgba(0,255,65,' + (intensity * 0.4).toFixed(3) + ')');
-            bg.addColorStop(1, 'rgba(0,255,65,0)');
-            ctx.fillStyle = bg;
-            ctx.beginPath();
-            ctx.arc(ix, iy, sz * 4, 0, Math.PI * 2);
-            ctx.fill();
-          }
+      // 2. Setup the "Flashlight" gradient effect around the mouse
+      ctx.save();
+      var glow = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 350);
+      glow.addColorStop(0, 'rgba(0, 255, 65, 0.35)'); // Bright at center
+      glow.addColorStop(1, 'rgba(0, 255, 65, 0)');    // Fades to nothing
+      
+      // Use the gradient as our "ink" for the glowing lines
+      ctx.strokeStyle = glow;
+      ctx.globalCompositeOperation = 'lighter'; // Makes overlapping lines pop
+
+      // 3. Draw the highlighted grid lines
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (var hx = 0; hx <= W; hx += MINOR) { ctx.moveTo(hx, 0); ctx.lineTo(hx, H); }
+      for (var hy = 0; hy <= H; hy += MINOR) { ctx.moveTo(0, hy); ctx.lineTo(W, hy); }
+      ctx.stroke();
+
+      // 4. Draw technical drafting crosshairs at major intersections
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      for (var ix = 0; ix <= W; ix += MAJOR) {
+        for (var iy = 0; iy <= H; iy += MAJOR) {
+          ctx.moveTo(ix - 6, iy); ctx.lineTo(ix + 6, iy);
+          ctx.moveTo(ix, iy - 6); ctx.lineTo(ix, iy + 6);
         }
       }
-
-      /* MOUSE — illuminate nearest intersection */
-      var nx = Math.round(mouseX / MAJOR) * MAJOR;
-      var ny = Math.round(mouseY / MAJOR) * MAJOR;
-      var md = Math.sqrt((mouseX - nx) * (mouseX - nx) + (mouseY - ny) * (mouseY - ny));
-      if (md < MAJOR * 0.65) {
-        var f = 1 - md / (MAJOR * 0.65);
-        // illuminate the two grid lines through this intersection
-        var lg = ctx.createLinearGradient(nx - 250, 0, nx + 250, 0);
-        lg.addColorStop(0, 'rgba(0,255,65,0)');
-        lg.addColorStop(0.5, 'rgba(0,255,65,' + (0.45 * f).toFixed(3) + ')');
-        lg.addColorStop(1, 'rgba(0,255,65,0)');
-        ctx.fillStyle = lg;
-        ctx.fillRect(nx - 250, ny - 1, 500, 2);
-
-        var lg2 = ctx.createLinearGradient(0, ny - 250, 0, ny + 250);
-        lg2.addColorStop(0, 'rgba(0,255,65,0)');
-        lg2.addColorStop(0.5, 'rgba(0,255,65,' + (0.45 * f).toFixed(3) + ')');
-        lg2.addColorStop(1, 'rgba(0,255,65,0)');
-        ctx.fillStyle = lg2;
-        ctx.fillRect(nx - 1, ny - 250, 2, 500);
-
-        // big halo
-        var rg = ctx.createRadialGradient(nx, ny, 0, nx, ny, 80);
-        rg.addColorStop(0, 'rgba(0,255,65,' + (0.4 * f).toFixed(3) + ')');
-        rg.addColorStop(1, 'rgba(0,255,65,0)');
-        ctx.fillStyle = rg;
-        ctx.beginPath();
-        ctx.arc(nx, ny, 80, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      /* MOUSE TRAIL */
-      for (var t = 0; t < trail.length; t++) {
-        var tp = trail[t];
-        var age = (time - tp.born) / 40;
-        tp.life = Math.max(0, 1 - age);
-        if (tp.life > 0) {
-          var tr = 12 * tp.life;
-          var tg = ctx.createRadialGradient(tp.x, tp.y, 0, tp.x, tp.y, tr);
-          tg.addColorStop(0, 'rgba(0,255,65,' + (0.35 * tp.life).toFixed(3) + ')');
-          tg.addColorStop(0.5, 'rgba(0,255,65,' + (0.15 * tp.life).toFixed(3) + ')');
-          tg.addColorStop(1, 'rgba(0,255,65,0)');
-          ctx.fillStyle = tg;
-          ctx.beginPath();
-          ctx.arc(tp.x, tp.y, tr, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
-      trail = trail.filter(function(p) { return p.life > 0; });
-
-      /* PARTICLES (moving traces along grid lines) */
-      for (var pi = particles.length - 1; pi >= 0; pi--) {
-        var p = particles[pi];
-        var x1, y1, x2, y2;
-        if (p.type === 'h') {
-          p.x += p.sp * p.dir;
-          x1 = p.x - p.dir * p.len; y1 = p.gy;
-          x2 = p.x;                 y2 = p.gy;
-          if ((p.dir > 0 && p.x > W + p.len) || (p.dir < 0 && p.x < -p.len)) { particles.splice(pi,1); continue; }
-        } else {
-          p.y += p.sp * p.dir;
-          x1 = p.gx; y1 = p.y - p.dir * p.len;
-          x2 = p.gx; y2 = p.y;
-          if ((p.dir > 0 && p.y > H + p.len) || (p.dir < 0 && p.y < -p.len)) { particles.splice(pi,1); continue; }
-        }
-        var col = p.gold ? '200,255,0' : '0,255,65';
-        var grad = ctx.createLinearGradient(x1, y1, x2, y2);
-        grad.addColorStop(0,   'rgba(' + col + ',0)');
-        grad.addColorStop(0.7, 'rgba(' + col + ',' + (p.alpha * 0.5).toFixed(3) + ')');
-        grad.addColorStop(1,   'rgba(' + col + ',' + p.alpha.toFixed(3) + ')');
-        ctx.shadowBlur = 14;
-        ctx.shadowColor = 'rgba(' + col + ',0.9)';
-        ctx.strokeStyle = grad;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-        // head dot
-        ctx.fillStyle = 'rgba(' + col + ',1)';
-        ctx.beginPath();
-        ctx.arc(x2, y2, 2.5, 0, Math.PI * 2);
-        ctx.fill();
-        // burst at intersection
-        if (p.type === 'h') {
-          var inX = Math.round(p.x / MAJOR) * MAJOR;
-          if (Math.abs(p.x - inX) < p.sp + 1) {
-            ripples.push({ x: inX, y: p.gy, r: 0, alpha: p.alpha * 0.6, gold: p.gold });
-          }
-        } else {
-          var inY = Math.round(p.y / MAJOR) * MAJOR;
-          if (Math.abs(p.y - inY) < p.sp + 1) {
-            ripples.push({ x: p.gx, y: inY, r: 0, alpha: p.alpha * 0.6, gold: p.gold });
-          }
-        }
-      }
-      while (particles.length < 18) spawnParticle();
-
-      /* RIPPLES */
-      for (var ri = ripples.length - 1; ri >= 0; ri--) {
-        var r = ripples[ri];
-        r.r += 2.5;
-        r.alpha *= 0.93;
-        if (r.alpha < 0.02 || r.r > 200) { ripples.splice(ri, 1); continue; }
-        var rc = r.gold ? '200,255,0' : '0,255,65';
-        ctx.strokeStyle = 'rgba(' + rc + ',' + r.alpha.toFixed(3) + ')';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(r.x, r.y, r.r, 0, Math.PI * 2);
-        ctx.stroke();
-      }
+      ctx.stroke();
+      ctx.restore();
 
       requestAnimationFrame(frame);
     }
