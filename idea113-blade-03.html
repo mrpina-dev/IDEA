@@ -82,10 +82,25 @@ input[type="text"],input[type="number"],input[type="password"],textarea{cursor:u
 .step-text em{color:var(--green);font-style:normal}
 .prework-callout{border:1px solid rgba(255,140,0,.25);background:rgba(255,140,0,.04);padding:16px 20px;margin-bottom:16px}
 .prework-callout-title{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:3px;color:var(--amber);text-transform:uppercase;margin-bottom:10px}
-.prework-items{display:flex;flex-direction:column;gap:7px}
-.prework-item{display:flex;align-items:flex-start;gap:10px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--dim);line-height:1.6}
+.prework-items{display:flex;flex-direction:column;gap:6px}
+.prework-item{display:flex;align-items:flex-start;gap:10px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--dim);line-height:1.5;border-left:2px solid rgba(255,140,0,.3);padding-left:10px;margin-left:2px}
 .prework-item::before{content:'▶';color:var(--amber);flex-shrink:0;margin-top:1px}
 .prework-item em{color:var(--white);font-style:normal}
+/* override callout uses its own list style — suppress inherited prework-item triangle */
+.sw-override-inner .prework-item{border-left:none;padding-left:0;margin-left:0}
+.sw-override-inner .prework-item::before{content:none}
+/* override callout steps */
+.sw-oc-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}
+.sw-oc-step{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--dim);line-height:1.55;display:flex;align-items:flex-start;gap:8px}
+.sw-oc-step-num{font-family:'Orbitron',sans-serif;font-size:9px;color:var(--amber);background:rgba(255,140,0,.1);border:1px solid rgba(255,140,0,.25);padding:2px 6px;flex-shrink:0;margin-top:1px;letter-spacing:1px}
+.sw-oc-step em{color:var(--white);font-style:normal}
+.sw-oc-ctx-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.sw-oc-ctx-item{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--dim);line-height:1.5;display:flex;align-items:flex-start;gap:8px;padding-left:4px}
+.sw-oc-ctx-item::before{content:'–';color:var(--amber);flex-shrink:0}
+.sw-oc-ctx-item em{color:var(--white);font-style:normal}
+.sw-oc-ref-card{border:1px solid rgba(255,140,0,.3);background:rgba(255,140,0,.04);padding:7px 12px;margin-top:4px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gold);letter-spacing:.5px;line-height:1.7}
+.sw-oc-note{border-top:1px solid rgba(255,140,0,.2);padding-top:8px;margin-top:4px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--dim);line-height:1.55}
+.sw-oc-note em{color:var(--white);font-style:normal}
 .rulebook-block{border:2px solid var(--gold);background:rgba(200,255,0,.03);margin-bottom:20px;padding:20px 24px;position:relative}
 .rulebook-block::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
 .rulebook-eyebrow{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:10px;display:block}
@@ -415,6 +430,27 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
 .row-thumb{box-shadow:0 0 6px #0f0,0 0 2px rgba(0,255,65,.6)!important;border-color:rgba(0,255,65,.5)!important}
 @media print{.image-item::after,.image-item::before,.image-item .img-corner,.row-thumb{box-shadow:none!important;background:none!important;border:none!important}}
 
+/* === HAS-IMAGE HIDE INSTRUCTIONS === */
+.upload-zone-wrap.has-image .ss-anim-strip,
+.upload-zone-wrap.has-image .paste-hint{display:none!important}
+/* === EXPAND TABLE === */
+.table-container.expanded{max-width:100vw;width:100vw;margin-left:calc(-50vw + 50%);border-radius:0}
+/* === NOMINAL TOOLTIP === */
+.nom-label-wrap{position:relative;display:inline-flex;align-items:center;gap:4px}
+.nom-info-icon{font-size:11px;color:var(--cyan);cursor:help;opacity:.7;flex-shrink:0;position:relative}
+.nom-info-icon:hover .nom-tooltip,.nom-info-icon:focus .nom-tooltip{opacity:1;pointer-events:auto;visibility:visible}
+.nom-tooltip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:rgba(2,10,4,.96);border:1px solid rgba(0,240,255,.35);color:var(--white);font-family:'Share Tech Mono',monospace;font-size:10px;line-height:1.55;padding:9px 12px;width:280px;z-index:500;opacity:0;pointer-events:none;visibility:hidden;transition:opacity .15s;box-shadow:0 0 12px rgba(0,240,255,.15)}
+.nom-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:rgba(0,240,255,.35)}
+/* === FIT ENTRY NAME === */
+.fit-entry-name{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--gold);background:transparent;border:none;border-bottom:1px solid rgba(200,255,0,.2);padding:2px 4px;min-width:80px;max-width:200px;outline:none;cursor:pointer}
+.fit-entry-name:focus{border-bottom-color:var(--gold);background:rgba(200,255,0,.04);cursor:text}
+/* === PRINTED-TO-METAL NOTE === */
+.fc-metal-note{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--amber);font-style:italic;line-height:1.5;border-top:1px dashed rgba(255,140,0,.2);margin-top:8px;padding-top:6px;display:none}
+.fc-metal-note.active{display:block}
+.fc-general-note{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--teal);font-style:italic;line-height:1.5;border-top:1px dashed rgba(0,170,136,.2);margin-top:8px;padding-top:6px;display:none}
+.fc-general-note.active{display:block}
+/* === AUTO-SAVE OFF state === */
+#tb-save-status.autosave-off{color:var(--amber);border-color:rgba(255,140,0,.35)}
 /* canvas uplink */
 #mx-toggle-btn{position:fixed;bottom:20px;right:20px;z-index:1001;background:rgba(2,10,4,.85);border:1px solid var(--green);color:var(--green);font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:2px;padding:8px 16px;cursor:pointer;text-transform:uppercase;box-shadow:0 0 10px rgba(0,255,65,.1);transition:all .3s}
 #mx-toggle-btn:hover{background:rgba(0,255,65,.1);box-shadow:0 0 15px rgba(0,255,65,.4)}
@@ -486,6 +522,8 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
   <button class="tb-btn" onclick="runExportPreflight()">[ Export HTML ]</button>
   <button class="tb-btn" style="border-color:rgba(0,240,255,.4);color:var(--cyan);background:rgba(0,240,255,.05);" onclick="showRestoreDialog()">[ Restore Defaults ]</button>
   <button class="tb-btn danger" onclick="showClearDialog()">[ Clear All ]</button>
+  <button class="tb-btn" id="autosave-toggle-btn" onclick="toggleAutoSave()">[ AUTO-SAVE ON ]</button>
+  <button class="tb-btn" id="expand-table-btn" onclick="toggleExpandTable()">[ EXPAND TABLE ]</button>
   <span id="tb-score">0 / 80 pts</span>
   <span id="tb-save-status">AUTO-SAVE ON</span>
 </div>
@@ -685,19 +723,26 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
       </div>
       <div class="sw-override-body">
         <div class="sw-override-inner">
-          <div class="prework-items" style="margin-top:6px;">
-            <div class="prework-item" style="flex-direction:column;align-items:flex-start;gap:4px;"><em style="color:var(--amber);font-size:10px;letter-spacing:1px;text-transform:uppercase;">Context</em><span>SolidWorks calculates part mass from geometry and assigned material density. Two situations require overriding this value:</span></div>
-            <div class="prework-item" style="padding-left:16px;">You have <em>physically weighed</em> a completed or prototype part using a scale &mdash; this is the most accurate value.</div>
-            <div class="prework-item" style="padding-left:16px;">You have <em>sliced a 3D printed part in Bambu Studio</em> which shows the actual filament mass including infill percentage, walls, and supports &mdash; this is more accurate than SolidWorks geometry mass for printed parts.</div>
-            <div class="prework-item" style="flex-direction:column;align-items:flex-start;gap:4px;margin-top:6px;"><em style="color:var(--amber);font-size:10px;letter-spacing:1px;text-transform:uppercase;">Steps using the official SolidWorks procedure</em></div>
-            <div class="prework-item"><em>Step 1</em> &mdash; Open your part file in SolidWorks.</div>
-            <div class="prework-item"><em>Step 2</em> &mdash; Go to <em>Tools &rarr; Evaluate &rarr; Mass Properties</em>.</div>
-            <div class="prework-item"><em>Step 3</em> &mdash; In the Mass Properties dialog, click <em>Override Mass Properties</em>.</div>
-            <div class="prework-item"><em>Step 4</em> &mdash; Check the <em>Override mass</em> checkbox.</div>
-            <div class="prework-item"><em>Step 5</em> &mdash; Enter your measured or sliced mass value. SolidWorks uses grams internally &mdash; convert if needed: <em>1 lb = 453.6 g</em>, <em>1 oz = 28.35 g</em>.</div>
-            <div class="prework-item"><em>Step 6</em> &mdash; Click OK then Close. The overridden value will show in the Mass Properties dialog with an asterisk.</div>
-            <div class="prework-item"><em>Step 7</em> &mdash; Enter this value in the mass column of the component table.</div>
-            <div class="prework-item" style="flex-direction:column;align-items:flex-start;gap:4px;margin-top:6px;border-top:1px solid rgba(255,140,0,.2);padding-top:8px;"><em style="color:var(--amber);">Note:</em><span>Override applies per configuration. If you have multiple configurations, select <em>All Configurations</em> unless you have a reason to override only the active one.</span></div>
+          <div style="margin-top:6px;">
+            <div style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--amber);text-transform:uppercase;margin-bottom:6px;">Context</div>
+            <ul class="sw-oc-ctx-list" style="margin-bottom:10px;">
+              <li class="sw-oc-ctx-item">You have <em>physically weighed</em> a completed or prototype part using a scale — this is the most accurate value.</li>
+              <li class="sw-oc-ctx-item">You have <em>sliced a 3D printed part in Bambu Studio</em> which shows the actual filament mass including infill, walls, and supports — more accurate than SolidWorks geometry mass for printed parts.</li>
+            </ul>
+            <div style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--amber);text-transform:uppercase;margin-bottom:6px;">Steps — Official SolidWorks Procedure</div>
+            <ol class="sw-oc-steps">
+              <li class="sw-oc-step"><span class="sw-oc-step-num">01</span><span>Open your part file in SolidWorks.</span></li>
+              <li class="sw-oc-step"><span class="sw-oc-step-num">02</span><span>Go to <em>Tools &rarr; Evaluate &rarr; Mass Properties</em>.</span></li>
+              <li class="sw-oc-step"><span class="sw-oc-step-num">03</span><span>In the Mass Properties dialog, click <em>Override Mass Properties</em>.</span></li>
+              <li class="sw-oc-step"><span class="sw-oc-step-num">04</span><span>Check the <em>Override mass</em> checkbox.</span></li>
+              <li class="sw-oc-step"><span class="sw-oc-step-num">05</span><span>Enter your measured or sliced mass value. SolidWorks accepts grams internally — convert if needed:</span></li>
+            </ol>
+            <div class="sw-oc-ref-card">1 lb = 453.6 g &nbsp;&nbsp;|&nbsp;&nbsp; 1 oz = 28.35 g</div>
+            <ol class="sw-oc-steps" start="6" style="margin-top:5px;">
+              <li class="sw-oc-step"><span class="sw-oc-step-num">06</span><span>Click OK then Close. The overridden value will show in the Mass Properties dialog with an asterisk.</span></li>
+              <li class="sw-oc-step"><span class="sw-oc-step-num">07</span><span>Enter this value in the mass column of the component table.</span></li>
+            </ol>
+            <div class="sw-oc-note" style="margin-top:10px;"><em>Note:</em> Override applies per configuration. If you have multiple configurations, select <em>All Configurations</em> unless you have a reason to override only the active one.</div>
           </div>
         </div>
       </div>
@@ -891,24 +936,6 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
     <!-- ZONE C: ASSEMBLY GEOMETRY -->
     <div class="sub-label" style="margin-top:16px;">Zone C &mdash; Assembly Geometry</div>
 
-    <!-- HEX BORE -->
-    <div class="tol-card">
-      <div class="tol-card-header">
-        <span class="tol-card-title">C1 &mdash; Hex Shaft Bore</span>
-        <div class="tol-card-dot" id="tdot-hexbore"></div>
-      </div>
-      <div class="tol-card-rule">
-        The hex shaft is <strong>0.500 in / 12.700 mm</strong> nominal (1/2" aluminum hex). Components that the shaft passes through must have a bore that allows assembly without forcing but does not allow wobble. Clearance fit target bore: <strong>0.516 in / 13.106 mm</strong>. Acceptable range: 0.508&ndash;0.524 in / 12.90&ndash;13.31 mm.
-      </div>
-      <div class="tol-target">Target: 0.516" / 13.106mm &nbsp;|&nbsp; Range: 0.508"&ndash;0.524" / 12.90&ndash;13.31mm</div>
-      <div class="tol-inputs" style="grid-template-columns:1fr 1fr 1fr 1fr;">
-        <div class="field-row"><label>Modeled Bore (in)</label><input type="number" data-tol="hexbore-in" step="0.001" min="0.4" max="0.7" placeholder="0.516" oninput="tolSyncInToMm('hexbore');checkTol('hexbore',0.508,0.524);saveToStorage();updateScoreAndDots()"></div>
-        <div class="field-row"><label>Modeled Bore (mm)</label><input type="number" data-tol="hexbore-mm" step="0.01" min="10" max="18" placeholder="13.106" oninput="tolSyncMmToIn('hexbore');checkTol('hexbore',0.508,0.524);saveToStorage();updateScoreAndDots()"></div>
-        <div class="field-row" style="justify-content:flex-end;padding-top:18px;"><div class="tol-status" id="tstat-hexbore" style="color:var(--dim)">Awaiting input</div></div>
-        <div class="field-row" style="justify-content:flex-end;padding-top:18px;"></div>
-      </div>
-    </div>
-
     <!-- SHAFT ENGAGEMENT -->
     <div class="tol-card">
       <div class="tol-card-header">
@@ -1081,7 +1108,7 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
     <div class="sub-label" style="margin-top:20px;">Required Assembly Screenshots</div>
     <p class="prompt" style="margin-bottom:12px;">All four screenshots are required. Take them with your full assembly visible, correct materials assigned, and no suppressed features.</p>
     <div class="grid-2" style="gap:14px;">
-      <div>
+      <div class="upload-zone-wrap" id="uzw-ss-mass">
         <label class="field-row" style="margin-bottom:6px;"><span style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;">01 &mdash; SolidWorks Mass Properties Dialog</span></label>
         <div class="ss-anim-strip no-print" id="ssanim-mass">
           <span class="ss-anim-label">How to screenshot on Windows</span>
@@ -1099,7 +1126,7 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
         <div id="ss-mass" class="image-grid"></div>
         <div class="img-count" id="ss-mass-count" style="color:var(--amber)">0 images (required)</div>
       </div>
-      <div>
+      <div class="upload-zone-wrap" id="uzw-ss-iso">
         <label class="field-row" style="margin-bottom:6px;"><span style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;">02 &mdash; Assembly Isometric View</span></label>
         <div class="ss-anim-strip no-print">
           <span class="ss-anim-label">How to screenshot on Windows</span>
@@ -1117,7 +1144,7 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
         <div id="ss-iso" class="image-grid"></div>
         <div class="img-count" id="ss-iso-count" style="color:var(--amber)">0 images (required)</div>
       </div>
-      <div>
+      <div class="upload-zone-wrap" id="uzw-ss-top">
         <label class="field-row" style="margin-bottom:6px;"><span style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;">03 &mdash; Assembly Top View</span></label>
         <div class="ss-anim-strip no-print">
           <span class="ss-anim-label">How to screenshot on Windows</span>
@@ -1135,7 +1162,7 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
         <div id="ss-top" class="image-grid"></div>
         <div class="img-count" id="ss-top-count" style="color:var(--amber)">0 images (required)</div>
       </div>
-      <div>
+      <div class="upload-zone-wrap" id="uzw-ss-side">
         <label class="field-row" style="margin-bottom:6px;"><span style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;">04 &mdash; Assembly Cross-Section</span></label>
         <div class="ss-anim-strip no-print">
           <span class="ss-anim-label">How to screenshot on Windows</span>
@@ -1402,6 +1429,7 @@ function toggleMassMode(){
   const btn = document.getElementById('mass-mode-btn');
   if(btn) btn.textContent = massMode==='g' ? '[ g ]' : '[ lbs ]';
   updateMassCells();
+  updateStats();
 }
 function updateMassCells(){
   document.querySelectorAll('#comp-body tr').forEach(tr=>{
@@ -1887,6 +1915,9 @@ function renderImgs(zone){
     ['tl','tr','bl','br'].forEach(pos=>{const br=document.createElement('span');br.className='img-corner '+pos;item.appendChild(br);});
     item.appendChild(imgEl);item.appendChild(cap);item.appendChild(rm);c.appendChild(item);
   });
+  // Toggle has-image on wrapper so instructions auto-hide
+  const wrap=document.getElementById('uzw-'+zone);
+  if(wrap)wrap.classList.toggle('has-image',(imgStore[zone]||[]).length>0);
 }
 function updateImgCount(zone,min){
   const count=(imgStore[zone]||[]).length;const el=document.getElementById(zone+'-count');if(!el)return;
@@ -1918,7 +1949,7 @@ function moduleComplete(n){
       return allFilled&&totalG<=MASS_LIMIT_G&&totalG>0&&procs>=3&&fast>=3&&hwOk&&boltOk;
     }
     case 3:{
-      const hexOk=getTolIn('hexbore')!==null&&getTolIn('hexbore')>=0.508&&getTolIn('hexbore')<=0.524;
+      const hexOk=hexBoreFitCalcOk();
       const pfOk=document.getElementById('na-pressfit')?.checked||sentOk('pressfit-detail',1);
       const snugOk=document.getElementById('na-snug')?.checked||sentOk('snug-detail',1);
       const wallOk=document.getElementById('na-wall')?.checked||(getTolIn('wall')!==null&&getTolIn('wall')>=0.047);
@@ -1972,7 +2003,7 @@ function updateScoreAndDots(){
     if(document.querySelectorAll('#bolt-body tr').length>0)score+=6;
   }
   // M3 (20)
-  const hexV=getTolIn('hexbore');if(hexV!==null&&hexV>=0.508&&hexV<=0.524)score+=4;else if(hexV!==null)score+=2;
+  if(hexBoreFitCalcOk())score+=4;
   const pfNA=document.getElementById('na-pressfit')?.checked;if(pfNA)score+=3;else if(sentOk('pressfit-detail',1))score+=3;
   const snugNA=document.getElementById('na-snug')?.checked;if(snugNA||sentOk('snug-detail',1))score+=0; // snug fit is part of combined wall card pts
   const wallNA=document.getElementById('na-wall')?.checked;if(wallNA)score+=2;else if(getTolIn('wall')!==null&&getTolIn('wall')>=0.047)score+=2;
@@ -2005,12 +2036,41 @@ function updateScoreAndDots(){
 
 /* -------- SAVE STATUS -------- */
 let saveTimer=null;
-function flashSave(){const el=document.getElementById('tb-save-status');el.textContent='SAVED';el.classList.add('flash');el.classList.remove('storage-full');clearTimeout(saveTimer);saveTimer=setTimeout(()=>{el.textContent='AUTO-SAVE ON';el.classList.remove('flash');},2200);}
+let autoSaveEnabled=true;
+let autoSaveInterval=null;
+function flashSave(){
+  const el=document.getElementById('tb-save-status');
+  if(!autoSaveEnabled){el.textContent='SAVED';el.classList.add('flash');clearTimeout(saveTimer);saveTimer=setTimeout(()=>{el.textContent='AUTO-SAVE OFF';el.classList.remove('flash');el.classList.add('autosave-off');},2200);return;}
+  el.textContent='SAVED';el.classList.add('flash');el.classList.remove('storage-full','autosave-off');
+  clearTimeout(saveTimer);saveTimer=setTimeout(()=>{el.textContent='AUTO-SAVE ON';el.classList.remove('flash');},2200);
+}
 function showStorageFull(){const el=document.getElementById('tb-save-status');el.textContent='STORAGE FULL';el.classList.add('storage-full');el.classList.remove('flash');}
+function toggleAutoSave(){
+  autoSaveEnabled=!autoSaveEnabled;
+  const btn=document.getElementById('autosave-toggle-btn');
+  const status=document.getElementById('tb-save-status');
+  if(autoSaveEnabled){
+    btn.textContent='[ AUTO-SAVE ON ]';
+    status.textContent='AUTO-SAVE ON';status.classList.remove('autosave-off');
+    if(!autoSaveInterval)autoSaveInterval=setInterval(saveToStorage,30000);
+  } else {
+    btn.textContent='[ AUTO-SAVE OFF ]';
+    status.textContent='AUTO-SAVE OFF';status.classList.add('autosave-off');
+    clearInterval(autoSaveInterval);autoSaveInterval=null;
+  }
+  try{localStorage.setItem('m3_autosave',autoSaveEnabled?'1':'0');}catch(e){}
+}
+function toggleExpandTable(){
+  const tc=document.getElementById('comp-table')?.closest('.table-container');
+  const btn=document.getElementById('expand-table-btn');
+  if(tc)tc.classList.toggle('expanded');
+  const expanded=tc?.classList.contains('expanded');
+  if(btn)btn.textContent=expanded?'[ COLLAPSE TABLE ]':'[ EXPAND TABLE ]';
+}
 
 /* -------- SAVE & LOAD -------- */
 function getTolData(){
-  const keys=['hexbore-in','hexbore-mm','wall-in','wall-mm','feat-in','feat-mm','metal-in','metal-mm','metal-type','hexext-in','hexext-mm','shaft-plan-in','shaft-plan-mm','shaft-actual-in','shaft-actual-mm'];
+  const keys=['wall-in','wall-mm','feat-in','feat-mm','metal-in','metal-mm','metal-type','hexext-in','hexext-mm','shaft-plan-in','shaft-plan-mm','shaft-actual-in','shaft-actual-mm'];
   const d={};keys.forEach(k=>{const el=document.querySelector(`[data-tol="${k}"]`);if(el)d[k]=el.type==='checkbox'?el.checked:el.value;});
   const naKeys=['pressfit-na','snug-na','wall-na','metal-na','shaft-thruall'];
   naKeys.forEach(k=>{const el=document.querySelector(`[data-tol="${k}"]`);if(el)d[k]=el.checked;});
@@ -2057,7 +2117,7 @@ function loadData(data){
   if(data._approved)setApproved(true,data._approvalTimestamp);
   updateCollabState();updateContinuityState();updateDevState();checkInterference();updateStats();
   // Re-run all tolerance/val checks
-  checkTol('hexbore',0.508,0.524);checkTolText('snug');checkTol('wall',0.047,null);checkTol('feat',0.047,null);checkTolMetal();checkShaftMatch();checkTol('hexext',0.45,0.55);
+  checkTolText('snug');checkTol('wall',0.047,null);checkTol('feat',0.047,null);checkTolMetal();checkShaftMatch();checkTol('hexext',0.45,0.55);
   checkVal('asm-mass',0,907);checkVal('asm-height',2.90,3.10);checkVal('asm-od',0,5.0);checkVal('asm-hexext',0.45,0.55);checkValCom();checkInterference();
   const pfNA=document.getElementById('na-pressfit')?.checked;if(pfNA)handleTolNA('pressfit');
   const snugNA2=document.getElementById('na-snug')?.checked;if(snugNA2)handleTolNA('snug');
@@ -2211,7 +2271,17 @@ const FIT_TYPES=[
   {id:4,label:'Circular shaft or boss — press fit, printed to printed',fixedDiam:false,hideMat:false},
   {id:5,label:'Circular shaft or boss — snug fit, printed to printed',fixedDiam:false,hideMat:false},
   {id:6,label:'Circular shaft or boss — clearance fit, printed to printed',fixedDiam:false,hideMat:false},
-  {id:7,label:'Non-circular shaft or boss — snug fit offset (hex, D-shaft, square, irregular)',fixedDiam:false,hideMat:false}
+  {id:7,label:'Non-circular shaft or boss — snug fit offset (hex, D-shaft, square, irregular)',fixedDiam:false,hideMat:false},
+  // Printed-to-metal joint types
+  {id:8,label:'Printed hole receiving metal shaft or pin — snug fit',fixedDiam:false,hideMat:false,metalNote:true},
+  {id:9,label:'Printed hole receiving metal shaft or pin — clearance fit',fixedDiam:false,hideMat:false,metalNote:true},
+  {id:10,label:'Printed pocket or slot receiving laser cut metal part — snug fit',fixedDiam:false,hideMat:false,metalNote:true},
+  {id:11,label:'Printed pocket or slot receiving laser cut metal part — clearance fit',fixedDiam:false,hideMat:false,metalNote:true},
+  // General offsets
+  {id:12,label:'3D printed hole or pocket for any metal part — general clearance',fixedDiam:false,hideMat:false,generalNote:true},
+  {id:13,label:'3D printed external feature or boss for metal pocket — general clearance',fixedDiam:false,hideMat:false,generalNote:true},
+  {id:14,label:'3D printed hole or pocket for another 3D printed part — general clearance',fixedDiam:false,hideMat:false,generalNote:true},
+  {id:15,label:'3D printed external feature or boss for 3D printed pocket — general clearance',fixedDiam:false,hideMat:false,generalNote:true}
 ];
 const FIT_MATS=['HIPS / Bambu H2D','HIPS / Bambu X1C','ABS / Bambu H2D','ABS / Bambu X1C','PLA / Bambu H2D','PLA / Bambu X1C'];
 // Tolerance table by material group
@@ -2232,11 +2302,36 @@ function getFitTol(typeId,matVal){
     case 5: return {tolMm:isPLA?0.15:0.20,label:'Snug fit',boreMm:true};
     case 6: return {tolMm:isPLA?0.35:0.40,label:'Clearance fit',boreMm:true};
     case 7: return {tolMm:isPLA?0.15:0.20,label:'Per-face offset (Offset Entities)',boreMm:false,isOffset:true};
+    // Printed-to-metal: snug uses fixed tolerance regardless of ABS/HIPS distinction
+    case 8: return {tolMm:isPLA?0.20:0.25,label:'Printed-to-metal snug fit',boreMm:true};
+    case 9: return {tolMm:isPLA?0.40:0.45,label:'Printed-to-metal clearance fit',boreMm:true};
+    case 10: return {tolMm:isPLA?0.20:0.25,label:'Printed pocket/slot to metal — snug fit',boreMm:true};
+    case 11: return {tolMm:isPLA?0.40:0.45,label:'Printed pocket/slot to metal — clearance fit',boreMm:true};
+    // General offsets — same tolerances as clearance fits
+    case 12: return {tolMm:isPLA?0.40:0.45,label:'General clearance — metal into printed',boreMm:true};
+    case 13: return {tolMm:isPLA?0.40:0.45,label:'General clearance — printed boss for metal pocket',boreMm:false,isBoss:true};
+    case 14: return {tolMm:isPLA?0.35:0.40,label:'General clearance — printed to printed',boreMm:true};
+    case 15: return {tolMm:isPLA?0.35:0.40,label:'General clearance — printed boss for printed pocket',boreMm:false,isBoss:true};
   }
   return {tolMm:0.40,label:'',boreMm:true};
 }
 let fitEntries=[];
 let fitEntryIdCounter=0;
+
+const NOM_TOOLTIP_TEXT='Nominal means the designed or specified size before tolerances are applied. For hardware, use the listed bolt or shaft diameter from the product spec sheet or McMaster-Carr page. For custom geometry, use the dimension as drawn in SolidWorks before any fit adjustments. For the hex shaft, nominal is always 0.500in regardless of measured variation.';
+
+function buildFitTypeOptions(selectedId){
+  const coreTypes=FIT_TYPES.filter(t=>t.id<=7);
+  const metalTypes=FIT_TYPES.filter(t=>t.id>=8&&t.id<=11);
+  const generalTypes=FIT_TYPES.filter(t=>t.id>=12);
+  let html='';
+  coreTypes.forEach(t=>{html+=`<option value="${t.id}"${(selectedId==t.id)?' selected':''}>${t.id}. ${t.label}</option>`;});
+  html+=`<option disabled>── Printed-to-Metal ──</option>`;
+  metalTypes.forEach(t=>{html+=`<option value="${t.id}"${(selectedId==t.id)?' selected':''}>${t.label}</option>`;});
+  html+=`<option disabled>── General Offsets ──</option>`;
+  generalTypes.forEach(t=>{html+=`<option value="${t.id}"${(selectedId==t.id)?' selected':''}>${t.label}</option>`;});
+  return html;
+}
 
 function addFitEntry(savedData){
   const id=fitEntryIdCounter++;
@@ -2244,33 +2339,37 @@ function addFitEntry(savedData){
   const container=document.getElementById('fit-entries');
   const div=document.createElement('div');div.className='fit-entry';div.id='fit-entry-'+id;
   const sd=savedData||{};
+  const locked=!!sd.locked;
+  const defaultName=locked?'Hex Shaft Bore':('Joint '+(id+1));
+  const entryName=sd.name||defaultName;
   div.innerHTML=`
     <div class="fit-entry-head">
-      <span class="fit-entry-num">ENTRY ${id+1}</span>
-      <span class="fit-entry-del" onclick="removeFitEntry(${id})" title="Remove">&#x2716; Remove</span>
+      <span class="fit-entry-num">${locked?'LOCKED':('ENTRY '+(id+1))}</span>
+      <input class="fit-entry-name" value="${entryName}" title="Click to rename" oninput="saveFitCalcData()" onchange="saveFitCalcData()">
+      ${locked?'':'<span class="fit-entry-del" onclick="removeFitEntry('+id+')" title="Remove">&#x2716; Remove</span>'}
     </div>
     <div class="fit-calc-row">
       <div class="field-row">
         <label>Joint Type</label>
-        <select class="fc-type" onchange="onFitTypeChange(${id})">
-          ${FIT_TYPES.map(t=>`<option value="${t.id}"${(sd.typeId==t.id)?' selected':''}>${t.id}. ${t.label}</option>`).join('')}
+        <select class="fc-type" onchange="onFitTypeChange(${id})"${locked?' disabled':''}>
+          ${buildFitTypeOptions(sd.typeId||1)}
         </select>
       </div>
       <div class="field-row fc-mat-wrap">
         <label>Material / Printer</label>
-        <select class="fc-mat" onchange="saveFitCalcData()">
+        <select class="fc-mat" onchange="calcFitEntry(${id});saveFitCalcData()">
           ${FIT_MATS.map(m=>`<option value="${m}"${sd.mat===m?' selected':''}>${m}</option>`).join('')}
         </select>
       </div>
     </div>
     <div class="fit-calc-row3">
       <div class="field-row fc-diam-wrap">
-        <label class="fc-diam-lbl">Nominal Diameter (in)</label>
-        <input type="number" class="fc-nom-in" step="0.001" min="0.01" max="10" placeholder="0.000" value="${sd.nomIn||''}" oninput="onFitNomSync(${id},'in');saveFitCalcData()">
+        <label class="nom-label-wrap"><span class="fc-diam-lbl-text">Nominal Diameter (in)</span> <span class="nom-info-icon" tabindex="0">ⓘ<span class="nom-tooltip">${NOM_TOOLTIP_TEXT}</span></span></label>
+        <input type="number" class="fc-nom-in" step="0.001" min="0.01" max="10" placeholder="0.000" value="${sd.nomIn||''}" oninput="onFitNomSync(${id},'in');calcFitEntry(${id});saveFitCalcData()">
       </div>
       <div class="field-row fc-diam-wrap">
-        <label>Nominal Diameter (mm)</label>
-        <input type="number" class="fc-nom-mm" step="0.01" min="0.1" max="254" placeholder="0.000" value="${sd.nomMm||''}" oninput="onFitNomSync(${id},'mm');saveFitCalcData()">
+        <label>Nominal Dimension (mm)</label>
+        <input type="number" class="fc-nom-mm" step="0.01" min="0.1" max="254" placeholder="0.000" value="${sd.nomMm||''}" oninput="onFitNomSync(${id},'mm');calcFitEntry(${id});saveFitCalcData()">
       </div>
       <div class="field-row" style="align-self:flex-end">
         <button class="fit-calc-btn" onclick="calcFitEntry(${id})">[ Calculate ]</button>
@@ -2281,11 +2380,16 @@ function addFitEntry(savedData){
       <div class="fit-result-tol" id="fc-rt-${id}">${sd.resultTol||''}</div>
       <div class="fit-result-why" id="fc-rw-${id}">${sd.resultWhy||''}</div>
     </div>
+    <div class="fc-metal-note" id="fc-metal-note-${id}">Metal does not shrink. The printed part must accommodate the full nominal metal dimension plus thermal contraction of the printed material.</div>
+    <div class="fc-general-note" id="fc-general-note-${id}">Use these for situations where the exact joint type does not match a specific category above. Verify with a test fit before final assembly.</div>
   `;
+  if(locked)div.dataset.locked='1';
   container.appendChild(div);
   // Apply initial state
   onFitTypeChange(id);
   if(sd.result){document.getElementById('fc-result-'+id)?.classList.add('active');}
+  // Auto-calculate locked hex bore entry when material changes or on load
+  if(locked&&sd.mat){setTimeout(()=>calcFitEntry(id),0);}
 }
 function onFitTypeChange(id){
   const div=document.getElementById('fit-entry-'+id);if(!div)return;
@@ -2293,10 +2397,11 @@ function onFitTypeChange(id){
   const typeId=parseInt(typeEl.value);
   const ft=FIT_TYPES.find(t=>t.id===typeId);
   const matWrap=div.querySelector('.fc-mat-wrap');
-  const diamWrap=div.querySelectorAll('.fc-diam-wrap');
   const nomIn=div.querySelector('.fc-nom-in');
   const nomMm=div.querySelector('.fc-nom-mm');
-  const diamLbl=div.querySelector('.fc-diam-lbl');
+  const diamLblText=div.querySelector('.fc-diam-lbl-text');
+  const metalNote=document.getElementById('fc-metal-note-'+id);
+  const generalNote=document.getElementById('fc-general-note-'+id);
   if(matWrap)matWrap.style.display=(ft&&ft.hideMat)?'none':'';
   if(ft&&ft.fixedDiam){
     if(nomIn){nomIn.value=ft.fixedVal.toFixed(3);nomIn.disabled=true;}
@@ -2305,10 +2410,12 @@ function onFitTypeChange(id){
     if(nomIn)nomIn.disabled=false;
     if(nomMm)nomMm.disabled=false;
   }
-  if(diamLbl){
-    if(typeId===7)diamLbl.textContent='Nominal Shaft Dimension (in)';
-    else diamLbl.textContent='Nominal Diameter (in)';
+  if(diamLblText){
+    if(typeId===7||typeId===10||typeId===11)diamLblText.textContent='Nominal Shaft Dimension (in)';
+    else diamLblText.textContent='Nominal Diameter (in)';
   }
+  if(metalNote)metalNote.classList.toggle('active',!!(ft&&ft.metalNote));
+  if(generalNote)generalNote.classList.toggle('active',!!(ft&&ft.generalNote));
   saveFitCalcData();
 }
 function onFitNomSync(id,from){
@@ -2333,6 +2440,12 @@ function calcFitEntry(id){
     resultVal=`Per-face offset: +${offMm} mm / +${offIn} in`;
     resultTol=`Tolerance applied: ${tol.label} +${offMm} mm`;
     resultWhy=`For non-circular shafts, apply this value using Offset Entities in SolidWorks on each face of the bore profile. This creates a uniform clearance on every face of the non-circular cross-section.`;
+  } else if(tol.isBoss){
+    const bossMm=+(nom_mm-tol.tolMm).toFixed(3);const bossIn=+(bossMm/25.4).toFixed(4);
+    const sign='-';
+    resultVal=`Recommended feature size: ${bossIn} in / ${bossMm} mm`;
+    resultTol=`Tolerance applied: ${tol.label} ${sign}${tol.tolMm.toFixed(2)} mm (${sign}${(tol.tolMm/25.4).toFixed(4)} in)`;
+    resultWhy=`For external features/bosses, reduce dimension by ${tol.tolMm} mm to create clearance in the receiving pocket. Verify with a test fit before final assembly.`;
   } else {
     const boreMm=+(nom_mm+tol.tolMm).toFixed(3);const boreIn=+(boreMm/25.4).toFixed(4);
     const sign=tol.tolMm>=0?'+':'';
@@ -2344,6 +2457,11 @@ function calcFitEntry(id){
     else if(typeId===4)resultWhy=`Press fit: bore equals nominal${tol.tolMm!==0?' minus '+Math.abs(tol.tolMm)+' mm for interference':' (no interference offset for this material)'}. Too much interference will crack printed parts.`;
     else if(typeId===5)resultWhy=`Snug fit: bore = nominal + ${tol.tolMm} mm. Parts seat with light hand pressure, no play.`;
     else if(typeId===6)resultWhy=`Clearance fit: bore = nominal + ${tol.tolMm} mm. Parts slide together freely with minimal resistance.`;
+    else if(typeId===8)resultWhy=`Printed hole for metal shaft/pin — snug fit. Model bore at +${tol.tolMm} mm over nominal metal dimension. Metal does not shrink; the printed hole must compensate for thermal contraction.`;
+    else if(typeId===9)resultWhy=`Printed hole for metal shaft/pin — clearance fit. Model bore at +${tol.tolMm} mm over nominal metal dimension. Parts slide freely with hand pressure.`;
+    else if(typeId===10)resultWhy=`Printed pocket/slot for laser cut metal — snug fit. Model the opening +${tol.tolMm} mm over the nominal metal dimension on each receiving surface.`;
+    else if(typeId===11)resultWhy=`Printed pocket/slot for laser cut metal — clearance fit. Model the opening +${tol.tolMm} mm over the nominal metal dimension for free insertion.`;
+    else if(typeId>=12&&typeId<=15){const isExt=typeId===13||typeId===15;resultWhy=`General clearance offset. Model the ${isExt?'external feature':'bore or pocket'} ${isExt?'smaller':'larger'} than nominal by ${tol.tolMm} mm. Verify with a test fit before final assembly.`;}
   }
   const rb=document.getElementById('fc-result-'+id);
   if(rb){
@@ -2355,9 +2473,17 @@ function calcFitEntry(id){
   saveFitCalcData();
 }
 function removeFitEntry(id){
-  const div=document.getElementById('fit-entry-'+id);if(div)div.remove();
+  const div=document.getElementById('fit-entry-'+id);
+  if(div&&div.dataset.locked==='1')return; // locked entries cannot be removed
+  if(div)div.remove();
   fitEntries=fitEntries.filter(x=>x!==id);
   saveFitCalcData();
+}
+function hexBoreFitCalcOk(){
+  const locked=document.querySelector('.fit-entry[data-locked="1"]');
+  if(!locked)return false;
+  const id=parseInt(locked.id.replace('fit-entry-',''));
+  return document.getElementById('fc-result-'+id)?.classList.contains('active')||false;
 }
 function saveFitCalcData(){
   const entries=Array.from(document.querySelectorAll('.fit-entry')).map(div=>{
@@ -2368,6 +2494,8 @@ function saveFitCalcData(){
       mat:div.querySelector('.fc-mat')?.value||'',
       nomIn:div.querySelector('.fc-nom-in')?.value||'',
       nomMm:div.querySelector('.fc-nom-mm')?.value||'',
+      name:div.querySelector('.fit-entry-name')?.value||'',
+      locked:div.dataset.locked==='1',
       result:rb?.classList.contains('active')||false,
       resultVal:document.getElementById('fc-rv-'+id)?.textContent||'',
       resultTol:document.getElementById('fc-rt-'+id)?.textContent||'',
@@ -2377,14 +2505,31 @@ function saveFitCalcData(){
   try{localStorage.setItem('m3_fitCalc_entries',JSON.stringify(entries));}catch(e){}
 }
 function loadFitCalcData(){
+  const hexBoreDefault={typeId:1,locked:true,name:'Hex Shaft Bore',nomIn:'0.500',nomMm:'12.700'};
   try{
     const raw=localStorage.getItem('m3_fitCalc_entries');
     if(raw){
       const arr=JSON.parse(raw);
       document.getElementById('fit-entries').innerHTML='';fitEntries=[];fitEntryIdCounter=0;
+      // Ensure first entry is always the locked hex bore entry
+      if(!arr[0]||!arr[0].locked){arr.unshift(hexBoreDefault);}
       arr.forEach(sd=>addFitEntry(sd));
-    } else {addFitEntry();}
-  }catch(e){addFitEntry();}
+    } else {
+      document.getElementById('fit-entries').innerHTML='';fitEntries=[];fitEntryIdCounter=0;
+      addFitEntry(hexBoreDefault);
+      addFitEntry();
+    }
+  }catch(e){
+    document.getElementById('fit-entries').innerHTML='';fitEntries=[];fitEntryIdCounter=0;
+    addFitEntry(hexBoreDefault);
+    addFitEntry();
+  }
+  // Auto-calculate the locked hex bore entry
+  setTimeout(()=>{
+    const first=document.querySelector('.fit-entry[data-locked="1"]');
+    if(first){const id=parseInt(first.id.replace('fit-entry-',''));calcFitEntry(id);}
+    updateScoreAndDots();
+  },50);
 }
 
 /* -------- CLIPBOARD PASTE TO UPLOAD ZONES -------- */
@@ -2416,7 +2561,9 @@ document.addEventListener('DOMContentLoaded',()=>{
   loadFromStorage();autoFillDate();
   loadFitCalcData();
   initCollapseState();
-  setInterval(saveToStorage,30000);
+  // Restore auto-save preference
+  try{const saved=localStorage.getItem('m3_autosave');if(saved==='0'){autoSaveEnabled=false;const btn=document.getElementById('autosave-toggle-btn');const st=document.getElementById('tb-save-status');if(btn)btn.textContent='[ AUTO-SAVE OFF ]';if(st){st.textContent='AUTO-SAVE OFF';st.classList.add('autosave-off');}}}catch(e){}
+  if(autoSaveEnabled)autoSaveInterval=setInterval(saveToStorage,30000);
   window.addEventListener('resize',resizeAll);
   document.fonts.ready.then(()=>{resizeAll();});
   requestAnimationFrame(()=>resizeAll());
