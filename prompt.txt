@@ -1,0 +1,15 @@
+﻿Edit the file idea113-blade-03.html. Make the following changes:
+
+1. POINT TOTAL: Change total from 70 to 80 points. New module breakdown: M1=5, M2=30, M3=20, M4=20, M5=5. Update all references to the total (TOTAL_PTS constant, total-bar text, footer, instructor table, tb-score display, and all rubric sub-point values inside each module, scale them proportionally to the new module totals).
+
+2. HTML EXPORT BUTTON: Remove the Download with Data button from the toolbar. Replace it with Export HTML that runs a pre-export preflight check first, same pattern as printWithPreflight(). Create a runExportPreflight() function that checks the same items as runPreflight(). If issues exist, show the preflight dialog with Export Anyway and Go Back options. If no issues, call downloadHTML() directly.
+
+3. REMOVE COLOR COLUMN: Remove the color input column from the component table entirely. Delete the th for color, delete the color td cell from addTableRow(), remove the color field from getCompData() and loadComps(), and remove the defaultColors array and compColorIndex logic.
+
+4. MASS UNITS: In the component table mass column, change secondary unit from ounces to pounds. Change header label from g/oz to g/lbs. Replace gToOz with gToLbs in the mass display. Update mass-oz-disp class to mass-lbs-disp. Update updateStats() accordingly.
+
+5. PER-ROW IMAGE UPLOAD: Remove the standalone Component Screenshots section below the component table. Add a compact image upload cell as the last column in the component table with a small file input and thumbnail preview per row. Store image as base64 on the row. Include in getCompData() and loadComps(). Update preflight to check that every component row has an image attached.
+
+6. CROSS-SECTION SCREENSHOT: Change screenshot 04 label from Assembly Side View to Assembly Cross-Section. Update description to: Maximum intersection cross-section view. Use SolidWorks Section View tool, cut plane at the widest point of the assembly. Show all internal geometry clearly with no hidden lines.
+
+After all changes, verify updateScoreAndDots() reflects new point totals. Do not change any other behavior. Save the file in place.

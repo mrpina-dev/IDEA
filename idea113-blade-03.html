@@ -148,7 +148,6 @@ input[type="text"],input[type="number"],input[type="password"],textarea{cursor:u
 #comp-table td input,#comp-table td select{width:100%;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--white);font-family:'Share Tech Mono',monospace;padding:8px 10px;box-sizing:border-box;font-size:12px}
 #comp-table td select{appearance:none;cursor:pointer}
 #comp-table td select option{background:var(--bg2);color:var(--white);font-family:'Share Tech Mono',monospace}
-#comp-table td input[type="color"]{height:35px;padding:2px;cursor:pointer}
 #comp-table td input[type="number"]{text-align:center}
 #comp-table td input:focus,#comp-table td select:focus{outline:none;background:rgba(0,255,65,.05);border-bottom-color:var(--green)}
 .custom-hidden-input{width:100%;margin-top:0;background:rgba(0,255,65,.05)!important;border-top:1px dashed rgba(0,255,65,.3)!important;color:var(--gold)!important;padding:6px 10px!important;font-size:11px!important;box-sizing:border-box}
@@ -162,6 +161,11 @@ input[type="text"],input[type="number"],input[type="password"],textarea{cursor:u
 .mass-cell{display:flex;flex-direction:column}
 .mass-cell input{font-size:11px;padding:6px 8px}
 .mass-cell .mass-convert{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--cyan);padding:3px 8px;letter-spacing:.5px}
+/* row image cell */
+.row-img-cell{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px}
+.row-img-cell .row-thumb{width:60px;height:40px;object-fit:cover;border:1px solid rgba(0,255,65,.25);display:none;cursor:zoom-in}
+.row-img-cell .row-upload-btn{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--dim);background:transparent;border:1px dashed rgba(0,255,65,.2);padding:3px 6px;cursor:pointer;text-transform:uppercase;white-space:nowrap}
+.row-img-cell .row-upload-btn:hover{color:var(--green);border-color:rgba(0,255,65,.5)}
 /* supplier cell */
 .supplier-wrap{display:flex;flex-direction:column}
 .supplier-wrap input[type="text"]{font-size:11px;padding:6px 8px}
@@ -346,7 +350,7 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
 <div id="toolbar">
   <button class="tb-btn" onclick="printWithPreflight()">[ Print / Export PDF ]</button>
   <button class="tb-btn" onclick="saveToStorage()">[ Save Progress ]</button>
-  <button class="tb-btn" onclick="downloadHTML()">[ Download with Data ]</button>
+  <button class="tb-btn" onclick="runExportPreflight()">[ Export HTML ]</button>
   <button class="tb-btn" style="border-color:rgba(0,240,255,.4);color:var(--cyan);background:rgba(0,240,255,.05);" onclick="showRestoreDialog()">[ Restore Defaults ]</button>
   <button class="tb-btn danger" onclick="showClearDialog()">[ Clear All ]</button>
   <span id="tb-score">0 / 80 pts</span>
@@ -376,6 +380,9 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
 </div>
 <div class="dialog-overlay" id="preflight-dialog">
   <div class="dialog-box"><div class="dialog-title">Pre-Print Check</div><div class="dialog-text">The following items are incomplete. You can go back to fix them or print anyway.</div><div class="preflight-list" id="preflight-list"></div><div class="dialog-btns"><button class="tb-btn danger" onclick="proceedPrint()">[ Print Anyway ]</button><button class="tb-btn" onclick="hidePreflight()">[ Go Back ]</button></div></div>
+</div>
+<div class="dialog-overlay" id="export-preflight-dialog">
+  <div class="dialog-box"><div class="dialog-title">Pre-Export Check</div><div class="dialog-text">The following items are incomplete. You can go back to fix them or export anyway.</div><div class="preflight-list" id="export-preflight-list"></div><div class="dialog-btns"><button class="tb-btn danger" onclick="proceedExport()">[ Export Anyway ]</button><button class="tb-btn" onclick="hideExportPreflight()">[ Go Back ]</button></div></div>
 </div>
 <div id="lightbox" style="display:none" onclick="closeLightbox()"><img id="lightbox-img" src="" alt="Full size"></div>
 <div id="version-warning"></div>
@@ -442,7 +449,7 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
     <div class="submit-step"><div class="step-num">01</div><div class="step-text">Complete all 5 modules and obtain <em>instructor approval</em></div></div>
     <div class="submit-step"><div class="step-num">02</div><div class="step-text">In SolidWorks: <em>File &rarr; Pack and Go</em>, zip all files</div></div>
     <div class="submit-step"><div class="step-num">03</div><div class="step-text">Upload <em>zip file</em> to Google Classroom</div></div>
-    <div class="submit-step"><div class="step-num">04</div><div class="step-text">Click <em>Download with Data</em> in the toolbar above</div></div>
+    <div class="submit-step"><div class="step-num">04</div><div class="step-text">Click <em>Export HTML</em> in the toolbar above</div></div>
     <div class="submit-step"><div class="step-num">05</div><div class="step-text">Upload the <em>.html</em> file to Google Classroom</div></div>
   </div>
 </div>
@@ -461,7 +468,7 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
   </div>
 </div>
 
-<div class="total-bar"><span>Assignment Weight</span><strong>70 Points</strong><span>Complete all 5 modules &amp; obtain instructor approval &nbsp;|&nbsp; Click [ Rubric ] for grading criteria</span></div>
+<div class="total-bar"><span>Assignment Weight</span><strong>80 Points</strong><span>Complete all 5 modules &amp; obtain instructor approval &nbsp;|&nbsp; Click [ Rubric ] for grading criteria</span></div>
 
 <!-- MODULE 01: DESIGN CONTINUITY -->
 <div class="module">
@@ -514,17 +521,17 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
 <!-- MODULE 02: COMPONENT CAD DOCUMENTATION -->
 <div class="module">
   <div class="module-header">
-    <span class="mod-num">02</span><span class="mod-title">Component CAD Documentation</span><span class="mod-pts">25 pts</span>
+    <span class="mod-num">02</span><span class="mod-title">Component CAD Documentation</span><span class="mod-pts">30 pts</span>
     <span class="mod-dot" id="dot-02"></span>
     <button class="rubric-toggle" id="rt-02" onclick="toggleRubric(2)">[ Rubric ]</button>
   </div>
   <div class="rubric-panel" id="rubric-02">
     <div class="rubric-inner">
       <div class="rubric-title-row"><span>Grading Criteria</span><span>Points</span></div>
-      <div class="rubric-row"><div class="rubric-criteria"><strong>Component Documentation:</strong> All components named with final modeled dimensions and SolidWorks mass values entered.</div><div class="rubric-pts">10 pts</div></div>
-      <div class="rubric-row"><div class="rubric-criteria"><strong>Competition Compliance:</strong> Total assembly mass &le;907g, 3+ distinct processes, 3+ fasteners confirmed.</div><div class="rubric-pts">5 pts</div></div>
-      <div class="rubric-row"><div class="rubric-criteria"><strong>Hardware Documentation:</strong> All COTS hardware has supplier link and 3D model download confirmed.</div><div class="rubric-pts">5 pts</div></div>
-      <div class="rubric-row"><div class="rubric-criteria"><strong>Bolt Clearance Documentation:</strong> All bolted joints documented in clearance table with treatment specified.</div><div class="rubric-pts">5 pts</div></div>
+      <div class="rubric-row"><div class="rubric-criteria"><strong>Component Documentation:</strong> All components named with final modeled dimensions and SolidWorks mass values entered.</div><div class="rubric-pts">12 pts</div></div>
+      <div class="rubric-row"><div class="rubric-criteria"><strong>Competition Compliance:</strong> Total assembly mass &le;907g, 3+ distinct processes, 3+ fasteners confirmed.</div><div class="rubric-pts">6 pts</div></div>
+      <div class="rubric-row"><div class="rubric-criteria"><strong>Hardware Documentation:</strong> All COTS hardware has supplier link and 3D model download confirmed.</div><div class="rubric-pts">6 pts</div></div>
+      <div class="rubric-row"><div class="rubric-criteria"><strong>Bolt Clearance Documentation:</strong> All bolted joints documented in clearance table with treatment specified.</div><div class="rubric-pts">6 pts</div></div>
     </div>
   </div>
   <div class="module-body">
@@ -533,15 +540,15 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
       <table id="comp-table">
         <thead><tr>
           <th class="no-print" style="width:60px;text-align:center;" data-tip="Controls — Drag to reorder. Duplicate or delete with icons.">Ctrl</th>
-          <th style="width:40px;" data-tip="Color — Display color. Does not affect grading.">Clr</th>
           <th style="width:150px;" data-tip="Component — Name of this part in your SolidWorks assembly. Match the part name in your feature tree exactly.">Component</th>
           <th style="width:130px;" data-tip="Material — Primary material. Select the closest match or choose Other.">Material</th>
           <th style="width:120px;" data-tip="Process — Manufacturing process or hardware type. Changes to hardware sub-options when Hardware / COTS is selected.">Process</th>
           <th style="width:90px;" data-tip="Final Thickness — Modeled thickness pulled from SolidWorks. Enter in inches; mm auto-converts. For hardware, enter the installed height."><div style="line-height:1.3">Thickness<br><span style="font-size:8px;color:var(--cyan);font-weight:normal;letter-spacing:1px">in / mm</span></div></th>
           <th style="width:90px;" data-tip="Spinning OD — Outer diameter of the circle this component traces when spinning. Measure between the furthest two points in any direction. Enter in inches; mm auto-converts. Max 5.000 in / 127.0 mm."><div style="line-height:1.3">Spin OD<br><span style="font-size:8px;color:var(--cyan);font-weight:normal;letter-spacing:1px">in / mm</span></div></th>
-          <th style="width:90px;" data-tip="Mass — Component mass from SolidWorks mass properties dialog. Enter in grams. Oz auto-converts."><div style="line-height:1.3">Mass<br><span style="font-size:8px;color:var(--cyan);font-weight:normal;letter-spacing:1px">g / oz</span></div></th>
+          <th style="width:90px;" data-tip="Mass — Component mass from SolidWorks mass properties dialog. Enter in grams. Lbs auto-converts."><div style="line-height:1.3">Mass<br><span style="font-size:8px;color:var(--cyan);font-weight:normal;letter-spacing:1px">g / lbs</span></div></th>
           <th style="width:160px;" data-tip="Supplier — For Hardware / COTS components: paste the full URL to the product page (McMaster-Carr, Grainger, etc.) and confirm the 3D model was downloaded and inserted into your assembly.">Supplier / HW</th>
           <th style="width:130px;" data-tip="Interface — How this component physically connects to adjacent components in the assembly.">Interface</th>
+          <th style="width:80px;" data-tip="Screenshot — Upload a SolidWorks screenshot of this component.">Screenshot</th>
         </tr></thead>
         <tbody id="comp-body"></tbody>
       </table>
@@ -570,16 +577,6 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
       <label>Total Mechanical Fastener Count in Assembly</label>
       <input type="number" data-field="fastener-count" id="fastener-count" placeholder="0" min="0" step="1" oninput="updateFastenerDisplay();updateScoreAndDots();saveToStorage()">
     </div>
-
-    <!-- COMPONENT SCREENSHOTS -->
-    <div class="sub-label" style="margin-top:20px;">Component Screenshots</div>
-    <p class="prompt" style="margin-bottom:10px;">Upload a SolidWorks screenshot of each component individually. Label each with the component name. These verify the model exists &mdash; not just the documentation.</p>
-    <div class="upload-zone no-print" onclick="document.getElementById('comp-img-upload').click()">
-      <div class="upload-zone-label">Click to upload component screenshots (multiple allowed)</div>
-      <input type="file" id="comp-img-upload" accept="image/*" multiple style="display:none" onchange="handleUpload(this,'comp-imgs',1)">
-    </div>
-    <div id="comp-imgs" class="image-grid"></div>
-    <div class="img-count" id="comp-imgs-count" style="color:var(--amber)">0 images (min 1 per component)</div>
 
     <!-- BOLT CLEARANCE TABLE -->
     <div class="sub-label" style="margin-top:20px;">Bolted Joint Clearance Log</div>
@@ -789,17 +786,17 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
 <!-- MODULE 04: ASSEMBLY VALIDATION -->
 <div class="module">
   <div class="module-header">
-    <span class="mod-num">04</span><span class="mod-title">Assembly Validation</span><span class="mod-pts">15 pts</span>
+    <span class="mod-num">04</span><span class="mod-title">Assembly Validation</span><span class="mod-pts">20 pts</span>
     <span class="mod-dot" id="dot-04"></span>
     <button class="rubric-toggle" id="rt-04" onclick="toggleRubric(4)">[ Rubric ]</button>
   </div>
   <div class="rubric-panel" id="rubric-04">
     <div class="rubric-inner">
       <div class="rubric-title-row"><span>Grading Criteria</span><span>Points</span></div>
-      <div class="rubric-row"><div class="rubric-criteria"><strong>Assembly Dimensions:</strong> Mass, height, OD, and hex extension all entered and within competition limits.</div><div class="rubric-pts">6 pts</div></div>
-      <div class="rubric-row"><div class="rubric-criteria"><strong>Center of Mass:</strong> CoM offset from spin axis entered. Within target earns full credit; above target with explanation earns partial.</div><div class="rubric-pts">3 pts</div></div>
-      <div class="rubric-row"><div class="rubric-criteria"><strong>Interference Check:</strong> SolidWorks interference detection run and result documented.</div><div class="rubric-pts">3 pts</div></div>
-      <div class="rubric-row"><div class="rubric-criteria"><strong>Required Screenshots:</strong> All 4 screenshots uploaded (mass properties, isometric, top, side).</div><div class="rubric-pts">3 pts</div></div>
+      <div class="rubric-row"><div class="rubric-criteria"><strong>Assembly Dimensions:</strong> Mass, height, OD, and hex extension all entered and within competition limits.</div><div class="rubric-pts">8 pts</div></div>
+      <div class="rubric-row"><div class="rubric-criteria"><strong>Center of Mass:</strong> CoM offset from spin axis entered. Within target earns full credit; above target with explanation earns partial.</div><div class="rubric-pts">4 pts</div></div>
+      <div class="rubric-row"><div class="rubric-criteria"><strong>Interference Check:</strong> SolidWorks interference detection run and result documented.</div><div class="rubric-pts">4 pts</div></div>
+      <div class="rubric-row"><div class="rubric-criteria"><strong>Required Screenshots:</strong> All 4 screenshots uploaded (mass properties, isometric, top, cross-section).</div><div class="rubric-pts">4 pts</div></div>
     </div>
   </div>
   <div class="module-body">
@@ -918,9 +915,9 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
         <div class="img-count" id="ss-top-count" style="color:var(--amber)">0 images (required)</div>
       </div>
       <div>
-        <label class="field-row" style="margin-bottom:6px;"><span style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;">04 &mdash; Assembly Side View</span></label>
+        <label class="field-row" style="margin-bottom:6px;"><span style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;">04 &mdash; Assembly Cross-Section</span></label>
         <div class="upload-zone no-print" onclick="document.getElementById('ss-side-upload').click()" style="padding:12px">
-          <div class="upload-zone-label">Click to upload side view screenshot</div>
+          <div class="upload-zone-label">Click to upload cross-section screenshot</div>
           <input type="file" id="ss-side-upload" accept="image/*" multiple style="display:none" onchange="handleUpload(this,'ss-side',1)">
         </div>
         <div id="ss-side" class="image-grid"></div>
@@ -1002,17 +999,17 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
   <thead><tr><th>Module</th><th>Description</th><th class="score-cell">Pts Possible</th><th class="score-cell">Pts Earned</th><th>Notes</th></tr></thead>
   <tbody>
     <tr><td>01</td><td>Design Continuity</td><td>5</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-    <tr><td>02</td><td>Component CAD Documentation</td><td>25</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td>02</td><td>Component CAD Documentation</td><td>30</td><td>&nbsp;</td><td>&nbsp;</td></tr>
     <tr><td>03</td><td>Tolerance &amp; Fit Verification</td><td>20</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-    <tr><td>04</td><td>Assembly Validation</td><td>15</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td>04</td><td>Assembly Validation</td><td>20</td><td>&nbsp;</td><td>&nbsp;</td></tr>
     <tr><td>05</td><td>Deviation Log</td><td>5</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-    <tr><td colspan="2"><strong>Total</strong></td><td>70</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td colspan="2"><strong>Total</strong></td><td>80</td><td>&nbsp;</td><td>&nbsp;</td></tr>
   </tbody>
 </table>
 
 <div class="footer">
   <span>IDEA-BLADE &nbsp;|&nbsp; Assignment 03 &nbsp;|&nbsp; Don Bosco Technical Institute &nbsp;|&nbsp; IDEA-113</span>
-  <span class="footer-pts">70 Points Total</span>
+  <span class="footer-pts">80 Points Total</span>
 </div>
 </div>
 <script>
@@ -1023,12 +1020,12 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
    ================================================================ */
 const BUILD_VERSION='v1';
 const STORAGE_KEY='idea113-blade-03';
-const TOTAL_PTS=70;
+const TOTAL_PTS=80;
 const APPROVAL_HASH='ec929973e52a87f1896dac3036bf607051238d042fef08147b9a78ba6a3a5adf';
 const MASS_LIMIT_G=907;
 let autoSaveInterval=null;
-let imgStore={'comp-imgs':[],'ss-mass':[],'ss-iso':[],'ss-top':[],'ss-side':[]};
-let compColorIndex=0;
+let imgStore={'ss-mass':[],'ss-iso':[],'ss-top':[],'ss-side':[]};
+
 let activeLayerDrag=null;
 let isApproved=false;
 
@@ -1222,7 +1219,6 @@ function getDevLogRows(){return Array.from(document.querySelectorAll('#dev-log-b
 function loadDevLogRows(arr){document.getElementById('dev-log-body').innerHTML='';(arr||[]).forEach(d=>addDevLogRow(d));}
 
 /* -------- COMPONENT TABLE -------- */
-const defaultColors=['#303833','#1B241D','#00FF41','#4A5B4D','#111813'];
 const matOpts=['Select...','Steel','Aluminum','Polycarbonate','HIPS','ABS','PLA','Wood / MDF','Hardware / COTS','Brass','Acrylic','Other'];
 const procOpts=['Select...','3D Print (FDM)','Laser Cut (Fiber)','Laser Cut (Diode)','CNC Router','Manual Mill','Manual Lathe','Drill Press','Hand Tools','Other'];
 const hwOpts=['Select...','Shaft Collar','Hex Shaft','Bolts / Nuts','Threaded Inserts','Washers / Spacers','Bearings','Pins / Dowels','Other Hardware'];
@@ -1259,9 +1255,9 @@ function extractVal(tr,cls){
 function addTableRow(tbodyId,data){
   const tbody=document.getElementById(tbodyId);if(!tbody)return;
   const tr=document.createElement('tr');tr.setAttribute('draggable','true');
-  const d={color:data?.color||defaultColors[compColorIndex%defaultColors.length],name:data?.name||'',mat:data?.mat||'',proc:data?.proc||'',thickIn:data?.thickIn||'',thickMm:data?.thickMm||'',odIn:data?.odIn||'',odMm:data?.odMm||'',massG:data?.massG||'',supplier:data?.supplier||'',hwDl:!!data?.hwDl,iface:data?.iface||''};
-  compColorIndex++;
+  const d={name:data?.name||'',mat:data?.mat||'',proc:data?.proc||'',thickIn:data?.thickIn||'',thickMm:data?.thickMm||'',odIn:data?.odIn||'',odMm:data?.odMm||'',massG:data?.massG||'',supplier:data?.supplier||'',hwDl:!!data?.hwDl,iface:data?.iface||'',rowImg:data?.rowImg||''};
   const isHw=(d.mat==='Hardware / COTS');const pOpts=isHw?hwOpts:procOpts;
+  const hwdlId='hwdl-'+Math.random().toString(36).slice(2,8);
   tr.innerHTML=`
     <td class="no-print" style="width:60px;text-align:center;vertical-align:middle;">
       <div style="display:flex;align-items:center;justify-content:space-evenly;height:100%;min-height:40px;">
@@ -1270,15 +1266,15 @@ function addTableRow(tbodyId,data){
         <span class="action-btn del" onclick="deleteCompRow(this)" title="Delete">&#x2716;</span>
       </div>
     </td>
-    <td style="width:40px;"><input type="color" class="input-color" value="${d.color}" style="height:35px;padding:2px;cursor:pointer;width:100%;background:transparent;border:none;"></td>
     <td style="width:150px;"><input type="text" class="input-name" value="${esc(d.name)}" placeholder="Component name" style="width:100%;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--white);font-family:'Share Tech Mono',monospace;padding:8px 10px;font-size:12px;"></td>
     <td style="width:130px;">${(()=>{let isC=d.mat&&!matOpts.includes(d.mat)&&d.mat!=='Select...';let sv=isC?'Other':(d.mat||'Select...');let h=`<select class="input-mat" onchange="checkCustom(this)">`;matOpts.forEach(o=>h+=`<option value="${o}"${o===sv?' selected':''}>${o}</option>`);h+=`</select><input type="text" class="input-mat-custom custom-hidden-input" style="display:${isC?'block':'none'}" value="${isC?esc(d.mat):''}" placeholder="Specify..." oninput="updateStats();saveToStorage();">`;return h;})()}</td>
     <td style="width:120px;">${buildSelect('input-proc',pOpts,d.proc)}</td>
     <td style="width:90px;"><div class="dual-cell"><div class="unit-label">in</div><input type="number" class="input-thick-in" step="0.01" min="0" max="4" value="${d.thickIn}" placeholder="0.00" oninput="syncDual(this,'thick','in');updateStats();saveToStorage();updateScoreAndDots()"><div class="dual-sep"></div><div class="unit-label">mm</div><input type="number" class="input-thick-mm" step="0.01" min="0" max="100" value="${d.thickMm}" placeholder="0.0" oninput="syncDual(this,'thick','mm');updateStats();saveToStorage();updateScoreAndDots()"></div></td>
     <td style="width:90px;"><div class="dual-cell"><div class="unit-label">in</div><input type="number" class="input-od-in" step="0.01" min="0" max="5.5" value="${d.odIn}" placeholder="0.00" oninput="syncDual(this,'od','in');updateStats();saveToStorage();updateScoreAndDots()"><div class="dual-sep"></div><div class="unit-label">mm</div><input type="number" class="input-od-mm" step="0.1" min="0" max="140" value="${d.odMm}" placeholder="0.0" oninput="syncDual(this,'od','mm');updateStats();saveToStorage();updateScoreAndDots()"></div></td>
-    <td style="width:90px;"><div class="mass-cell"><input type="number" class="input-mass-g" step="0.1" min="0" max="2000" value="${d.massG}" placeholder="0.0 g" oninput="updateStats();saveToStorage();updateScoreAndDots()"><div class="mass-convert" id="">&#8594; <span class="mass-oz-disp">${d.massG?gToOz(d.massG)+' oz':'-'}</span></div></div></td>
-    <td style="width:160px;"><div class="supplier-wrap" style="opacity:${isHw?'1':'.4'}"><input type="text" class="input-supplier" value="${esc(d.supplier)}" placeholder="Paste product URL..." style="width:100%;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--ice);font-family:'Share Tech Mono',monospace;padding:8px 10px;font-size:10px;"><div class="hw-chk-row"><input type="checkbox" class="input-hw-dl" ${d.hwDl?'checked':''} id="hwdl-${compColorIndex}" onchange="updateScoreAndDots();saveToStorage()"><label for="hwdl-${compColorIndex}">3D model downloaded &amp; inserted</label></div></div></td>
+    <td style="width:90px;"><div class="mass-cell"><input type="number" class="input-mass-g" step="0.1" min="0" max="2000" value="${d.massG}" placeholder="0.0 g" oninput="updateStats();saveToStorage();updateScoreAndDots()"><div class="mass-convert">&#8594; <span class="mass-lbs-disp">${d.massG?gToLbs(d.massG)+' lbs':'-'}</span></div></div></td>
+    <td style="width:160px;"><div class="supplier-wrap" style="opacity:${isHw?'1':'.4'}"><input type="text" class="input-supplier" value="${esc(d.supplier)}" placeholder="Paste product URL..." style="width:100%;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--ice);font-family:'Share Tech Mono',monospace;padding:8px 10px;font-size:10px;"><div class="hw-chk-row"><input type="checkbox" class="input-hw-dl" ${d.hwDl?'checked':''} id="${hwdlId}" onchange="updateScoreAndDots();saveToStorage()"><label for="${hwdlId}">3D model downloaded &amp; inserted</label></div></div></td>
     <td style="width:130px;">${buildSelect('input-iface',ifaceOpts,d.iface)}</td>
+    <td style="width:80px;"><div class="row-img-cell"><input type="file" class="input-row-img-file" accept="image/*" style="display:none" onchange="handleRowImg(this)"><button class="row-upload-btn" type="button" onclick="this.closest('td').querySelector('.input-row-img-file').click()">+ Img</button><img class="row-thumb" src="${d.rowImg||''}" style="${d.rowImg?'display:block':'display:none'};" onclick="if(this.src&&!this.src.endsWith('/'))openLightbox(this.src)"></div></td>
   `;
   tr.querySelectorAll('input:not(.custom-hidden-input),select').forEach(el=>{
     if(!el.onchange&&!el.oninput)el.addEventListener('input',()=>{updateScoreAndDots();saveToStorage();updateStats();});
@@ -1296,8 +1292,7 @@ function duplicateCompRow(btn){
   const tr=btn.closest('tr');const clone=tr.cloneNode(true);
   tr.parentNode.insertBefore(clone,tr.nextSibling);
   const orig=tr.querySelectorAll('input,select'),cloned=clone.querySelectorAll('input,select');
-  orig.forEach((el,i)=>{if(el.type!=='color')cloned[i].value=el.value;else cloned[i].value=defaultColors[compColorIndex%defaultColors.length];});
-  compColorIndex++;
+  orig.forEach((el,i)=>{cloned[i].value=el.value;});
   clone.querySelectorAll('input:not(.custom-hidden-input),select').forEach(el=>{if(!el.onchange&&!el.oninput)el.addEventListener('input',()=>{updateScoreAndDots();saveToStorage();updateStats();});});
   attachCompDragEvents(clone);updateStats();updateScoreAndDots();saveToStorage();
 }
@@ -1310,18 +1305,19 @@ function attachCompDragEvents(tr){
 }
 function getCompData(){
   return Array.from(document.querySelectorAll('#comp-body tr')).map(tr=>({
-    color:tr.querySelector('.input-color')?.value||'',name:tr.querySelector('.input-name')?.value||'',
+    name:tr.querySelector('.input-name')?.value||'',
     mat:extractVal(tr,'input-mat'),proc:extractVal(tr,'input-proc'),
     thickIn:tr.querySelector('.input-thick-in')?.value||'',thickMm:tr.querySelector('.input-thick-mm')?.value||'',
     odIn:tr.querySelector('.input-od-in')?.value||'',odMm:tr.querySelector('.input-od-mm')?.value||'',
     massG:tr.querySelector('.input-mass-g')?.value||'',
     supplier:tr.querySelector('.input-supplier')?.value||'',
     hwDl:tr.querySelector('.input-hw-dl')?.checked||false,
-    iface:extractVal(tr,'input-iface')
+    iface:extractVal(tr,'input-iface'),
+    rowImg:(()=>{const t=tr.querySelector('.row-thumb');return(t&&t.style.display!=='none'&&t.src&&!t.src.endsWith('/'))?t.src:'';})()
   }));
 }
 function loadComps(arr){
-  document.getElementById('comp-body').innerHTML='';compColorIndex=0;
+  document.getElementById('comp-body').innerHTML='';
   if(!arr||arr.length===0){
     [{name:'',mat:'Select...',proc:'Select...','iface':'Select...'},{name:'',mat:'Select...',proc:'Select...','iface':'Select...'},{name:'',mat:'Select...',proc:'Select...','iface':'Select...'},{name:'',mat:'Hardware / COTS',proc:'Select...','iface':'Select...'},{name:'',mat:'Select...',proc:'Select...','iface':'Select...'}].forEach(d=>addTableRow('comp-body',d));
   } else arr.forEach(d=>addTableRow('comp-body',d));
@@ -1336,8 +1332,8 @@ function updateStats(){
   const massEl=document.getElementById('stat-mass');const massLbsEl=document.getElementById('stat-mass-lbs');
   if(massEl){massEl.textContent=totalG.toFixed(1)+' g';massEl.className='stat-card-value '+(totalG>MASS_LIMIT_G?'warn':'ok');}
   if(massLbsEl)massLbsEl.textContent=gToLbs(totalG).toFixed(3)+' lbs | Limit: 907g / 2.000 lbs';
-  // Update mass oz in each row
-  document.querySelectorAll('.input-mass-g').forEach(inp=>{const oz=inp.closest('td')?.querySelector('.mass-oz-disp');if(oz){const g=parseFloat(inp.value)||0;oz.textContent=g?gToOz(g)+' oz':'-';}});
+  // Update mass lbs in each row
+  document.querySelectorAll('.input-mass-g').forEach(inp=>{const lbs=inp.closest('td')?.querySelector('.mass-lbs-disp');if(lbs){const g=parseFloat(inp.value)||0;lbs.textContent=g?gToLbs(g)+' lbs':'-';}});
   // Process count
   const procs=new Set(comps.map(c=>c.proc).filter(p=>p&&p!=='Select...'));
   const procEl=document.getElementById('stat-procs');if(procEl){procEl.textContent=procs.size;procEl.className='stat-card-value '+(procs.size>=3?'ok':'warn');}
@@ -1347,6 +1343,15 @@ function updateStats(){
 function updateFastenerDisplay(){
   const n=parseInt(document.getElementById('fastener-count')?.value)||0;
   const el=document.getElementById('stat-fasteners-disp');if(el){el.textContent=n;el.className='stat-card-value '+(n>=3?'ok':'warn');}
+}
+function handleRowImg(input){
+  const f=input.files[0];if(!f)return;
+  const r=new FileReader();r.onload=ev=>{
+    const td=input.closest('td');
+    const thumb=td.querySelector('.row-thumb');
+    if(thumb){thumb.src=ev.target.result;thumb.style.display='block';}
+    updateScoreAndDots();saveToStorage();
+  };r.readAsDataURL(f);input.value='';
 }
 
 /* -------- BOLT CLEARANCE TABLE -------- */
@@ -1538,18 +1543,18 @@ function updateScoreAndDots(){
   // M1 (5)
   const planSel=document.querySelector('input[name="plan-status"]:checked');
   if(planSel){if(planSel.value==='unchanged'&&sentOk('continuity-confirm',1))score+=5;else if(planSel.value==='deviations'&&document.querySelectorAll('#dev-body tr').length>0)score+=5;else score+=2;}
-  // M2 (25)
+  // M2 (30)
   const comps=getCompData();let totalG=0;
   if(comps.length>0){
     const procs=new Set(comps.map(c=>c.proc).filter(p=>p&&p!=='Select...')).size;
     totalG=comps.reduce((s,c)=>s+(parseFloat(c.massG)||0),0);
     const named=comps.filter(c=>c.name&&c.mat&&c.mat!=='Select...'&&c.massG).length;
-    score+=Math.round(10*named/comps.length);
+    score+=Math.round(12*named/comps.length);
     if(totalG>0&&totalG<=MASS_LIMIT_G)score+=2;
-    if(procs>=3)score+=2;const fast=parseInt(getFieldVal('fastener-count'))||0;if(fast>=3)score+=1;
+    if(procs>=3)score+=2;const fast=parseInt(getFieldVal('fastener-count'))||0;if(fast>=3)score+=2;
     const hwComps=comps.filter(c=>c.mat==='Hardware / COTS');
-    if(hwComps.length===0)score+=5;else{const hwOk=hwComps.filter(c=>c.supplier&&c.hwDl).length;score+=Math.round(5*hwOk/hwComps.length);}
-    if(document.querySelectorAll('#bolt-body tr').length>0)score+=5;
+    if(hwComps.length===0)score+=6;else{const hwOk=hwComps.filter(c=>c.supplier&&c.hwDl).length;score+=Math.round(6*hwOk/hwComps.length);}
+    if(document.querySelectorAll('#bolt-body tr').length>0)score+=6;
   }
   // M3 (20)
   const hexV=getTolIn('hexbore');if(hexV!==null&&hexV>=0.508&&hexV<=0.524)score+=4;else if(hexV!==null)score+=2;
@@ -1559,21 +1564,21 @@ function updateScoreAndDots(){
   const metalNA=document.getElementById('na-metal')?.checked;if(metalNA)score+=3;else if(getTolIn('metal')!==null)score+=3;
   const sp=getTolIn('shaft-plan-in'),sa=getTolIn('shaft-actual-in');if(sp!==null&&sa!==null)score+=3;
   const hexextV=getTolIn('hexext');if(hexextV!==null&&hexextV>=0.45&&hexextV<=0.55)score+=3;else if(hexextV!==null)score+=1;
-  // M4 (15)
+  // M4 (20)
   const asmG=parseFloat(document.querySelector('[data-val="asm-mass-g"]')?.value)||0;
   const asmH=parseFloat(document.querySelector('[data-val="asm-height-in"]')?.value)||0;
   const asmOD=parseFloat(document.querySelector('[data-val="asm-od-in"]')?.value)||0;
   const asmHE=parseFloat(document.querySelector('[data-val="asm-hexext-in"]')?.value)||0;
   const asmCom=document.querySelector('[data-val="asm-com-mm"]')?.value;
-  if(asmG>0&&asmG<=MASS_LIMIT_G)score+=2;else if(asmG>0)score+=1;
+  if(asmG>0&&asmG<=MASS_LIMIT_G)score+=3;else if(asmG>0)score+=1;
   if(asmH>=2.9&&asmH<=3.1)score+=2;else if(asmH>0)score+=1;
-  if(asmOD>0&&asmOD<=5.0)score+=1;else if(asmOD>5.0)score+=0;
+  if(asmOD>0&&asmOD<=5.0)score+=2;else if(asmOD>5.0)score+=0;
   if(asmHE>=0.45&&asmHE<=0.55)score+=1;
-  if(asmCom!==undefined&&asmCom!=='')score+=3;
-  if(document.querySelector('input[name="interference"]:checked'))score+=3;
+  if(asmCom!==undefined&&asmCom!=='')score+=4;
+  if(document.querySelector('input[name="interference"]:checked'))score+=4;
   const ssZones=['ss-mass','ss-iso','ss-top','ss-side'];
   const ssCount=ssZones.filter(z=>(imgStore[z]||[]).length>=1).length;
-  score+=Math.round(3*ssCount/4);
+  score+=Math.round(4*ssCount/4);
   // M5 (5)
   if(isApproved){const devSel=document.querySelector('input[name="dev-status"]:checked');if(devSel){if(devSel.value==='match')score+=5;else if(document.querySelectorAll('#dev-log-body tr').length>0)score+=5;}}
   score=Math.min(Math.max(score,0),TOTAL_PTS);
@@ -1628,7 +1633,7 @@ function loadData(data){
   if(data._devLogRows)loadDevLogRows(data._devLogRows);
   if(data._tol){Object.entries(data._tol).forEach(([k,v])=>{const el=document.querySelector(`[data-tol="${k}"]`);if(el){if(el.type==='checkbox')el.checked=!!v;else el.value=v;}});}
   if(data._val){Object.entries(data._val).forEach(([k,v])=>{const el=document.querySelector(`[data-val="${k}"]`);if(el)el.value=v;});}
-  if(data._imgs){imgStore=data._imgs;Object.keys(imgStore).forEach(z=>renderImgs(z));['comp-imgs','ss-mass','ss-iso','ss-top','ss-side'].forEach(z=>updateImgCount(z,z==='comp-imgs'?1:1));}
+  if(data._imgs){imgStore=data._imgs;Object.keys(imgStore).forEach(z=>renderImgs(z));['ss-mass','ss-iso','ss-top','ss-side'].forEach(z=>updateImgCount(z,1));}
   if(data._approved)setApproved(true,data._approvalTimestamp);
   updateCollabState();updateContinuityState();updateDevState();checkInterference();updateStats();
   // Re-run all tolerance/val checks
@@ -1675,7 +1680,7 @@ function confirmClear(){
   document.querySelectorAll('.sent-count').forEach(sc=>{sc.querySelector('.current').textContent='0';sc.classList.remove('met','unmet','active');});
   document.querySelectorAll('[data-tol]').forEach(el=>{if(el.type==='checkbox')el.checked=false;else el.value='';});
   document.querySelectorAll('[data-val]').forEach(el=>el.value='');
-  imgStore={'comp-imgs':[],'ss-mass':[],'ss-iso':[],'ss-top':[],'ss-side':[]};
+  imgStore={'ss-mass':[],'ss-iso':[],'ss-top':[],'ss-side':[]};
   Object.keys(imgStore).forEach(z=>{const c=document.getElementById(z);if(c)c.innerHTML='';updateImgCount(z,0);});
   loadComps([]);loadBoltData([]);loadDevRows([]);loadDevLogRows([]);
   setApproved(false,'');isApproved=false;
@@ -1697,11 +1702,11 @@ function runPreflight(){
   const fast=parseInt(getFieldVal('fastener-count'))||0;if(fast<3)issues.push('Module 02: Fastener count is below 3 ('+fast+' entered)');
   if(document.querySelectorAll('#bolt-body tr').length===0)issues.push('Module 02: Bolt clearance table is empty');
   const totalG=comps.reduce((s,c)=>s+(parseFloat(c.massG)||0),0);if(totalG>MASS_LIMIT_G)issues.push(`Module 02: Total mass ${totalG.toFixed(1)}g exceeds 907g limit`);}
-  if((imgStore['comp-imgs']||[]).length<1)issues.push('Module 02: No component screenshots uploaded');
+  comps.forEach((c,i)=>{if(!c.rowImg)issues.push(`Module 02: Component ${i+1} (${c.name||'?'}) — no screenshot uploaded`);});
   const hexV=getTolIn('hexbore');if(hexV===null)issues.push('Module 03: Hex bore check — no value entered');
   const hexextV=getTolIn('hexext');if(hexextV===null)issues.push('Module 03: Hex extension check — no value entered');
   const sp=getTolIn('shaft-plan-in'),sa=getTolIn('shaft-actual-in');if(!sp||!sa)issues.push('Module 03: Shaft engagement confirmation — values missing');
-  const ssZones=['ss-mass','ss-iso','ss-top','ss-side'];const ssNames=['mass properties','isometric view','top view','side view'];
+  const ssZones=['ss-mass','ss-iso','ss-top','ss-side'];const ssNames=['mass properties','isometric view','top view','cross-section view'];
   ssZones.forEach((z,i)=>{if((imgStore[z]||[]).length<1)issues.push(`Module 04: Missing required screenshot — ${ssNames[i]}`);});
   if(!document.querySelector('input[name="interference"]:checked'))issues.push('Module 04: Interference detection result not selected');
   if(!isApproved)issues.push('Instructor approval required before submission');
@@ -1716,6 +1721,14 @@ function printWithPreflight(){
 }
 function hidePreflight(){document.getElementById('preflight-dialog').classList.remove('active');}
 function proceedPrint(){hidePreflight();window.print();}
+function runExportPreflight(){
+  const issues=runPreflight();if(issues.length===0){downloadHTML();return;}
+  const list=document.getElementById('export-preflight-list');list.innerHTML='';
+  issues.forEach(i=>{const div=document.createElement('div');div.className='preflight-issue';div.textContent=i;list.appendChild(div);});
+  document.getElementById('export-preflight-dialog').classList.add('active');
+}
+function hideExportPreflight(){document.getElementById('export-preflight-dialog').classList.remove('active');}
+function proceedExport(){hideExportPreflight();downloadHTML();}
 
 /* -------- ANIMATIONS -------- */
 function initAnimations(){
