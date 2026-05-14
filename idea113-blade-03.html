@@ -188,9 +188,20 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
 .stat-card-sub{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:.5px}
 /* === BOLT CLEARANCE TABLE === */
 #bolt-table{width:100%;border-collapse:collapse}
-#bolt-table th{background:rgba(0,255,65,.04);color:var(--dim);font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;text-align:left;padding:8px 10px;border-bottom:1px solid rgba(0,255,65,.12);border-right:1px solid rgba(0,255,65,.05)}
-#bolt-table td{padding:0;border-bottom:1px solid rgba(0,255,65,.05);border-right:1px solid rgba(0,255,65,.05);background:var(--bg2);vertical-align:top}
-#bolt-table td input,#bolt-table td select{width:100%;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--white);font-family:'Share Tech Mono',monospace;font-size:11px;padding:7px 9px}
+#bolt-table th{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;text-align:left;padding:12px 10px 6px;border-bottom:1px solid rgba(0,255,65,.12);border-right:1px solid rgba(0,255,65,.05)}
+#bolt-table th .bolt-th-sub{font-family:'Share Tech Mono',monospace;font-size:8px;font-weight:normal;letter-spacing:.3px;display:block;margin-top:3px;text-transform:none;opacity:.75}
+#bolt-table th.bth-joint{background:rgba(0,255,65,.07);color:#00FF41}
+#bolt-table th.bth-bsize{background:rgba(0,255,65,.07);color:#00FF41}
+#bolt-table th.bth-clrp{background:rgba(0,240,255,.06);color:#00F0FF}
+#bolt-table th.bth-clrm{background:rgba(0,170,136,.07);color:#00AA88}
+#bolt-table th.bth-head{background:rgba(200,255,0,.06);color:#C8FF00}
+#bolt-table th.bth-cbod{background:rgba(200,255,0,.06);color:#C8FF00}
+#bolt-table th.bth-cbdp{background:rgba(200,255,0,.06);color:#C8FF00}
+#bolt-table th.bth-nut{background:rgba(255,140,0,.07);color:#FF8C00}
+#bolt-table td{padding:0;border-bottom:1px solid rgba(0,255,65,.06);border-right:1px solid rgba(0,255,65,.05);background:var(--bg2);vertical-align:top}
+#bolt-table tbody tr{transition:background .15s}
+#bolt-table tbody tr:hover{background:rgba(0,255,65,.025)}
+#bolt-table td input,#bolt-table td select{width:100%;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--white);font-family:'Share Tech Mono',monospace;font-size:11px;padding:10px 9px}
 #bolt-table td input:focus,#bolt-table td select:focus{outline:none;background:rgba(0,255,65,.04);border-bottom-color:var(--green)}
 #bolt-table td select{appearance:none;cursor:pointer}
 #bolt-table td select option{background:var(--bg1);color:var(--white)}
@@ -285,6 +296,41 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
 .preflight-list{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;text-align:left}
 .preflight-issue{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--amber);letter-spacing:.5px;padding:5px 0;border-bottom:1px solid rgba(255,140,0,.1);display:flex;gap:8px}
 .preflight-issue::before{content:'[!]';color:var(--amber);flex-shrink:0}
+/* === MASS TOGGLE === */
+.mass-toggle-btn{font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:1px;padding:2px 6px;border:1px solid rgba(0,255,65,.35);background:rgba(0,255,65,.06);color:var(--green);cursor:pointer;text-transform:uppercase;transition:all .2s;display:inline-block;margin-top:2px}
+.mass-toggle-btn:hover{background:rgba(0,255,65,.16);border-color:rgba(0,255,65,.7)}
+/* === SW MASS OVERRIDE CALLOUT === */
+.sw-override-callout{border:1px solid rgba(255,140,0,.25);background:rgba(255,140,0,.04);margin-bottom:14px}
+.sw-override-header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;cursor:pointer;user-select:none}
+.sw-override-header:hover{background:rgba(255,140,0,.06)}
+.sw-override-title{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--amber);text-transform:uppercase}
+.sw-override-arrow{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--amber);transition:transform .25s}
+.sw-override-body{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.sw-override-body.open{max-height:600px}
+.sw-override-inner{padding:4px 16px 14px}
+/* === SCREENSHOT ANIMATION STRIP === */
+.ss-anim-strip{font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(0,255,65,.45);letter-spacing:1px;margin-bottom:6px;min-height:18px}
+.ss-anim-label{font-size:9px;color:rgba(0,255,65,.3);letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:2px}
+.ss-anim-step{display:inline-block;animation:ss-step-cycle 7.5s steps(1) infinite}
+@keyframes ss-step-cycle{
+  0%,31%{content:'';} /* placeholder for JS text */
+  0%{opacity:1}
+  33%{opacity:1}
+  34%{opacity:0}
+  66%{opacity:0}
+  67%{opacity:1}
+  100%{opacity:1}
+}
+/* === APPROVAL SUCCESS REDESIGN === */
+.approval-success{display:none;margin-top:18px;padding:24px 28px;background:rgba(0,255,65,.04);border:2px solid var(--green);box-shadow:0 0 24px rgba(0,255,65,.18),inset 0 0 16px rgba(0,255,65,.04);position:relative;overflow:hidden}
+.approval-success::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.approval-success-check{font-family:'Orbitron',sans-serif;font-size:48px;font-weight:900;color:var(--green);text-shadow:var(--glow-green);line-height:1;margin-bottom:8px;display:block}
+.approval-success-title{font-family:'Orbitron',sans-serif;font-size:18px;font-weight:900;color:var(--gold);letter-spacing:5px;text-transform:uppercase;text-shadow:var(--glow-gold);margin-bottom:10px;display:block}
+.approval-timestamp{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--cyan);letter-spacing:2px}
+/* === ROW IMAGE FULL-WIDTH === */
+.row-img-cell .row-thumb{width:100%;height:80px;min-height:80px;object-fit:cover;border:1px solid rgba(0,255,65,.25);display:none;cursor:zoom-in}
+/* === IMAGE GRID FULL-WIDTH === */
+.image-item img{width:100%;height:90px;min-height:80px;object-fit:cover;border:1px solid rgba(0,255,65,.25);cursor:zoom-in;transition:border-color .2s;display:block}
 /* canvas uplink */
 #mx-toggle-btn{position:fixed;bottom:20px;right:20px;z-index:1001;background:rgba(2,10,4,.85);border:1px solid var(--green);color:var(--green);font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:2px;padding:8px 16px;cursor:pointer;text-transform:uppercase;box-shadow:0 0 10px rgba(0,255,65,.1);transition:all .3s}
 #mx-toggle-btn:hover{background:rgba(0,255,65,.1);box-shadow:0 0 15px rgba(0,255,65,.4)}
@@ -536,6 +582,26 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
   </div>
   <div class="module-body">
     <p class="prompt">Document every component in your SolidWorks assembly. Pull all dimensions and mass values directly from SolidWorks &mdash; do not estimate. OD is the diameter of the circle the component traces when spinning: measure between the two furthest points in any direction, even for non-circular geometry.</p>
+
+    <!-- SW MASS OVERRIDE CALLOUT (Change 6) -->
+    <div class="sw-override-callout">
+      <div class="sw-override-header" onclick="this.nextElementSibling.classList.toggle('open');this.querySelector('.sw-override-arrow').style.transform=this.nextElementSibling.classList.contains('open')?'rotate(90deg)':'rotate(0deg)'">
+        <span class="sw-override-title">How to Override SolidWorks Mass Properties</span>
+        <span class="sw-override-arrow">&#9654;</span>
+      </div>
+      <div class="sw-override-body">
+        <div class="sw-override-inner">
+          <div class="prework-items" style="margin-top:4px;">
+            <div class="prework-item"><em>Step 1</em> &mdash; Right-click the part in the feature tree and select <em>Properties</em>.</div>
+            <div class="prework-item"><em>Step 2</em> &mdash; Check <em>Override Mass Properties</em>.</div>
+            <div class="prework-item"><em>Step 3</em> &mdash; Enter the measured mass in grams (convert: <em>1 oz = 28.35 g</em>, <em>1 lb = 453.6 g</em>).</div>
+            <div class="prework-item">Use this for <em>physically weighed parts</em> or when using Bambu Studio sliced mass.</div>
+            <div class="prework-item"><em>For Bambu Studio:</em> open the sliced file, check the mass shown in the print preview, and enter that value here.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="table-container">
       <table id="comp-table">
         <thead><tr>
@@ -545,7 +611,7 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
           <th style="width:120px;" data-tip="Process — Manufacturing process or hardware type. Changes to hardware sub-options when Hardware / COTS is selected.">Process</th>
           <th style="width:90px;" data-tip="Final Thickness — Modeled thickness pulled from SolidWorks. Enter in inches; mm auto-converts. For hardware, enter the installed height."><div style="line-height:1.3">Thickness<br><span style="font-size:8px;color:var(--cyan);font-weight:normal;letter-spacing:1px">in / mm</span></div></th>
           <th style="width:90px;" data-tip="Spinning OD — Outer diameter of the circle this component traces when spinning. Measure between the furthest two points in any direction. Enter in inches; mm auto-converts. Max 5.000 in / 127.0 mm."><div style="line-height:1.3">Spin OD<br><span style="font-size:8px;color:var(--cyan);font-weight:normal;letter-spacing:1px">in / mm</span></div></th>
-          <th style="width:90px;" data-tip="Mass — Component mass from SolidWorks mass properties dialog. Enter in grams. Lbs auto-converts."><div style="line-height:1.3">Mass<br><span style="font-size:8px;color:var(--cyan);font-weight:normal;letter-spacing:1px">g / lbs</span></div></th>
+          <th style="width:90px;" data-tip="Mass — Component mass. Toggle between grams-primary and lbs-primary input mode using the button below."><div style="line-height:1.3">Mass<br><button class="mass-toggle-btn" id="mass-mode-btn" onclick="toggleMassMode()" title="Toggle input unit">[ g ]</button></div></th>
           <th style="width:160px;" data-tip="Supplier — For Hardware / COTS components: paste the full URL to the product page (McMaster-Carr, Grainger, etc.) and confirm the 3D model was downloaded and inserted into your assembly.">Supplier / HW</th>
           <th style="width:130px;" data-tip="Interface — How this component physically connects to adjacent components in the assembly.">Interface</th>
           <th style="width:80px;" data-tip="Screenshot — Upload a SolidWorks screenshot of this component.">Screenshot</th>
@@ -584,14 +650,14 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
     <div class="table-container" style="margin-bottom:8px;">
       <table id="bolt-table">
         <thead><tr>
-          <th style="width:150px;">Joint Description</th>
-          <th style="width:70px;">Bolt Size</th>
-          <th style="width:80px;">Clr Hole &mdash; Printed<br><span style="font-size:8px;font-weight:normal;">in (nom + 0.016")</span></th>
-          <th style="width:80px;">Clr Hole &mdash; Metal<br><span style="font-size:8px;font-weight:normal;">in (nominal)</span></th>
-          <th style="width:90px;">Head Treatment</th>
-          <th style="width:80px;">Counterbore &oslash;<br><span style="font-size:8px;font-weight:normal;">in (head + 0.020")</span></th>
-          <th style="width:80px;">Counterbore Depth<br><span style="font-size:8px;font-weight:normal;">in (head ht + 0.010")</span></th>
-          <th style="width:90px;">Nut Treatment</th>
+          <th class="bth-joint" style="width:150px;">Joint Description<span class="bolt-th-sub">Name the two parts being bolted together</span></th>
+          <th class="bth-bsize" style="width:70px;">Bolt Size<span class="bolt-th-sub">e.g. M4, 8-32</span></th>
+          <th class="bth-clrp" style="width:80px;">Clr Hole &mdash; Printed<span class="bolt-th-sub">in &mdash; bolt nom + 0.016"</span></th>
+          <th class="bth-clrm" style="width:80px;">Clr Hole &mdash; Metal<span class="bolt-th-sub">in &mdash; nominal (no add)</span></th>
+          <th class="bth-head" style="width:90px;">Head Treatment<span class="bolt-th-sub">How the bolt head sits</span></th>
+          <th class="bth-cbod" style="width:80px;">Counterbore &oslash;<span class="bolt-th-sub">in &mdash; head diam + 0.020"</span></th>
+          <th class="bth-cbdp" style="width:80px;">Counterbore Depth<span class="bolt-th-sub">in &mdash; head ht + 0.010"</span></th>
+          <th class="bth-nut" style="width:90px;">Nut Treatment<span class="bolt-th-sub">How the nut is retained</span></th>
           <th class="no-print" style="width:30px;"></th>
         </tr></thead>
         <tbody id="bolt-body"></tbody>
@@ -614,7 +680,8 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
       <div class="rubric-title-row"><span>Grading Criteria</span><span>Points</span></div>
       <div class="rubric-row"><div class="rubric-criteria"><strong>Hex Bore Check:</strong> Bore diameter entered and within acceptable clearance range.</div><div class="rubric-pts">4 pts</div></div>
       <div class="rubric-row"><div class="rubric-criteria"><strong>Press Fit Check:</strong> Each press fit pair documented with modeled interference. N/A acceptable if no press fits used.</div><div class="rubric-pts">3 pts</div></div>
-      <div class="rubric-row"><div class="rubric-criteria"><strong>Wall Thickness &amp; Feature Size:</strong> Minimum wall and minimum feature confirmed or N/A.</div><div class="rubric-pts">4 pts</div></div>
+      <div class="rubric-row"><div class="rubric-criteria"><strong>Snug Fit Check:</strong> Each snug fit pair documented. N/A acceptable if no snug fits used.</div><div class="rubric-pts">included</div></div>
+      <div class="rubric-row"><div class="rubric-criteria"><strong>Wall Thickness &amp; Feature Size:</strong> Minimum wall and minimum feature confirmed or N/A (combined card).</div><div class="rubric-pts">4 pts</div></div>
       <div class="rubric-row"><div class="rubric-criteria"><strong>Metal Wall Thickness:</strong> Minimum metal wall confirmed or N/A.</div><div class="rubric-pts">3 pts</div></div>
       <div class="rubric-row"><div class="rubric-criteria"><strong>Shaft Engagement Confirmation:</strong> Modeled engagement matches Assignment 02 plan or deviation documented.</div><div class="rubric-pts">3 pts</div></div>
       <div class="rubric-row"><div class="rubric-criteria"><strong>Hex Extension Height:</strong> Modeled hex extension within 0.45"&mdash;0.55" rule.</div><div class="rubric-pts">3 pts</div></div>
@@ -665,10 +732,34 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
       </div>
     </div>
 
+    <!-- SNUG FIT (Change 3) -->
+    <div class="tol-card">
+      <div class="tol-card-header">
+        <span class="tol-card-title">03 &mdash; Snug Fit (Printed-to-Printed)</span>
+        <div class="tol-card-dot" id="tdot-snug"></div>
+      </div>
+      <div class="tol-card-rule">
+        Snug fits are used where parts must slide together with light resistance but no play &mdash; looser than a press fit, tighter than a clearance fit. For ABS printed parts, the bore should be nominal plus <strong>0.008 in / 0.20 mm</strong>. Example: a 0.500 in shaft fits into a 0.508 in bore.
+      </div>
+      <div class="tol-target">Bore = shaft nominal + 0.008" / 0.20mm</div>
+      <div class="tol-na-row">
+        <input type="checkbox" id="na-snug" data-tol="snug-na" onchange="handleTolNA('snug');saveToStorage();updateScoreAndDots()">
+        <label for="na-snug">N/A &mdash; my design does not use printed-to-printed snug fits</label>
+      </div>
+      <div id="snug-fields" style="margin-top:10px;">
+        <div class="field-row">
+          <label>Describe each snug fit pair: part name, shaft OD, bore ID, resulting clearance</label>
+          <textarea data-field="snug-detail" placeholder="Example: Blade ring OD 0.500&quot; slides into body hub bore 0.508&quot; — clearance 0.008&quot; / 0.20mm. Light finger pressure needed to seat. Checked in SolidWorks mate simulation." oninput="autoResize(this);updateMirror(this.dataset.field,this.value);checkTolText('snug');saveToStorage();updateScoreAndDots()"></textarea>
+          <div class="print-mirror" data-mirror="snug-detail"></div>
+          <div class="sent-count" data-min="1" data-field-ref="snug-detail"><span class="sent-dot"></span><span><span class="current">0</span> / 1 sentence minimum</span></div>
+        </div>
+      </div>
+    </div>
+
     <!-- MIN WALL ABS -->
     <div class="tol-card">
       <div class="tol-card-header">
-        <span class="tol-card-title">03 &mdash; Minimum Wall Thickness (ABS / 3D Printed)</span>
+        <span class="tol-card-title">04 &mdash; Minimum Wall Thickness and Feature Size (ABS / 3D Printed)</span>
         <div class="tol-card-dot" id="tdot-wall"></div>
       </div>
       <div class="tol-card-rule">
@@ -687,28 +778,17 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
         </div>
         <div class="field-row" style="margin-top:8px;"><label>Where is this thin wall located?</label><input type="text" data-field="wall-location" placeholder="e.g. Blade arm leading edge, inner hub wall near hex bore..." oninput="updateScoreAndDots();saveToStorage()"></div>
         <div class="print-mirror single-line" data-mirror="wall-location" style="display:none"></div>
-      </div>
-    </div>
 
-    <!-- MIN FEATURE SIZE -->
-    <div class="tol-card">
-      <div class="tol-card-header">
-        <span class="tol-card-title">04 &mdash; Minimum Feature Size (3D Print, 0.6mm Nozzle)</span>
-        <div class="tol-card-dot" id="tdot-feat"></div>
-      </div>
-      <div class="tol-card-rule">
-        At a 0.6mm nozzle, the minimum printable feature is <strong>1.2 mm / 0.047 in</strong> (2 perimeters). Features smaller than this &mdash; thin fins, sharp tips, narrow slots &mdash; will either not print or will print poorly. Design around this constraint or accept that fine details will not resolve cleanly.
-      </div>
-      <div class="tol-target">Minimum feature: 1.2mm / 0.047"</div>
-      <div class="tol-na-row">
-        <input type="checkbox" id="na-feat" data-tol="feat-na" onchange="handleTolNA('feat');saveToStorage();updateScoreAndDots()">
-        <label for="na-feat">N/A &mdash; my design has no 3D printed parts</label>
-      </div>
-      <div id="feat-fields" style="margin-top:10px;">
-        <div class="tol-inputs">
-          <div class="field-row"><label>Smallest Printed Feature (in)</label><input type="number" data-tol="feat-in" step="0.001" min="0" max="1" placeholder="0.047" oninput="tolSyncInToMm('feat');checkTol('feat',0.047,null);saveToStorage();updateScoreAndDots()"></div>
-          <div class="field-row"><label>Smallest Printed Feature (mm)</label><input type="number" data-tol="feat-mm" step="0.01" min="0" max="25" placeholder="1.2" oninput="tolSyncMmToIn('feat');checkTol('feat',0.047,null);saveToStorage();updateScoreAndDots()"></div>
-          <div class="field-row" style="justify-content:flex-end;padding-top:18px;"><div class="tol-status" id="tstat-feat" style="color:var(--dim)">Awaiting input</div></div>
+        <hr style="border:none;border-top:1px solid rgba(0,255,65,.1);margin:14px 0;">
+
+        <div style="margin-bottom:8px;">
+          <div class="tol-card-rule" style="margin-bottom:6px;"><strong>Minimum Feature Size (3D Print, 0.6mm Nozzle)</strong><br>At a 0.6mm nozzle, the minimum printable feature is <strong>1.2 mm / 0.047 in</strong> (2 perimeters). Features smaller than this &mdash; thin fins, sharp tips, narrow slots &mdash; will either not print or will print poorly. Design around this constraint or accept that fine details will not resolve cleanly.</div>
+          <div class="tol-target" style="margin-bottom:8px;">Minimum feature: 1.2mm / 0.047"</div>
+          <div class="tol-inputs">
+            <div class="field-row"><label>Smallest Printed Feature (in)</label><input type="number" data-tol="feat-in" step="0.001" min="0" max="1" placeholder="0.047" oninput="tolSyncInToMm('feat');checkTol('feat',0.047,null);saveToStorage();updateScoreAndDots()"></div>
+            <div class="field-row"><label>Smallest Printed Feature (mm)</label><input type="number" data-tol="feat-mm" step="0.01" min="0" max="25" placeholder="1.2" oninput="tolSyncMmToIn('feat');checkTol('feat',0.047,null);saveToStorage();updateScoreAndDots()"></div>
+            <div class="field-row" style="justify-content:flex-end;padding-top:18px;"><div class="tol-status" id="tstat-feat" style="color:var(--dim)">Awaiting input</div></div>
+          </div>
         </div>
       </div>
     </div>
@@ -746,11 +826,18 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
       <div class="tol-card-rule">
         Your Assignment 02 build plan specified a hex shaft engagement depth. Confirm your SolidWorks model reflects that planned depth. If it changed, document the deviation and reason.
       </div>
+      <!-- Thru-All checkbox (Change 5) -->
+      <div class="tol-na-row" style="margin-bottom:10px;">
+        <input type="checkbox" id="shaft-thruall" data-tol="shaft-thruall" onchange="handleShaftThruAll();saveToStorage();updateScoreAndDots()">
+        <label for="shaft-thruall"><strong>Thru-All</strong> &mdash; shaft passes completely through the body to the base tip</label>
+      </div>
+      <div id="shaft-depth-fields">
       <div class="tol-inputs" style="grid-template-columns:1fr 1fr 1fr 1fr;">
         <div class="field-row"><label>A02 Planned Depth (in)</label><input type="number" data-tol="shaft-plan-in" step="0.05" min="0.25" max="3.1" placeholder="From A02" oninput="tolSyncInToMm('shaft-plan');checkShaftMatch();saveToStorage();updateScoreAndDots()"></div>
         <div class="field-row"><label>Planned (mm)</label><input type="number" data-tol="shaft-plan-mm" step="0.1" min="6" max="79" placeholder="mm" oninput="tolSyncMmToIn('shaft-plan');checkShaftMatch();saveToStorage();updateScoreAndDots()"></div>
         <div class="field-row"><label>Modeled Depth (in)</label><input type="number" data-tol="shaft-actual-in" step="0.05" min="0.25" max="3.1" placeholder="From SW" oninput="tolSyncInToMm('shaft-actual');checkShaftMatch();saveToStorage();updateScoreAndDots()"></div>
         <div class="field-row"><label>Modeled (mm)</label><input type="number" data-tol="shaft-actual-mm" step="0.1" min="6" max="79" placeholder="mm" oninput="tolSyncMmToIn('shaft-actual');checkShaftMatch();saveToStorage();updateScoreAndDots()"></div>
+      </div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:8px;">
         <div class="tol-card-dot" id="tdot-shaft-match" style="width:8px;height:8px;flex-shrink:0"></div>
@@ -851,6 +938,17 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
         </div>
         <div class="val-indicator"><div class="val-dot" id="vdot-asm-hexext"></div><div class="val-status" id="vstat-asm-hexext" style="color:var(--dim)">Awaiting input</div></div>
       </div>
+      <!-- CENTER OF MASS INSTRUCTIONS (Change 7) -->
+      <div style="grid-column:1/-1;background:rgba(200,255,0,.03);border:1px solid rgba(200,255,0,.15);padding:12px 16px;margin-bottom:0;">
+        <div style="font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;">How to Find Center of Mass in SolidWorks</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--dim);line-height:1.7;">
+          <strong>Evaluate</strong> menu &rarr; <strong>Mass Properties</strong> &rarr; check <em>"Show center of mass on screen"</em>. Read the <strong>X</strong> and <strong>Y</strong> coordinates from the origin. The offset is the straight-line distance: <span style="color:var(--gold);">√(X² + Y²)</span>.
+        </div>
+        <div style="margin-top:8px;">
+          <a href="https://youtu.be/Y8riRSCD-xo?si=WSD6cdG7Tk1vPwxV" target="_blank" rel="noopener" style="font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;color:var(--bg0);background:var(--gold);padding:6px 14px;text-decoration:none;letter-spacing:1px;text-transform:uppercase;display:inline-block;transition:background .15s;" onmouseover="this.style.background='#fff'" onmouseout="this.style.background='var(--gold)'">&#9654; Watch Tutorial</a>
+        </div>
+      </div>
+
       <!-- CENTER OF MASS -->
       <div class="val-card">
         <div class="val-card-label">Center of Mass Offset from Spin Axis</div>
@@ -889,6 +987,7 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
     <div class="grid-2" style="gap:14px;">
       <div>
         <label class="field-row" style="margin-bottom:6px;"><span style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;">01 &mdash; SolidWorks Mass Properties Dialog</span></label>
+        <div class="ss-anim-strip no-print" id="ssanim-mass"><span class="ss-anim-label">How to take a screenshot on Windows</span><span class="ss-anim-step" id="ssas-mass">&#8862; + SHIFT + S &rarr; drag to select</span></div>
         <div class="upload-zone no-print" onclick="document.getElementById('ss-mass-upload').click()" style="padding:12px">
           <div class="upload-zone-label">Click to upload mass properties screenshot</div>
           <input type="file" id="ss-mass-upload" accept="image/*" multiple style="display:none" onchange="handleUpload(this,'ss-mass',1)">
@@ -898,6 +997,7 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
       </div>
       <div>
         <label class="field-row" style="margin-bottom:6px;"><span style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;">02 &mdash; Assembly Isometric View</span></label>
+        <div class="ss-anim-strip no-print"><span class="ss-anim-label">How to take a screenshot on Windows</span><span class="ss-anim-step" id="ssas-iso">&#8862; + SHIFT + S &rarr; drag to select</span></div>
         <div class="upload-zone no-print" onclick="document.getElementById('ss-iso-upload').click()" style="padding:12px">
           <div class="upload-zone-label">Click to upload isometric screenshot</div>
           <input type="file" id="ss-iso-upload" accept="image/*" multiple style="display:none" onchange="handleUpload(this,'ss-iso',1)">
@@ -907,6 +1007,7 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
       </div>
       <div>
         <label class="field-row" style="margin-bottom:6px;"><span style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;">03 &mdash; Assembly Top View</span></label>
+        <div class="ss-anim-strip no-print"><span class="ss-anim-label">How to take a screenshot on Windows</span><span class="ss-anim-step" id="ssas-top">&#8862; + SHIFT + S &rarr; drag to select</span></div>
         <div class="upload-zone no-print" onclick="document.getElementById('ss-top-upload').click()" style="padding:12px">
           <div class="upload-zone-label">Click to upload top view screenshot</div>
           <input type="file" id="ss-top-upload" accept="image/*" multiple style="display:none" onchange="handleUpload(this,'ss-top',1)">
@@ -916,6 +1017,7 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
       </div>
       <div>
         <label class="field-row" style="margin-bottom:6px;"><span style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;">04 &mdash; Assembly Cross-Section</span></label>
+        <div class="ss-anim-strip no-print"><span class="ss-anim-label">How to take a screenshot on Windows</span><span class="ss-anim-step" id="ssas-side">&#8862; + SHIFT + S &rarr; drag to select</span></div>
         <div class="upload-zone no-print" onclick="document.getElementById('ss-side-upload').click()" style="padding:12px">
           <div class="upload-zone-label">Click to upload cross-section screenshot</div>
           <input type="file" id="ss-side-upload" accept="image/*" multiple style="display:none" onchange="handleUpload(this,'ss-side',1)">
@@ -940,7 +1042,8 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
   </div>
   <div class="approval-error" id="approval-error">Incorrect code. See Mr. Pina.</div>
   <div class="approval-success" id="approval-success">
-    <div class="approval-success-title">Design Approved</div>
+    <span class="approval-success-check">&#10003;</span>
+    <span class="approval-success-title">DESIGN APPROVED</span>
     <div class="approval-timestamp" id="approval-timestamp"></div>
   </div>
 </div>
@@ -1076,6 +1179,69 @@ function setApproved(state,timestamp){
   }
   updateScoreAndDots();
 }
+
+/* -------- MASS INPUT MODE TOGGLE (Change 1) -------- */
+let massMode='g'; // 'g' = grams primary, 'lbs' = pounds primary
+function toggleMassMode(){
+  massMode = massMode==='g' ? 'lbs' : 'g';
+  const btn = document.getElementById('mass-mode-btn');
+  if(btn) btn.textContent = massMode==='g' ? '[ g ]' : '[ lbs ]';
+  updateMassCells();
+}
+function updateMassCells(){
+  document.querySelectorAll('#comp-body tr').forEach(tr=>{
+    const cell = tr.querySelector('.mass-cell');
+    if(!cell) return;
+    const inp = cell.querySelector('.input-mass-g');
+    const disp = cell.querySelector('.mass-lbs-disp');
+    const labelEl = cell.querySelector('.mass-mode-label');
+    if(!inp) return;
+    if(massMode==='g'){
+      if(labelEl) labelEl.textContent='g';
+      inp.placeholder='0.0 g';
+      inp.setAttribute('data-mass-unit','g');
+      if(disp) disp.parentElement.innerHTML='&#8594; <span class="mass-lbs-disp">'+(inp.value?gToLbs(parseFloat(inp.value))+' lbs':'-')+'</span>';
+    } else {
+      if(labelEl) labelEl.textContent='lbs';
+      inp.placeholder='0.000 lbs';
+      inp.setAttribute('data-mass-unit','lbs');
+      if(disp) disp.parentElement.innerHTML='&#8594; <span class="mass-lbs-disp">'+(inp.value?lbsToG(parseFloat(inp.value)).toFixed(1)+' g':'-')+'</span>';
+    }
+  });
+}
+
+/* -------- SHAFT THRU-ALL (Change 5) -------- */
+function handleShaftThruAll(){
+  const cb = document.getElementById('shaft-thruall');
+  const fields = document.getElementById('shaft-depth-fields');
+  const stat = document.getElementById('tstat-shaft');
+  const dot = document.getElementById('tdot-shaft');
+  if(!cb) return;
+  if(cb.checked){
+    if(fields) fields.style.opacity='.4';
+    if(fields) fields.querySelectorAll('input').forEach(inp=>inp.disabled=true);
+    if(dot) dot.className='tol-card-dot ok';
+    if(stat){stat.textContent='Thru-All specified';stat.style.color='var(--green)';}
+    setTolDot('shaft','ok','Thru-All specified');
+  } else {
+    if(fields) fields.style.opacity='1';
+    if(fields) fields.querySelectorAll('input').forEach(inp=>inp.disabled=false);
+    checkShaftMatch();
+  }
+  updateScoreAndDots();
+}
+
+/* -------- SCREENSHOT ANIMATION (Change 10) -------- */
+(function initSsAnim(){
+  const steps=['&#8862;','&#8862; + SHIFT + S','&#8862; + SHIFT + S &#8594; [&#9619;&#9619;&#9619;]'];
+  const ids=['ssas-mass','ssas-iso','ssas-top','ssas-side'];
+  let step=0;
+  function tick(){
+    step=(step+1)%steps.length;
+    ids.forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=steps[step];});
+  }
+  setInterval(tick,2500);
+})();
 
 /* -------- MATRIX RAIN -------- */
 (function(){
@@ -1271,7 +1437,7 @@ function addTableRow(tbodyId,data){
     <td style="width:120px;">${buildSelect('input-proc',pOpts,d.proc)}</td>
     <td style="width:90px;"><div class="dual-cell"><div class="unit-label">in</div><input type="number" class="input-thick-in" step="0.01" min="0" max="4" value="${d.thickIn}" placeholder="0.00" oninput="syncDual(this,'thick','in');updateStats();saveToStorage();updateScoreAndDots()"><div class="dual-sep"></div><div class="unit-label">mm</div><input type="number" class="input-thick-mm" step="0.01" min="0" max="100" value="${d.thickMm}" placeholder="0.0" oninput="syncDual(this,'thick','mm');updateStats();saveToStorage();updateScoreAndDots()"></div></td>
     <td style="width:90px;"><div class="dual-cell"><div class="unit-label">in</div><input type="number" class="input-od-in" step="0.01" min="0" max="5.5" value="${d.odIn}" placeholder="0.00" oninput="syncDual(this,'od','in');updateStats();saveToStorage();updateScoreAndDots()"><div class="dual-sep"></div><div class="unit-label">mm</div><input type="number" class="input-od-mm" step="0.1" min="0" max="140" value="${d.odMm}" placeholder="0.0" oninput="syncDual(this,'od','mm');updateStats();saveToStorage();updateScoreAndDots()"></div></td>
-    <td style="width:90px;"><div class="mass-cell"><input type="number" class="input-mass-g" step="0.1" min="0" max="2000" value="${d.massG}" placeholder="0.0 g" oninput="updateStats();saveToStorage();updateScoreAndDots()"><div class="mass-convert">&#8594; <span class="mass-lbs-disp">${d.massG?gToLbs(d.massG)+' lbs':'-'}</span></div></div></td>
+    <td style="width:90px;"><div class="mass-cell"><input type="number" class="input-mass-g" data-mass-unit="${d.massUnit||'g'}" step="0.1" min="0" value="${d.massRaw||d.massG}" placeholder="${massMode==='lbs'?'0.000 lbs':'0.0 g'}" oninput="updateStats();saveToStorage();updateScoreAndDots()"><div class="mass-convert">&#8594; <span class="mass-lbs-disp">${d.massG?(d.massUnit==='lbs'?lbsToG(parseFloat(d.massRaw||0)).toFixed(1)+' g':gToLbs(d.massG)+' lbs'):'-'}</span></div></div></td>
     <td style="width:160px;"><div class="supplier-wrap" style="opacity:${isHw?'1':'.4'}"><input type="text" class="input-supplier" value="${esc(d.supplier)}" placeholder="Paste product URL..." style="width:100%;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--ice);font-family:'Share Tech Mono',monospace;padding:8px 10px;font-size:10px;"><div class="hw-chk-row"><input type="checkbox" class="input-hw-dl" ${d.hwDl?'checked':''} id="${hwdlId}" onchange="updateScoreAndDots();saveToStorage()"><label for="${hwdlId}">3D model downloaded &amp; inserted</label></div></div></td>
     <td style="width:130px;">${buildSelect('input-iface',ifaceOpts,d.iface)}</td>
     <td style="width:80px;"><div class="row-img-cell"><input type="file" class="input-row-img-file" accept="image/*" style="display:none" onchange="handleRowImg(this)"><button class="row-upload-btn" type="button" onclick="this.closest('td').querySelector('.input-row-img-file').click()">+ Img</button><img class="row-thumb" src="${d.rowImg||''}" style="${d.rowImg?'display:block':'display:none'};" onclick="if(this.src&&!this.src.endsWith('/'))openLightbox(this.src)"></div></td>
@@ -1304,17 +1470,27 @@ function attachCompDragEvents(tr){
   tr.addEventListener('dragend',function(){this.style.opacity='1';activeLayerDrag=null;});
 }
 function getCompData(){
-  return Array.from(document.querySelectorAll('#comp-body tr')).map(tr=>({
-    name:tr.querySelector('.input-name')?.value||'',
-    mat:extractVal(tr,'input-mat'),proc:extractVal(tr,'input-proc'),
-    thickIn:tr.querySelector('.input-thick-in')?.value||'',thickMm:tr.querySelector('.input-thick-mm')?.value||'',
-    odIn:tr.querySelector('.input-od-in')?.value||'',odMm:tr.querySelector('.input-od-mm')?.value||'',
-    massG:tr.querySelector('.input-mass-g')?.value||'',
-    supplier:tr.querySelector('.input-supplier')?.value||'',
-    hwDl:tr.querySelector('.input-hw-dl')?.checked||false,
-    iface:extractVal(tr,'input-iface'),
-    rowImg:(()=>{const t=tr.querySelector('.row-thumb');return(t&&t.style.display!=='none'&&t.src&&!t.src.endsWith('/'))?t.src:'';})()
-  }));
+  return Array.from(document.querySelectorAll('#comp-body tr')).map(tr=>{
+    const massInp=tr.querySelector('.input-mass-g');
+    const rawVal=massInp?.value||'';
+    const unit=massInp?.getAttribute('data-mass-unit')||'g';
+    let massG='',massLbs='';
+    if(rawVal!==''){
+      if(unit==='lbs'){massLbs=rawVal;massG=lbsToG(parseFloat(rawVal)||0).toFixed(1);}
+      else{massG=rawVal;massLbs=gToLbs(parseFloat(rawVal)||0).toFixed(4);}
+    }
+    return{
+      name:tr.querySelector('.input-name')?.value||'',
+      mat:extractVal(tr,'input-mat'),proc:extractVal(tr,'input-proc'),
+      thickIn:tr.querySelector('.input-thick-in')?.value||'',thickMm:tr.querySelector('.input-thick-mm')?.value||'',
+      odIn:tr.querySelector('.input-od-in')?.value||'',odMm:tr.querySelector('.input-od-mm')?.value||'',
+      massG,massLbs,massRaw:rawVal,massUnit:unit,
+      supplier:tr.querySelector('.input-supplier')?.value||'',
+      hwDl:tr.querySelector('.input-hw-dl')?.checked||false,
+      iface:extractVal(tr,'input-iface'),
+      rowImg:(()=>{const t=tr.querySelector('.row-thumb');return(t&&t.style.display!=='none'&&t.src&&!t.src.endsWith('/'))?t.src:'';})()
+    };
+  });
 }
 function loadComps(arr){
   document.getElementById('comp-body').innerHTML='';
@@ -1328,12 +1504,12 @@ function loadComps(arr){
 function updateStats(){
   const comps=getCompData();
   // Total mass
-  let totalG=comps.reduce((s,c)=>s+(parseFloat(c.massG)||0),0);
+  let totalG=comps.reduce((s,c)=>{const g=parseFloat(c.massG)||0;return s+g;},0);
   const massEl=document.getElementById('stat-mass');const massLbsEl=document.getElementById('stat-mass-lbs');
   if(massEl){massEl.textContent=totalG.toFixed(1)+' g';massEl.className='stat-card-value '+(totalG>MASS_LIMIT_G?'warn':'ok');}
   if(massLbsEl)massLbsEl.textContent=gToLbs(totalG).toFixed(3)+' lbs | Limit: 907g / 2.000 lbs';
-  // Update mass lbs in each row
-  document.querySelectorAll('.input-mass-g').forEach(inp=>{const lbs=inp.closest('td')?.querySelector('.mass-lbs-disp');if(lbs){const g=parseFloat(inp.value)||0;lbs.textContent=g?gToLbs(g)+' lbs':'-';}});
+  // Update mass conversion display in each row
+  document.querySelectorAll('.input-mass-g').forEach(inp=>{const lbs=inp.closest('td')?.querySelector('.mass-lbs-disp');if(lbs){const v=parseFloat(inp.value)||0;const unit=inp.getAttribute('data-mass-unit')||'g';lbs.textContent=v?(unit==='lbs'?lbsToG(v).toFixed(1)+' g':gToLbs(v)+' lbs'):'-';}});
   // Process count
   const procs=new Set(comps.map(c=>c.proc).filter(p=>p&&p!=='Select...'));
   const procEl=document.getElementById('stat-procs');if(procEl){procEl.textContent=procs.size;procEl.className='stat-card-value '+(procs.size>=3?'ok':'warn');}
@@ -1511,12 +1687,14 @@ function moduleComplete(n){
     case 3:{
       const hexOk=getTolIn('hexbore')!==null&&getTolIn('hexbore')>=0.508&&getTolIn('hexbore')<=0.524;
       const pfOk=document.getElementById('na-pressfit')?.checked||sentOk('pressfit-detail',1);
+      const snugOk=document.getElementById('na-snug')?.checked||sentOk('snug-detail',1);
       const wallOk=document.getElementById('na-wall')?.checked||(getTolIn('wall')!==null&&getTolIn('wall')>=0.047);
       const featOk=document.getElementById('na-feat')?.checked||(getTolIn('feat')!==null&&getTolIn('feat')>=0.047);
       const metalOk=document.getElementById('na-metal')?.checked||(getTolIn('metal')!==null);
-      const shaftOk=getTolIn('shaft-plan-in')!==null&&getTolIn('shaft-actual-in')!==null;
+      const shaftThruAll=document.getElementById('shaft-thruall')?.checked;
+      const shaftOk=shaftThruAll||(getTolIn('shaft-plan-in')!==null&&getTolIn('shaft-actual-in')!==null);
       const hexextOk=getTolIn('hexext')!==null&&getTolIn('hexext')>=0.45&&getTolIn('hexext')<=0.55;
-      return hexOk&&pfOk&&wallOk&&featOk&&metalOk&&shaftOk&&hexextOk;
+      return hexOk&&pfOk&&snugOk&&wallOk&&featOk&&metalOk&&shaftOk&&hexextOk;
     }
     case 4:{
       const massOk=(parseFloat(document.querySelector('[data-val="asm-mass-g"]')?.value)||0)>0;
@@ -1559,10 +1737,12 @@ function updateScoreAndDots(){
   // M3 (20)
   const hexV=getTolIn('hexbore');if(hexV!==null&&hexV>=0.508&&hexV<=0.524)score+=4;else if(hexV!==null)score+=2;
   const pfNA=document.getElementById('na-pressfit')?.checked;if(pfNA)score+=3;else if(sentOk('pressfit-detail',1))score+=3;
+  const snugNA=document.getElementById('na-snug')?.checked;if(snugNA||sentOk('snug-detail',1))score+=0; // snug fit is part of combined wall card pts
   const wallNA=document.getElementById('na-wall')?.checked;if(wallNA)score+=2;else if(getTolIn('wall')!==null&&getTolIn('wall')>=0.047)score+=2;
   const featNA=document.getElementById('na-feat')?.checked;if(featNA)score+=2;else if(getTolIn('feat')!==null&&getTolIn('feat')>=0.047)score+=2;
   const metalNA=document.getElementById('na-metal')?.checked;if(metalNA)score+=3;else if(getTolIn('metal')!==null)score+=3;
-  const sp=getTolIn('shaft-plan-in'),sa=getTolIn('shaft-actual-in');if(sp!==null&&sa!==null)score+=3;
+  const shaftTA=document.getElementById('shaft-thruall')?.checked;
+  const sp=getTolIn('shaft-plan-in'),sa=getTolIn('shaft-actual-in');if(shaftTA||(sp!==null&&sa!==null))score+=3;
   const hexextV=getTolIn('hexext');if(hexextV!==null&&hexextV>=0.45&&hexextV<=0.55)score+=3;else if(hexextV!==null)score+=1;
   // M4 (20)
   const asmG=parseFloat(document.querySelector('[data-val="asm-mass-g"]')?.value)||0;
@@ -1594,7 +1774,7 @@ function flashSave(){const el=document.getElementById('tb-save-status');el.textC
 function getTolData(){
   const keys=['hexbore-in','hexbore-mm','wall-in','wall-mm','feat-in','feat-mm','metal-in','metal-mm','metal-type','hexext-in','hexext-mm','shaft-plan-in','shaft-plan-mm','shaft-actual-in','shaft-actual-mm'];
   const d={};keys.forEach(k=>{const el=document.querySelector(`[data-tol="${k}"]`);if(el)d[k]=el.type==='checkbox'?el.checked:el.value;});
-  const naKeys=['pressfit-na','wall-na','feat-na','metal-na'];
+  const naKeys=['pressfit-na','snug-na','wall-na','feat-na','metal-na','shaft-thruall'];
   naKeys.forEach(k=>{const el=document.querySelector(`[data-tol="${k}"]`);if(el)d[k]=el.checked;});
   return d;
 }
@@ -1610,6 +1790,7 @@ function collectData(){
     else if(el.type==='checkbox')data[el.dataset.field]=el.checked;
     else data[el.dataset.field]=el.value;
   });
+  data._massMode=massMode;
   data._comps=getCompData();data._bolts=getBoltData();data._devRows=getDevRows();data._devLogRows=getDevLogRows();
   data._tol=getTolData();data._val=getValData();data._imgs=imgStore;
   data._approved=isApproved;data._approvalTimestamp=document.getElementById('approval-timestamp')?.textContent||'';
@@ -1627,6 +1808,7 @@ function loadData(data){
       else{el.value=val;if(el.tagName==='TEXTAREA')requestAnimationFrame(()=>autoResize(el));updateMirror(key,val);updateCounter(key,val);}
     });
   });
+  if(data._massMode){massMode=data._massMode;const mb=document.getElementById('mass-mode-btn');if(mb)mb.textContent=massMode==='g'?'[ g ]':'[ lbs ]';}
   if(data._comps)loadComps(data._comps);else loadComps([]);
   if(data._bolts)loadBoltData(data._bolts);
   if(data._devRows)loadDevRows(data._devRows);
@@ -1637,12 +1819,14 @@ function loadData(data){
   if(data._approved)setApproved(true,data._approvalTimestamp);
   updateCollabState();updateContinuityState();updateDevState();checkInterference();updateStats();
   // Re-run all tolerance/val checks
-  checkTol('hexbore',0.508,0.524);checkTol('wall',0.047,null);checkTol('feat',0.047,null);checkTolMetal();checkShaftMatch();checkTol('hexext',0.45,0.55);
+  checkTol('hexbore',0.508,0.524);checkTolText('snug');checkTol('wall',0.047,null);checkTol('feat',0.047,null);checkTolMetal();checkShaftMatch();checkTol('hexext',0.45,0.55);
   checkVal('asm-mass',0,907);checkVal('asm-height',2.90,3.10);checkVal('asm-od',0,5.0);checkVal('asm-hexext',0.45,0.55);checkValCom();checkInterference();
   const pfNA=document.getElementById('na-pressfit')?.checked;if(pfNA)handleTolNA('pressfit');
+  const snugNA2=document.getElementById('na-snug')?.checked;if(snugNA2)handleTolNA('snug');
   const wallNA=document.getElementById('na-wall')?.checked;if(wallNA)handleTolNA('wall');
   const featNA=document.getElementById('na-feat')?.checked;if(featNA)handleTolNA('feat');
   const metalNA=document.getElementById('na-metal')?.checked;if(metalNA)handleTolNA('metal');
+  const shaftTA2=document.getElementById('shaft-thruall')?.checked;if(shaftTA2)handleShaftThruAll();
   updateScoreAndDots();
 }
 function loadFromStorage(){
@@ -1685,6 +1869,7 @@ function confirmClear(){
   loadComps([]);loadBoltData([]);loadDevRows([]);loadDevLogRows([]);
   setApproved(false,'');isApproved=false;
   document.getElementById('approval-pwd').value='';
+  massMode='g';const mb=document.getElementById('mass-mode-btn');if(mb)mb.textContent='[ g ]';
   updateCollabState();updateContinuityState();updateDevState();updateStats();updateScoreAndDots();
   autoFillDate();
 }
