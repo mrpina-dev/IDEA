@@ -163,7 +163,7 @@ input[type="text"],input[type="number"],input[type="password"],textarea{cursor:u
 .table-container{overflow-x:auto;margin-bottom:10px;border:1px solid rgba(0,255,65,.18);background:var(--bg2);padding-bottom:8px}
 #comp-table{width:100%;border-collapse:collapse;min-width:1200px}
 #comp-table th{background:rgba(0,255,65,.05);color:var(--green);font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:1px;text-transform:uppercase;text-align:left;padding:10px;border-bottom:1px solid rgba(0,255,65,.18);border-right:1px solid rgba(0,255,65,.05);vertical-align:middle;cursor:help}
-#comp-table td{padding:0;border-bottom:1px solid rgba(0,255,65,.05);border-right:1px solid rgba(0,255,65,.05);background:var(--bg1);position:relative;vertical-align:top}
+#comp-table td{padding:0;border-bottom:1px solid rgba(0,255,65,.05);border-right:1px solid rgba(0,255,65,.05);background:var(--bg1);position:relative;vertical-align:middle}
 #comp-table tbody tr{transition:background .2s}
 #comp-table tbody tr:hover{background:rgba(0,255,65,.03)}
 #comp-table td input,#comp-table td select{width:100%;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--white);font-family:'Share Tech Mono',monospace;padding:8px 10px;box-sizing:border-box;font-size:12px}
@@ -173,7 +173,11 @@ input[type="text"],input[type="number"],input[type="password"],textarea{cursor:u
 #comp-table td input:focus,#comp-table td select:focus{outline:none;background:rgba(0,255,65,.05);border-bottom-color:var(--green)}
 .custom-hidden-input{width:100%;margin-top:0;background:rgba(0,255,65,.05)!important;border-top:1px dashed rgba(0,255,65,.3)!important;color:var(--gold)!important;padding:6px 10px!important;font-size:11px!important;box-sizing:border-box}
 .custom-hidden-input:focus{border-bottom-color:var(--gold)!important}
-/* hover unit cell (replaces dual-cell and mass-cell) */
+/* dual-cell (thickness / OD columns) */
+.dual-cell{display:flex;flex-direction:column;width:100%;justify-content:center;}
+.unit-label{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--dim);padding:2px 8px;letter-spacing:.5px;text-align:left;background:rgba(0,255,65,.04);}
+.dual-sep{height:1px;background:rgba(0,255,65,.1);width:100%;}
+/* hover unit cell (mass column) */
 .hover-unit-cell{position:relative;}
 .hover-unit-cell input[type="number"]{font-size:11px;padding:6px 8px;width:100%;}
 .hover-unit-label{display:none;position:absolute;top:100%;left:0;background:var(--bg2);border:1px solid rgba(0,255,65,.22);color:var(--dim);font-family:'Share Tech Mono',monospace;font-size:9px;padding:2px 8px;white-space:nowrap;z-index:50;pointer-events:none;letter-spacing:.5px;}
@@ -183,7 +187,7 @@ input[type="text"],input[type="number"],input[type="password"],textarea{cursor:u
 #ss-mass .image-item,#ss-iso .image-item,#ss-top .image-item,#ss-side .image-item{display:block;margin-bottom:10px;}
 #ss-mass .image-item img,#ss-iso .image-item img,#ss-top .image-item img,#ss-side .image-item img{width:100%;height:auto;min-height:200px;object-fit:cover;}
 /* row image cell */
-.row-img-cell{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px}
+.row-img-cell{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:4px}
 .row-img-cell .row-thumb{width:60px;height:40px;object-fit:cover;border:1px solid rgba(0,255,65,.25);display:none;cursor:zoom-in}
 .row-img-cell .row-upload-btn{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--dim);background:transparent;border:1px dashed rgba(0,255,65,.2);padding:3px 6px;cursor:pointer;text-transform:uppercase;white-space:nowrap}
 .row-img-cell .row-upload-btn:hover{color:var(--green);border-color:rgba(0,255,65,.5)}
@@ -194,7 +198,7 @@ input[type="text"],input[type="number"],input[type="password"],textarea{cursor:u
 .row-ss-capture{font-family:'Share Tech Mono',monospace;font-size:7px;color:var(--green);letter-spacing:.5px;animation:capture-blink 1.6s step-start infinite;white-space:nowrap}
 @keyframes capture-blink{0%,49%{opacity:1}50%,100%{opacity:.2}}
 /* supplier cell */
-.supplier-wrap{display:flex;flex-direction:column}
+.supplier-wrap{display:flex;flex-direction:column;justify-content:center}
 .supplier-wrap input[type="text"]{font-size:11px;padding:6px 8px}
 .supplier-wrap .hw-chk-row{display:flex;align-items:center;gap:6px;padding:4px 8px;background:rgba(200,255,0,.03);border-top:1px solid rgba(200,255,0,.1)}
 .supplier-wrap .hw-chk-row input[type="checkbox"]{width:12px;height:12px;accent-color:var(--gold);flex-shrink:0;cursor:pointer}
@@ -516,9 +520,11 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
   .tol-card,.val-card,.stat-card{break-inside:avoid}
   .image-item img,.row-thumb{box-shadow:none!important}
   #tb-save-status{display:none!important}
+  .dual-cell input{display:inline!important;width:auto!important}
+  .unit-label{display:inline-block!important;padding:0 2px!important;font-size:8px!important;}
+  .dual-sep{display:none!important;}
   .hover-unit-cell input{display:inline!important;width:auto!important}
   .hover-unit-label{display:inline-block!important;position:static!important;border:none!important;background:transparent!important;color:var(--dim)!important;font-size:8px!important;padding:0 2px!important;margin-left:2px;}
-  .hover-unit-cell .hover-hidden-input{display:none!important}
   .instructor-table{display:table!important;width:100%;border-collapse:collapse;margin-top:24px;page-break-inside:avoid}
   .instructor-table th,.instructor-table td{border:1px solid rgba(0,255,65,.25);padding:8px 12px;font-family:'Share Tech Mono',monospace;font-size:10px;text-align:left}
   .instructor-table th{background:rgba(0,255,65,.05);color:var(--dim);font-size:9px;letter-spacing:2px;text-transform:uppercase}
@@ -1659,8 +1665,8 @@ function addTableRow(tbodyId,data){
     <td style="width:150px;"><input type="text" class="input-name" value="${esc(d.name)}" placeholder="Component name" style="width:100%;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--white);font-family:'Share Tech Mono',monospace;padding:8px 10px;font-size:12px;"></td>
     <td style="width:130px;">${(()=>{let isC=d.mat&&!matOpts.includes(d.mat)&&d.mat!=='Select...';let sv=isC?'Other':(d.mat||'Select...');let h=`<select class="input-mat" onchange="checkCustom(this)">`;matOpts.forEach(o=>h+=`<option value="${o}"${o===sv?' selected':''}>${o}</option>`);h+=`</select><input type="text" class="input-mat-custom custom-hidden-input" style="display:${isC?'block':'none'}" value="${isC?esc(d.mat):''}" placeholder="Specify..." oninput="updateStats();saveToStorage();">`;return h;})()}</td>
     <td style="width:120px;">${buildSelect('input-proc',pOpts,d.proc)}</td>
-    <td style="width:90px;" class="hover-unit-cell"><input type="number" class="input-thick-in" step="0.01" min="0" max="4" value="${d.thickIn}" placeholder="0.00 in" oninput="syncDual(this,'thick','in');updateStats();saveToStorage();updateScoreAndDots()"><input type="number" class="input-thick-mm hover-hidden-input" step="0.01" min="0" max="100" value="${d.thickMm}" placeholder="0.0" style="display:none" tabindex="-1" readonly><span class="hover-unit-label thick-hover-label">${d.thickMm?parseFloat(d.thickMm).toFixed(1)+' mm':''}</span></td>
-    <td style="width:90px;" class="hover-unit-cell"><input type="number" class="input-od-in" step="0.01" min="0" max="5.5" value="${d.odIn}" placeholder="0.00 in" oninput="syncDual(this,'od','in');updateStats();saveToStorage();updateScoreAndDots()"><input type="number" class="input-od-mm hover-hidden-input" step="0.1" min="0" max="140" value="${d.odMm}" placeholder="0.0" style="display:none" tabindex="-1" readonly><span class="hover-unit-label od-hover-label">${d.odMm?parseFloat(d.odMm).toFixed(1)+' mm':''}</span></td>
+    <td style="width:90px;"><div class="dual-cell"><div class="unit-label">in</div><input type="number" class="input-thick-in" step="0.01" min="0" max="4" value="${d.thickIn}" placeholder="0.00" oninput="syncDual(this,'thick','in');updateStats();saveToStorage();updateScoreAndDots()"><div class="dual-sep"></div><div class="unit-label">mm</div><input type="number" class="input-thick-mm" step="0.01" min="0" max="100" value="${d.thickMm}" placeholder="0.0" oninput="syncDual(this,'thick','mm');updateStats();saveToStorage();updateScoreAndDots()"></div></td>
+    <td style="width:90px;"><div class="dual-cell"><div class="unit-label">in</div><input type="number" class="input-od-in" step="0.01" min="0" max="5.5" value="${d.odIn}" placeholder="0.00" oninput="syncDual(this,'od','in');updateStats();saveToStorage();updateScoreAndDots()"><div class="dual-sep"></div><div class="unit-label">mm</div><input type="number" class="input-od-mm" step="0.1" min="0" max="140" value="${d.odMm}" placeholder="0.0" oninput="syncDual(this,'od','mm');updateStats();saveToStorage();updateScoreAndDots()"></div></td>
     <td style="width:90px;" class="hover-unit-cell"><input type="number" class="input-mass-g" data-mass-unit="${d.massUnit||'g'}" step="0.1" min="0" value="${d.massRaw||d.massG}" placeholder="${massMode==='lbs'?'0.000 lbs':'0.0 g'}" oninput="updateStats();saveToStorage();updateScoreAndDots();updateMassHoverLabel(this)"><span class="hover-unit-label mass-hover-label">${(()=>{if(!d.massRaw&&!d.massG)return'';const v=parseFloat(d.massRaw||d.massG)||0;return(d.massUnit||'g')==='lbs'?lbsToG(v).toFixed(1)+' g':gToLbs(v)+' lbs';})()}</span></td>
     <td style="width:160px;"><div class="supplier-wrap" style="opacity:${isHw?'1':'.4'}"><input type="text" class="input-supplier" value="${esc(d.supplier)}" placeholder="Paste product URL..." style="width:100%;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--ice);font-family:'Share Tech Mono',monospace;padding:8px 10px;font-size:10px;"><div class="hw-chk-row"><input type="checkbox" class="input-hw-dl" ${d.hwDl?'checked':''} id="${hwdlId}" onchange="updateScoreAndDots();saveToStorage()"><label for="${hwdlId}">3D model downloaded &amp; inserted</label></div></div></td>
     <td style="width:130px;">${buildSelect('input-iface',ifaceOpts,d.iface)}</td>
@@ -1673,13 +1679,9 @@ function addTableRow(tbodyId,data){
 }
 function syncDual(el,field,unit){
   const tr=el.closest('tr');if(!tr)return;
-  if(unit==='in'){
-    const mmVal=el.value!==''?inToMm(parseFloat(el.value)||0):NaN;
-    const mm=tr.querySelector(`.input-${field}-mm`);
-    if(mm)mm.value=isNaN(mmVal)?'':mmVal;
-    const lbl=tr.querySelector(`.${field}-hover-label`);
-    if(lbl)lbl.textContent=el.value!==''&&!isNaN(mmVal)?mmVal.toFixed(1)+' mm':'';
-  }
+  const val=parseFloat(el.value);if(isNaN(val))return;
+  if(unit==='in'){const mm=tr.querySelector(`.input-${field}-mm`);if(mm)mm.value=inToMm(val);}
+  else{const inch=tr.querySelector(`.input-${field}-in`);if(inch)inch.value=mmToIn(val);}
 }
 function deleteCompRow(btn){btn.closest('tr').remove();updateStats();updateScoreAndDots();saveToStorage();}
 function duplicateCompRow(btn){
@@ -1687,12 +1689,6 @@ function duplicateCompRow(btn){
   tr.parentNode.insertBefore(clone,tr.nextSibling);
   const orig=tr.querySelectorAll('input,select'),cloned=clone.querySelectorAll('input,select');
   orig.forEach((el,i)=>{cloned[i].value=el.value;});
-  // Sync hover labels for cloned row
-  ['thick','od'].forEach(field=>{
-    const mm=clone.querySelector(`.input-${field}-mm`);
-    const lbl=clone.querySelector(`.${field}-hover-label`);
-    if(lbl&&mm)lbl.textContent=mm.value?parseFloat(mm.value).toFixed(1)+' mm':'';
-  });
   const massInp=clone.querySelector('.input-mass-g');
   if(massInp)updateMassHoverLabel(massInp);
   clone.querySelectorAll('input:not(.custom-hidden-input),select').forEach(el=>{if(!el.onchange&&!el.oninput)el.addEventListener('input',()=>{updateScoreAndDots();saveToStorage();updateStats();});});
@@ -1783,7 +1779,7 @@ function handleRowImg(input){
 }
 
 /* -------- BOLT CLEARANCE TABLE -------- */
-const headOpts=['Select...','Counterbore (socket head flush/below)','Through clearance (head exposed)','N/A'];
+const headOpts=['Select...','Counterbore (socket head flush/below)','Countersink (flat head flush/below)','Through clearance (head exposed)','N/A'];
 const nutOpts=['Select...','Nut trap (captured in printed pocket)','Accessible face (nut on surface)','N/A'];
 function addBoltRow(d){
   d=d||{};const tbody=document.getElementById('bolt-body');const tr=document.createElement('tr');
@@ -1998,7 +1994,7 @@ function updateScoreAndDots(){
     const fast=comps.reduce((s,c)=>{const p=c.proc||'';if(fkw2.test(p))return s+(c.qty||1);return s;},0);
     if(fast>=3)score+=2;
     const hwComps=comps.filter(c=>c.mat==='Hardware / COTS');
-    if(hwComps.length===0)score+=6;else{const hwOk=hwComps.filter(c=>c.supplier&&c.hwDl).length;score+=Math.round(6*hwOk/hwComps.length);}
+    if(hwComps.length>0){const hwOk=hwComps.filter(c=>c.supplier&&c.hwDl).length;score+=Math.round(6*hwOk/hwComps.length);}
     if(document.querySelectorAll('#bolt-body tr').length>0)score+=6;
   }
   // M3 (20)
@@ -2172,7 +2168,7 @@ function hideClearDialog(){document.getElementById('clear-dialog').classList.rem
 function showRestoreDialog(){document.getElementById('restore-dialog').classList.add('active');}
 function hideRestoreDialog(){document.getElementById('restore-dialog').classList.remove('active');}
 function confirmClear(){
-  hideClearDialog();localStorage.removeItem(STORAGE_KEY);
+  hideClearDialog();localStorage.removeItem(STORAGE_KEY);localStorage.removeItem('m3_fitCalc_entries');
   document.querySelectorAll('[data-field]').forEach(el=>{if(el.type==='radio'||el.type==='checkbox')el.checked=false;else el.value='';});
   document.querySelectorAll('[data-mirror]').forEach(el=>el.textContent='');
   document.querySelectorAll('textarea[data-field]').forEach(ta=>ta.style.height='');
@@ -2182,6 +2178,7 @@ function confirmClear(){
   imgStore={'ss-mass':[],'ss-iso':[],'ss-top':[],'ss-side':[]};
   Object.keys(imgStore).forEach(z=>{const c=document.getElementById(z);if(c)c.innerHTML='';updateImgCount(z,0);});
   loadComps([]);loadBoltData([]);loadDevRows([]);loadDevLogRows([]);
+  document.getElementById('fit-entries').innerHTML='';fitEntries=[];fitEntryIdCounter=0;addFitEntry({typeId:1,name:'Hex Shaft Bore'});addFitEntry();
   setApproved(false,'');isApproved=false;
   document.getElementById('approval-pwd').value='';
   massMode='lbs';const mb=document.getElementById('mass-mode-btn');if(mb)mb.textContent='[ lbs ]';
@@ -2498,8 +2495,8 @@ function hexBoreFitCalcOk(){
   const first=document.querySelector('.fit-entry');
   if(!first)return false;
   const id=parseInt(first.id.replace('fit-entry-',''));
-  const nomIn=first.querySelector('.fc-nom-in')?.value||'';
-  if(!nomIn)return false;
+  const nomIn=first.querySelector('.fc-nom-in')?.value??'';
+  if(typeof nomIn!=='string'||nomIn.length===0)return false;
   const resultBox=document.getElementById('fc-result-'+id);
   return resultBox?.classList.contains('active')&&resultBox.textContent.trim()!==''||false;
 }
