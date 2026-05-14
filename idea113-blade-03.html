@@ -528,8 +528,6 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
   <span id="tb-save-status">AUTO-SAVE ON</span>
 </div>
 <canvas id="bg-canvas"></canvas>
-<style>
-</style>
 <button id="mx-toggle-btn" class="no-print">[ Canvas Uplink ]</button>
 <div id="matrix-controls" class="no-print">
   <div style="font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:3px;color:var(--green);border-bottom:1px solid rgba(0,255,65,.2);padding-bottom:8px;margin-bottom:4px;text-transform:uppercase;">Canvas Uplink</div>
@@ -2037,7 +2035,6 @@ function updateScoreAndDots(){
 /* -------- SAVE STATUS -------- */
 let saveTimer=null;
 let autoSaveEnabled=true;
-let autoSaveInterval=null;
 function flashSave(){
   const el=document.getElementById('tb-save-status');
   if(!autoSaveEnabled){el.textContent='SAVED';el.classList.add('flash');clearTimeout(saveTimer);saveTimer=setTimeout(()=>{el.textContent='AUTO-SAVE OFF';el.classList.remove('flash');el.classList.add('autosave-off');},2200);return;}
