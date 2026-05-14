@@ -37,8 +37,9 @@ input[type="text"],input[type="number"],input[type="password"],textarea{cursor:u
 .tb-btn.danger{border-color:rgba(255,140,0,.28);color:var(--amber);background:rgba(255,140,0,.03)}
 .tb-btn.danger:hover{background:rgba(255,140,0,.1);border-color:rgba(255,140,0,.6)}
 #tb-score{font-family:'Orbitron',sans-serif;font-size:11px;color:var(--gold);letter-spacing:2px;padding:6px 12px;border:1px solid rgba(200,255,0,.2);background:rgba(200,255,0,.04);white-space:nowrap}
-#tb-save-status{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:1px;margin-left:auto;transition:color .3s}
-#tb-save-status.flash{color:var(--green)}
+#tb-save-status{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:1.5px;position:fixed;right:16px;top:8px;z-index:1100;padding:5px 12px;border:1px solid rgba(74,122,82,.25);background:rgba(2,10,4,.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:color .35s,border-color .35s,background .35s,box-shadow .35s}
+#tb-save-status.flash{color:var(--green);border-color:var(--green);background:rgba(0,255,65,.08);box-shadow:0 0 12px rgba(0,255,65,.35),inset 0 0 6px rgba(0,255,65,.06)}
+#tb-save-status.storage-full{color:var(--amber);border-color:var(--amber);background:rgba(255,140,0,.06);box-shadow:0 0 10px rgba(255,140,0,.3)}
 #bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.55}
 .page{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:32px 32px 60px}
 #version-warning{display:none;background:rgba(255,140,0,.08);border:1px solid var(--amber);padding:10px 16px;margin-bottom:16px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--amber);letter-spacing:1px;line-height:1.6}
@@ -111,7 +112,12 @@ input[type="text"],input[type="number"],input[type="password"],textarea{cursor:u
 .rubric-toggle{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;padding:3px 10px;border:1px solid rgba(0,255,65,.18);background:transparent;color:var(--dim);cursor:pointer;text-transform:uppercase;transition:color .2s,background .2s;white-space:nowrap}
 .rubric-toggle:hover{color:var(--green);background:rgba(0,255,65,.05)}
 .rubric-toggle.open{color:rgba(74,122,82,.7)}
-.module-body{padding:20px 24px;display:flex;flex-direction:column;gap:14px;position:relative;z-index:1}
+.module-body{padding:20px 24px;display:flex;flex-direction:column;gap:14px;position:relative;z-index:1;overflow:hidden;transition:max-height .4s ease,padding .4s ease}
+.module.collapsed .module-body{max-height:0!important;padding-top:0;padding-bottom:0}
+.module.collapsed .rubric-panel{max-height:0!important;border-bottom-width:0!important}
+.module-header{cursor:pointer;user-select:none}
+.mod-chevron{font-size:14px;color:var(--dim);margin-left:4px;transition:transform .3s ease;display:inline-block;line-height:1}
+.module.collapsed .mod-chevron{transform:rotate(-180deg)}
 .rubric-panel{max-height:0;overflow:hidden;transition:max-height .35s ease;background:rgba(0,255,65,.015);border-bottom:0 solid rgba(0,255,65,.1)}
 .rubric-panel.open{max-height:900px;border-bottom:1px solid rgba(0,255,65,.1)}
 .rubric-inner{padding:12px 24px 16px}
@@ -166,6 +172,12 @@ input[type="text"],input[type="number"],input[type="password"],textarea{cursor:u
 .row-img-cell .row-thumb{width:60px;height:40px;object-fit:cover;border:1px solid rgba(0,255,65,.25);display:none;cursor:zoom-in}
 .row-img-cell .row-upload-btn{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--dim);background:transparent;border:1px dashed rgba(0,255,65,.2);padding:3px 6px;cursor:pointer;text-transform:uppercase;white-space:nowrap}
 .row-img-cell .row-upload-btn:hover{color:var(--green);border-color:rgba(0,255,65,.5)}
+/* compact screenshot hint */
+.row-ss-hint{display:flex;align-items:center;gap:2px;flex-wrap:nowrap;margin-top:2px}
+.row-ss-key{font-family:'Orbitron',sans-serif;font-size:7px;color:var(--green);background:rgba(0,255,65,.07);border:1px solid rgba(0,255,65,.4);border-bottom:2px solid rgba(0,255,65,.6);padding:1px 4px;letter-spacing:.5px;white-space:nowrap}
+.row-ss-plus{font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(0,255,65,.4)}
+.row-ss-capture{font-family:'Share Tech Mono',monospace;font-size:7px;color:var(--green);letter-spacing:.5px;animation:capture-blink 1.6s step-start infinite;white-space:nowrap}
+@keyframes capture-blink{0%,49%{opacity:1}50%,100%{opacity:.2}}
 /* supplier cell */
 .supplier-wrap{display:flex;flex-direction:column}
 .supplier-wrap input[type="text"]{font-size:11px;padding:6px 8px}
@@ -309,18 +321,33 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
 .sw-override-body.open{max-height:600px}
 .sw-override-inner{padding:4px 16px 14px}
 /* === SCREENSHOT ANIMATION STRIP === */
-.ss-anim-strip{font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(0,255,65,.45);letter-spacing:1px;margin-bottom:6px;min-height:18px}
-.ss-anim-label{font-size:9px;color:rgba(0,255,65,.3);letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:2px}
-.ss-anim-step{display:inline-block;animation:ss-step-cycle 7.5s steps(1) infinite}
-@keyframes ss-step-cycle{
-  0%,31%{content:'';} /* placeholder for JS text */
-  0%{opacity:1}
-  33%{opacity:1}
-  34%{opacity:0}
-  66%{opacity:0}
-  67%{opacity:1}
-  100%{opacity:1}
+.ss-anim-strip{background:rgba(0,0,0,.65);border:1px solid rgba(0,255,65,.35);box-shadow:0 0 14px rgba(0,255,65,.18),inset 0 0 10px rgba(0,255,65,.04);padding:12px 14px;margin-bottom:8px;display:flex;flex-direction:column;align-items:center;gap:8px;overflow:hidden;position:relative}
+.ss-anim-strip::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--green),transparent);animation:ss-topline 3s ease-in-out infinite}
+@keyframes ss-topline{0%,100%{opacity:.3}50%{opacity:1}}
+.ss-key-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center}
+.ss-key{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;color:var(--green);background:rgba(0,255,65,.08);border:1px solid rgba(0,255,65,.5);border-bottom:3px solid rgba(0,255,65,.7);padding:5px 10px;letter-spacing:1px;text-shadow:0 0 8px rgba(0,255,65,.6);box-shadow:0 0 6px rgba(0,255,65,.2),inset 0 0 4px rgba(0,255,65,.06);animation:ss-key-glow 2s ease-in-out infinite}
+@keyframes ss-key-glow{0%,100%{box-shadow:0 0 4px rgba(0,255,65,.15),inset 0 0 2px rgba(0,255,65,.04)}50%{box-shadow:0 0 12px rgba(0,255,65,.5),inset 0 0 6px rgba(0,255,65,.1)}}
+.ss-key-plus{font-family:'Orbitron',sans-serif;font-size:12px;color:rgba(0,255,65,.5);font-weight:700}
+.ss-screen-area{width:100%;max-width:220px;height:50px;background:rgba(0,0,0,.4);border:1px solid rgba(0,255,65,.2);position:relative;overflow:hidden}
+.ss-select-rect{position:absolute;top:8px;left:10px;width:0;height:0;border:1.5px dashed rgba(0,255,65,.7);box-shadow:0 0 6px rgba(0,255,65,.3);animation:ss-draw-rect 9s ease-in-out infinite}
+@keyframes ss-draw-rect{
+  0%{width:0;height:0;opacity:1}
+  15%{width:0;height:0;opacity:1}
+  45%{width:160px;height:0;opacity:1}
+  65%{width:160px;height:30px;opacity:1}
+  75%{width:160px;height:30px;opacity:1}
+  82%{width:160px;height:30px;opacity:0}
+  100%{width:0;height:0;opacity:0}
 }
+.ss-captured{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;color:var(--green);letter-spacing:2px;text-shadow:var(--glow-green);opacity:0;animation:ss-captured-flash 9s ease-in-out infinite}
+@keyframes ss-captured-flash{
+  0%,74%{opacity:0}
+  78%{opacity:1}
+  88%{opacity:1}
+  95%{opacity:0}
+  100%{opacity:0}
+}
+.ss-anim-label{font-family:'Share Tech Mono',monospace;font-size:8px;color:rgba(0,255,65,.45);letter-spacing:2px;text-transform:uppercase;display:block;text-align:center}
 /* === APPROVAL SUCCESS REDESIGN === */
 .approval-success{display:none;margin-top:18px;padding:24px 28px;background:rgba(0,255,65,.04);border:2px solid var(--green);box-shadow:0 0 24px rgba(0,255,65,.18),inset 0 0 16px rgba(0,255,65,.04);position:relative;overflow:hidden}
 .approval-success::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent)}
@@ -331,6 +358,24 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
 .row-img-cell .row-thumb{width:100%;height:80px;min-height:80px;object-fit:cover;border:1px solid rgba(0,255,65,.25);display:none;cursor:zoom-in}
 /* === IMAGE GRID FULL-WIDTH === */
 .image-item img{width:100%;height:90px;min-height:80px;object-fit:cover;border:1px solid rgba(0,255,65,.25);cursor:zoom-in;transition:border-color .2s;display:block}
+/* === IMAGE COMPOSITING EFFECTS === */
+.image-item{position:relative}
+.image-item img{box-shadow:0 0 6px #0f0,0 0 2px rgba(0,255,65,.6)!important;border-color:rgba(0,255,65,.6)!important}
+/* scanline overlay */
+.image-item::after{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.12) 3px,rgba(0,0,0,.12) 4px);z-index:2}
+/* vignette overlay via before */
+.image-item::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55) 100%);z-index:3}
+/* corner brackets */
+.image-item .img-corner{position:absolute;width:10px;height:10px;border-color:rgba(0,255,65,.8);border-style:solid;z-index:4;pointer-events:none}
+.image-item .img-corner.tl{top:3px;left:3px;border-width:2px 0 0 2px}
+.image-item .img-corner.tr{top:3px;right:3px;border-width:2px 2px 0 0}
+.image-item .img-corner.bl{bottom:22px;left:3px;border-width:0 0 2px 2px}
+.image-item .img-corner.br{bottom:22px;right:3px;border-width:0 2px 2px 0}
+/* row-img-cell thumb compositing */
+.row-img-cell{position:relative}
+.row-thumb{box-shadow:0 0 6px #0f0,0 0 2px rgba(0,255,65,.6)!important;border-color:rgba(0,255,65,.5)!important}
+@media print{.image-item::after,.image-item::before,.image-item .img-corner,.row-thumb{box-shadow:none!important;background:none!important;border:none!important}}
+
 /* canvas uplink */
 #mx-toggle-btn{position:fixed;bottom:20px;right:20px;z-index:1001;background:rgba(2,10,4,.85);border:1px solid var(--green);color:var(--green);font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:2px;padding:8px 16px;cursor:pointer;text-transform:uppercase;box-shadow:0 0 10px rgba(0,255,65,.1);transition:all .3s}
 #mx-toggle-btn:hover{background:rgba(0,255,65,.1);box-shadow:0 0 15px rgba(0,255,65,.4)}
@@ -363,7 +408,8 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   #bg-canvas,#scroll-progress,#toolbar,.submit-callout,.sent-count,.add-row-btn,.rubric-toggle,.rubric-panel,
   .dialog-overlay,#custom-tooltip,.action-btn.del,.upload-zone,.img-remove,
-  #mx-toggle-btn,#matrix-controls,.approval-input-row,.approval-error,.module-locked-overlay{display:none!important}
+  #mx-toggle-btn,#matrix-controls,.approval-input-row,.approval-error,.module-locked-overlay,
+  .ss-anim-strip,.row-ss-hint,.row-ss-capture,.image-item::after,.image-item::before,.img-corner{display:none!important}
   .info-field input,.field-row input[type="text"],.field-row input[type="number"],.field-row input[type="password"],.field-row textarea,.field-row select,.collab-names input,.tol-inputs input,.val-card-inputs input,.approval-gate input{display:none!important}
   input[type="checkbox"],input[type="radio"]{display:none!important}
   .print-mirror{display:block!important}
@@ -380,6 +426,8 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
   .module-locked-overlay{display:none!important}
   .approval-success{display:block!important}
   .tol-card,.val-card,.stat-card{break-inside:avoid}
+  .image-item img,.row-thumb{box-shadow:none!important}
+  #tb-save-status{display:none!important}
   .dual-cell input,.mass-cell input{display:inline!important;width:auto!important}
   .instructor-table{display:table!important;width:100%;border-collapse:collapse;margin-top:24px;page-break-inside:avoid}
   .instructor-table th,.instructor-table td{border:1px solid rgba(0,255,65,.25);padding:8px 12px;font-family:'Share Tech Mono',monospace;font-size:10px;text-align:left}
@@ -400,7 +448,7 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
   <button class="tb-btn" style="border-color:rgba(0,240,255,.4);color:var(--cyan);background:rgba(0,240,255,.05);" onclick="showRestoreDialog()">[ Restore Defaults ]</button>
   <button class="tb-btn danger" onclick="showClearDialog()">[ Clear All ]</button>
   <span id="tb-score">0 / 80 pts</span>
-  <span id="tb-save-status">Auto-save on</span>
+  <span id="tb-save-status">AUTO-SAVE ON</span>
 </div>
 <canvas id="bg-canvas"></canvas>
 <style>
@@ -518,10 +566,11 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
 
 <!-- MODULE 01: DESIGN CONTINUITY -->
 <div class="module">
-  <div class="module-header">
+  <div class="module-header" onclick="toggleModuleCollapse(1,event)">
     <span class="mod-num">01</span><span class="mod-title">Design Continuity</span><span class="mod-pts">5 pts</span>
     <span class="mod-dot" id="dot-01"></span>
     <button class="rubric-toggle" id="rt-01" onclick="toggleRubric(1)">[ Rubric ]</button>
+    <span class="mod-chevron" id="chev-01">&#9662;</span>
   </div>
   <div class="rubric-panel" id="rubric-01">
     <div class="rubric-inner">
@@ -566,10 +615,11 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
 
 <!-- MODULE 02: COMPONENT CAD DOCUMENTATION -->
 <div class="module">
-  <div class="module-header">
+  <div class="module-header" onclick="toggleModuleCollapse(2,event)">
     <span class="mod-num">02</span><span class="mod-title">Component CAD Documentation</span><span class="mod-pts">30 pts</span>
     <span class="mod-dot" id="dot-02"></span>
     <button class="rubric-toggle" id="rt-02" onclick="toggleRubric(2)">[ Rubric ]</button>
+    <span class="mod-chevron" id="chev-02">&#9662;</span>
   </div>
   <div class="rubric-panel" id="rubric-02">
     <div class="rubric-inner">
@@ -583,20 +633,32 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
   <div class="module-body">
     <p class="prompt">Document every component in your SolidWorks assembly. Pull all dimensions and mass values directly from SolidWorks &mdash; do not estimate. OD is the diameter of the circle the component traces when spinning: measure between the two furthest points in any direction, even for non-circular geometry.</p>
 
-    <!-- SW MASS OVERRIDE CALLOUT (Change 6) -->
+    <!-- SW MEASUREMENT TUTORIAL LINK -->
+    <div style="margin-bottom:10px;">
+      <a href="https://youtu.be/4KrSyDHD6uA?si=YH5w-ntCEHHIYZJJ" target="_blank" rel="noopener" class="rulebook-link-btn" style="background:var(--gold);color:var(--bg0);font-size:11px;padding:8px 18px;letter-spacing:1.5px;" onmouseover="this.style.background='#fff'" onmouseout="this.style.background='var(--gold)'">&#9654; Watch: SolidWorks Measurement Tool</a>
+    </div>
+
+    <!-- SW MASS OVERRIDE CALLOUT (Change 10) -->
     <div class="sw-override-callout">
-      <div class="sw-override-header" onclick="this.nextElementSibling.classList.toggle('open');this.querySelector('.sw-override-arrow').style.transform=this.nextElementSibling.classList.contains('open')?'rotate(90deg)':'rotate(0deg)'">
-        <span class="sw-override-title">How to Override SolidWorks Mass Properties</span>
+      <div class="sw-override-header" onclick="(function(h){var b=h.nextElementSibling;b.classList.toggle('open');h.querySelector('.sw-override-arrow').style.transform=b.classList.contains('open')?'rotate(90deg)':'rotate(0deg)';})(this)">
+        <span class="sw-override-title">How to Override Mass Properties &mdash; click to expand</span>
         <span class="sw-override-arrow">&#9654;</span>
       </div>
       <div class="sw-override-body">
         <div class="sw-override-inner">
-          <div class="prework-items" style="margin-top:4px;">
-            <div class="prework-item"><em>Step 1</em> &mdash; Right-click the part in the feature tree and select <em>Properties</em>.</div>
-            <div class="prework-item"><em>Step 2</em> &mdash; Check <em>Override Mass Properties</em>.</div>
-            <div class="prework-item"><em>Step 3</em> &mdash; Enter the measured mass in grams (convert: <em>1 oz = 28.35 g</em>, <em>1 lb = 453.6 g</em>).</div>
-            <div class="prework-item">Use this for <em>physically weighed parts</em> or when using Bambu Studio sliced mass.</div>
-            <div class="prework-item"><em>For Bambu Studio:</em> open the sliced file, check the mass shown in the print preview, and enter that value here.</div>
+          <div class="prework-items" style="margin-top:6px;">
+            <div class="prework-item" style="flex-direction:column;align-items:flex-start;gap:4px;"><em style="color:var(--amber);font-size:10px;letter-spacing:1px;text-transform:uppercase;">Context</em><span>SolidWorks calculates part mass from geometry and assigned material density. Two situations require overriding this value:</span></div>
+            <div class="prework-item" style="padding-left:16px;">You have <em>physically weighed</em> a completed or prototype part using a scale &mdash; this is the most accurate value.</div>
+            <div class="prework-item" style="padding-left:16px;">You have <em>sliced a 3D printed part in Bambu Studio</em> which shows the actual filament mass including infill percentage, walls, and supports &mdash; this is more accurate than SolidWorks geometry mass for printed parts.</div>
+            <div class="prework-item" style="flex-direction:column;align-items:flex-start;gap:4px;margin-top:6px;"><em style="color:var(--amber);font-size:10px;letter-spacing:1px;text-transform:uppercase;">Steps using the official SolidWorks procedure</em></div>
+            <div class="prework-item"><em>Step 1</em> &mdash; Open your part file in SolidWorks.</div>
+            <div class="prework-item"><em>Step 2</em> &mdash; Go to <em>Tools &rarr; Evaluate &rarr; Mass Properties</em>.</div>
+            <div class="prework-item"><em>Step 3</em> &mdash; In the Mass Properties dialog, click <em>Override Mass Properties</em>.</div>
+            <div class="prework-item"><em>Step 4</em> &mdash; Check the <em>Override mass</em> checkbox.</div>
+            <div class="prework-item"><em>Step 5</em> &mdash; Enter your measured or sliced mass value. SolidWorks uses grams internally &mdash; convert if needed: <em>1 lb = 453.6 g</em>, <em>1 oz = 28.35 g</em>.</div>
+            <div class="prework-item"><em>Step 6</em> &mdash; Click OK then Close. The overridden value will show in the Mass Properties dialog with an asterisk.</div>
+            <div class="prework-item"><em>Step 7</em> &mdash; Enter this value in the mass column of the component table.</div>
+            <div class="prework-item" style="flex-direction:column;align-items:flex-start;gap:4px;margin-top:6px;border-top:1px solid rgba(255,140,0,.2);padding-top:8px;"><em style="color:var(--amber);">Note:</em><span>Override applies per configuration. If you have multiple configurations, select <em>All Configurations</em> unless you have a reason to override only the active one.</span></div>
           </div>
         </div>
       </div>
@@ -611,7 +673,7 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
           <th style="width:120px;" data-tip="Process — Manufacturing process or hardware type. Changes to hardware sub-options when Hardware / COTS is selected.">Process</th>
           <th style="width:90px;" data-tip="Final Thickness — Modeled thickness pulled from SolidWorks. Enter in inches; mm auto-converts. For hardware, enter the installed height."><div style="line-height:1.3">Thickness<br><span style="font-size:8px;color:var(--cyan);font-weight:normal;letter-spacing:1px">in / mm</span></div></th>
           <th style="width:90px;" data-tip="Spinning OD — Outer diameter of the circle this component traces when spinning. Measure between the furthest two points in any direction. Enter in inches; mm auto-converts. Max 5.000 in / 127.0 mm."><div style="line-height:1.3">Spin OD<br><span style="font-size:8px;color:var(--cyan);font-weight:normal;letter-spacing:1px">in / mm</span></div></th>
-          <th style="width:90px;" data-tip="Mass — Component mass. Toggle between grams-primary and lbs-primary input mode using the button below."><div style="line-height:1.3">Mass<br><button class="mass-toggle-btn" id="mass-mode-btn" onclick="toggleMassMode()" title="Toggle input unit">[ g ]</button></div></th>
+          <th style="width:90px;" data-tip="Mass — Component mass. Toggle between grams-primary and lbs-primary input mode using the button below."><div style="line-height:1.3">Mass<br><button class="mass-toggle-btn" id="mass-mode-btn" onclick="toggleMassMode()" title="Toggle input unit">[ lbs ]</button></div></th>
           <th style="width:160px;" data-tip="Supplier — For Hardware / COTS components: paste the full URL to the product page (McMaster-Carr, Grainger, etc.) and confirm the 3D model was downloaded and inserted into your assembly.">Supplier / HW</th>
           <th style="width:130px;" data-tip="Interface — How this component physically connects to adjacent components in the assembly.">Interface</th>
           <th style="width:80px;" data-tip="Screenshot — Upload a SolidWorks screenshot of this component.">Screenshot</th>
@@ -670,10 +732,11 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
 
 <!-- MODULE 03: TOLERANCE & FIT VERIFICATION -->
 <div class="module">
-  <div class="module-header">
+  <div class="module-header" onclick="toggleModuleCollapse(3,event)">
     <span class="mod-num">03</span><span class="mod-title">Tolerance &amp; Fit Verification</span><span class="mod-pts">20 pts</span>
     <span class="mod-dot" id="dot-03"></span>
     <button class="rubric-toggle" id="rt-03" onclick="toggleRubric(3)">[ Rubric ]</button>
+    <span class="mod-chevron" id="chev-03">&#9662;</span>
   </div>
   <div class="rubric-panel" id="rubric-03">
     <div class="rubric-inner">
@@ -872,10 +935,11 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
 
 <!-- MODULE 04: ASSEMBLY VALIDATION -->
 <div class="module">
-  <div class="module-header">
+  <div class="module-header" onclick="toggleModuleCollapse(4,event)">
     <span class="mod-num">04</span><span class="mod-title">Assembly Validation</span><span class="mod-pts">20 pts</span>
     <span class="mod-dot" id="dot-04"></span>
     <button class="rubric-toggle" id="rt-04" onclick="toggleRubric(4)">[ Rubric ]</button>
+    <span class="mod-chevron" id="chev-04">&#9662;</span>
   </div>
   <div class="rubric-panel" id="rubric-04">
     <div class="rubric-inner">
@@ -965,6 +1029,9 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
       <div class="val-card">
         <div class="val-card-label">SolidWorks Interference Detection</div>
         <div class="val-card-target">Evaluate &rarr; Interference Detection &rarr; Calculate &nbsp;|&nbsp; All conflicts must be resolved before submission</div>
+        <div style="margin-bottom:8px;">
+          <a href="https://youtu.be/NjsG8KW4Kp4?si=LrnXdSdr0y9cMzm3" target="_blank" rel="noopener" style="font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;color:var(--bg0);background:var(--cyan);padding:5px 12px;text-decoration:none;letter-spacing:1px;text-transform:uppercase;display:inline-block;transition:background .15s;" onmouseover="this.style.background='#fff'" onmouseout="this.style.background='var(--cyan)'">&#9654; Watch: Interference Detection Tutorial</a>
+        </div>
         <div style="margin-top:8px;">
           <div class="collab-options" style="gap:16px;flex-wrap:wrap;">
             <label class="collab-opt"><input type="radio" name="interference" value="clear" data-field="interference-result" onchange="checkInterference();saveToStorage();updateScoreAndDots()"> <span>No interference detected &mdash; all clear</span></label>
@@ -987,7 +1054,14 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
     <div class="grid-2" style="gap:14px;">
       <div>
         <label class="field-row" style="margin-bottom:6px;"><span style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;">01 &mdash; SolidWorks Mass Properties Dialog</span></label>
-        <div class="ss-anim-strip no-print" id="ssanim-mass"><span class="ss-anim-label">How to take a screenshot on Windows</span><span class="ss-anim-step" id="ssas-mass">&#8862; + SHIFT + S &rarr; drag to select</span></div>
+        <div class="ss-anim-strip no-print" id="ssanim-mass">
+          <span class="ss-anim-label">How to screenshot on Windows</span>
+          <div class="ss-key-row">
+            <span class="ss-key">WIN</span><span class="ss-key-plus">+</span><span class="ss-key">SHIFT</span><span class="ss-key-plus">+</span><span class="ss-key">S</span>
+          </div>
+          <div class="ss-screen-area"><div class="ss-select-rect"></div></div>
+          <span class="ss-captured">&#11044; CAPTURED</span>
+        </div>
         <div class="upload-zone no-print" onclick="document.getElementById('ss-mass-upload').click()" style="padding:12px">
           <div class="upload-zone-label">Click to upload mass properties screenshot</div>
           <input type="file" id="ss-mass-upload" accept="image/*" multiple style="display:none" onchange="handleUpload(this,'ss-mass',1)">
@@ -997,7 +1071,14 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
       </div>
       <div>
         <label class="field-row" style="margin-bottom:6px;"><span style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;">02 &mdash; Assembly Isometric View</span></label>
-        <div class="ss-anim-strip no-print"><span class="ss-anim-label">How to take a screenshot on Windows</span><span class="ss-anim-step" id="ssas-iso">&#8862; + SHIFT + S &rarr; drag to select</span></div>
+        <div class="ss-anim-strip no-print">
+          <span class="ss-anim-label">How to screenshot on Windows</span>
+          <div class="ss-key-row">
+            <span class="ss-key">WIN</span><span class="ss-key-plus">+</span><span class="ss-key">SHIFT</span><span class="ss-key-plus">+</span><span class="ss-key">S</span>
+          </div>
+          <div class="ss-screen-area"><div class="ss-select-rect"></div></div>
+          <span class="ss-captured">&#11044; CAPTURED</span>
+        </div>
         <div class="upload-zone no-print" onclick="document.getElementById('ss-iso-upload').click()" style="padding:12px">
           <div class="upload-zone-label">Click to upload isometric screenshot</div>
           <input type="file" id="ss-iso-upload" accept="image/*" multiple style="display:none" onchange="handleUpload(this,'ss-iso',1)">
@@ -1007,7 +1088,14 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
       </div>
       <div>
         <label class="field-row" style="margin-bottom:6px;"><span style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;">03 &mdash; Assembly Top View</span></label>
-        <div class="ss-anim-strip no-print"><span class="ss-anim-label">How to take a screenshot on Windows</span><span class="ss-anim-step" id="ssas-top">&#8862; + SHIFT + S &rarr; drag to select</span></div>
+        <div class="ss-anim-strip no-print">
+          <span class="ss-anim-label">How to screenshot on Windows</span>
+          <div class="ss-key-row">
+            <span class="ss-key">WIN</span><span class="ss-key-plus">+</span><span class="ss-key">SHIFT</span><span class="ss-key-plus">+</span><span class="ss-key">S</span>
+          </div>
+          <div class="ss-screen-area"><div class="ss-select-rect"></div></div>
+          <span class="ss-captured">&#11044; CAPTURED</span>
+        </div>
         <div class="upload-zone no-print" onclick="document.getElementById('ss-top-upload').click()" style="padding:12px">
           <div class="upload-zone-label">Click to upload top view screenshot</div>
           <input type="file" id="ss-top-upload" accept="image/*" multiple style="display:none" onchange="handleUpload(this,'ss-top',1)">
@@ -1017,7 +1105,14 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
       </div>
       <div>
         <label class="field-row" style="margin-bottom:6px;"><span style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;">04 &mdash; Assembly Cross-Section</span></label>
-        <div class="ss-anim-strip no-print"><span class="ss-anim-label">How to take a screenshot on Windows</span><span class="ss-anim-step" id="ssas-side">&#8862; + SHIFT + S &rarr; drag to select</span></div>
+        <div class="ss-anim-strip no-print">
+          <span class="ss-anim-label">How to screenshot on Windows</span>
+          <div class="ss-key-row">
+            <span class="ss-key">WIN</span><span class="ss-key-plus">+</span><span class="ss-key">SHIFT</span><span class="ss-key-plus">+</span><span class="ss-key">S</span>
+          </div>
+          <div class="ss-screen-area"><div class="ss-select-rect"></div></div>
+          <span class="ss-captured">&#11044; CAPTURED</span>
+        </div>
         <div class="upload-zone no-print" onclick="document.getElementById('ss-side-upload').click()" style="padding:12px">
           <div class="upload-zone-label">Click to upload cross-section screenshot</div>
           <input type="file" id="ss-side-upload" accept="image/*" multiple style="display:none" onchange="handleUpload(this,'ss-side',1)">
@@ -1054,10 +1149,11 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
     <div class="module-locked-icon">&#128274;</div>
     <div class="module-locked-text">Instructor Approval Required<br>to Unlock This Module</div>
   </div>
-  <div class="module-header">
+  <div class="module-header" onclick="toggleModuleCollapse(5,event)">
     <span class="mod-num">05</span><span class="mod-title">Deviation Log</span><span class="mod-pts">5 pts</span>
     <span class="mod-dot" id="dot-05"></span>
     <button class="rubric-toggle" id="rt-05" onclick="toggleRubric(5)">[ Rubric ]</button>
+    <span class="mod-chevron" id="chev-05">&#9662;</span>
   </div>
   <div class="rubric-panel" id="rubric-05">
     <div class="rubric-inner">
@@ -1181,7 +1277,7 @@ function setApproved(state,timestamp){
 }
 
 /* -------- MASS INPUT MODE TOGGLE (Change 1) -------- */
-let massMode='g'; // 'g' = grams primary, 'lbs' = pounds primary
+let massMode='lbs'; // 'g' = grams primary, 'lbs' = pounds primary
 function toggleMassMode(){
   massMode = massMode==='g' ? 'lbs' : 'g';
   const btn = document.getElementById('mass-mode-btn');
@@ -1231,17 +1327,8 @@ function handleShaftThruAll(){
   updateScoreAndDots();
 }
 
-/* -------- SCREENSHOT ANIMATION (Change 10) -------- */
-(function initSsAnim(){
-  const steps=['&#8862;','&#8862; + SHIFT + S','&#8862; + SHIFT + S &#8594; [&#9619;&#9619;&#9619;]'];
-  const ids=['ssas-mass','ssas-iso','ssas-top','ssas-side'];
-  let step=0;
-  function tick(){
-    step=(step+1)%steps.length;
-    ids.forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=steps[step];});
-  }
-  setInterval(tick,2500);
-})();
+/* -------- SCREENSHOT ANIMATION (Change 7) -------- */
+// Pure CSS animation — no JS needed for the redesigned strips
 
 /* -------- MATRIX RAIN -------- */
 (function(){
@@ -1440,7 +1527,7 @@ function addTableRow(tbodyId,data){
     <td style="width:90px;"><div class="mass-cell"><input type="number" class="input-mass-g" data-mass-unit="${d.massUnit||'g'}" step="0.1" min="0" value="${d.massRaw||d.massG}" placeholder="${massMode==='lbs'?'0.000 lbs':'0.0 g'}" oninput="updateStats();saveToStorage();updateScoreAndDots()"><div class="mass-convert">&#8594; <span class="mass-lbs-disp">${d.massG?(d.massUnit==='lbs'?lbsToG(parseFloat(d.massRaw||0)).toFixed(1)+' g':gToLbs(d.massG)+' lbs'):'-'}</span></div></div></td>
     <td style="width:160px;"><div class="supplier-wrap" style="opacity:${isHw?'1':'.4'}"><input type="text" class="input-supplier" value="${esc(d.supplier)}" placeholder="Paste product URL..." style="width:100%;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--ice);font-family:'Share Tech Mono',monospace;padding:8px 10px;font-size:10px;"><div class="hw-chk-row"><input type="checkbox" class="input-hw-dl" ${d.hwDl?'checked':''} id="${hwdlId}" onchange="updateScoreAndDots();saveToStorage()"><label for="${hwdlId}">3D model downloaded &amp; inserted</label></div></div></td>
     <td style="width:130px;">${buildSelect('input-iface',ifaceOpts,d.iface)}</td>
-    <td style="width:80px;"><div class="row-img-cell"><input type="file" class="input-row-img-file" accept="image/*" style="display:none" onchange="handleRowImg(this)"><button class="row-upload-btn" type="button" onclick="this.closest('td').querySelector('.input-row-img-file').click()">+ Img</button><img class="row-thumb" src="${d.rowImg||''}" style="${d.rowImg?'display:block':'display:none'};" onclick="if(this.src&&!this.src.endsWith('/'))openLightbox(this.src)"></div></td>
+    <td style="width:80px;"><div class="row-img-cell"><input type="file" class="input-row-img-file" accept="image/*" style="display:none" onchange="handleRowImg(this)"><button class="row-upload-btn" type="button" onclick="this.closest('td').querySelector('.input-row-img-file').click()">+ Img</button><img class="row-thumb" src="${d.rowImg||''}" style="${d.rowImg?'display:block':'display:none'};" onclick="if(this.src&&!this.src.endsWith('/'))openLightbox(this.src)"><div class="row-ss-hint no-print"><span class="row-ss-key">WIN</span><span class="row-ss-plus">+</span><span class="row-ss-key">SHF</span><span class="row-ss-plus">+</span><span class="row-ss-key">S</span></div><span class="row-ss-capture no-print">&#11044; CAPTURE</span></div></td>
   `;
   tr.querySelectorAll('input:not(.custom-hidden-input),select').forEach(el=>{
     if(!el.onchange&&!el.oninput)el.addEventListener('input',()=>{updateScoreAndDots();saveToStorage();updateStats();});
@@ -1506,8 +1593,15 @@ function updateStats(){
   // Total mass
   let totalG=comps.reduce((s,c)=>{const g=parseFloat(c.massG)||0;return s+g;},0);
   const massEl=document.getElementById('stat-mass');const massLbsEl=document.getElementById('stat-mass-lbs');
-  if(massEl){massEl.textContent=totalG.toFixed(1)+' g';massEl.className='stat-card-value '+(totalG>MASS_LIMIT_G?'warn':'ok');}
-  if(massLbsEl)massLbsEl.textContent=gToLbs(totalG).toFixed(3)+' lbs | Limit: 907g / 2.000 lbs';
+  if(massEl){
+    if(massMode==='lbs'){massEl.textContent=gToLbs(totalG).toFixed(3)+' lbs';}
+    else{massEl.textContent=totalG.toFixed(1)+' g';}
+    massEl.className='stat-card-value '+(totalG>MASS_LIMIT_G?'warn':'ok');
+  }
+  if(massLbsEl){
+    if(massMode==='lbs'){massLbsEl.textContent=totalG.toFixed(1)+' g  |  Limit: 2.000 lbs / 907g';}
+    else{massLbsEl.textContent=gToLbs(totalG).toFixed(3)+' lbs  |  Limit: 907g / 2.000 lbs';}
+  }
   // Update mass conversion display in each row
   document.querySelectorAll('.input-mass-g').forEach(inp=>{const lbs=inp.closest('td')?.querySelector('.mass-lbs-disp');if(lbs){const v=parseFloat(inp.value)||0;const unit=inp.getAttribute('data-mass-unit')||'g';lbs.textContent=v?(unit==='lbs'?lbsToG(v).toFixed(1)+' g':gToLbs(v)+' lbs'):'-';}});
   // Process count
@@ -1627,7 +1721,11 @@ function checkVal(key,min,max){
   if(v===null){setValDot(key,'','Awaiting input');return;}
   const ok=(v>=min)&&(max===null||v<=max);
   let txt='';
-  if(key==='asm-mass')txt=ok?`${v.toFixed(1)}g — within 907g limit`:`${v.toFixed(1)}g — EXCEEDS 907g limit`;
+  if(key==='asm-mass'){
+    const lbsV=gToLbs(v);
+    if(massMode==='lbs')txt=ok?`${lbsV.toFixed(3)} lbs (${v.toFixed(1)}g) — within 2.000 lbs limit`:`${lbsV.toFixed(3)} lbs — EXCEEDS 2.000 lbs limit`;
+    else txt=ok?`${v.toFixed(1)}g (${lbsV.toFixed(3)} lbs) — within 907g limit`:`${v.toFixed(1)}g — EXCEEDS 907g limit`;
+  }
   else if(key==='asm-height')txt=ok?`${v.toFixed(2)}" / ${inToMm(v).toFixed(1)}mm — in spec`:`${v.toFixed(2)}" — OUT OF RANGE (2.90"–3.10")`;
   else if(key==='asm-od')txt=ok?`${v.toFixed(2)}" / ${inToMm(v).toFixed(1)}mm — under 5.000" limit`:`${v.toFixed(2)}" — EXCEEDS 5.000" limit`;
   else if(key==='asm-hexext')txt=ok?`${v.toFixed(2)}" / ${inToMm(v).toFixed(1)}mm — in spec`:`${v.toFixed(2)}" — OUT OF RANGE (0.45"–0.55")`;
@@ -1654,6 +1752,8 @@ function renderImgs(zone){
     const imgEl=document.createElement('img');imgEl.src=img.src;imgEl.addEventListener('click',()=>openLightbox(img.src));
     const cap=document.createElement('input');cap.type='text';cap.className='img-caption';cap.placeholder='Caption...';cap.value=img.caption||'';cap.addEventListener('input',()=>{imgStore[zone][i].caption=cap.value;saveToStorage();});
     const rm=document.createElement('button');rm.className='img-remove no-print';rm.textContent='x';rm.addEventListener('click',()=>{imgStore[zone].splice(i,1);renderImgs(zone);updateImgCount(zone,0);updateScoreAndDots();saveToStorage();});
+    // Corner bracket decorations
+    ['tl','tr','bl','br'].forEach(pos=>{const br=document.createElement('span');br.className='img-corner '+pos;item.appendChild(br);});
     item.appendChild(imgEl);item.appendChild(cap);item.appendChild(rm);c.appendChild(item);
   });
 }
@@ -1768,7 +1868,8 @@ function updateScoreAndDots(){
 
 /* -------- SAVE STATUS -------- */
 let saveTimer=null;
-function flashSave(){const el=document.getElementById('tb-save-status');el.textContent='Saved';el.classList.add('flash');clearTimeout(saveTimer);saveTimer=setTimeout(()=>{el.textContent='Auto-save on';el.classList.remove('flash');},2000);}
+function flashSave(){const el=document.getElementById('tb-save-status');el.textContent='SAVED';el.classList.add('flash');el.classList.remove('storage-full');clearTimeout(saveTimer);saveTimer=setTimeout(()=>{el.textContent='AUTO-SAVE ON';el.classList.remove('flash');},2200);}
+function showStorageFull(){const el=document.getElementById('tb-save-status');el.textContent='STORAGE FULL';el.classList.add('storage-full');el.classList.remove('flash');}
 
 /* -------- SAVE & LOAD -------- */
 function getTolData(){
@@ -1796,7 +1897,7 @@ function collectData(){
   data._approved=isApproved;data._approvalTimestamp=document.getElementById('approval-timestamp')?.textContent||'';
   return data;
 }
-function saveToStorage(){const d=collectData();try{localStorage.setItem(STORAGE_KEY,JSON.stringify(d));flashSave();}catch(e){document.getElementById('tb-save-status').textContent='Storage full — use Download';}}
+function saveToStorage(){const d=collectData();try{localStorage.setItem(STORAGE_KEY,JSON.stringify(d));flashSave();}catch(e){showStorageFull();}}
 function loadData(data){
   if(!data)return;
   if(data._version&&data._version!==BUILD_VERSION){const w=document.getElementById('version-warning');w.style.display='block';w.textContent='Warning: data from '+data._version+'. Current build is '+BUILD_VERSION+'.';}
@@ -1869,7 +1970,7 @@ function confirmClear(){
   loadComps([]);loadBoltData([]);loadDevRows([]);loadDevLogRows([]);
   setApproved(false,'');isApproved=false;
   document.getElementById('approval-pwd').value='';
-  massMode='g';const mb=document.getElementById('mass-mode-btn');if(mb)mb.textContent='[ g ]';
+  massMode='lbs';const mb=document.getElementById('mass-mode-btn');if(mb)mb.textContent='[ lbs ]';
   updateCollabState();updateContinuityState();updateDevState();updateStats();updateScoreAndDots();
   autoFillDate();
 }
@@ -1915,6 +2016,42 @@ function runExportPreflight(){
 function hideExportPreflight(){document.getElementById('export-preflight-dialog').classList.remove('active');}
 function proceedExport(){hideExportPreflight();downloadHTML();}
 
+/* -------- COLLAPSIBLE MODULES -------- */
+function toggleModuleCollapse(n,evt){
+  if(evt&&(evt.target.classList.contains('rubric-toggle')||evt.target.closest('.rubric-toggle')))return;
+  const mods=document.querySelectorAll('.module');
+  const mod=mods[n-1];
+  if(!mod)return;
+  const body=mod.querySelector('.module-body');
+  const panel=mod.querySelector('.rubric-panel');
+  const isCollapsed=mod.classList.contains('collapsed');
+  if(isCollapsed){
+    // Expand: set max-height to scrollHeight
+    if(body){body.style.maxHeight=body.scrollHeight+'px';setTimeout(()=>{body.style.maxHeight='none';},420);}
+    mod.classList.remove('collapsed');
+  } else {
+    // Collapse: fix current height then animate to 0
+    if(body){body.style.maxHeight=body.scrollHeight+'px';requestAnimationFrame(()=>requestAnimationFrame(()=>{body.style.maxHeight='0';}));}
+    if(panel&&panel.classList.contains('open')){panel.classList.remove('open');const btn=document.getElementById('rt-0'+n);if(btn){btn.classList.remove('open');btn.textContent='[ Rubric ]';}}
+    mod.classList.add('collapsed');
+  }
+  try{localStorage.setItem('mod_'+n+'_collapsed',(!isCollapsed).toString());}catch(e){}
+}
+function initCollapseState(){
+  for(let n=1;n<=5;n++){
+    const saved=localStorage.getItem('mod_'+n+'_collapsed');
+    if(saved==='true'){
+      const mods=document.querySelectorAll('.module');
+      const mod=mods[n-1];
+      if(mod){
+        const body=mod.querySelector('.module-body');
+        if(body){body.style.maxHeight='0';}
+        mod.classList.add('collapsed');
+      }
+    }
+  }
+}
+
 /* -------- ANIMATIONS -------- */
 function initAnimations(){
   if(window.matchMedia('(prefers-reduced-motion:reduce)').matches){document.querySelectorAll('.module').forEach(m=>m.classList.add('visible'));return;}
@@ -1935,6 +2072,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.querySelectorAll('input[type="checkbox"][data-field]').forEach(r=>r.addEventListener('change',()=>{updateScoreAndDots();saveToStorage();}));
   document.getElementById('approval-pwd')?.addEventListener('keydown',e=>{if(e.key==='Enter')checkApproval();});
   loadFromStorage();autoFillDate();
+  initCollapseState();
   setInterval(saveToStorage,30000);
   window.addEventListener('resize',resizeAll);
   document.fonts.ready.then(()=>{resizeAll();});
