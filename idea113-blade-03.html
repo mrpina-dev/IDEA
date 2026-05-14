@@ -305,6 +305,12 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
 #dev-table td{padding:0;border-bottom:1px solid rgba(0,255,65,.05);background:var(--bg2);vertical-align:top}
 #dev-table td textarea{width:100%;background:transparent;border:none;color:var(--white);font-family:'Share Tech Mono',monospace;font-size:11px;padding:7px 9px;resize:none;min-height:48px;outline:none}
 #dev-table td textarea:focus{background:rgba(0,255,65,.04)}
+/* === DEVIATION LOG TABLE (Module 05) === */
+#dev-log-table{width:100%;border-collapse:collapse;margin-top:10px}
+#dev-log-table th{background:rgba(0,255,65,.05);color:var(--green);font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;text-align:left;padding:8px 10px;border-bottom:1px solid rgba(0,255,65,.18)}
+#dev-log-table td{padding:0;border-bottom:1px solid rgba(0,255,65,.05);background:var(--bg2);vertical-align:top}
+#dev-log-table td textarea{width:100%;background:var(--bg2);border:1px solid rgba(0,255,65,.12);border-bottom:1px solid var(--dim);color:var(--green);font-family:'Share Tech Mono',monospace;font-size:11px;padding:7px 9px;resize:none;min-height:48px;outline:none}
+#dev-log-table td textarea:focus{border-color:var(--green)!important;box-shadow:0 0 8px rgba(0,255,65,.08)}
 .declaration-block{border:1px solid rgba(0,255,65,.18);background:rgba(0,255,65,.02);padding:18px 22px;margin-bottom:20px}
 .declaration-title{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:3px;color:var(--green);text-transform:uppercase;margin-bottom:10px}
 .declaration-text{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--dim);line-height:1.8;margin-bottom:14px}
@@ -433,14 +439,20 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
 /* === HAS-IMAGE HIDE INSTRUCTIONS === */
 .upload-zone-wrap.has-image .ss-anim-strip,
 .upload-zone-wrap.has-image .paste-hint{display:none!important}
+/* === ACTIVE PASTE TARGET === */
+.paste-target-active{border:2px solid var(--cyan)!important;background:rgba(0,240,255,.05)!important;position:relative}
+.paste-target-badge{position:absolute;top:4px;right:4px;font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--cyan);background:rgba(0,240,255,.12);border:1px solid rgba(0,240,255,.4);padding:1px 5px;letter-spacing:1px;z-index:10;pointer-events:none;white-space:nowrap}
+/* === ROW IMG PASTE HINT === */
+.row-paste-hint{font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(0,240,255,.6);letter-spacing:.5px;margin-top:2px;text-align:center}
 /* === EXPAND TABLE === */
-.table-container.expanded{max-width:100vw;width:100vw;margin-left:calc(-50vw + 50%);border-radius:0}
+.table-container.expanded{width:100vw;position:relative;left:50%;transform:translateX(-50%);max-width:100vw}
 /* === NOMINAL TOOLTIP === */
 .nom-label-wrap{position:relative;display:inline-flex;align-items:center;gap:4px}
 .nom-info-icon{font-size:11px;color:var(--cyan);cursor:help;opacity:.7;flex-shrink:0;position:relative}
-.nom-info-icon:hover .nom-tooltip,.nom-info-icon:focus .nom-tooltip{opacity:1;pointer-events:auto;visibility:visible}
-.nom-tooltip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:rgba(2,10,4,.96);border:1px solid rgba(0,240,255,.35);color:var(--white);font-family:'Share Tech Mono',monospace;font-size:10px;line-height:1.55;padding:9px 12px;width:280px;z-index:500;opacity:0;pointer-events:none;visibility:hidden;transition:opacity .15s;box-shadow:0 0 12px rgba(0,240,255,.15)}
-.nom-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:rgba(0,240,255,.35)}
+.nom-label-wrap:hover .nom-tooltip,.nom-label-wrap:focus-within .nom-tooltip{opacity:1;pointer-events:auto;visibility:visible}
+.nom-tooltip{position:absolute;bottom:calc(100% + 6px);left:0;transform:none;background:rgba(2,10,4,.98);border:1px solid rgba(0,240,255,1);color:var(--white);font-family:'Share Tech Mono',monospace;font-size:12px;line-height:1.7;padding:14px 16px;max-width:340px;width:340px;z-index:500;opacity:0;pointer-events:none;visibility:hidden;transition:opacity .15s;box-shadow:0 0 16px rgba(0,240,255,.25)}
+.nom-tooltip strong{color:var(--gold);font-family:'Orbitron',sans-serif;font-weight:700;display:block;margin-bottom:6px;font-size:11px;letter-spacing:1px}
+.nom-tooltip::after{content:'';position:absolute;top:100%;left:20px;transform:none;border:5px solid transparent;border-top-color:rgba(0,240,255,1)}
 /* === FIT ENTRY NAME === */
 .fit-entry-name{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--gold);background:transparent;border:none;border-bottom:1px solid rgba(200,255,0,.2);padding:2px 4px;min-width:80px;max-width:200px;outline:none;cursor:pointer}
 .fit-entry-name:focus{border-bottom-color:var(--gold);background:rgba(200,255,0,.04);cursor:text}
@@ -523,7 +535,6 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
   <button class="tb-btn" style="border-color:rgba(0,240,255,.4);color:var(--cyan);background:rgba(0,240,255,.05);" onclick="showRestoreDialog()">[ Restore Defaults ]</button>
   <button class="tb-btn danger" onclick="showClearDialog()">[ Clear All ]</button>
   <button class="tb-btn" id="autosave-toggle-btn" onclick="toggleAutoSave()">[ AUTO-SAVE ON ]</button>
-  <button class="tb-btn" id="expand-table-btn" onclick="toggleExpandTable()">[ EXPAND TABLE ]</button>
   <span id="tb-score">0 / 80 pts</span>
   <span id="tb-save-status">AUTO-SAVE ON</span>
 </div>
@@ -746,6 +757,7 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
       </div>
     </div>
 
+    <button class="add-row-btn no-print" id="expand-table-btn" onclick="toggleExpandTable()" style="margin:0 0 6px 0;">[ EXPAND TABLE ]</button>
     <div class="table-container">
       <table id="comp-table">
         <thead><tr>
@@ -822,8 +834,6 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
     <div class="rubric-inner">
       <div class="rubric-title-row"><span>Grading Criteria</span><span>Points</span></div>
       <div class="rubric-row"><div class="rubric-criteria"><strong>Hex Bore Check:</strong> Bore diameter entered and within acceptable clearance range.</div><div class="rubric-pts">4 pts</div></div>
-      <div class="rubric-row"><div class="rubric-criteria"><strong>Press Fit Check:</strong> Each press fit pair documented with modeled interference. N/A acceptable if no press fits used.</div><div class="rubric-pts">3 pts</div></div>
-      <div class="rubric-row"><div class="rubric-criteria"><strong>Snug Fit Check:</strong> Each snug fit pair documented. N/A acceptable if no snug fits used.</div><div class="rubric-pts">included</div></div>
       <div class="rubric-row"><div class="rubric-criteria"><strong>Wall Thickness &amp; Feature Size:</strong> Minimum wall and minimum feature confirmed or N/A (combined card).</div><div class="rubric-pts">4 pts</div></div>
       <div class="rubric-row"><div class="rubric-criteria"><strong>Metal Wall Thickness:</strong> Minimum metal wall confirmed or N/A.</div><div class="rubric-pts">3 pts</div></div>
       <div class="rubric-row"><div class="rubric-criteria"><strong>Shaft Engagement Confirmation:</strong> Modeled engagement matches Assignment 02 plan or deviation documented.</div><div class="rubric-pts">3 pts</div></div>
@@ -892,43 +902,6 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
         </div>
       </div>
 
-      <!-- Press Fit & Snug Fit (kept for scoring) -->
-      <div class="dlim-section">
-        <div class="dlim-section-head">
-          <span class="dlim-section-title">Press Fits (Printed-to-Printed)</span>
-          <div class="tol-na-row" style="margin:0">
-            <input type="checkbox" id="na-pressfit" data-tol="pressfit-na" onchange="handleTolNA('pressfit');saveToStorage();updateScoreAndDots()">
-            <label for="na-pressfit">N/A &mdash; no press fits</label>
-          </div>
-        </div>
-        <div class="tol-card-dot" id="tdot-pressfit" style="float:right;margin-top:-20px;"></div>
-        <div class="tol-card-rule" style="margin-bottom:8px;">Shaft = bore nominal &minus; 0.006" / 0.15 mm for ABS. See Fit Calculator above for precise values.</div>
-        <div id="pressfit-fields">
-          <div class="field-row">
-            <textarea data-field="pressfit-detail" placeholder="Describe each press fit pair: part name, shaft OD, bore ID, interference." oninput="autoResize(this);updateMirror(this.dataset.field,this.value);checkTolText('pressfit');saveToStorage();updateScoreAndDots()" style="min-height:50px"></textarea>
-            <div class="print-mirror" data-mirror="pressfit-detail"></div>
-            <div class="sent-count" data-min="1" data-field-ref="pressfit-detail"><span class="sent-dot"></span><span><span class="current">0</span> / 1 sentence minimum</span></div>
-          </div>
-        </div>
-      </div>
-      <div class="dlim-section">
-        <div class="dlim-section-head">
-          <span class="dlim-section-title">Snug Fits (Printed-to-Printed)</span>
-          <div class="tol-na-row" style="margin:0">
-            <input type="checkbox" id="na-snug" data-tol="snug-na" onchange="handleTolNA('snug');saveToStorage();updateScoreAndDots()">
-            <label for="na-snug">N/A &mdash; no snug fits</label>
-          </div>
-        </div>
-        <div class="tol-card-dot" id="tdot-snug" style="float:right;margin-top:-20px;"></div>
-        <div class="tol-card-rule" style="margin-bottom:8px;">Bore = nominal + 0.008" / 0.20 mm for ABS. See Fit Calculator above for precise values by material.</div>
-        <div id="snug-fields">
-          <div class="field-row">
-            <textarea data-field="snug-detail" placeholder="Describe each snug fit pair: part name, shaft OD, bore ID, clearance." oninput="autoResize(this);updateMirror(this.dataset.field,this.value);checkTolText('snug');saveToStorage();updateScoreAndDots()" style="min-height:50px"></textarea>
-            <div class="print-mirror" data-mirror="snug-detail"></div>
-            <div class="sent-count" data-min="1" data-field-ref="snug-detail"><span class="sent-dot"></span><span><span class="current">0</span> / 1 sentence minimum</span></div>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- ZONE C: ASSEMBLY GEOMETRY -->
@@ -1674,7 +1647,7 @@ function addTableRow(tbodyId,data){
     <td style="width:90px;"><div class="mass-cell"><input type="number" class="input-mass-g" data-mass-unit="${d.massUnit||'g'}" step="0.1" min="0" value="${d.massRaw||d.massG}" placeholder="${massMode==='lbs'?'0.000 lbs':'0.0 g'}" oninput="updateStats();saveToStorage();updateScoreAndDots()"><div class="mass-convert">&#8594; <span class="mass-lbs-disp">${d.massG?(d.massUnit==='lbs'?lbsToG(parseFloat(d.massRaw||0)).toFixed(1)+' g':gToLbs(d.massG)+' lbs'):'-'}</span></div></div></td>
     <td style="width:160px;"><div class="supplier-wrap" style="opacity:${isHw?'1':'.4'}"><input type="text" class="input-supplier" value="${esc(d.supplier)}" placeholder="Paste product URL..." style="width:100%;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--ice);font-family:'Share Tech Mono',monospace;padding:8px 10px;font-size:10px;"><div class="hw-chk-row"><input type="checkbox" class="input-hw-dl" ${d.hwDl?'checked':''} id="${hwdlId}" onchange="updateScoreAndDots();saveToStorage()"><label for="${hwdlId}">3D model downloaded &amp; inserted</label></div></div></td>
     <td style="width:130px;">${buildSelect('input-iface',ifaceOpts,d.iface)}</td>
-    <td style="width:80px;"><div class="row-img-cell"><input type="file" class="input-row-img-file" accept="image/*" style="display:none" onchange="handleRowImg(this)"><button class="row-upload-btn" type="button" onclick="this.closest('td').querySelector('.input-row-img-file').click()">+ Img</button><img class="row-thumb" src="${d.rowImg||''}" style="${d.rowImg?'display:block':'display:none'};" onclick="if(this.src&&!this.src.endsWith('/'))openLightbox(this.src)"><div class="row-ss-hint no-print"><span class="row-ss-key">WIN</span><span class="row-ss-plus">+</span><span class="row-ss-key">SHF</span><span class="row-ss-plus">+</span><span class="row-ss-key">S</span></div><span class="row-ss-capture no-print">&#11044; CAPTURE</span></div></td>
+    <td style="width:80px;"><div class="row-img-cell" onmouseenter="setActiveRowImgCell(this)" onclick="setActiveRowImgCell(this)"><input type="file" class="input-row-img-file" accept="image/*" style="display:none" onchange="handleRowImg(this)"><button class="row-upload-btn" type="button" onclick="this.closest('td').querySelector('.input-row-img-file').click()">+ Img</button><img class="row-thumb" src="${d.rowImg||''}" style="${d.rowImg?'display:block':'display:none'};" onclick="if(this.src&&!this.src.endsWith('/'))openLightbox(this.src)"><div class="row-ss-hint no-print" style="${d.rowImg?'display:none':''}"><span class="row-ss-key">WIN</span><span class="row-ss-plus">+</span><span class="row-ss-key">SHF</span><span class="row-ss-plus">+</span><span class="row-ss-key">S</span></div><span class="row-ss-capture no-print" style="${d.rowImg?'display:none':''}">&#11044; CAPTURE</span><span class="row-paste-hint no-print" style="${d.rowImg?'display:none':''}">Ctrl+V to paste</span></div></td>
   `;
   tr.querySelectorAll('input:not(.custom-hidden-input),select').forEach(el=>{
     if(!el.onchange&&!el.oninput)el.addEventListener('input',()=>{updateScoreAndDots();saveToStorage();updateStats();});
@@ -1775,6 +1748,7 @@ function handleRowImg(input){
     const td=input.closest('td');
     const thumb=td.querySelector('.row-thumb');
     if(thumb){thumb.src=ev.target.result;thumb.style.display='block';}
+    td.querySelectorAll('.row-ss-hint,.row-ss-capture,.row-paste-hint').forEach(el=>el.style.display='none');
     updateScoreAndDots();saveToStorage();
   };r.readAsDataURL(f);input.value='';
 }
@@ -1948,15 +1922,13 @@ function moduleComplete(n){
     }
     case 3:{
       const hexOk=hexBoreFitCalcOk();
-      const pfOk=document.getElementById('na-pressfit')?.checked||sentOk('pressfit-detail',1);
-      const snugOk=document.getElementById('na-snug')?.checked||sentOk('snug-detail',1);
       const wallOk=document.getElementById('na-wall')?.checked||(getTolIn('wall')!==null&&getTolIn('wall')>=0.047);
       const featOk=document.getElementById('na-wall')?.checked||(getTolIn('feat')!==null&&getTolIn('feat')>=0.047);
       const metalOk=document.getElementById('na-metal')?.checked||(getTolIn('metal')!==null);
       const shaftThruAll=document.getElementById('shaft-thruall')?.checked;
       const shaftOk=shaftThruAll||(getTolIn('shaft-plan-in')!==null&&getTolIn('shaft-actual-in')!==null);
       const hexextOk=getTolIn('hexext')!==null&&getTolIn('hexext')>=0.45&&getTolIn('hexext')<=0.55;
-      return hexOk&&pfOk&&snugOk&&wallOk&&featOk&&metalOk&&shaftOk&&hexextOk;
+      return hexOk&&wallOk&&featOk&&metalOk&&shaftOk&&hexextOk;
     }
     case 4:{
       const massOk=(parseFloat(document.querySelector('[data-val="asm-mass-g"]')?.value)||0)>0;
@@ -2002,8 +1974,6 @@ function updateScoreAndDots(){
   }
   // M3 (20)
   if(hexBoreFitCalcOk())score+=4;
-  const pfNA=document.getElementById('na-pressfit')?.checked;if(pfNA)score+=3;else if(sentOk('pressfit-detail',1))score+=3;
-  const snugNA=document.getElementById('na-snug')?.checked;if(snugNA||sentOk('snug-detail',1))score+=0; // snug fit is part of combined wall card pts
   const wallNA=document.getElementById('na-wall')?.checked;if(wallNA)score+=2;else if(getTolIn('wall')!==null&&getTolIn('wall')>=0.047)score+=2;
   const featNA=document.getElementById('na-wall')?.checked;if(featNA)score+=2;else if(getTolIn('feat')!==null&&getTolIn('feat')>=0.047)score+=2;
   const metalNA=document.getElementById('na-metal')?.checked;if(metalNA)score+=3;else if(getTolIn('metal')!==null)score+=3;
@@ -2060,16 +2030,22 @@ function toggleAutoSave(){
 function toggleExpandTable(){
   const tc=document.getElementById('comp-table')?.closest('.table-container');
   const btn=document.getElementById('expand-table-btn');
-  if(tc)tc.classList.toggle('expanded');
-  const expanded=tc?.classList.contains('expanded');
-  if(btn)btn.textContent=expanded?'[ COLLAPSE TABLE ]':'[ EXPAND TABLE ]';
+  if(!tc)return;
+  const expanded=tc.classList.contains('expanded');
+  if(expanded){
+    tc.classList.remove('expanded');
+    if(btn)btn.textContent='[ EXPAND TABLE ]';
+  } else {
+    tc.classList.add('expanded');
+    if(btn)btn.textContent='[ COLLAPSE TABLE ]';
+  }
 }
 
 /* -------- SAVE & LOAD -------- */
 function getTolData(){
   const keys=['wall-in','wall-mm','feat-in','feat-mm','metal-in','metal-mm','metal-type','hexext-in','hexext-mm','shaft-plan-in','shaft-plan-mm','shaft-actual-in','shaft-actual-mm'];
   const d={};keys.forEach(k=>{const el=document.querySelector(`[data-tol="${k}"]`);if(el)d[k]=el.type==='checkbox'?el.checked:el.value;});
-  const naKeys=['pressfit-na','snug-na','wall-na','metal-na','shaft-thruall'];
+  const naKeys=['wall-na','metal-na','shaft-thruall'];
   naKeys.forEach(k=>{const el=document.querySelector(`[data-tol="${k}"]`);if(el)d[k]=el.checked;});
   return d;
 }
@@ -2114,10 +2090,8 @@ function loadData(data){
   if(data._approved)setApproved(true,data._approvalTimestamp);
   updateCollabState();updateContinuityState();updateDevState();checkInterference();updateStats();
   // Re-run all tolerance/val checks
-  checkTolText('snug');checkTol('wall',0.047,null);checkTol('feat',0.047,null);checkTolMetal();checkShaftMatch();checkTol('hexext',0.45,0.55);
+  checkTol('wall',0.047,null);checkTol('feat',0.047,null);checkTolMetal();checkShaftMatch();checkTol('hexext',0.45,0.55);
   checkVal('asm-mass',0,907);checkVal('asm-height',2.90,3.10);checkVal('asm-od',0,5.0);checkVal('asm-hexext',0.45,0.55);checkValCom();checkInterference();
-  const pfNA=document.getElementById('na-pressfit')?.checked;if(pfNA)handleTolNA('pressfit');
-  const snugNA2=document.getElementById('na-snug')?.checked;if(snugNA2)handleTolNA('snug');
   const wallNA=document.getElementById('na-wall')?.checked;if(wallNA)handleTolNA('wall');
   // na-feat is now combined with na-wall toggle; handle via na-wall
   const featNA2=document.getElementById('na-wall')?.checked;if(featNA2)handleTolNA('feat');
@@ -2315,18 +2289,22 @@ function getFitTol(typeId,matVal){
 let fitEntries=[];
 let fitEntryIdCounter=0;
 
-const NOM_TOOLTIP_TEXT='Nominal means the designed or specified size before tolerances are applied. For hardware, use the listed bolt or shaft diameter from the product spec sheet or McMaster-Carr page. For custom geometry, use the dimension as drawn in SolidWorks before any fit adjustments. For the hex shaft, nominal is always 0.500in regardless of measured variation.';
+const NOM_TOOLTIP_TEXT='<strong>Nominal Dimension</strong>The designed or specified size before tolerances are applied. For hardware, use the listed bolt or shaft diameter from the product spec sheet or McMaster-Carr page. For custom geometry, use the dimension as drawn in SolidWorks before any fit adjustments. For the hex shaft, nominal is always 0.500 in regardless of measured variation.';
 
 function buildFitTypeOptions(selectedId){
   const coreTypes=FIT_TYPES.filter(t=>t.id<=7);
   const metalTypes=FIT_TYPES.filter(t=>t.id>=8&&t.id<=11);
   const generalTypes=FIT_TYPES.filter(t=>t.id>=12);
   let html='';
-  coreTypes.forEach(t=>{html+=`<option value="${t.id}"${(selectedId==t.id)?' selected':''}>${t.id}. ${t.label}</option>`;});
-  html+=`<option disabled>── Printed-to-Metal ──</option>`;
+  html+=`<optgroup label="Printed Parts">`;
+  coreTypes.forEach(t=>{html+=`<option value="${t.id}"${(selectedId==t.id)?' selected':''}>${t.label}</option>`;});
+  html+=`</optgroup>`;
+  html+=`<optgroup label="Printed to Metal">`;
   metalTypes.forEach(t=>{html+=`<option value="${t.id}"${(selectedId==t.id)?' selected':''}>${t.label}</option>`;});
-  html+=`<option disabled>── General Offsets ──</option>`;
+  html+=`</optgroup>`;
+  html+=`<optgroup label="General Offsets">`;
   generalTypes.forEach(t=>{html+=`<option value="${t.id}"${(selectedId==t.id)?' selected':''}>${t.label}</option>`;});
+  html+=`</optgroup>`;
   return html;
 }
 
@@ -2336,19 +2314,18 @@ function addFitEntry(savedData){
   const container=document.getElementById('fit-entries');
   const div=document.createElement('div');div.className='fit-entry';div.id='fit-entry-'+id;
   const sd=savedData||{};
-  const locked=!!sd.locked;
-  const defaultName=locked?'Hex Shaft Bore':('Joint '+(id+1));
-  const entryName=sd.name||defaultName;
+  const defaultName=sd.name||('Joint '+(id+1));
+  const entryName=defaultName;
   div.innerHTML=`
     <div class="fit-entry-head">
-      <span class="fit-entry-num">${locked?'LOCKED':('ENTRY '+(id+1))}</span>
+      <span class="fit-entry-num">ENTRY ${id+1}</span>
       <input class="fit-entry-name" value="${entryName}" title="Click to rename" oninput="saveFitCalcData()" onchange="saveFitCalcData()">
-      ${locked?'':'<span class="fit-entry-del" onclick="removeFitEntry('+id+')" title="Remove">&#x2716; Remove</span>'}
+      <span class="fit-entry-del" onclick="removeFitEntry(${id})" title="Remove">&#x2716; Remove</span>
     </div>
     <div class="fit-calc-row">
       <div class="field-row">
         <label>Joint Type</label>
-        <select class="fc-type" onchange="onFitTypeChange(${id})"${locked?' disabled':''}>
+        <select class="fc-type" onchange="onFitTypeChange(${id})">
           ${buildFitTypeOptions(sd.typeId||1)}
         </select>
       </div>
@@ -2361,7 +2338,7 @@ function addFitEntry(savedData){
     </div>
     <div class="fit-calc-row3">
       <div class="field-row fc-diam-wrap">
-        <label class="nom-label-wrap"><span class="fc-diam-lbl-text">Nominal Diameter (in)</span> <span class="nom-info-icon" tabindex="0">ⓘ<span class="nom-tooltip">${NOM_TOOLTIP_TEXT}</span></span></label>
+        <label class="nom-label-wrap"><span class="fc-diam-lbl-text">Nominal Diameter (in)</span> <span class="nom-info-icon" tabindex="0">ⓘ</span><span class="nom-tooltip">${NOM_TOOLTIP_TEXT}</span></label>
         <input type="number" class="fc-nom-in" step="0.001" min="0.01" max="10" placeholder="0.000" value="${sd.nomIn||''}" oninput="onFitNomSync(${id},'in');calcFitEntry(${id});saveFitCalcData()">
       </div>
       <div class="field-row fc-diam-wrap">
@@ -2380,13 +2357,10 @@ function addFitEntry(savedData){
     <div class="fc-metal-note" id="fc-metal-note-${id}">Metal does not shrink. The printed part must accommodate the full nominal metal dimension plus thermal contraction of the printed material.</div>
     <div class="fc-general-note" id="fc-general-note-${id}">Use these for situations where the exact joint type does not match a specific category above. Verify with a test fit before final assembly.</div>
   `;
-  if(locked)div.dataset.locked='1';
   container.appendChild(div);
   // Apply initial state
   onFitTypeChange(id);
   if(sd.result){document.getElementById('fc-result-'+id)?.classList.add('active');}
-  // Auto-calculate locked hex bore entry when material changes or on load
-  if(locked&&sd.mat){setTimeout(()=>calcFitEntry(id),0);}
 }
 function onFitTypeChange(id){
   const div=document.getElementById('fit-entry-'+id);if(!div)return;
@@ -2471,15 +2445,17 @@ function calcFitEntry(id){
 }
 function removeFitEntry(id){
   const div=document.getElementById('fit-entry-'+id);
-  if(div&&div.dataset.locked==='1')return; // locked entries cannot be removed
   if(div)div.remove();
   fitEntries=fitEntries.filter(x=>x!==id);
   saveFitCalcData();
 }
 function hexBoreFitCalcOk(){
-  const locked=document.querySelector('.fit-entry[data-locked="1"]');
-  if(!locked)return false;
-  const id=parseInt(locked.id.replace('fit-entry-',''));
+  const first=document.querySelector('.fit-entry');
+  if(!first)return false;
+  const id=parseInt(first.id.replace('fit-entry-',''));
+  const nomIn=first.querySelector('.fc-nom-in')?.value||'';
+  const mat=first.querySelector('.fc-mat')?.value||'';
+  if(!nomIn||!mat)return false;
   return document.getElementById('fc-result-'+id)?.classList.contains('active')||false;
 }
 function saveFitCalcData(){
@@ -2492,7 +2468,6 @@ function saveFitCalcData(){
       nomIn:div.querySelector('.fc-nom-in')?.value||'',
       nomMm:div.querySelector('.fc-nom-mm')?.value||'',
       name:div.querySelector('.fit-entry-name')?.value||'',
-      locked:div.dataset.locked==='1',
       result:rb?.classList.contains('active')||false,
       resultVal:document.getElementById('fc-rv-'+id)?.textContent||'',
       resultTol:document.getElementById('fc-rt-'+id)?.textContent||'',
@@ -2502,14 +2477,12 @@ function saveFitCalcData(){
   try{localStorage.setItem('m3_fitCalc_entries',JSON.stringify(entries));}catch(e){}
 }
 function loadFitCalcData(){
-  const hexBoreDefault={typeId:1,locked:true,name:'Hex Shaft Bore',nomIn:'0.500',nomMm:'12.700'};
+  const hexBoreDefault={typeId:1,name:'Hex Shaft Bore'};
   try{
     const raw=localStorage.getItem('m3_fitCalc_entries');
     if(raw){
       const arr=JSON.parse(raw);
       document.getElementById('fit-entries').innerHTML='';fitEntries=[];fitEntryIdCounter=0;
-      // Ensure first entry is always the locked hex bore entry
-      if(!arr[0]||!arr[0].locked){arr.unshift(hexBoreDefault);}
       arr.forEach(sd=>addFitEntry(sd));
     } else {
       document.getElementById('fit-entries').innerHTML='';fitEntries=[];fitEntryIdCounter=0;
@@ -2521,26 +2494,71 @@ function loadFitCalcData(){
     addFitEntry(hexBoreDefault);
     addFitEntry();
   }
-  // Auto-calculate the locked hex bore entry
-  setTimeout(()=>{
-    const first=document.querySelector('.fit-entry[data-locked="1"]');
-    if(first){const id=parseInt(first.id.replace('fit-entry-',''));calcFitEntry(id);}
-    updateScoreAndDots();
-  },50);
+  updateScoreAndDots();
 }
 
 /* -------- CLIPBOARD PASTE TO UPLOAD ZONES -------- */
 let lastUZ=null;
-function setLastUZ(zone){lastUZ=zone;}
+let lastRowImgCell=null;
+let activePasteEl=null;
+
+function clearPasteTarget(){
+  if(activePasteEl){
+    activePasteEl.classList.remove('paste-target-active');
+    const badge=activePasteEl.querySelector('.paste-target-badge');
+    if(badge)badge.remove();
+  }
+  activePasteEl=null;
+}
+
+function setLastUZ(zone){
+  clearPasteTarget();
+  lastUZ=zone;
+  lastRowImgCell=null;
+  const el=document.getElementById('uz-'+zone);
+  if(el){
+    activePasteEl=el;
+    el.classList.add('paste-target-active');
+    const badge=document.createElement('span');
+    badge.className='paste-target-badge';
+    badge.textContent='PASTE TARGET';
+    el.appendChild(badge);
+  }
+}
+
+function setActiveRowImgCell(cell){
+  clearPasteTarget();
+  lastRowImgCell=cell;
+  lastUZ=null;
+  if(cell){
+    activePasteEl=cell;
+    cell.classList.add('paste-target-active');
+    const badge=document.createElement('span');
+    badge.className='paste-target-badge';
+    badge.textContent='PASTE TARGET';
+    cell.appendChild(badge);
+  }
+}
+
 document.addEventListener('paste',function(e){
   const items=e.clipboardData?.items;if(!items)return;
   for(let i=0;i<items.length;i++){
     if(items[i].type.startsWith('image/')){
       const file=items[i].getAsFile();if(!file)continue;
-      const zone=lastUZ||'ss-mass';
-      if(!imgStore[zone])imgStore[zone]=[];
-      const r=new FileReader();r.onload=ev=>{imgStore[zone].push({src:ev.target.result,caption:''});renderImgs(zone);updateImgCount(zone,1);updateScoreAndDots();saveToStorage();};
-      r.readAsDataURL(file);
+      if(lastRowImgCell){
+        const cell=lastRowImgCell;
+        const r=new FileReader();r.onload=ev=>{
+          const thumb=cell.querySelector('.row-thumb');
+          if(thumb){thumb.src=ev.target.result;thumb.style.display='block';}
+          cell.querySelectorAll('.row-ss-hint,.row-ss-capture,.row-paste-hint').forEach(el=>el.style.display='none');
+          updateScoreAndDots();saveToStorage();
+        };r.readAsDataURL(file);
+      } else {
+        const zone=lastUZ||'ss-mass';
+        if(!imgStore[zone])imgStore[zone]=[];
+        const r=new FileReader();r.onload=ev=>{imgStore[zone].push({src:ev.target.result,caption:''});renderImgs(zone);updateImgCount(zone,1);updateScoreAndDots();saveToStorage();};
+        r.readAsDataURL(file);
+      }
       break;
     }
   }
