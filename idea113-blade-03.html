@@ -348,12 +348,51 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
   100%{opacity:0}
 }
 .ss-anim-label{font-family:'Share Tech Mono',monospace;font-size:8px;color:rgba(0,255,65,.45);letter-spacing:2px;text-transform:uppercase;display:block;text-align:center}
-/* === APPROVAL SUCCESS REDESIGN === */
+/* === APPROVAL SUCCESS REDESIGN (animated) === */
 .approval-success{display:none;margin-top:18px;padding:24px 28px;background:rgba(0,255,65,.04);border:2px solid var(--green);box-shadow:0 0 24px rgba(0,255,65,.18),inset 0 0 16px rgba(0,255,65,.04);position:relative;overflow:hidden}
 .approval-success::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent)}
 .approval-success-check{font-family:'Orbitron',sans-serif;font-size:48px;font-weight:900;color:var(--green);text-shadow:var(--glow-green);line-height:1;margin-bottom:8px;display:block}
 .approval-success-title{font-family:'Orbitron',sans-serif;font-size:18px;font-weight:900;color:var(--gold);letter-spacing:5px;text-transform:uppercase;text-shadow:var(--glow-gold);margin-bottom:10px;display:block}
 .approval-timestamp{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--cyan);letter-spacing:2px}
+/* Approval animation layers */
+.apv-seq-text{font-family:'Orbitron',monospace;font-size:14px;letter-spacing:4px;color:var(--green);text-shadow:var(--glow-green);display:block;min-height:22px;margin-bottom:6px}
+.apv-seq-access{font-family:'Orbitron',monospace;font-size:14px;letter-spacing:4px;color:var(--gold);text-shadow:var(--glow-gold);display:block;min-height:22px;margin-bottom:10px}
+.apv-scan-line{position:absolute;left:0;right:0;height:2px;background:rgba(0,255,65,.6);box-shadow:0 0 12px rgba(0,255,65,.8);top:-4px;pointer-events:none;z-index:5}
+.apv-radial-wipe{position:absolute;inset:0;background:rgba(2,10,4,.9);z-index:4;pointer-events:none;clip-path:circle(0% at 50% 50%);transition:clip-path .6s ease-out}
+.apv-radial-wipe.done{clip-path:circle(0% at 50% 50%);display:none}
+@keyframes apv-flicker{0%,100%{box-shadow:0 0 0 rgba(0,255,65,0)}16%{box-shadow:inset 0 0 60px rgba(0,255,65,.5),0 0 30px rgba(0,255,65,.4)}33%{box-shadow:0 0 0 rgba(0,255,65,0)}50%{box-shadow:inset 0 0 60px rgba(0,255,65,.5),0 0 30px rgba(0,255,65,.4)}66%{box-shadow:0 0 0 rgba(0,255,65,0)}83%{box-shadow:inset 0 0 60px rgba(0,255,65,.5),0 0 30px rgba(0,255,65,.4)}}
+.approval-gate.flickering{animation:apv-flicker .6s linear forwards}
+.apv-final-border{border:2px solid var(--green);box-shadow:0 0 20px rgba(0,255,65,.5),inset 0 0 20px rgba(0,255,65,.05)}
+/* === FIT CALCULATOR ZONE === */
+.fit-calc-panel{background:var(--bg2);border:1px solid rgba(0,240,255,.2);border-left:3px solid var(--cyan);padding:16px 18px;margin-bottom:12px}
+.fit-calc-title{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;color:var(--cyan);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
+.fit-entry{border:1px solid rgba(0,255,65,.1);background:rgba(0,255,65,.02);padding:12px 14px;margin-bottom:10px;position:relative}
+.fit-entry-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.fit-entry-num{font-family:'Orbitron',sans-serif;font-size:9px;color:var(--dim);background:rgba(0,255,65,.07);border:1px solid rgba(0,255,65,.2);padding:2px 8px;letter-spacing:1px}
+.fit-entry-del{font-size:11px;color:var(--dim);cursor:pointer;margin-left:auto;transition:color .2s}
+.fit-entry-del:hover{color:var(--amber)}
+.fit-calc-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.fit-calc-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px}
+.fit-result-box{background:rgba(0,240,255,.04);border:1px solid rgba(0,240,255,.2);border-left:3px solid var(--cyan);padding:10px 12px;margin-top:8px;display:none}
+.fit-result-box.active{display:block}
+.fit-result-val{font-family:'Orbitron',sans-serif;font-size:13px;color:var(--cyan);letter-spacing:1px;margin-bottom:4px}
+.fit-result-tol{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gold);margin-bottom:4px}
+.fit-result-why{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--dim);line-height:1.6}
+.fit-calc-note{font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(74,122,82,.7);font-style:italic;line-height:1.6;border-top:1px dashed rgba(0,255,65,.1);margin-top:10px;padding-top:8px}
+.fit-add-btn{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1.5px;padding:7px 14px;border:1px dashed rgba(0,240,255,.3);background:transparent;color:var(--cyan);cursor:pointer;text-transform:uppercase;transition:color .2s,border-color .2s,background .2s}
+.fit-add-btn:hover{color:var(--cyan);border-color:rgba(0,240,255,.6);background:rgba(0,240,255,.04)}
+.fit-calc-btn{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;padding:8px 16px;border:1px solid var(--cyan);background:rgba(0,240,255,.06);color:var(--cyan);cursor:pointer;text-transform:uppercase;transition:background .2s}
+.fit-calc-btn:hover{background:rgba(0,240,255,.14)}
+/* Clipboard paste hint */
+.paste-hint{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--cyan);letter-spacing:.8px;margin-bottom:5px;display:block}
+/* Design limits card */
+.dlim-card{background:var(--bg2);border:1px solid rgba(0,255,65,.12);border-left:3px solid var(--teal);padding:16px 18px;margin-bottom:12px}
+.dlim-section{margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid rgba(0,255,65,.08)}
+.dlim-section:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
+.dlim-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+.dlim-section-title{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;color:var(--teal);letter-spacing:2px;text-transform:uppercase}
+/* qty badge */
+.qty-badge{font-family:'Orbitron',sans-serif;font-size:9px;color:var(--gold);background:rgba(200,255,0,.1);border:1px solid rgba(200,255,0,.3);padding:1px 6px;letter-spacing:1px;margin-left:6px;display:inline-block;vertical-align:middle}
 /* === ROW IMAGE FULL-WIDTH === */
 .row-img-cell .row-thumb{width:100%;height:80px;min-height:80px;object-fit:cover;border:1px solid rgba(0,255,65,.25);display:none;cursor:zoom-in}
 /* === IMAGE GRID FULL-WIDTH === */
@@ -668,6 +707,7 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
       <table id="comp-table">
         <thead><tr>
           <th class="no-print" style="width:60px;text-align:center;" data-tip="Controls — Drag to reorder. Duplicate or delete with icons.">Ctrl</th>
+          <th style="width:50px;text-align:center;" data-tip="Qty — Number of this component in the assembly. Multiplied for mass total and fastener count.">Qty</th>
           <th style="width:150px;" data-tip="Component — Name of this part in your SolidWorks assembly. Match the part name in your feature tree exactly.">Component</th>
           <th style="width:130px;" data-tip="Material — Primary material. Select the closest match or choose Other.">Material</th>
           <th style="width:120px;" data-tip="Process — Manufacturing process or hardware type. Changes to hardware sub-options when Hardware / COTS is selected.">Process</th>
@@ -698,12 +738,9 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
       <div class="stat-card">
         <div class="stat-card-label">Mechanical Fasteners</div>
         <div class="stat-card-value" id="stat-fasteners-disp">0</div>
-        <div class="stat-card-sub">Min required: 3 &nbsp;&mdash;&nbsp; enter count below</div>
+        <div class="stat-card-sub">Min required: 3</div>
+        <div class="stat-card-sub" style="margin-top:4px;font-size:9px;color:var(--dim);letter-spacing:.3px;">Fastener count is calculated automatically from your component list. Only bolts and screws are counted, not nuts or washers.</div>
       </div>
-    </div>
-    <div class="field-row" style="max-width:300px;margin-top:6px;">
-      <label>Total Mechanical Fastener Count in Assembly</label>
-      <input type="number" data-field="fastener-count" id="fastener-count" placeholder="0" min="0" step="1" oninput="updateFastenerDisplay();updateScoreAndDots();saveToStorage()">
     </div>
 
     <!-- BOLT CLEARANCE TABLE -->
@@ -753,10 +790,111 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
   <div class="module-body">
     <p class="prompt">Work through each check while your SolidWorks model is open. Enter what your model actually shows &mdash; not what you intended. If a check does not apply to your design, mark it N/A. Out-of-spec values earn no credit but can still be corrected before submission.</p>
 
+    <!-- ZONE A: FIT CALCULATOR -->
+    <div class="sub-label">Zone A &mdash; Fit Calculator</div>
+    <div class="fit-calc-panel">
+      <div class="fit-calc-title">Joint Fit Calculator</div>
+      <p class="tol-card-rule" style="margin-bottom:12px;">Select your joint type and enter the nominal dimension. The calculator will output the recommended bore or offset dimension to model in SolidWorks.</p>
+      <div id="fit-entries"></div>
+      <button class="fit-add-btn" onclick="addFitEntry()">[ + Add Joint Entry ]</button>
+      <div class="fit-calc-note">These are starting values based on Bambu enclosed-chamber behavior. A test print is recommended for critical fits.</div>
+    </div>
+
+    <!-- ZONE B: DESIGN LIMITS (merged card) -->
+    <div class="sub-label" style="margin-top:16px;">Zone B &mdash; Printed and Metal Design Limits</div>
+    <div class="dlim-card">
+      <div class="tol-card-dot" id="tdot-wall" style="float:right;margin-top:2px;"></div>
+
+      <!-- Section 1: 3D Printed Parts -->
+      <div class="dlim-section">
+        <div class="dlim-section-head">
+          <span class="dlim-section-title">3D Printed Parts</span>
+          <div class="tol-na-row" style="margin:0">
+            <input type="checkbox" id="na-wall" data-tol="wall-na" onchange="handleTolNA('wall');handleTolNA('feat');saveToStorage();updateScoreAndDots()">
+            <label for="na-wall">N/A &mdash; no 3D printed parts</label>
+          </div>
+        </div>
+        <div class="tol-card-rule" style="margin-bottom:8px;">Structural wall minimum: <strong>2.0 mm / 0.079 in</strong>. Absolute floor: <strong>1.2 mm / 0.047 in</strong> (2 perimeters at 0.6 mm nozzle). Minimum printable feature: <strong>1.2 mm / 0.047 in</strong>.</div>
+        <div id="wall-fields">
+          <div class="tol-inputs" style="margin-bottom:8px;">
+            <div class="field-row"><label>Thinnest Wall (in)</label><input type="number" data-tol="wall-in" step="0.001" min="0" max="1" placeholder="0.079" oninput="tolSyncInToMm('wall');checkTol('wall',0.047,null);saveToStorage();updateScoreAndDots()"></div>
+            <div class="field-row"><label>Thinnest Wall (mm)</label><input type="number" data-tol="wall-mm" step="0.01" min="0" max="25" placeholder="2.0" oninput="tolSyncMmToIn('wall');checkTol('wall',0.047,null);saveToStorage();updateScoreAndDots()"></div>
+            <div class="field-row" style="justify-content:flex-end;padding-top:18px;"><div class="tol-status" id="tstat-wall" style="color:var(--dim)">Awaiting input</div></div>
+          </div>
+          <div class="tol-inputs">
+            <div class="field-row"><label>Smallest Feature (in)</label><input type="number" data-tol="feat-in" step="0.001" min="0" max="1" placeholder="0.047" oninput="tolSyncInToMm('feat');checkTol('feat',0.047,null);saveToStorage();updateScoreAndDots()"></div>
+            <div class="field-row"><label>Smallest Feature (mm)</label><input type="number" data-tol="feat-mm" step="0.01" min="0" max="25" placeholder="1.2" oninput="tolSyncMmToIn('feat');checkTol('feat',0.047,null);saveToStorage();updateScoreAndDots()"></div>
+            <div class="field-row" style="justify-content:flex-end;padding-top:18px;"><div class="tol-status" id="tstat-feat" style="color:var(--dim)">Awaiting input</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Laser Cut Metal -->
+      <div class="dlim-section">
+        <div class="dlim-section-head">
+          <span class="dlim-section-title">Laser Cut Metal</span>
+          <div class="tol-na-row" style="margin:0">
+            <input type="checkbox" id="na-metal" data-tol="metal-na" onchange="handleTolNA('metal');saveToStorage();updateScoreAndDots()">
+            <label for="na-metal">N/A &mdash; no laser cut metal parts</label>
+          </div>
+        </div>
+        <div class="tol-card-rule" style="margin-bottom:8px;">Steel minimum: <strong>0.031 in / 0.8 mm</strong>. Aluminum minimum: <strong>0.039 in / 1.0 mm</strong>.</div>
+        <div id="metal-fields">
+          <div class="tol-inputs">
+            <div class="field-row"><label>Metal Type</label><select data-tol="metal-type" onchange="checkTolMetal();saveToStorage()"><option value="">Select...</option><option value="steel">Steel</option><option value="aluminum">Aluminum</option><option value="other">Other</option></select></div>
+            <div class="field-row"><label>Thinnest Section (in)</label><input type="number" data-tol="metal-in" step="0.001" min="0" max="1" placeholder="0.031" oninput="tolSyncInToMm('metal');checkTolMetal();saveToStorage();updateScoreAndDots()"></div>
+            <div class="field-row"><label>Thinnest Section (mm)</label><input type="number" data-tol="metal-mm" step="0.01" min="0" max="25" placeholder="0.8" oninput="tolSyncMmToIn('metal');checkTolMetal();saveToStorage();updateScoreAndDots()"></div>
+          </div>
+          <div style="margin-top:8px;"><div class="tol-status" id="tstat-metal" style="color:var(--dim)">Awaiting input</div></div>
+        </div>
+      </div>
+
+      <!-- Press Fit & Snug Fit (kept for scoring) -->
+      <div class="dlim-section">
+        <div class="dlim-section-head">
+          <span class="dlim-section-title">Press Fits (Printed-to-Printed)</span>
+          <div class="tol-na-row" style="margin:0">
+            <input type="checkbox" id="na-pressfit" data-tol="pressfit-na" onchange="handleTolNA('pressfit');saveToStorage();updateScoreAndDots()">
+            <label for="na-pressfit">N/A &mdash; no press fits</label>
+          </div>
+        </div>
+        <div class="tol-card-dot" id="tdot-pressfit" style="float:right;margin-top:-20px;"></div>
+        <div class="tol-card-rule" style="margin-bottom:8px;">Shaft = bore nominal &minus; 0.006" / 0.15 mm for ABS. See Fit Calculator above for precise values.</div>
+        <div id="pressfit-fields">
+          <div class="field-row">
+            <textarea data-field="pressfit-detail" placeholder="Describe each press fit pair: part name, shaft OD, bore ID, interference." oninput="autoResize(this);updateMirror(this.dataset.field,this.value);checkTolText('pressfit');saveToStorage();updateScoreAndDots()" style="min-height:50px"></textarea>
+            <div class="print-mirror" data-mirror="pressfit-detail"></div>
+            <div class="sent-count" data-min="1" data-field-ref="pressfit-detail"><span class="sent-dot"></span><span><span class="current">0</span> / 1 sentence minimum</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="dlim-section">
+        <div class="dlim-section-head">
+          <span class="dlim-section-title">Snug Fits (Printed-to-Printed)</span>
+          <div class="tol-na-row" style="margin:0">
+            <input type="checkbox" id="na-snug" data-tol="snug-na" onchange="handleTolNA('snug');saveToStorage();updateScoreAndDots()">
+            <label for="na-snug">N/A &mdash; no snug fits</label>
+          </div>
+        </div>
+        <div class="tol-card-dot" id="tdot-snug" style="float:right;margin-top:-20px;"></div>
+        <div class="tol-card-rule" style="margin-bottom:8px;">Bore = nominal + 0.008" / 0.20 mm for ABS. See Fit Calculator above for precise values by material.</div>
+        <div id="snug-fields">
+          <div class="field-row">
+            <textarea data-field="snug-detail" placeholder="Describe each snug fit pair: part name, shaft OD, bore ID, clearance." oninput="autoResize(this);updateMirror(this.dataset.field,this.value);checkTolText('snug');saveToStorage();updateScoreAndDots()" style="min-height:50px"></textarea>
+            <div class="print-mirror" data-mirror="snug-detail"></div>
+            <div class="sent-count" data-min="1" data-field-ref="snug-detail"><span class="sent-dot"></span><span><span class="current">0</span> / 1 sentence minimum</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ZONE C: ASSEMBLY GEOMETRY -->
+    <div class="sub-label" style="margin-top:16px;">Zone C &mdash; Assembly Geometry</div>
+
     <!-- HEX BORE -->
     <div class="tol-card">
       <div class="tol-card-header">
-        <span class="tol-card-title">01 &mdash; Hex Shaft Bore</span>
+        <span class="tol-card-title">C1 &mdash; Hex Shaft Bore</span>
         <div class="tol-card-dot" id="tdot-hexbore"></div>
       </div>
       <div class="tol-card-rule">
@@ -771,119 +909,10 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
       </div>
     </div>
 
-    <!-- PRESS FIT -->
-    <div class="tol-card">
-      <div class="tol-card-header">
-        <span class="tol-card-title">02 &mdash; Press Fits (Printed-to-Printed)</span>
-        <div class="tol-card-dot" id="tdot-pressfit"></div>
-      </div>
-      <div class="tol-card-rule">
-        Press fits between 3D printed ABS parts require the shaft/pin to be <strong>0.006 in / 0.15 mm smaller than the bore</strong> (interference fit). Example: a 0.500" pin presses into a 0.494" bore. Too much interference will crack printed parts. This check only applies if your assembly uses printed-to-printed press fits.
-      </div>
-      <div class="tol-target">Target interference: 0.006" / 0.15mm (shaft = bore &minus; 0.006")</div>
-      <div class="tol-na-row">
-        <input type="checkbox" id="na-pressfit" data-tol="pressfit-na" onchange="handleTolNA('pressfit');saveToStorage();updateScoreAndDots()">
-        <label for="na-pressfit">N/A &mdash; my design does not use printed-to-printed press fits</label>
-      </div>
-      <div id="pressfit-fields" style="margin-top:10px;">
-        <div class="field-row">
-          <label>Describe each press fit pair: part name, pin OD, bore ID, calculated interference</label>
-          <textarea data-field="pressfit-detail" placeholder="Example: Body hub pin 0.494&quot; OD pressed into top cap bore 0.500&quot; — interference 0.006&quot; / 0.15mm. Checked in SolidWorks mate simulation, no interference conflicts." oninput="autoResize(this);updateMirror(this.dataset.field,this.value);checkTolText('pressfit');saveToStorage();updateScoreAndDots()"></textarea>
-          <div class="print-mirror" data-mirror="pressfit-detail"></div>
-          <div class="sent-count" data-min="1" data-field-ref="pressfit-detail"><span class="sent-dot"></span><span><span class="current">0</span> / 1 sentence minimum</span></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SNUG FIT (Change 3) -->
-    <div class="tol-card">
-      <div class="tol-card-header">
-        <span class="tol-card-title">03 &mdash; Snug Fit (Printed-to-Printed)</span>
-        <div class="tol-card-dot" id="tdot-snug"></div>
-      </div>
-      <div class="tol-card-rule">
-        Snug fits are used where parts must slide together with light resistance but no play &mdash; looser than a press fit, tighter than a clearance fit. For ABS printed parts, the bore should be nominal plus <strong>0.008 in / 0.20 mm</strong>. Example: a 0.500 in shaft fits into a 0.508 in bore.
-      </div>
-      <div class="tol-target">Bore = shaft nominal + 0.008" / 0.20mm</div>
-      <div class="tol-na-row">
-        <input type="checkbox" id="na-snug" data-tol="snug-na" onchange="handleTolNA('snug');saveToStorage();updateScoreAndDots()">
-        <label for="na-snug">N/A &mdash; my design does not use printed-to-printed snug fits</label>
-      </div>
-      <div id="snug-fields" style="margin-top:10px;">
-        <div class="field-row">
-          <label>Describe each snug fit pair: part name, shaft OD, bore ID, resulting clearance</label>
-          <textarea data-field="snug-detail" placeholder="Example: Blade ring OD 0.500&quot; slides into body hub bore 0.508&quot; — clearance 0.008&quot; / 0.20mm. Light finger pressure needed to seat. Checked in SolidWorks mate simulation." oninput="autoResize(this);updateMirror(this.dataset.field,this.value);checkTolText('snug');saveToStorage();updateScoreAndDots()"></textarea>
-          <div class="print-mirror" data-mirror="snug-detail"></div>
-          <div class="sent-count" data-min="1" data-field-ref="snug-detail"><span class="sent-dot"></span><span><span class="current">0</span> / 1 sentence minimum</span></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- MIN WALL ABS -->
-    <div class="tol-card">
-      <div class="tol-card-header">
-        <span class="tol-card-title">04 &mdash; Minimum Wall Thickness and Feature Size (ABS / 3D Printed)</span>
-        <div class="tol-card-dot" id="tdot-wall"></div>
-      </div>
-      <div class="tol-card-rule">
-        Structural ABS walls must be <strong>minimum 2.0 mm / 0.079 in</strong>. Absolute floor is <strong>1.2 mm / 0.047 in</strong> (2 perimeters at 0.6mm nozzle). Walls thinner than 2.0mm will flex under impact. Walls thinner than 1.2mm will not print reliably. This check only applies if your design includes 3D printed parts.
-      </div>
-      <div class="tol-target">Structural min: 2.0mm / 0.079" &nbsp;|&nbsp; Absolute floor: 1.2mm / 0.047"</div>
-      <div class="tol-na-row">
-        <input type="checkbox" id="na-wall" data-tol="wall-na" onchange="handleTolNA('wall');saveToStorage();updateScoreAndDots()">
-        <label for="na-wall">N/A &mdash; my design has no 3D printed parts</label>
-      </div>
-      <div id="wall-fields" style="margin-top:10px;">
-        <div class="tol-inputs">
-          <div class="field-row"><label>Thinnest Printed Wall (in)</label><input type="number" data-tol="wall-in" step="0.001" min="0" max="1" placeholder="0.079" oninput="tolSyncInToMm('wall');checkTol('wall',0.047,null);saveToStorage();updateScoreAndDots()"></div>
-          <div class="field-row"><label>Thinnest Printed Wall (mm)</label><input type="number" data-tol="wall-mm" step="0.01" min="0" max="25" placeholder="2.0" oninput="tolSyncMmToIn('wall');checkTol('wall',0.047,null);saveToStorage();updateScoreAndDots()"></div>
-          <div class="field-row" style="justify-content:flex-end;padding-top:18px;"><div class="tol-status" id="tstat-wall" style="color:var(--dim)">Awaiting input</div></div>
-        </div>
-        <div class="field-row" style="margin-top:8px;"><label>Where is this thin wall located?</label><input type="text" data-field="wall-location" placeholder="e.g. Blade arm leading edge, inner hub wall near hex bore..." oninput="updateScoreAndDots();saveToStorage()"></div>
-        <div class="print-mirror single-line" data-mirror="wall-location" style="display:none"></div>
-
-        <hr style="border:none;border-top:1px solid rgba(0,255,65,.1);margin:14px 0;">
-
-        <div style="margin-bottom:8px;">
-          <div class="tol-card-rule" style="margin-bottom:6px;"><strong>Minimum Feature Size (3D Print, 0.6mm Nozzle)</strong><br>At a 0.6mm nozzle, the minimum printable feature is <strong>1.2 mm / 0.047 in</strong> (2 perimeters). Features smaller than this &mdash; thin fins, sharp tips, narrow slots &mdash; will either not print or will print poorly. Design around this constraint or accept that fine details will not resolve cleanly.</div>
-          <div class="tol-target" style="margin-bottom:8px;">Minimum feature: 1.2mm / 0.047"</div>
-          <div class="tol-inputs">
-            <div class="field-row"><label>Smallest Printed Feature (in)</label><input type="number" data-tol="feat-in" step="0.001" min="0" max="1" placeholder="0.047" oninput="tolSyncInToMm('feat');checkTol('feat',0.047,null);saveToStorage();updateScoreAndDots()"></div>
-            <div class="field-row"><label>Smallest Printed Feature (mm)</label><input type="number" data-tol="feat-mm" step="0.01" min="0" max="25" placeholder="1.2" oninput="tolSyncMmToIn('feat');checkTol('feat',0.047,null);saveToStorage();updateScoreAndDots()"></div>
-            <div class="field-row" style="justify-content:flex-end;padding-top:18px;"><div class="tol-status" id="tstat-feat" style="color:var(--dim)">Awaiting input</div></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- METAL WALL -->
-    <div class="tol-card">
-      <div class="tol-card-header">
-        <span class="tol-card-title">05 &mdash; Minimum Metal Wall (Laser Cut Parts)</span>
-        <div class="tol-card-dot" id="tdot-metal"></div>
-      </div>
-      <div class="tol-card-rule">
-        Laser cut metal parts should respect minimum wall thicknesses: <strong>Steel min 0.031 in / 0.8 mm</strong>, <strong>Aluminum min 0.039 in / 1.0 mm</strong>. Thinner walls may distort during cutting or deform under impact loads.
-      </div>
-      <div class="tol-target">Steel min: 0.031" / 0.8mm &nbsp;|&nbsp; Aluminum min: 0.039" / 1.0mm</div>
-      <div class="tol-na-row">
-        <input type="checkbox" id="na-metal" data-tol="metal-na" onchange="handleTolNA('metal');saveToStorage();updateScoreAndDots()">
-        <label for="na-metal">N/A &mdash; my design has no laser cut metal parts</label>
-      </div>
-      <div id="metal-fields" style="margin-top:10px;">
-        <div class="tol-inputs">
-          <div class="field-row"><label>Thinnest Metal Wall (in)</label><input type="number" data-tol="metal-in" step="0.001" min="0" max="1" placeholder="0.031" oninput="tolSyncInToMm('metal');checkTolMetal();saveToStorage();updateScoreAndDots()"></div>
-          <div class="field-row"><label>Thinnest Metal Wall (mm)</label><input type="number" data-tol="metal-mm" step="0.01" min="0" max="25" placeholder="0.8" oninput="tolSyncMmToIn('metal');checkTolMetal();saveToStorage();updateScoreAndDots()"></div>
-          <div class="field-row" style="justify-content:flex-end;padding-top:18px;"><div class="tol-status" id="tstat-metal" style="color:var(--dim)">Awaiting input</div></div>
-        </div>
-        <div class="field-row" style="margin-top:8px;"><label>Metal type at thinnest wall</label><select data-tol="metal-type" onchange="checkTolMetal();saveToStorage()"><option value="">Select...</option><option value="steel">Steel</option><option value="aluminum">Aluminum</option><option value="other">Other</option></select></div>
-      </div>
-    </div>
-
     <!-- SHAFT ENGAGEMENT -->
     <div class="tol-card">
       <div class="tol-card-header">
-        <span class="tol-card-title">06 &mdash; Hex Shaft Engagement Confirmation</span>
+        <span class="tol-card-title">C2 &mdash; Hex Shaft Engagement Confirmation</span>
         <div class="tol-card-dot" id="tdot-shaft"></div>
       </div>
       <div class="tol-card-rule">
@@ -916,7 +945,7 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
     <!-- HEX EXTENSION HEIGHT -->
     <div class="tol-card">
       <div class="tol-card-header">
-        <span class="tol-card-title">07 &mdash; Hex Extension Height</span>
+        <span class="tol-card-title">C3 &mdash; Hex Extension Height</span>
         <div class="tol-card-dot" id="tdot-hexext"></div>
       </div>
       <div class="tol-card-rule">
@@ -1062,7 +1091,8 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
           <div class="ss-screen-area"><div class="ss-select-rect"></div></div>
           <span class="ss-captured">&#11044; CAPTURED</span>
         </div>
-        <div class="upload-zone no-print" onclick="document.getElementById('ss-mass-upload').click()" style="padding:12px">
+        <span class="paste-hint no-print">Tip &mdash; after Win+Shift+S, press Ctrl+V here to paste directly from clipboard.</span>
+        <div class="upload-zone no-print" id="uz-ss-mass" onclick="document.getElementById('ss-mass-upload').click()" onmouseenter="setLastUZ('ss-mass')" style="padding:12px">
           <div class="upload-zone-label">Click to upload mass properties screenshot</div>
           <input type="file" id="ss-mass-upload" accept="image/*" multiple style="display:none" onchange="handleUpload(this,'ss-mass',1)">
         </div>
@@ -1079,7 +1109,8 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
           <div class="ss-screen-area"><div class="ss-select-rect"></div></div>
           <span class="ss-captured">&#11044; CAPTURED</span>
         </div>
-        <div class="upload-zone no-print" onclick="document.getElementById('ss-iso-upload').click()" style="padding:12px">
+        <span class="paste-hint no-print">Tip &mdash; after Win+Shift+S, press Ctrl+V here to paste directly from clipboard.</span>
+        <div class="upload-zone no-print" id="uz-ss-iso" onclick="document.getElementById('ss-iso-upload').click()" onmouseenter="setLastUZ('ss-iso')" style="padding:12px">
           <div class="upload-zone-label">Click to upload isometric screenshot</div>
           <input type="file" id="ss-iso-upload" accept="image/*" multiple style="display:none" onchange="handleUpload(this,'ss-iso',1)">
         </div>
@@ -1096,7 +1127,8 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
           <div class="ss-screen-area"><div class="ss-select-rect"></div></div>
           <span class="ss-captured">&#11044; CAPTURED</span>
         </div>
-        <div class="upload-zone no-print" onclick="document.getElementById('ss-top-upload').click()" style="padding:12px">
+        <span class="paste-hint no-print">Tip &mdash; after Win+Shift+S, press Ctrl+V here to paste directly from clipboard.</span>
+        <div class="upload-zone no-print" id="uz-ss-top" onclick="document.getElementById('ss-top-upload').click()" onmouseenter="setLastUZ('ss-top')" style="padding:12px">
           <div class="upload-zone-label">Click to upload top view screenshot</div>
           <input type="file" id="ss-top-upload" accept="image/*" multiple style="display:none" onchange="handleUpload(this,'ss-top',1)">
         </div>
@@ -1113,7 +1145,8 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
           <div class="ss-screen-area"><div class="ss-select-rect"></div></div>
           <span class="ss-captured">&#11044; CAPTURED</span>
         </div>
-        <div class="upload-zone no-print" onclick="document.getElementById('ss-side-upload').click()" style="padding:12px">
+        <span class="paste-hint no-print">Tip &mdash; after Win+Shift+S, press Ctrl+V here to paste directly from clipboard.</span>
+        <div class="upload-zone no-print" id="uz-ss-side" onclick="document.getElementById('ss-side-upload').click()" onmouseenter="setLastUZ('ss-side')" style="padding:12px">
           <div class="upload-zone-label">Click to upload cross-section screenshot</div>
           <input type="file" id="ss-side-upload" accept="image/*" multiple style="display:none" onchange="handleUpload(this,'ss-side',1)">
         </div>
@@ -1137,9 +1170,13 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
   </div>
   <div class="approval-error" id="approval-error">Incorrect code. See Mr. Pina.</div>
   <div class="approval-success" id="approval-success">
-    <span class="approval-success-check">&#10003;</span>
-    <span class="approval-success-title">DESIGN APPROVED</span>
-    <div class="approval-timestamp" id="approval-timestamp"></div>
+    <div class="apv-radial-wipe" id="apv-radial-wipe"></div>
+    <div class="apv-scan-line" id="apv-scan-line" style="display:none"></div>
+    <span class="apv-seq-text" id="apv-seq-verified"></span>
+    <span class="apv-seq-access" id="apv-seq-access"></span>
+    <span class="approval-success-check" id="apv-check" style="opacity:0">&#10003;</span>
+    <span class="approval-success-title" id="apv-title" style="opacity:0">DESIGN APPROVED</span>
+    <div class="approval-timestamp" id="approval-timestamp" style="opacity:0"></div>
   </div>
 </div>
 
@@ -1244,7 +1281,7 @@ async function checkApproval(){
   const pwd=document.getElementById('approval-pwd').value;
   const hash=await sha256(pwd);
   if(hash===APPROVAL_HASH){
-    setApproved(true,new Date().toLocaleString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric',hour:'numeric',minute:'2-digit'}));
+    setApproved(true,new Date().toLocaleString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric',hour:'numeric',minute:'2-digit'}),true);
     saveToStorage();
   } else {
     const err=document.getElementById('approval-error');
@@ -1253,7 +1290,7 @@ async function checkApproval(){
     document.getElementById('approval-pwd').value='';
   }
 }
-function setApproved(state,timestamp){
+function setApproved(state,timestamp,animate){
   isApproved=state;
   const gate=document.getElementById('approval-gate');
   const lock=document.getElementById('module-05-lock');
@@ -1261,12 +1298,28 @@ function setApproved(state,timestamp){
   const success=document.getElementById('approval-success');
   const ts=document.getElementById('approval-timestamp');
   if(state){
-    gate.classList.add('approved');
-    if(lock){lock.style.opacity='0';lock.style.pointerEvents='none';}
-    mod05.classList.add('unlocked');
-    success.style.display='block';
-    if(timestamp && ts) ts.textContent='Approved: '+timestamp;
     document.getElementById('approval-error').style.display='none';
+    if(animate){
+      runApprovalAnimation(gate,lock,mod05,success,ts,timestamp);
+    } else {
+      // Instant restore (on page load)
+      gate.classList.add('approved');
+      if(lock){lock.style.opacity='0';lock.style.pointerEvents='none';}
+      mod05.classList.add('unlocked');
+      success.style.display='block';
+      // Show final state elements immediately
+      const check=document.getElementById('apv-check');
+      const title=document.getElementById('apv-title');
+      const verif=document.getElementById('apv-seq-verified');
+      const access=document.getElementById('apv-seq-access');
+      const wipe=document.getElementById('apv-radial-wipe');
+      if(check)check.style.opacity='1';
+      if(title)title.style.opacity='1';
+      if(ts){ts.textContent='Approved: '+timestamp;ts.style.opacity='1';}
+      if(verif)verif.textContent='IDENTITY VERIFIED';
+      if(access)access.textContent='ACCESS GRANTED';
+      if(wipe)wipe.style.display='none';
+    }
   } else {
     gate.classList.remove('approved');
     if(lock){lock.style.opacity='1';lock.style.pointerEvents='all';}
@@ -1274,6 +1327,72 @@ function setApproved(state,timestamp){
     success.style.display='none';
   }
   updateScoreAndDots();
+}
+
+function runApprovalAnimation(gate,lock,mod05,success,ts,timestamp){
+  // Step 1: Flicker x3 over 0.6s
+  gate.classList.add('flickering');
+  setTimeout(()=>{
+    gate.classList.remove('flickering');
+    // Step 2: Show success panel, start scan line sweep (0.8s)
+    success.style.display='block';
+    const scanLine=document.getElementById('apv-scan-line');
+    const wipe=document.getElementById('apv-radial-wipe');
+    if(scanLine){
+      scanLine.style.display='block';
+      scanLine.style.top='-4px';
+      scanLine.style.transition='top 0.8s linear';
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{scanLine.style.top='100%';}));
+    }
+    // Step 3: After 0.8s type "IDENTITY VERIFIED" over 0.5s
+    setTimeout(()=>{
+      if(scanLine)scanLine.style.display='none';
+      const verif=document.getElementById('apv-seq-verified');
+      typeText(verif,'IDENTITY VERIFIED',500,()=>{
+        // Step 4: After brief pause, type "ACCESS GRANTED" over 0.5s
+        setTimeout(()=>{
+          const access=document.getElementById('apv-seq-access');
+          typeText(access,'ACCESS GRANTED',500,()=>{
+            // Step 5: Radial wipe out the overlay
+            if(wipe){
+              wipe.style.clipPath='circle(0% at 50% 50%)';
+              wipe.style.display='block';
+              requestAnimationFrame(()=>requestAnimationFrame(()=>{
+                wipe.style.transition='clip-path 0.6s ease-out';
+                wipe.style.clipPath='circle(150% at 50% 50%)';
+              }));
+              setTimeout(()=>{
+                wipe.style.display='none';
+                // Step 6: Show final state
+                gate.classList.add('approved');
+                if(lock){lock.style.opacity='0';lock.style.pointerEvents='none';}
+                mod05.classList.add('unlocked');
+                const check=document.getElementById('apv-check');
+                const title=document.getElementById('apv-title');
+                if(check){check.style.transition='opacity 0.4s';check.style.opacity='1';}
+                if(title){title.style.transition='opacity 0.4s';title.style.opacity='1';}
+                if(ts){ts.textContent='Approved: '+timestamp;ts.style.transition='opacity 0.4s';ts.style.opacity='1';}
+                gate.classList.add('apv-final-border');
+                updateScoreAndDots();
+              },650);
+            }
+          });
+        },300);
+      });
+    },800);
+  },600);
+}
+
+function typeText(el,text,duration,cb){
+  if(!el){if(cb)cb();return;}
+  el.textContent='';
+  const interval=duration/text.length;
+  let i=0;
+  const t=setInterval(()=>{
+    el.textContent+=text[i];
+    i++;
+    if(i>=text.length){clearInterval(t);if(cb)setTimeout(cb,100);}
+  },interval);
 }
 
 /* -------- MASS INPUT MODE TOGGLE (Change 1) -------- */
@@ -1508,9 +1627,10 @@ function extractVal(tr,cls){
 function addTableRow(tbodyId,data){
   const tbody=document.getElementById(tbodyId);if(!tbody)return;
   const tr=document.createElement('tr');tr.setAttribute('draggable','true');
-  const d={name:data?.name||'',mat:data?.mat||'',proc:data?.proc||'',thickIn:data?.thickIn||'',thickMm:data?.thickMm||'',odIn:data?.odIn||'',odMm:data?.odMm||'',massG:data?.massG||'',supplier:data?.supplier||'',hwDl:!!data?.hwDl,iface:data?.iface||'',rowImg:data?.rowImg||''};
+  const d={name:data?.name||'',qty:data?.qty||1,mat:data?.mat||'',proc:data?.proc||'',thickIn:data?.thickIn||'',thickMm:data?.thickMm||'',odIn:data?.odIn||'',odMm:data?.odMm||'',massG:data?.massG||'',supplier:data?.supplier||'',hwDl:!!data?.hwDl,iface:data?.iface||'',rowImg:data?.rowImg||''};
   const isHw=(d.mat==='Hardware / COTS');const pOpts=isHw?hwOpts:procOpts;
   const hwdlId='hwdl-'+Math.random().toString(36).slice(2,8);
+  const qty=Math.max(1,parseInt(d.qty)||1);
   tr.innerHTML=`
     <td class="no-print" style="width:60px;text-align:center;vertical-align:middle;">
       <div style="display:flex;align-items:center;justify-content:space-evenly;height:100%;min-height:40px;">
@@ -1519,6 +1639,7 @@ function addTableRow(tbodyId,data){
         <span class="action-btn del" onclick="deleteCompRow(this)" title="Delete">&#x2716;</span>
       </div>
     </td>
+    <td style="width:50px;text-align:center;vertical-align:middle;"><input type="number" class="input-qty" value="${qty}" min="1" step="1" style="width:44px;text-align:center;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--gold);font-family:'Share Tech Mono',monospace;padding:8px 4px;font-size:13px;" oninput="updateStats();saveToStorage();updateScoreAndDots()"></td>
     <td style="width:150px;"><input type="text" class="input-name" value="${esc(d.name)}" placeholder="Component name" style="width:100%;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--white);font-family:'Share Tech Mono',monospace;padding:8px 10px;font-size:12px;"></td>
     <td style="width:130px;">${(()=>{let isC=d.mat&&!matOpts.includes(d.mat)&&d.mat!=='Select...';let sv=isC?'Other':(d.mat||'Select...');let h=`<select class="input-mat" onchange="checkCustom(this)">`;matOpts.forEach(o=>h+=`<option value="${o}"${o===sv?' selected':''}>${o}</option>`);h+=`</select><input type="text" class="input-mat-custom custom-hidden-input" style="display:${isC?'block':'none'}" value="${isC?esc(d.mat):''}" placeholder="Specify..." oninput="updateStats();saveToStorage();">`;return h;})()}</td>
     <td style="width:120px;">${buildSelect('input-proc',pOpts,d.proc)}</td>
@@ -1566,8 +1687,10 @@ function getCompData(){
       if(unit==='lbs'){massLbs=rawVal;massG=lbsToG(parseFloat(rawVal)||0).toFixed(1);}
       else{massG=rawVal;massLbs=gToLbs(parseFloat(rawVal)||0).toFixed(4);}
     }
+    const qty=Math.max(1,parseInt(tr.querySelector('.input-qty')?.value)||1);
     return{
       name:tr.querySelector('.input-name')?.value||'',
+      qty,
       mat:extractVal(tr,'input-mat'),proc:extractVal(tr,'input-proc'),
       thickIn:tr.querySelector('.input-thick-in')?.value||'',thickMm:tr.querySelector('.input-thick-mm')?.value||'',
       odIn:tr.querySelector('.input-od-in')?.value||'',odMm:tr.querySelector('.input-od-mm')?.value||'',
@@ -1590,8 +1713,8 @@ function loadComps(arr){
 /* -------- STAT BARS -------- */
 function updateStats(){
   const comps=getCompData();
-  // Total mass
-  let totalG=comps.reduce((s,c)=>{const g=parseFloat(c.massG)||0;return s+g;},0);
+  // Total mass (multiply per-row mass by quantity)
+  let totalG=comps.reduce((s,c)=>{const g=(parseFloat(c.massG)||0)*(c.qty||1);return s+g;},0);
   const massEl=document.getElementById('stat-mass');const massLbsEl=document.getElementById('stat-mass-lbs');
   if(massEl){
     if(massMode==='lbs'){massEl.textContent=gToLbs(totalG).toFixed(3)+' lbs';}
@@ -1604,14 +1727,20 @@ function updateStats(){
   }
   // Update mass conversion display in each row
   document.querySelectorAll('.input-mass-g').forEach(inp=>{const lbs=inp.closest('td')?.querySelector('.mass-lbs-disp');if(lbs){const v=parseFloat(inp.value)||0;const unit=inp.getAttribute('data-mass-unit')||'g';lbs.textContent=v?(unit==='lbs'?lbsToG(v).toFixed(1)+' g':gToLbs(v)+' lbs'):'-';}});
-  // Process count
-  const procs=new Set(comps.map(c=>c.proc).filter(p=>p&&p!=='Select...'));
+  // Process count — exclude Hardware / COTS rows
+  const nonHwComps=comps.filter(c=>c.mat!=='Hardware / COTS');
+  const procs=new Set(nonHwComps.map(c=>c.proc).filter(p=>p&&p!=='Select...'));
   const procEl=document.getElementById('stat-procs');if(procEl){procEl.textContent=procs.size;procEl.className='stat-card-value '+(procs.size>=3?'ok':'warn');}
-  // Fastener count display
-  updateFastenerDisplay();
+  // Fastener auto-count: rows where proc contains bolt/screw keywords, multiplied by qty
+  const fastenerKW=/bolt|screw|bolts\s*\/\s*nuts/i;
+  let fastCount=comps.reduce((s,c)=>{const p=c.proc||'';if(fastenerKW.test(p))return s+(c.qty||1);return s;},0);
+  updateFastenerDisplay(fastCount);
 }
-function updateFastenerDisplay(){
-  const n=parseInt(document.getElementById('fastener-count')?.value)||0;
+function updateFastenerDisplay(n){
+  if(n===undefined){
+    const cd=getCompData();const fkw=/bolt|screw|bolts\s*\/\s*nuts/i;
+    n=cd.reduce((s,c)=>{const p=c.proc||'';if(fkw.test(p))return s+(c.qty||1);return s;},0);
+  }
   const el=document.getElementById('stat-fasteners-disp');if(el){el.textContent=n;el.className='stat-card-value '+(n>=3?'ok':'warn');}
 }
 function handleRowImg(input){
@@ -1673,7 +1802,9 @@ function checkTolText(key){
   setTolDot(key,val?'ok':'','Awaiting input');
 }
 function handleTolNA(key){
-  const na=document.getElementById('na-'+key)?.checked;
+  // 'feat' shares the na-wall checkbox (combined in Zone B)
+  const naId=key==='feat'?'na-wall':('na-'+key);
+  const na=document.getElementById(naId)?.checked;
   const fields=document.getElementById(key+'-fields');
   if(fields)fields.style.opacity=na?'.4':'1';
   if(na)setTolDot(key,'ok','N/A &mdash; not applicable');
@@ -1777,9 +1908,11 @@ function moduleComplete(n){
     case 2:{
       const comps=getCompData();if(comps.length<2)return false;
       const allFilled=comps.every(c=>c.name&&c.mat&&c.mat!=='Select...'&&c.proc&&c.proc!=='Select...'&&c.iface&&c.iface!=='Select...');
-      const totalG=comps.reduce((s,c)=>s+(parseFloat(c.massG)||0),0);
-      const procs=new Set(comps.map(c=>c.proc).filter(p=>p&&p!=='Select...')).size;
-      const fast=parseInt(getFieldVal('fastener-count'))||0;
+      const totalG=comps.reduce((s,c)=>s+(parseFloat(c.massG)||0)*(c.qty||1),0);
+      const nonHwC=comps.filter(c=>c.mat!=='Hardware / COTS');
+      const procs=new Set(nonHwC.map(c=>c.proc).filter(p=>p&&p!=='Select...')).size;
+      const fkw=/bolt|screw|bolts\s*\/\s*nuts/i;
+      const fast=comps.reduce((s,c)=>{const p=c.proc||'';if(fkw.test(p))return s+(c.qty||1);return s;},0);
       const hwOk=comps.filter(c=>c.mat==='Hardware / COTS').every(c=>c.supplier&&c.hwDl);
       const boltOk=document.querySelectorAll('#bolt-body tr').length>0;
       return allFilled&&totalG<=MASS_LIMIT_G&&totalG>0&&procs>=3&&fast>=3&&hwOk&&boltOk;
@@ -1789,7 +1922,7 @@ function moduleComplete(n){
       const pfOk=document.getElementById('na-pressfit')?.checked||sentOk('pressfit-detail',1);
       const snugOk=document.getElementById('na-snug')?.checked||sentOk('snug-detail',1);
       const wallOk=document.getElementById('na-wall')?.checked||(getTolIn('wall')!==null&&getTolIn('wall')>=0.047);
-      const featOk=document.getElementById('na-feat')?.checked||(getTolIn('feat')!==null&&getTolIn('feat')>=0.047);
+      const featOk=document.getElementById('na-wall')?.checked||(getTolIn('feat')!==null&&getTolIn('feat')>=0.047);
       const metalOk=document.getElementById('na-metal')?.checked||(getTolIn('metal')!==null);
       const shaftThruAll=document.getElementById('shaft-thruall')?.checked;
       const shaftOk=shaftThruAll||(getTolIn('shaft-plan-in')!==null&&getTolIn('shaft-actual-in')!==null);
@@ -1824,12 +1957,16 @@ function updateScoreAndDots(){
   // M2 (30)
   const comps=getCompData();let totalG=0;
   if(comps.length>0){
-    const procs=new Set(comps.map(c=>c.proc).filter(p=>p&&p!=='Select...')).size;
-    totalG=comps.reduce((s,c)=>s+(parseFloat(c.massG)||0),0);
+    const nonHwC2=comps.filter(c=>c.mat!=='Hardware / COTS');
+    const procs=new Set(nonHwC2.map(c=>c.proc).filter(p=>p&&p!=='Select...')).size;
+    totalG=comps.reduce((s,c)=>s+(parseFloat(c.massG)||0)*(c.qty||1),0);
     const named=comps.filter(c=>c.name&&c.mat&&c.mat!=='Select...'&&c.massG).length;
     score+=Math.round(12*named/comps.length);
     if(totalG>0&&totalG<=MASS_LIMIT_G)score+=2;
-    if(procs>=3)score+=2;const fast=parseInt(getFieldVal('fastener-count'))||0;if(fast>=3)score+=2;
+    if(procs>=3)score+=2;
+    const fkw2=/bolt|screw|bolts\s*\/\s*nuts/i;
+    const fast=comps.reduce((s,c)=>{const p=c.proc||'';if(fkw2.test(p))return s+(c.qty||1);return s;},0);
+    if(fast>=3)score+=2;
     const hwComps=comps.filter(c=>c.mat==='Hardware / COTS');
     if(hwComps.length===0)score+=6;else{const hwOk=hwComps.filter(c=>c.supplier&&c.hwDl).length;score+=Math.round(6*hwOk/hwComps.length);}
     if(document.querySelectorAll('#bolt-body tr').length>0)score+=6;
@@ -1839,7 +1976,7 @@ function updateScoreAndDots(){
   const pfNA=document.getElementById('na-pressfit')?.checked;if(pfNA)score+=3;else if(sentOk('pressfit-detail',1))score+=3;
   const snugNA=document.getElementById('na-snug')?.checked;if(snugNA||sentOk('snug-detail',1))score+=0; // snug fit is part of combined wall card pts
   const wallNA=document.getElementById('na-wall')?.checked;if(wallNA)score+=2;else if(getTolIn('wall')!==null&&getTolIn('wall')>=0.047)score+=2;
-  const featNA=document.getElementById('na-feat')?.checked;if(featNA)score+=2;else if(getTolIn('feat')!==null&&getTolIn('feat')>=0.047)score+=2;
+  const featNA=document.getElementById('na-wall')?.checked;if(featNA)score+=2;else if(getTolIn('feat')!==null&&getTolIn('feat')>=0.047)score+=2;
   const metalNA=document.getElementById('na-metal')?.checked;if(metalNA)score+=3;else if(getTolIn('metal')!==null)score+=3;
   const shaftTA=document.getElementById('shaft-thruall')?.checked;
   const sp=getTolIn('shaft-plan-in'),sa=getTolIn('shaft-actual-in');if(shaftTA||(sp!==null&&sa!==null))score+=3;
@@ -1875,7 +2012,7 @@ function showStorageFull(){const el=document.getElementById('tb-save-status');el
 function getTolData(){
   const keys=['hexbore-in','hexbore-mm','wall-in','wall-mm','feat-in','feat-mm','metal-in','metal-mm','metal-type','hexext-in','hexext-mm','shaft-plan-in','shaft-plan-mm','shaft-actual-in','shaft-actual-mm'];
   const d={};keys.forEach(k=>{const el=document.querySelector(`[data-tol="${k}"]`);if(el)d[k]=el.type==='checkbox'?el.checked:el.value;});
-  const naKeys=['pressfit-na','snug-na','wall-na','feat-na','metal-na','shaft-thruall'];
+  const naKeys=['pressfit-na','snug-na','wall-na','metal-na','shaft-thruall'];
   naKeys.forEach(k=>{const el=document.querySelector(`[data-tol="${k}"]`);if(el)d[k]=el.checked;});
   return d;
 }
@@ -1925,7 +2062,8 @@ function loadData(data){
   const pfNA=document.getElementById('na-pressfit')?.checked;if(pfNA)handleTolNA('pressfit');
   const snugNA2=document.getElementById('na-snug')?.checked;if(snugNA2)handleTolNA('snug');
   const wallNA=document.getElementById('na-wall')?.checked;if(wallNA)handleTolNA('wall');
-  const featNA=document.getElementById('na-feat')?.checked;if(featNA)handleTolNA('feat');
+  // na-feat is now combined with na-wall toggle; handle via na-wall
+  const featNA2=document.getElementById('na-wall')?.checked;if(featNA2)handleTolNA('feat');
   const metalNA=document.getElementById('na-metal')?.checked;if(metalNA)handleTolNA('metal');
   const shaftTA2=document.getElementById('shaft-thruall')?.checked;if(shaftTA2)handleShaftThruAll();
   updateScoreAndDots();
@@ -1984,10 +2122,13 @@ function runPreflight(){
   const comps=getCompData();
   if(comps.length===0)issues.push('Module 02: No components documented');
   else{comps.forEach((c,i)=>{if(!c.name)issues.push(`Module 02: Component ${i+1} — missing name`);if(!c.massG)issues.push(`Module 02: Component ${i+1} (${c.name||'?'}) — missing mass value`);});
-  const procs=new Set(comps.map(c=>c.proc).filter(p=>p&&p!=='Select...')).size;if(procs<3)issues.push('Module 02: Fewer than 3 distinct manufacturing processes documented ('+procs+' found)');
-  const fast=parseInt(getFieldVal('fastener-count'))||0;if(fast<3)issues.push('Module 02: Fastener count is below 3 ('+fast+' entered)');
+  const nhwc=comps.filter(c=>c.mat!=='Hardware / COTS');
+  const procs=new Set(nhwc.map(c=>c.proc).filter(p=>p&&p!=='Select...')).size;if(procs<3)issues.push('Module 02: Fewer than 3 distinct manufacturing processes documented ('+procs+' found, Hardware/COTS excluded)');
+  const pfkw=/bolt|screw|bolts\s*\/\s*nuts/i;
+  const fast=comps.reduce((s,c)=>{const p=c.proc||'';if(pfkw.test(p))return s+(c.qty||1);return s;},0);
+  if(fast<3)issues.push('Module 02: Fewer than 3 fasteners detected in component list ('+fast+' found)');
   if(document.querySelectorAll('#bolt-body tr').length===0)issues.push('Module 02: Bolt clearance table is empty');
-  const totalG=comps.reduce((s,c)=>s+(parseFloat(c.massG)||0),0);if(totalG>MASS_LIMIT_G)issues.push(`Module 02: Total mass ${totalG.toFixed(1)}g exceeds 907g limit`);}
+  const totalG=comps.reduce((s,c)=>s+(parseFloat(c.massG)||0)*(c.qty||1),0);if(totalG>MASS_LIMIT_G)issues.push(`Module 02: Total mass ${totalG.toFixed(1)}g exceeds 907g limit`);}
   comps.forEach((c,i)=>{if(!c.rowImg)issues.push(`Module 02: Component ${i+1} (${c.name||'?'}) — no screenshot uploaded`);});
   const hexV=getTolIn('hexbore');if(hexV===null)issues.push('Module 03: Hex bore check — no value entered');
   const hexextV=getTolIn('hexext');if(hexextV===null)issues.push('Module 03: Hex extension check — no value entered');
@@ -2062,6 +2203,207 @@ function initAnimations(){
 /* -------- DATE -------- */
 function autoFillDate(){const el=document.querySelector('[data-field="student-date"]');if(!el||el.value.trim()!=='')return;const now=new Date();el.value=String(now.getMonth()+1).padStart(2,'0')+' / '+String(now.getDate()).padStart(2,'0')+' / '+now.getFullYear();updateMirror('student-date',el.value);}
 
+/* -------- FIT CALCULATOR -------- */
+const FIT_TYPES=[
+  {id:1,label:'Hex shaft through printed part',fixedDiam:true,fixedVal:0.500,fixedMm:12.700,hideMat:false},
+  {id:2,label:'Bolt clearance through printed part',fixedDiam:false,hideMat:false},
+  {id:3,label:'Bolt clearance through laser cut metal',fixedDiam:false,hideMat:true},
+  {id:4,label:'Circular shaft or boss — press fit, printed to printed',fixedDiam:false,hideMat:false},
+  {id:5,label:'Circular shaft or boss — snug fit, printed to printed',fixedDiam:false,hideMat:false},
+  {id:6,label:'Circular shaft or boss — clearance fit, printed to printed',fixedDiam:false,hideMat:false},
+  {id:7,label:'Non-circular shaft or boss — snug fit offset (hex, D-shaft, square, irregular)',fixedDiam:false,hideMat:false}
+];
+const FIT_MATS=['HIPS / Bambu H2D','HIPS / Bambu X1C','ABS / Bambu H2D','ABS / Bambu X1C','PLA / Bambu H2D','PLA / Bambu X1C'];
+// Tolerance table by material group
+function getFitTol(typeId,matVal){
+  const mat=matVal||'';
+  const isPLA=mat.startsWith('PLA');
+  const isHIPS=mat.startsWith('HIPS');
+  // clearance: HIPS/ABS +0.40mm, PLA +0.35mm
+  // snug: HIPS/ABS +0.20mm, PLA +0.15mm
+  // press: HIPS/ABS ±0 (nominal), PLA -0.05mm bore
+  // non-circ snug offset per face: same as snug
+  // metal clearance: +0.40mm fixed
+  switch(typeId){
+    case 1: return {tolMm:+(isPLA?0.35:0.40),label:'Clearance',boreMm:true};
+    case 2: return {tolMm:+(isPLA?0.35:0.40),label:'Clearance (printed)',boreMm:true};
+    case 3: return {tolMm:0.40,label:'Clearance (metal)',boreMm:true,fixedTol:true};
+    case 4: return {tolMm:isPLA?-0.05:0,label:'Press fit (interference)',boreMm:true};
+    case 5: return {tolMm:isPLA?0.15:0.20,label:'Snug fit',boreMm:true};
+    case 6: return {tolMm:isPLA?0.35:0.40,label:'Clearance fit',boreMm:true};
+    case 7: return {tolMm:isPLA?0.15:0.20,label:'Per-face offset (Offset Entities)',boreMm:false,isOffset:true};
+  }
+  return {tolMm:0.40,label:'',boreMm:true};
+}
+let fitEntries=[];
+let fitEntryIdCounter=0;
+
+function addFitEntry(savedData){
+  const id=fitEntryIdCounter++;
+  fitEntries.push(id);
+  const container=document.getElementById('fit-entries');
+  const div=document.createElement('div');div.className='fit-entry';div.id='fit-entry-'+id;
+  const sd=savedData||{};
+  div.innerHTML=`
+    <div class="fit-entry-head">
+      <span class="fit-entry-num">ENTRY ${id+1}</span>
+      <span class="fit-entry-del" onclick="removeFitEntry(${id})" title="Remove">&#x2716; Remove</span>
+    </div>
+    <div class="fit-calc-row">
+      <div class="field-row">
+        <label>Joint Type</label>
+        <select class="fc-type" onchange="onFitTypeChange(${id})">
+          ${FIT_TYPES.map(t=>`<option value="${t.id}"${(sd.typeId==t.id)?' selected':''}>${t.id}. ${t.label}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field-row fc-mat-wrap">
+        <label>Material / Printer</label>
+        <select class="fc-mat" onchange="saveFitCalcData()">
+          ${FIT_MATS.map(m=>`<option value="${m}"${sd.mat===m?' selected':''}>${m}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="fit-calc-row3">
+      <div class="field-row fc-diam-wrap">
+        <label class="fc-diam-lbl">Nominal Diameter (in)</label>
+        <input type="number" class="fc-nom-in" step="0.001" min="0.01" max="10" placeholder="0.000" value="${sd.nomIn||''}" oninput="onFitNomSync(${id},'in');saveFitCalcData()">
+      </div>
+      <div class="field-row fc-diam-wrap">
+        <label>Nominal Diameter (mm)</label>
+        <input type="number" class="fc-nom-mm" step="0.01" min="0.1" max="254" placeholder="0.000" value="${sd.nomMm||''}" oninput="onFitNomSync(${id},'mm');saveFitCalcData()">
+      </div>
+      <div class="field-row" style="align-self:flex-end">
+        <button class="fit-calc-btn" onclick="calcFitEntry(${id})">[ Calculate ]</button>
+      </div>
+    </div>
+    <div class="fit-result-box${sd.result?' active':''}" id="fc-result-${id}">
+      <div class="fit-result-val" id="fc-rv-${id}">${sd.resultVal||''}</div>
+      <div class="fit-result-tol" id="fc-rt-${id}">${sd.resultTol||''}</div>
+      <div class="fit-result-why" id="fc-rw-${id}">${sd.resultWhy||''}</div>
+    </div>
+  `;
+  container.appendChild(div);
+  // Apply initial state
+  onFitTypeChange(id);
+  if(sd.result){document.getElementById('fc-result-'+id)?.classList.add('active');}
+}
+function onFitTypeChange(id){
+  const div=document.getElementById('fit-entry-'+id);if(!div)return;
+  const typeEl=div.querySelector('.fc-type');if(!typeEl)return;
+  const typeId=parseInt(typeEl.value);
+  const ft=FIT_TYPES.find(t=>t.id===typeId);
+  const matWrap=div.querySelector('.fc-mat-wrap');
+  const diamWrap=div.querySelectorAll('.fc-diam-wrap');
+  const nomIn=div.querySelector('.fc-nom-in');
+  const nomMm=div.querySelector('.fc-nom-mm');
+  const diamLbl=div.querySelector('.fc-diam-lbl');
+  if(matWrap)matWrap.style.display=(ft&&ft.hideMat)?'none':'';
+  if(ft&&ft.fixedDiam){
+    if(nomIn){nomIn.value=ft.fixedVal.toFixed(3);nomIn.disabled=true;}
+    if(nomMm){nomMm.value=ft.fixedMm.toFixed(3);nomMm.disabled=true;}
+  } else {
+    if(nomIn)nomIn.disabled=false;
+    if(nomMm)nomMm.disabled=false;
+  }
+  if(diamLbl){
+    if(typeId===7)diamLbl.textContent='Nominal Shaft Dimension (in)';
+    else diamLbl.textContent='Nominal Diameter (in)';
+  }
+  saveFitCalcData();
+}
+function onFitNomSync(id,from){
+  const div=document.getElementById('fit-entry-'+id);if(!div)return;
+  const nomIn=div.querySelector('.fc-nom-in');const nomMm=div.querySelector('.fc-nom-mm');
+  if(from==='in'&&nomIn&&nomMm&&nomIn.value!=='')nomMm.value=inToMm(parseFloat(nomIn.value)||0);
+  else if(from==='mm'&&nomIn&&nomMm&&nomMm.value!=='')nomIn.value=mmToIn(parseFloat(nomMm.value)||0);
+}
+function calcFitEntry(id){
+  const div=document.getElementById('fit-entry-'+id);if(!div)return;
+  const typeId=parseInt(div.querySelector('.fc-type')?.value)||1;
+  const matVal=div.querySelector('.fc-mat')?.value||'';
+  const nomInVal=parseFloat(div.querySelector('.fc-nom-in')?.value)||0;
+  const nomMmVal=parseFloat(div.querySelector('.fc-nom-mm')?.value)||0;
+  if(!nomInVal&&!nomMmVal){alert('Enter a nominal dimension first.');return;}
+  const nom_mm=nomMmVal||inToMm(nomInVal);
+  const nom_in=nomInVal||mmToIn(nomMmVal);
+  const tol=getFitTol(typeId,matVal);
+  let resultVal='',resultTol='',resultWhy='';
+  if(tol.isOffset){
+    const offMm=+tol.tolMm.toFixed(3);const offIn=+(offMm/25.4).toFixed(4);
+    resultVal=`Per-face offset: +${offMm} mm / +${offIn} in`;
+    resultTol=`Tolerance applied: ${tol.label} +${offMm} mm`;
+    resultWhy=`For non-circular shafts, apply this value using Offset Entities in SolidWorks on each face of the bore profile. This creates a uniform clearance on every face of the non-circular cross-section.`;
+  } else {
+    const boreMm=+(nom_mm+tol.tolMm).toFixed(3);const boreIn=+(boreMm/25.4).toFixed(4);
+    const sign=tol.tolMm>=0?'+':'';
+    resultVal=`Recommended bore: ${boreIn} in / ${boreMm} mm`;
+    resultTol=`Tolerance applied: ${tol.label} ${sign}${tol.tolMm.toFixed(2)} mm (${sign}${(tol.tolMm/25.4).toFixed(4)} in)`;
+    if(typeId===1)resultWhy=`Hex shaft nominal 0.500 in / 12.700 mm. Clearance bore at +${tol.tolMm} mm ensures assembly without forcing.`;
+    else if(typeId===2)resultWhy=`Bolt clearance in printed part: nominal + ${tol.tolMm} mm. Printed holes contract slightly during cooling.`;
+    else if(typeId===3)resultWhy=`Metal clearance hole: nominal + 0.40 mm fixed. Laser-cut metal does not require shrinkage compensation.`;
+    else if(typeId===4)resultWhy=`Press fit: bore equals nominal${tol.tolMm!==0?' minus '+Math.abs(tol.tolMm)+' mm for interference':' (no interference offset for this material)'}. Too much interference will crack printed parts.`;
+    else if(typeId===5)resultWhy=`Snug fit: bore = nominal + ${tol.tolMm} mm. Parts seat with light hand pressure, no play.`;
+    else if(typeId===6)resultWhy=`Clearance fit: bore = nominal + ${tol.tolMm} mm. Parts slide together freely with minimal resistance.`;
+  }
+  const rb=document.getElementById('fc-result-'+id);
+  if(rb){
+    rb.classList.add('active');
+    document.getElementById('fc-rv-'+id).textContent=resultVal;
+    document.getElementById('fc-rt-'+id).textContent=resultTol;
+    document.getElementById('fc-rw-'+id).textContent=resultWhy;
+  }
+  saveFitCalcData();
+}
+function removeFitEntry(id){
+  const div=document.getElementById('fit-entry-'+id);if(div)div.remove();
+  fitEntries=fitEntries.filter(x=>x!==id);
+  saveFitCalcData();
+}
+function saveFitCalcData(){
+  const entries=Array.from(document.querySelectorAll('.fit-entry')).map(div=>{
+    const id=parseInt(div.id.replace('fit-entry-',''));
+    const rb=document.getElementById('fc-result-'+id);
+    return{
+      id,typeId:parseInt(div.querySelector('.fc-type')?.value)||1,
+      mat:div.querySelector('.fc-mat')?.value||'',
+      nomIn:div.querySelector('.fc-nom-in')?.value||'',
+      nomMm:div.querySelector('.fc-nom-mm')?.value||'',
+      result:rb?.classList.contains('active')||false,
+      resultVal:document.getElementById('fc-rv-'+id)?.textContent||'',
+      resultTol:document.getElementById('fc-rt-'+id)?.textContent||'',
+      resultWhy:document.getElementById('fc-rw-'+id)?.textContent||''
+    };
+  });
+  try{localStorage.setItem('m3_fitCalc_entries',JSON.stringify(entries));}catch(e){}
+}
+function loadFitCalcData(){
+  try{
+    const raw=localStorage.getItem('m3_fitCalc_entries');
+    if(raw){
+      const arr=JSON.parse(raw);
+      document.getElementById('fit-entries').innerHTML='';fitEntries=[];fitEntryIdCounter=0;
+      arr.forEach(sd=>addFitEntry(sd));
+    } else {addFitEntry();}
+  }catch(e){addFitEntry();}
+}
+
+/* -------- CLIPBOARD PASTE TO UPLOAD ZONES -------- */
+let lastUZ=null;
+function setLastUZ(zone){lastUZ=zone;}
+document.addEventListener('paste',function(e){
+  const items=e.clipboardData?.items;if(!items)return;
+  for(let i=0;i<items.length;i++){
+    if(items[i].type.startsWith('image/')){
+      const file=items[i].getAsFile();if(!file)continue;
+      const zone=lastUZ||'ss-mass';
+      if(!imgStore[zone])imgStore[zone]=[];
+      const r=new FileReader();r.onload=ev=>{imgStore[zone].push({src:ev.target.result,caption:''});renderImgs(zone);updateImgCount(zone,1);updateScoreAndDots();saveToStorage();};
+      r.readAsDataURL(file);
+      break;
+    }
+  }
+});
+
 /* -------- INIT -------- */
 document.addEventListener('DOMContentLoaded',()=>{
   document.querySelectorAll('textarea[data-field]').forEach(ta=>{ta.addEventListener('input',()=>{autoResize(ta);updateMirror(ta.dataset.field,ta.value);updateCounter(ta.dataset.field,ta.value);updateScoreAndDots();saveToStorage();});});
@@ -2072,6 +2414,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.querySelectorAll('input[type="checkbox"][data-field]').forEach(r=>r.addEventListener('change',()=>{updateScoreAndDots();saveToStorage();}));
   document.getElementById('approval-pwd')?.addEventListener('keydown',e=>{if(e.key==='Enter')checkApproval();});
   loadFromStorage();autoFillDate();
+  loadFitCalcData();
   initCollapseState();
   setInterval(saveToStorage,30000);
   window.addEventListener('resize',resizeAll);
