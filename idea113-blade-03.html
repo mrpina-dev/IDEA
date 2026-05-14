@@ -1,0 +1,1748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IDEA-BLADE | Assignment 03: CAD Design Package</title>
+<link rel="icon" type="image/png" sizes="512x512" href="/IDEA/ib-android-chrome-512x512.png">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg0:#020A04;--bg1:#050F07;--bg2:#081209;
+  --green:#00FF41;--gold:#C8FF00;--cyan:#00F0FF;
+  --amber:#FF8C00;--teal:#00AA88;--violet:#5500AA;
+  --white:#E8FFE8;--dim:#4A7A52;--ice:#88DDFF;
+  --glow-green:0 0 10px rgba(0,255,65,.8),0 0 28px rgba(0,255,65,.3);
+  --glow-gold:0 0 10px rgba(200,255,0,.8),0 0 28px rgba(200,255,0,.3);
+  --glow-amber:0 0 10px rgba(255,140,0,.8),0 0 28px rgba(255,140,0,.3);
+  --glow-cyan:0 0 10px rgba(0,240,255,.8),0 0 28px rgba(0,240,255,.3);
+}
+body{background:var(--bg0);color:var(--white);font-family:'Rajdhani',sans-serif;font-size:15px;line-height:1.6;min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{height:8px;width:8px}
+::-webkit-scrollbar-track{background:rgba(0,255,65,.05);border:1px solid rgba(0,255,65,.1)}
+::-webkit-scrollbar-thumb{background:rgba(0,255,65,.3);border:1px solid rgba(0,255,65,.5);border-radius:0}
+::-webkit-scrollbar-thumb:hover{background:rgba(0,255,65,.6)}
+.table-container{scrollbar-width:thin;scrollbar-color:rgba(0,255,65,.3) rgba(0,255,65,.05)}
+input,textarea,select{transition:border-color .2s ease,box-shadow .2s ease,background .2s ease,opacity .2s ease}
+input:hover:not(:disabled),textarea:hover:not(:disabled),select:hover:not(:disabled){border-color:rgba(0,255,65,.4)!important}
+.tb-btn:active{transform:scale(.96)}
+#scroll-progress{position:fixed;top:0;left:0;width:0%;height:2px;background:var(--green);box-shadow:var(--glow-green);z-index:1001;transition:width .08s linear;pointer-events:none}
+body,html{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' opacity='0.85'%3E%3Cline x1='12' y1='0' x2='12' y2='9' stroke='%2300FF41' stroke-width='1.5'/%3E%3Cline x1='12' y1='15' x2='12' y2='24' stroke='%2300FF41' stroke-width='1.5'/%3E%3Cline x1='0' y1='12' x2='9' y2='12' stroke='%2300FF41' stroke-width='1.5'/%3E%3Cline x1='15' y1='12' x2='24' y2='12' stroke='%2300FF41' stroke-width='1.5'/%3E%3Crect x='11' y='11' width='2' height='2' fill='%2300FF41'/%3E%3C/svg%3E") 12 12,crosshair}
+a,button,.tb-btn,.action-btn,.rubric-toggle,select,input[type="radio"],input[type="checkbox"],label,th[data-tip]{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' opacity='0.75'%3E%3Cpath d='M7 10V7h3M14 7h3v3M17 14v3h-3M10 17H7v-3' fill='none' stroke='%23C8FF00' stroke-width='1.5'/%3E%3Ccircle cx='12' cy='12' r='1.5' fill='%23C8FF00'/%3E%3C/svg%3E") 12 12,pointer!important}
+input[type="text"],input[type="number"],input[type="password"],textarea{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' opacity='0.6'%3E%3Cline x1='12' y1='4' x2='12' y2='20' stroke='%2300F0FF' stroke-width='1.5'/%3E%3Cline x1='8' y1='4' x2='16' y2='4' stroke='%2300F0FF' stroke-width='1.5'/%3E%3Cline x1='8' y1='20' x2='16' y2='20' stroke='%2300F0FF' stroke-width='1.5'/%3E%3C/svg%3E") 12 12,text!important}
+#toolbar{position:sticky;top:0;z-index:1000;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);background:rgba(2,10,4,.9);border-bottom:1px solid rgba(0,255,65,.18);padding:8px 20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tb-btn{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1.5px;padding:7px 14px;border:1px solid rgba(0,255,65,.28);background:rgba(0,255,65,.04);color:var(--green);cursor:pointer;text-transform:uppercase;white-space:nowrap}
+.tb-btn:hover{background:rgba(0,255,65,.12);border-color:rgba(0,255,65,.6)}
+.tb-btn.danger{border-color:rgba(255,140,0,.28);color:var(--amber);background:rgba(255,140,0,.03)}
+.tb-btn.danger:hover{background:rgba(255,140,0,.1);border-color:rgba(255,140,0,.6)}
+#tb-score{font-family:'Orbitron',sans-serif;font-size:11px;color:var(--gold);letter-spacing:2px;padding:6px 12px;border:1px solid rgba(200,255,0,.2);background:rgba(200,255,0,.04);white-space:nowrap}
+#tb-save-status{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:1px;margin-left:auto;transition:color .3s}
+#tb-save-status.flash{color:var(--green)}
+#bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.55}
+.page{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:32px 32px 60px}
+#version-warning{display:none;background:rgba(255,140,0,.08);border:1px solid var(--amber);padding:10px 16px;margin-bottom:16px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--amber);letter-spacing:1px;line-height:1.6}
+.header{border:1px solid rgba(0,255,65,.28);border-bottom:3px solid var(--green);background:rgba(5,15,7,.97);padding:28px 32px 24px;margin-bottom:20px;position:relative;overflow:hidden;break-inside:avoid}
+.header::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.header-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:16px}
+.brand-label{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:3px;text-transform:uppercase;display:block;margin-bottom:4px}
+.brand-title{font-family:'Orbitron',sans-serif;font-size:30px;font-weight:900;color:var(--green);letter-spacing:4px;text-shadow:var(--glow-green);line-height:1;display:block;margin-bottom:4px}
+.brand-sub{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--dim);letter-spacing:2px;display:block}
+.badge-num{font-family:'Orbitron',sans-serif;font-size:42px;font-weight:900;color:rgba(0,255,65,.12);line-height:1;text-align:right;display:block}
+.badge-label{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:2px;text-align:right;display:block}
+.header-title{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;color:var(--green);letter-spacing:4px;text-transform:uppercase;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid rgba(0,255,65,.12)}
+.student-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;margin-bottom:14px}
+.info-field{display:flex;flex-direction:column;gap:4px}
+.info-field label,.field-row label{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;display:block}
+.info-field input,.field-row input[type="text"],.field-row input[type="number"],.field-row input[type="password"],.field-row select{background:var(--bg2);border:1px solid rgba(0,255,65,.12);border-bottom:1px solid var(--dim);color:var(--green);font-family:'Rajdhani',sans-serif;font-size:15px;padding:9px 12px;outline:none;width:100%}
+.field-row select{font-family:'Share Tech Mono',monospace;font-size:13px;appearance:none;cursor:pointer}
+.field-row select option{background:var(--bg1);color:var(--white)}
+.info-field input:focus,.field-row input:focus,.field-row select:focus{border-color:var(--green)!important;box-shadow:0 0 8px rgba(0,255,65,.1)}
+.info-field input[readonly]{color:var(--cyan);cursor:default;border-color:rgba(0,240,255,.15)}
+.info-field input::placeholder,.field-row input::placeholder{color:var(--dim);font-style:italic;font-size:13px}
+.collab-row{display:flex;align-items:center;gap:16px;padding-top:14px;border-top:1px solid rgba(0,255,65,.08);flex-wrap:wrap}
+.collab-label{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;white-space:nowrap}
+.collab-options{display:flex;gap:16px}
+.collab-opt{display:flex;align-items:center;gap:6px;cursor:pointer}
+.collab-opt input[type="radio"]{accent-color:var(--green);width:14px;height:14px;cursor:pointer}
+.collab-opt span{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--dim);letter-spacing:1px}
+.collab-names{flex:1;min-width:200px}
+.collab-names input{background:var(--bg2);border:1px solid rgba(0,255,65,.12);border-bottom:1px solid var(--dim);color:var(--green);font-family:'Rajdhani',sans-serif;font-size:14px;padding:7px 12px;outline:none;width:100%;transition:border-color .2s,opacity .2s}
+.collab-names input:focus{border-color:var(--green)!important}
+.collab-names input:disabled{background:rgba(0,255,65,.02)!important;border-color:rgba(0,255,65,.05)!important;color:var(--dim)!important}
+.collab-names input::placeholder{color:var(--dim);font-style:italic;font-size:12px}
+.collab-note{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(74,122,82,.55);letter-spacing:1px;display:block;margin-top:7px;font-style:italic;width:100%}
+.submit-callout{border:1px solid rgba(255,140,0,.18);background:rgba(255,140,0,.03);padding:12px 16px;margin-bottom:16px}
+.submit-callout-title{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:3px;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+.submit-steps{display:flex;gap:0;flex-wrap:wrap}
+.submit-step{display:flex;align-items:flex-start;gap:8px;flex:1;min-width:140px;padding:4px 8px}
+.step-num{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;color:var(--amber);flex-shrink:0;line-height:1.4}
+.step-text{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:.5px;line-height:1.5}
+.step-text em{color:var(--green);font-style:normal}
+.prework-callout{border:1px solid rgba(255,140,0,.25);background:rgba(255,140,0,.04);padding:16px 20px;margin-bottom:16px}
+.prework-callout-title{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:3px;color:var(--amber);text-transform:uppercase;margin-bottom:10px}
+.prework-items{display:flex;flex-direction:column;gap:7px}
+.prework-item{display:flex;align-items:flex-start;gap:10px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--dim);line-height:1.6}
+.prework-item::before{content:'▶';color:var(--amber);flex-shrink:0;margin-top:1px}
+.prework-item em{color:var(--white);font-style:normal}
+.rulebook-block{border:2px solid var(--gold);background:rgba(200,255,0,.03);margin-bottom:20px;padding:20px 24px;position:relative}
+.rulebook-block::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.rulebook-eyebrow{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:10px;display:block}
+.rulebook-link-row{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.rulebook-link-btn{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:900;color:var(--bg0);background:var(--gold);padding:12px 24px;text-decoration:none;letter-spacing:2px;text-transform:uppercase;display:inline-block;transition:background .15s,box-shadow .15s;cursor:pointer}
+.rulebook-link-btn:hover{background:#fff;box-shadow:var(--glow-gold)}
+.rulebook-note{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--dim);letter-spacing:.5px;line-height:1.8}
+.total-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:rgba(0,255,65,.04);border:1px solid rgba(0,255,65,.18);margin-bottom:20px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--dim);letter-spacing:2px}
+.total-bar strong{font-family:'Orbitron',sans-serif;font-size:13px;color:var(--gold);letter-spacing:3px;animation:glow-breathe-gold 3s ease-in-out infinite}
+@keyframes glow-breathe-gold{0%,100%{text-shadow:0 0 4px rgba(200,255,0,.2)}50%{text-shadow:var(--glow-gold)}}
+.module{border:1px solid rgba(0,255,65,.18);background:var(--bg1);margin-bottom:20px;position:relative;break-inside:avoid;opacity:0;transform:translateY(20px);transition:opacity .65s ease,transform .65s ease;overflow:hidden}
+.module.visible{opacity:1;transform:translateY(0)}
+.module::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:linear-gradient(180deg,var(--green),rgba(0,255,65,.05));z-index:1}
+.module::after{content:'';position:absolute;top:-100%;left:0;right:0;height:100%;background:linear-gradient(180deg,transparent 0%,rgba(0,255,65,.035) 50%,transparent 100%);pointer-events:none;transition:top .55s ease;z-index:0}
+.module:hover::after{top:100%}
+.module-header{display:flex;align-items:center;gap:12px;padding:12px 20px 12px 24px;border-bottom:1px solid rgba(0,255,65,.12);background:rgba(0,255,65,.03);position:relative;z-index:1}
+.mod-num{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;color:var(--dim);letter-spacing:1px;background:rgba(0,255,65,.07);padding:3px 8px;border:1px solid rgba(0,255,65,.18)}
+.mod-title{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;color:var(--green);flex:1;text-transform:uppercase}
+.mod-pts{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gold);letter-spacing:2px;background:rgba(200,255,0,.05);border:1px solid rgba(200,255,0,.18);padding:3px 10px;animation:glow-breathe-pts 4s ease-in-out infinite}
+@keyframes glow-breathe-pts{0%,100%{text-shadow:0 0 4px rgba(200,255,0,.15)}50%{text-shadow:var(--glow-gold)}}
+.mod-dot{width:10px;height:10px;border-radius:50%;background:rgba(74,122,82,.3);border:1px solid rgba(74,122,82,.4);flex-shrink:0;transition:background .3s,border-color .3s,box-shadow .3s}
+.mod-dot.complete{background:var(--green);border-color:var(--green);box-shadow:0 0 8px rgba(0,255,65,.55)}
+.mod-dot.partial{background:var(--teal);border-color:var(--teal)}
+.rubric-toggle{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;padding:3px 10px;border:1px solid rgba(0,255,65,.18);background:transparent;color:var(--dim);cursor:pointer;text-transform:uppercase;transition:color .2s,background .2s;white-space:nowrap}
+.rubric-toggle:hover{color:var(--green);background:rgba(0,255,65,.05)}
+.rubric-toggle.open{color:rgba(74,122,82,.7)}
+.module-body{padding:20px 24px;display:flex;flex-direction:column;gap:14px;position:relative;z-index:1}
+.rubric-panel{max-height:0;overflow:hidden;transition:max-height .35s ease;background:rgba(0,255,65,.015);border-bottom:0 solid rgba(0,255,65,.1)}
+.rubric-panel.open{max-height:900px;border-bottom:1px solid rgba(0,255,65,.1)}
+.rubric-inner{padding:12px 24px 16px}
+.rubric-title-row{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;padding-bottom:8px;border-bottom:1px solid rgba(0,255,65,.08);margin-bottom:2px;display:flex;justify-content:space-between}
+.rubric-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:7px 0;border-bottom:1px solid rgba(0,255,65,.04)}
+.rubric-row:last-child{border-bottom:none}
+.rubric-criteria{font-size:13px;color:var(--dim);line-height:1.5;flex:1}
+.rubric-criteria strong{color:var(--white);font-weight:600}
+.rubric-pts{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--gold);white-space:nowrap;padding-top:2px}
+.field-row{display:flex;flex-direction:column;gap:5px}
+.field-row textarea{background:var(--bg2);border:1px solid rgba(0,255,65,.12);border-bottom:1px solid var(--dim);color:var(--green);font-family:'Rajdhani',sans-serif;font-size:15px;padding:10px 12px;outline:none;resize:none;overflow:hidden;width:100%;min-height:80px}
+.field-row textarea:focus{border-color:var(--green)!important;box-shadow:0 0 8px rgba(0,255,65,.08),inset 0 0 4px rgba(0,255,65,.03)}
+.field-row textarea::placeholder{color:var(--dim);font-style:italic;font-size:13px}
+.sent-count{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px;padding:4px 8px;border-left:2px solid var(--dim);color:var(--dim);transition:color .2s,border-color .2s;display:flex;align-items:center;gap:6px}
+.sent-count.met{color:var(--green);border-left-color:var(--green)}
+.sent-count.unmet.active{color:var(--amber);border-left-color:var(--amber)}
+.sent-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+.prompt{font-size:13px;color:var(--dim);font-style:italic;line-height:1.7;padding:10px 14px;border-left:2px solid rgba(0,255,65,.1);background:rgba(0,255,65,.02)}
+.sub-label{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;color:var(--dim);letter-spacing:3px;text-transform:uppercase;padding:6px 0 2px;border-bottom:1px solid rgba(0,255,65,.07);margin-bottom:2px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.print-mirror{display:none;color:var(--green);font-family:'Rajdhani',sans-serif;font-size:15px;line-height:1.65;white-space:pre-wrap;word-break:break-word;padding:10px 12px;border:1px solid rgba(0,255,65,.12);border-bottom:1px solid var(--dim);background:var(--bg2);min-height:34px;width:100%}
+.print-mirror.single-line{white-space:normal;overflow:visible;min-height:auto}
+#custom-tooltip{position:fixed;pointer-events:none;opacity:0;z-index:9999;background:rgba(2,10,4,.75);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:var(--green);padding:10px 14px;border:1px solid var(--green);box-shadow:var(--glow-green);font-family:'Share Tech Mono',monospace;font-size:12px;width:max-content;max-width:300px;line-height:1.5;transform:translate(-50%,-100%);margin-top:-15px;margin-left:10px;transition:opacity .05s ease-out}
+#custom-tooltip strong{color:var(--gold);display:block;margin-bottom:4px;border-bottom:1px solid rgba(200,255,0,.3);padding-bottom:2px}
+#custom-tooltip.show{opacity:1}
+/* === COMPONENT TABLE === */
+.table-container{overflow-x:auto;margin-bottom:10px;border:1px solid rgba(0,255,65,.18);background:var(--bg2);padding-bottom:8px}
+#comp-table{width:100%;border-collapse:collapse;min-width:1200px}
+#comp-table th{background:rgba(0,255,65,.05);color:var(--green);font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:1px;text-transform:uppercase;text-align:left;padding:10px;border-bottom:1px solid rgba(0,255,65,.18);border-right:1px solid rgba(0,255,65,.05);vertical-align:middle;cursor:help}
+#comp-table td{padding:0;border-bottom:1px solid rgba(0,255,65,.05);border-right:1px solid rgba(0,255,65,.05);background:var(--bg1);position:relative;vertical-align:top}
+#comp-table tbody tr{transition:background .2s}
+#comp-table tbody tr:hover{background:rgba(0,255,65,.03)}
+#comp-table td input,#comp-table td select{width:100%;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--white);font-family:'Share Tech Mono',monospace;padding:8px 10px;box-sizing:border-box;font-size:12px}
+#comp-table td select{appearance:none;cursor:pointer}
+#comp-table td select option{background:var(--bg2);color:var(--white);font-family:'Share Tech Mono',monospace}
+#comp-table td input[type="color"]{height:35px;padding:2px;cursor:pointer}
+#comp-table td input[type="number"]{text-align:center}
+#comp-table td input:focus,#comp-table td select:focus{outline:none;background:rgba(0,255,65,.05);border-bottom-color:var(--green)}
+.custom-hidden-input{width:100%;margin-top:0;background:rgba(0,255,65,.05)!important;border-top:1px dashed rgba(0,255,65,.3)!important;color:var(--gold)!important;padding:6px 10px!important;font-size:11px!important;box-sizing:border-box}
+.custom-hidden-input:focus{border-bottom-color:var(--gold)!important}
+/* dual unit cell */
+.dual-cell{display:flex;flex-direction:column}
+.dual-cell input{font-size:11px;padding:6px 8px}
+.dual-cell .unit-label{font-family:'Orbitron',monospace;font-size:8px;color:var(--dim);padding:1px 8px;background:rgba(0,0,0,.3)}
+.dual-sep{height:1px;background:rgba(0,255,65,.08)}
+/* mass cell */
+.mass-cell{display:flex;flex-direction:column}
+.mass-cell input{font-size:11px;padding:6px 8px}
+.mass-cell .mass-convert{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--cyan);padding:3px 8px;letter-spacing:.5px}
+/* supplier cell */
+.supplier-wrap{display:flex;flex-direction:column}
+.supplier-wrap input[type="text"]{font-size:11px;padding:6px 8px}
+.supplier-wrap .hw-chk-row{display:flex;align-items:center;gap:6px;padding:4px 8px;background:rgba(200,255,0,.03);border-top:1px solid rgba(200,255,0,.1)}
+.supplier-wrap .hw-chk-row input[type="checkbox"]{width:12px;height:12px;accent-color:var(--gold);flex-shrink:0;cursor:pointer}
+.supplier-wrap .hw-chk-row label{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:.5px;cursor:pointer}
+.action-btn{cursor:pointer;color:var(--dim);font-size:14px;user-select:none;transition:color .2s}
+.action-btn:hover{color:var(--green)}
+.action-btn.del:hover{color:var(--amber)}
+tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0,255,65,.05)!important}
+.add-row-btn{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1.5px;padding:6px 14px;border:1px dashed rgba(0,255,65,.2);background:transparent;color:var(--dim);cursor:pointer;text-transform:uppercase;transition:color .2s,border-color .2s,background .2s;margin:8px 10px 4px;display:inline-block}
+.add-row-btn:hover{color:var(--green);border-color:rgba(0,255,65,.4);background:rgba(0,255,65,.03)}
+/* === STAT BARS (process count, fastener count, mass total) === */
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:14px}
+.stat-card{background:var(--bg2);border:1px solid rgba(0,255,65,.12);padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.stat-card-label{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:2px;text-transform:uppercase}
+.stat-card-value{font-family:'Orbitron',sans-serif;font-size:18px;font-weight:700;color:var(--green);transition:color .3s}
+.stat-card-value.warn{color:var(--amber)}
+.stat-card-value.ok{color:var(--green)}
+.stat-card-sub{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:.5px}
+/* === BOLT CLEARANCE TABLE === */
+#bolt-table{width:100%;border-collapse:collapse}
+#bolt-table th{background:rgba(0,255,65,.04);color:var(--dim);font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;text-align:left;padding:8px 10px;border-bottom:1px solid rgba(0,255,65,.12);border-right:1px solid rgba(0,255,65,.05)}
+#bolt-table td{padding:0;border-bottom:1px solid rgba(0,255,65,.05);border-right:1px solid rgba(0,255,65,.05);background:var(--bg2);vertical-align:top}
+#bolt-table td input,#bolt-table td select{width:100%;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--white);font-family:'Share Tech Mono',monospace;font-size:11px;padding:7px 9px}
+#bolt-table td input:focus,#bolt-table td select:focus{outline:none;background:rgba(0,255,65,.04);border-bottom-color:var(--green)}
+#bolt-table td select{appearance:none;cursor:pointer}
+#bolt-table td select option{background:var(--bg1);color:var(--white)}
+.bolt-note{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:.5px;font-style:italic;margin-top:6px;line-height:1.6}
+/* === IMAGE GALLERY === */
+.image-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:10px}
+.image-item{position:relative}
+.image-item img{width:100%;height:90px;object-fit:cover;border:1px solid rgba(0,255,65,.25);cursor:zoom-in;transition:border-color .2s;display:block}
+.image-item img:hover{border-color:var(--green)}
+.img-caption{width:100%;font-size:10px;padding:4px 6px;margin-top:3px;background:var(--bg2);border:1px solid rgba(0,255,65,.15);color:var(--white);font-family:'Share Tech Mono',monospace;outline:none}
+.img-remove{position:absolute;top:2px;right:2px;width:18px;height:18px;background:rgba(255,140,0,.85);border:none;color:#fff;font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.img-count{font-size:11px;margin-top:4px;transition:color .3s;font-family:'Share Tech Mono',monospace;letter-spacing:.5px}
+.upload-zone{border:2px dashed rgba(0,255,65,.25);padding:18px;text-align:center;cursor:pointer;transition:border-color .2s;margin-bottom:8px}
+.upload-zone:hover{border-color:var(--green)}
+.upload-zone-label{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--dim)}
+#lightbox{position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:3000;display:flex;align-items:center;justify-content:center;cursor:zoom-out}
+#lightbox img{max-width:92vw;max-height:90vh;object-fit:contain;border:1px solid var(--green);box-shadow:var(--glow-green)}
+/* === TOLERANCE CARDS === */
+.tol-card{background:var(--bg2);border:1px solid rgba(0,255,65,.12);border-left:3px solid var(--teal);padding:14px 16px;margin-bottom:12px}
+.tol-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:12px}
+.tol-card-title{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;color:var(--teal);letter-spacing:2px;text-transform:uppercase}
+.tol-card-dot{width:10px;height:10px;border-radius:50%;background:var(--ice);border:1px solid var(--dim);flex-shrink:0;transition:background .3s,box-shadow .3s,border-color .3s}
+.tol-card-dot.ok{background:var(--green);border-color:var(--green);box-shadow:0 0 6px rgba(0,255,65,.5)}
+.tol-card-dot.warn{background:var(--amber);border-color:var(--amber)}
+.tol-card-rule{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--dim);margin-bottom:10px;line-height:1.65;letter-spacing:.3px}
+.tol-card-rule strong{color:var(--white)}
+.tol-target{font-family:'Orbitron',sans-serif;font-size:12px;color:var(--gold);letter-spacing:1px;animation:glow-breathe-pts 3s ease-in-out infinite;margin-bottom:8px}
+.tol-inputs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:end}
+.tol-inputs .field-row input{font-size:13px;padding:7px 10px;background:var(--bg1);border:1px solid rgba(0,255,65,.15);border-bottom:1px solid var(--dim);color:var(--green);width:100%}
+.tol-inputs .field-row input:focus{border-color:var(--green)!important}
+.tol-status{font-family:'Share Tech Mono',monospace;font-size:10px;transition:color .3s;letter-spacing:.5px;padding-top:2px}
+.tol-na-row{display:flex;align-items:center;gap:8px;margin-top:8px}
+.tol-na-row input[type="checkbox"]{accent-color:var(--dim);cursor:pointer}
+.tol-na-row label{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--dim);cursor:pointer}
+/* === VALIDATION CARDS === */
+.val-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.val-card{background:var(--bg2);border:1px solid rgba(0,255,65,.12);padding:14px 16px}
+.val-card-label{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;color:var(--dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
+.val-card-target{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--cyan);margin-bottom:8px;letter-spacing:.5px}
+.val-card-inputs{display:flex;gap:8px;align-items:center}
+.val-card-inputs input{flex:1;background:var(--bg1);border:1px solid rgba(0,255,65,.15);border-bottom:1px solid var(--dim);color:var(--green);font-family:'Share Tech Mono',monospace;font-size:14px;padding:8px 10px;outline:none;text-align:center}
+.val-card-inputs input:focus{border-color:var(--green)!important}
+.val-card-inputs .unit-badge{font-family:'Orbitron',sans-serif;font-size:9px;color:var(--dim);letter-spacing:1px;white-space:nowrap}
+.val-indicator{display:flex;align-items:center;gap:8px;margin-top:6px}
+.val-dot{width:8px;height:8px;border-radius:50%;background:var(--ice);border:1px solid var(--dim);flex-shrink:0;transition:background .3s,box-shadow .3s,border-color .3s}
+.val-dot.ok{background:var(--green);border-color:var(--green);box-shadow:0 0 6px rgba(0,255,65,.5)}
+.val-dot.warn{background:var(--amber);border-color:var(--amber)}
+.val-status{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--dim);transition:color .3s}
+/* === APPROVAL GATE === */
+.approval-gate{border:2px solid rgba(200,255,0,.35);background:rgba(200,255,0,.02);padding:24px 28px;margin-bottom:20px;position:relative;transition:border-color .4s,background .4s}
+.approval-gate::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.approval-gate.approved{border-color:var(--green);background:rgba(0,255,65,.03)}
+.approval-gate.approved::before{background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.approval-eyebrow{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:10px;display:block;transition:color .4s}
+.approval-gate.approved .approval-eyebrow{color:var(--green)}
+.approval-text{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--dim);line-height:1.8;margin-bottom:16px}
+.approval-input-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.approval-input-row input[type="password"]{flex:1;min-width:200px;background:var(--bg2);border:1px solid rgba(200,255,0,.25);border-bottom:1px solid var(--gold);color:var(--gold);font-family:'Share Tech Mono',monospace;font-size:14px;padding:10px 14px;outline:none;letter-spacing:.2em}
+.approval-input-row input[type="password"]:focus{border-color:var(--gold)!important;box-shadow:0 0 8px rgba(200,255,0,.15)}
+.approval-submit{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;padding:10px 20px;border:1px solid var(--gold);background:rgba(200,255,0,.06);color:var(--gold);cursor:pointer;text-transform:uppercase;transition:background .2s,box-shadow .2s}
+.approval-submit:hover{background:rgba(200,255,0,.14);box-shadow:var(--glow-gold)}
+.approval-error{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--amber);margin-top:8px;display:none}
+.approval-success{display:none;margin-top:14px;padding:12px 16px;background:rgba(0,255,65,.05);border:1px solid rgba(0,255,65,.2)}
+.approval-success-title{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;color:var(--green);letter-spacing:3px;text-transform:uppercase;margin-bottom:6px}
+.approval-timestamp{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--cyan);letter-spacing:1px}
+/* === LOCKED MODULE === */
+.module-locked-overlay{position:absolute;inset:0;background:rgba(2,10,4,.82);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;transition:opacity .4s}
+.module-locked-icon{font-family:'Orbitron',sans-serif;font-size:28px;color:rgba(74,122,82,.5)}
+.module-locked-text{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--dim);letter-spacing:2px;text-transform:uppercase;text-align:center}
+.module.unlocked .module-locked-overlay{opacity:0;pointer-events:none}
+/* === DEVIATION TABLE === */
+#dev-table{width:100%;border-collapse:collapse;margin-top:10px}
+#dev-table th{background:rgba(0,255,65,.04);color:var(--dim);font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;text-align:left;padding:8px 10px;border-bottom:1px solid rgba(0,255,65,.12)}
+#dev-table td{padding:0;border-bottom:1px solid rgba(0,255,65,.05);background:var(--bg2);vertical-align:top}
+#dev-table td textarea{width:100%;background:transparent;border:none;color:var(--white);font-family:'Share Tech Mono',monospace;font-size:11px;padding:7px 9px;resize:none;min-height:48px;outline:none}
+#dev-table td textarea:focus{background:rgba(0,255,65,.04)}
+.declaration-block{border:1px solid rgba(0,255,65,.18);background:rgba(0,255,65,.02);padding:18px 22px;margin-bottom:20px}
+.declaration-title{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:3px;color:var(--green);text-transform:uppercase;margin-bottom:10px}
+.declaration-text{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--dim);line-height:1.8;margin-bottom:14px}
+.decl-checkbox{display:flex;align-items:flex-start;gap:10px;cursor:pointer}
+.decl-checkbox input[type="checkbox"]{accent-color:var(--green);width:16px;height:16px;margin-top:2px;cursor:pointer;flex-shrink:0}
+.decl-checkbox-label{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--white);letter-spacing:.5px;line-height:1.6}
+.instructor-table{display:none}
+.footer{display:flex;justify-content:space-between;align-items:center;margin-top:32px;padding:14px 20px;border:1px solid rgba(0,255,65,.12);background:var(--bg1);font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:2px;flex-wrap:wrap;gap:10px}
+.footer-pts{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;color:var(--gold);letter-spacing:3px}
+.dialog-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.88);z-index:9998;align-items:center;justify-content:center}
+.dialog-overlay.active{display:flex}
+.dialog-box{border:2px solid var(--amber);background:var(--bg1);padding:30px 36px;max-width:520px;text-align:center;max-height:80vh;overflow-y:auto}
+.dialog-title{font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;color:var(--amber);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px}
+.dialog-text{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--dim);line-height:1.8;margin-bottom:22px}
+.dialog-btns{display:flex;gap:12px;justify-content:center}
+.preflight-list{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;text-align:left}
+.preflight-issue{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--amber);letter-spacing:.5px;padding:5px 0;border-bottom:1px solid rgba(255,140,0,.1);display:flex;gap:8px}
+.preflight-issue::before{content:'[!]';color:var(--amber);flex-shrink:0}
+/* canvas uplink */
+#mx-toggle-btn{position:fixed;bottom:20px;right:20px;z-index:1001;background:rgba(2,10,4,.85);border:1px solid var(--green);color:var(--green);font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:2px;padding:8px 16px;cursor:pointer;text-transform:uppercase;box-shadow:0 0 10px rgba(0,255,65,.1);transition:all .3s}
+#mx-toggle-btn:hover{background:rgba(0,255,65,.1);box-shadow:0 0 15px rgba(0,255,65,.4)}
+#mx-toggle-btn.active{background:var(--green);color:var(--bg0);box-shadow:var(--glow-green)}
+#matrix-controls{position:fixed;bottom:60px;right:20px;width:300px;background:rgba(2,10,4,.95);border:1px solid rgba(0,255,65,.3);padding:16px 20px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:1000;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--dim);display:flex;flex-direction:column;gap:12px;opacity:0;pointer-events:none;transform:translateY(20px);transition:all .3s cubic-bezier(.175,.885,.32,1.275)}
+#matrix-controls.open{opacity:1;pointer-events:all;transform:translateY(0);border-color:var(--green);box-shadow:0 0 20px rgba(0,255,65,.15)}
+.mx-slider-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.mx-slider-row label{letter-spacing:1px;text-transform:uppercase;width:60px}
+.mx-slider-row input[type="range"]{flex:1;accent-color:var(--green);cursor:ew-resize}
+.mx-readout{width:28px;text-align:right;color:var(--gold);font-family:'Orbitron',sans-serif;font-size:10px}
+.mx-group-title{font-family:'Orbitron',sans-serif;font-size:9px;color:var(--dim);margin-bottom:6px;text-transform:uppercase;letter-spacing:2px;border-top:1px dashed rgba(0,255,65,.2);padding-top:10px}
+.mx-tags{display:flex;flex-wrap:wrap;gap:6px}
+.mx-tag{border:1px solid rgba(0,255,65,.2);background:rgba(0,255,65,.02);color:var(--dim);padding:4px 8px;cursor:pointer;text-transform:uppercase;font-size:9px;transition:all .2s;user-select:none}
+.mx-tag:hover{border-color:rgba(0,255,65,.5)}
+.mx-tag.active{background:rgba(0,255,65,.15);color:var(--green);border-color:var(--green);box-shadow:inset 0 0 8px rgba(0,255,65,.1)}
+.tag-green{--c:#00FF41;--bg:rgba(0,255,65,.15)}
+.tag-cyan{--c:#00F0FF;--bg:rgba(0,240,255,.15)}
+.tag-gold{--c:#C8FF00;--bg:rgba(200,255,0,.15)}
+.tag-amber{--c:#FF8C00;--bg:rgba(255,140,0,.15)}
+.mx-tag.color-tag{border-color:rgba(255,255,255,.1);color:rgba(255,255,255,.4);border-left:3px solid var(--c)}
+.mx-tag.color-tag:hover{border-color:var(--c);color:var(--c)}
+.mx-tag.color-tag.active{background:var(--bg);color:var(--c);border-color:var(--c);box-shadow:inset 0 0 8px var(--bg)}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  .module{opacity:1!important;transform:none!important}
+  .module::after{display:none!important}
+}
+@page{size:letter;margin:.5in}
+@media print{
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  #bg-canvas,#scroll-progress,#toolbar,.submit-callout,.sent-count,.add-row-btn,.rubric-toggle,.rubric-panel,
+  .dialog-overlay,#custom-tooltip,.action-btn.del,.upload-zone,.img-remove,
+  #mx-toggle-btn,#matrix-controls,.approval-input-row,.approval-error,.module-locked-overlay{display:none!important}
+  .info-field input,.field-row input[type="text"],.field-row input[type="number"],.field-row input[type="password"],.field-row textarea,.field-row select,.collab-names input,.tol-inputs input,.val-card-inputs input,.approval-gate input{display:none!important}
+  input[type="checkbox"],input[type="radio"]{display:none!important}
+  .print-mirror{display:block!important}
+  #comp-table input,#comp-table select,#bolt-table input,#bolt-table select,#dev-table textarea{border:none!important;background:transparent!important;padding:4px!important;color:var(--white)!important;text-align:left}
+  #comp-table select,#bolt-table select{appearance:none;-webkit-appearance:none}
+  #comp-table td,#bolt-table td{border-bottom:1px solid rgba(0,255,65,.1)!important}
+  .custom-hidden-input{border:none!important;padding:0!important;color:var(--white)!important;background:transparent!important}
+  th[data-tip]::after{display:none!important}
+  .module,.header,.declaration-block,.rulebook-block,.prework-callout,.approval-gate{break-inside:avoid;page-break-inside:avoid}
+  .page{padding:0!important;max-width:100%!important;margin:0!important}
+  .brand-title{text-shadow:none!important}
+  .module{opacity:1!important;transform:none!important;background:var(--bg1)!important;border:1px solid rgba(0,255,65,.3)!important}
+  .module::after{display:none!important}
+  .module-locked-overlay{display:none!important}
+  .approval-success{display:block!important}
+  .tol-card,.val-card,.stat-card{break-inside:avoid}
+  .dual-cell input,.mass-cell input{display:inline!important;width:auto!important}
+  .instructor-table{display:table!important;width:100%;border-collapse:collapse;margin-top:24px;page-break-inside:avoid}
+  .instructor-table th,.instructor-table td{border:1px solid rgba(0,255,65,.25);padding:8px 12px;font-family:'Share Tech Mono',monospace;font-size:10px;text-align:left}
+  .instructor-table th{background:rgba(0,255,65,.05);color:var(--dim);font-size:9px;letter-spacing:2px;text-transform:uppercase}
+  .instructor-table td{color:var(--white);min-height:32px;vertical-align:top}
+  .instructor-table .score-cell{min-width:60px}
+  .prework-callout{display:block!important}
+}
+</style>
+</head>
+<body>
+<div id="scroll-progress"></div>
+<div id="custom-tooltip"></div>
+<div id="toolbar">
+  <button class="tb-btn" onclick="printWithPreflight()">[ Print / Export PDF ]</button>
+  <button class="tb-btn" onclick="saveToStorage()">[ Save Progress ]</button>
+  <button class="tb-btn" onclick="downloadHTML()">[ Download with Data ]</button>
+  <button class="tb-btn" style="border-color:rgba(0,240,255,.4);color:var(--cyan);background:rgba(0,240,255,.05);" onclick="showRestoreDialog()">[ Restore Defaults ]</button>
+  <button class="tb-btn danger" onclick="showClearDialog()">[ Clear All ]</button>
+  <span id="tb-score">0 / 80 pts</span>
+  <span id="tb-save-status">Auto-save on</span>
+</div>
+<canvas id="bg-canvas"></canvas>
+<style>
+</style>
+<button id="mx-toggle-btn" class="no-print">[ Canvas Uplink ]</button>
+<div id="matrix-controls" class="no-print">
+  <div style="font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:3px;color:var(--green);border-bottom:1px solid rgba(0,255,65,.2);padding-bottom:8px;margin-bottom:4px;text-transform:uppercase;">Canvas Uplink</div>
+  <div class="mx-slider-row"><label>Size</label><input type="range" id="mx-size" min="8" max="40" value="14"><span class="mx-readout" id="mx-out-size">14</span></div>
+  <div class="mx-slider-row"><label>Density</label><input type="range" id="mx-density" min="1" max="100" value="85"><span class="mx-readout" id="mx-out-density">85</span></div>
+  <div class="mx-slider-row"><label>Velocity</label><input type="range" id="mx-speed" min="1" max="100" value="35"><span class="mx-readout" id="mx-out-speed">35</span></div>
+  <div class="mx-slider-row"><label>Trails</label><input type="range" id="mx-fade" min="1" max="100" value="70"><span class="mx-readout" id="mx-out-fade">70</span></div>
+  <div class="mx-group-title">Data Types</div>
+  <div class="mx-tags"><div class="mx-tag active" data-type="char" data-val="matrix">Katakana</div><div class="mx-tag" data-type="char" data-val="binary">Binary</div><div class="mx-tag" data-type="char" data-val="hex">Hex</div></div>
+  <div class="mx-group-title">Palettes</div>
+  <div class="mx-tags"><div class="mx-tag color-tag tag-green active" data-type="color" data-val="green">Neon Green</div><div class="mx-tag color-tag tag-cyan" data-type="color" data-val="cyan">Cyan Ice</div><div class="mx-tag color-tag tag-gold" data-type="color" data-val="gold">Gold Alert</div><div class="mx-tag color-tag tag-amber" data-type="color" data-val="amber">Warning</div></div>
+  <button id="mx-random-btn" class="tb-btn" style="width:100%;text-align:center;margin-top:10px;">[ Execute Randomize ]</button>
+</div>
+<div class="dialog-overlay" id="clear-dialog">
+  <div class="dialog-box"><div class="dialog-title">Clear All Progress?</div><div class="dialog-text">This will permanently erase all fields, component rows, tolerance data, and saved data. This cannot be undone.</div><div class="dialog-btns"><button class="tb-btn danger" onclick="confirmClear()">[ Yes, Clear Everything ]</button><button class="tb-btn" onclick="hideClearDialog()">[ Cancel ]</button></div></div>
+</div>
+<div class="dialog-overlay" id="restore-dialog">
+  <div class="dialog-box" style="border-color:var(--cyan);"><div class="dialog-title" style="color:var(--cyan);">Restore Defaults?</div><div class="dialog-text">This will reset the component table to its default state and clear all typed answers. This cannot be undone.</div><div class="dialog-btns"><button class="tb-btn" style="border-color:rgba(0,240,255,.6);color:var(--cyan);background:rgba(0,240,255,.1);" onclick="confirmRestore()">[ Yes, Restore Defaults ]</button><button class="tb-btn" onclick="hideRestoreDialog()">[ Cancel ]</button></div></div>
+</div>
+<div class="dialog-overlay" id="preflight-dialog">
+  <div class="dialog-box"><div class="dialog-title">Pre-Print Check</div><div class="dialog-text">The following items are incomplete. You can go back to fix them or print anyway.</div><div class="preflight-list" id="preflight-list"></div><div class="dialog-btns"><button class="tb-btn danger" onclick="proceedPrint()">[ Print Anyway ]</button><button class="tb-btn" onclick="hidePreflight()">[ Go Back ]</button></div></div>
+</div>
+<div id="lightbox" style="display:none" onclick="closeLightbox()"><img id="lightbox-img" src="" alt="Full size"></div>
+<div id="version-warning"></div>
+<div class="page">
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+    <div>
+      <span class="brand-label">Don Bosco Technical Institute &nbsp;|&nbsp; IDEA-113</span>
+      <span class="brand-title">IDEA-BLADE</span>
+      <span class="brand-sub">Battle-Tops Design and Manufacturing Project</span>
+    </div>
+    <div style="text-align:right"><span class="badge-num">03</span><span class="badge-label">Assignment</span></div>
+  </div>
+  <div class="header-title">CAD Design Package</div>
+  <div class="student-grid">
+    <div class="info-field">
+      <label>Operator (Student Name)</label>
+      <input type="text" data-field="student-name" placeholder="Full name" autocomplete="off">
+      <div class="print-mirror single-line" data-mirror="student-name"></div>
+    </div>
+    <div class="info-field">
+      <label>Date</label>
+      <input type="text" data-field="student-date" readonly>
+      <div class="print-mirror single-line" data-mirror="student-date"></div>
+    </div>
+    <div class="info-field">
+      <label>Due Date</label>
+      <input type="text" value="05 / 19 / 2026" readonly>
+    </div>
+  </div>
+  <div class="collab-row">
+    <span class="collab-label">Collaboration</span>
+    <div class="collab-options">
+      <label class="collab-opt"><input type="radio" name="collab" value="solo" data-field="collab-status"> <span>Working solo</span></label>
+      <label class="collab-opt"><input type="radio" name="collab" value="collab" data-field="collab-status"> <span>Collaborating</span></label>
+    </div>
+    <div class="collab-names">
+      <input type="text" data-field="collab-names" placeholder="Collaborator name(s)" autocomplete="off">
+      <div class="print-mirror single-line" data-mirror="collab-names"></div>
+    </div>
+    <span class="collab-note">* Individual grades. Designs compete independently regardless of collaboration.</span>
+  </div>
+</div>
+
+<!-- PRE-WORK CALLOUT -->
+<div class="prework-callout">
+  <div class="prework-callout-title">Before Opening SolidWorks</div>
+  <div class="prework-items">
+    <div class="prework-item">Review your <em>Assignment 02</em> stackup and manufacturing sequence before modeling anything. Your build plan is your contract.</div>
+    <div class="prework-item">Have your <em>physical materials in hand</em> before designing fits. Do not guess at stock dimensions.</div>
+    <div class="prework-item">Enable <em>dual dimensions</em> in SolidWorks (Tools &rarr; Document Properties &rarr; Units). Use inches as primary, millimeters as secondary throughout.</div>
+    <div class="prework-item">Download <em>3D model files</em> for all hardware (McMaster-Carr, Grainger, manufacturer sites) before modeling. Insert actual hardware models into your SolidWorks assembly &mdash; do not approximate geometry.</div>
+    <div class="prework-item">Model components in <em>your stated sequence order</em> from Assignment 02. The first part sets the reference geometry for everything else.</div>
+    <div class="prework-item">Design to <em>target dimensions</em>, not stock dimensions. Tolerancing is applied at the feature level, not by changing the nominal design.</div>
+  </div>
+</div>
+
+<!-- SUBMIT CALLOUT -->
+<div class="submit-callout">
+  <div class="submit-callout-title">Submission Instructions</div>
+  <div class="submit-steps">
+    <div class="submit-step"><div class="step-num">01</div><div class="step-text">Complete all 5 modules and obtain <em>instructor approval</em></div></div>
+    <div class="submit-step"><div class="step-num">02</div><div class="step-text">In SolidWorks: <em>File &rarr; Pack and Go</em>, zip all files</div></div>
+    <div class="submit-step"><div class="step-num">03</div><div class="step-text">Upload <em>zip file</em> to Google Classroom</div></div>
+    <div class="submit-step"><div class="step-num">04</div><div class="step-text">Click <em>Download with Data</em> in the toolbar above</div></div>
+    <div class="submit-step"><div class="step-num">05</div><div class="step-text">Upload the <em>.html</em> file to Google Classroom</div></div>
+  </div>
+</div>
+
+<!-- RULEBOOK LINK -->
+<div class="rulebook-block">
+  <span class="rulebook-eyebrow">Required Reading - IDEA-Blade Rulebook</span>
+  <div class="rulebook-link-row">
+    <a class="rulebook-link-btn" href="https://mrpina-dev.github.io/IDEA/IDEA-Blade_Rulebook_v2_2.html" target="_blank" rel="noopener">
+      Open Rulebook
+    </a>
+    <div class="rulebook-note">
+      All design constraints, blade contact rules, scoring criteria, and competition<br>
+      format are defined in the rulebook.
+    </div>
+  </div>
+</div>
+
+<div class="total-bar"><span>Assignment Weight</span><strong>70 Points</strong><span>Complete all 5 modules &amp; obtain instructor approval &nbsp;|&nbsp; Click [ Rubric ] for grading criteria</span></div>
+
+<!-- MODULE 01: DESIGN CONTINUITY -->
+<div class="module">
+  <div class="module-header">
+    <span class="mod-num">01</span><span class="mod-title">Design Continuity</span><span class="mod-pts">5 pts</span>
+    <span class="mod-dot" id="dot-01"></span>
+    <button class="rubric-toggle" id="rt-01" onclick="toggleRubric(1)">[ Rubric ]</button>
+  </div>
+  <div class="rubric-panel" id="rubric-01">
+    <div class="rubric-inner">
+      <div class="rubric-title-row"><span>Grading Criteria</span><span>Points</span></div>
+      <div class="rubric-row"><div class="rubric-criteria"><strong>Plan Unchanged:</strong> Radio confirmed unchanged and statement complete.</div><div class="rubric-pts">5 pts</div></div>
+      <div class="rubric-row"><div class="rubric-criteria"><strong>Plan Deviations:</strong> All changes documented with original plan, final decision, and justification. Deviations earn full credit if honestly and completely documented.</div><div class="rubric-pts">5 pts</div></div>
+      <div class="rubric-row"><div class="rubric-criteria"><strong>No response or incomplete:</strong> Radio not selected, or deviations present but not documented.</div><div class="rubric-pts">0 pts</div></div>
+    </div>
+  </div>
+  <div class="module-body">
+    <p class="prompt">Your Assignment 02 build plan was a commitment. Before modeling, confirm whether your design followed that plan or evolved during the CAD phase. Both outcomes earn full credit &mdash; honesty is what counts.</p>
+    <div class="collab-options" style="gap:20px;flex-wrap:wrap;margin-bottom:8px;">
+      <label class="collab-opt"><input type="radio" name="plan-status" value="unchanged" data-field="plan-status"> <span>My build plan is unchanged &mdash; I modeled what I planned</span></label>
+      <label class="collab-opt"><input type="radio" name="plan-status" value="deviations" data-field="plan-status"> <span>My build plan has deviations &mdash; documented below</span></label>
+    </div>
+    <div id="continuity-unchanged" style="display:none;">
+      <div class="field-row">
+        <label>Confirmation Statement</label>
+        <textarea data-field="continuity-confirm" placeholder="Briefly confirm your design followed your Assignment 02 plan. Note any minor adjustments that did not change the fundamental design direction." style="min-height:60px;"></textarea>
+        <div class="print-mirror" data-mirror="continuity-confirm"></div>
+        <div class="sent-count" data-min="1" data-field-ref="continuity-confirm"><span class="sent-dot"></span><span><span class="current">0</span> / 1 sentence minimum</span></div>
+      </div>
+    </div>
+    <div id="continuity-deviations" style="display:none;">
+      <p class="prompt" style="margin-bottom:10px;">Document every significant deviation from your Assignment 02 plan below. Add a row for each change.</p>
+      <div class="table-container" style="margin-bottom:10px;">
+        <table id="dev-table">
+          <thead><tr>
+            <th style="width:25%">What Changed</th>
+            <th style="width:25%">Original A02 Plan</th>
+            <th style="width:25%">Final CAD Decision</th>
+            <th style="width:20%">Reason for Change</th>
+            <th class="no-print" style="width:5%"></th>
+          </tr></thead>
+          <tbody id="dev-body"></tbody>
+        </table>
+      </div>
+      <button class="add-row-btn no-print" onclick="addDevRow()">[ + Add Deviation ]</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODULE 02: COMPONENT CAD DOCUMENTATION -->
+<div class="module">
+  <div class="module-header">
+    <span class="mod-num">02</span><span class="mod-title">Component CAD Documentation</span><span class="mod-pts">25 pts</span>
+    <span class="mod-dot" id="dot-02"></span>
+    <button class="rubric-toggle" id="rt-02" onclick="toggleRubric(2)">[ Rubric ]</button>
+  </div>
+  <div class="rubric-panel" id="rubric-02">
+    <div class="rubric-inner">
+      <div class="rubric-title-row"><span>Grading Criteria</span><span>Points</span></div>
+      <div class="rubric-row"><div class="rubric-criteria"><strong>Component Documentation:</strong> All components named with final modeled dimensions and SolidWorks mass values entered.</div><div class="rubric-pts">10 pts</div></div>
+      <div class="rubric-row"><div class="rubric-criteria"><strong>Competition Compliance:</strong> Total assembly mass &le;907g, 3+ distinct processes, 3+ fasteners confirmed.</div><div class="rubric-pts">5 pts</div></div>
+      <div class="rubric-row"><div class="rubric-criteria"><strong>Hardware Documentation:</strong> All COTS hardware has supplier link and 3D model download confirmed.</div><div class="rubric-pts">5 pts</div></div>
+      <div class="rubric-row"><div class="rubric-criteria"><strong>Bolt Clearance Documentation:</strong> All bolted joints documented in clearance table with treatment specified.</div><div class="rubric-pts">5 pts</div></div>
+    </div>
+  </div>
+  <div class="module-body">
+    <p class="prompt">Document every component in your SolidWorks assembly. Pull all dimensions and mass values directly from SolidWorks &mdash; do not estimate. OD is the diameter of the circle the component traces when spinning: measure between the two furthest points in any direction, even for non-circular geometry.</p>
+    <div class="table-container">
+      <table id="comp-table">
+        <thead><tr>
+          <th class="no-print" style="width:60px;text-align:center;" data-tip="Controls — Drag to reorder. Duplicate or delete with icons.">Ctrl</th>
+          <th style="width:40px;" data-tip="Color — Display color. Does not affect grading.">Clr</th>
+          <th style="width:150px;" data-tip="Component — Name of this part in your SolidWorks assembly. Match the part name in your feature tree exactly.">Component</th>
+          <th style="width:130px;" data-tip="Material — Primary material. Select the closest match or choose Other.">Material</th>
+          <th style="width:120px;" data-tip="Process — Manufacturing process or hardware type. Changes to hardware sub-options when Hardware / COTS is selected.">Process</th>
+          <th style="width:90px;" data-tip="Final Thickness — Modeled thickness pulled from SolidWorks. Enter in inches; mm auto-converts. For hardware, enter the installed height."><div style="line-height:1.3">Thickness<br><span style="font-size:8px;color:var(--cyan);font-weight:normal;letter-spacing:1px">in / mm</span></div></th>
+          <th style="width:90px;" data-tip="Spinning OD — Outer diameter of the circle this component traces when spinning. Measure between the furthest two points in any direction. Enter in inches; mm auto-converts. Max 5.000 in / 127.0 mm."><div style="line-height:1.3">Spin OD<br><span style="font-size:8px;color:var(--cyan);font-weight:normal;letter-spacing:1px">in / mm</span></div></th>
+          <th style="width:90px;" data-tip="Mass — Component mass from SolidWorks mass properties dialog. Enter in grams. Oz auto-converts."><div style="line-height:1.3">Mass<br><span style="font-size:8px;color:var(--cyan);font-weight:normal;letter-spacing:1px">g / oz</span></div></th>
+          <th style="width:160px;" data-tip="Supplier — For Hardware / COTS components: paste the full URL to the product page (McMaster-Carr, Grainger, etc.) and confirm the 3D model was downloaded and inserted into your assembly.">Supplier / HW</th>
+          <th style="width:130px;" data-tip="Interface — How this component physically connects to adjacent components in the assembly.">Interface</th>
+        </tr></thead>
+        <tbody id="comp-body"></tbody>
+      </table>
+      <button class="add-row-btn no-print" onclick="addTableRow('comp-body')">[ + Add Component ]</button>
+    </div>
+
+    <!-- STAT BARS -->
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-card-label">Total Assembly Mass</div>
+        <div class="stat-card-value" id="stat-mass">0 g</div>
+        <div class="stat-card-sub" id="stat-mass-lbs">0.000 lbs &nbsp;|&nbsp; Limit: 907g / 2.000 lbs</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Distinct Processes</div>
+        <div class="stat-card-value" id="stat-procs">0</div>
+        <div class="stat-card-sub">Min required: 3</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Mechanical Fasteners</div>
+        <div class="stat-card-value" id="stat-fasteners-disp">0</div>
+        <div class="stat-card-sub">Min required: 3 &nbsp;&mdash;&nbsp; enter count below</div>
+      </div>
+    </div>
+    <div class="field-row" style="max-width:300px;margin-top:6px;">
+      <label>Total Mechanical Fastener Count in Assembly</label>
+      <input type="number" data-field="fastener-count" id="fastener-count" placeholder="0" min="0" step="1" oninput="updateFastenerDisplay();updateScoreAndDots();saveToStorage()">
+    </div>
+
+    <!-- COMPONENT SCREENSHOTS -->
+    <div class="sub-label" style="margin-top:20px;">Component Screenshots</div>
+    <p class="prompt" style="margin-bottom:10px;">Upload a SolidWorks screenshot of each component individually. Label each with the component name. These verify the model exists &mdash; not just the documentation.</p>
+    <div class="upload-zone no-print" onclick="document.getElementById('comp-img-upload').click()">
+      <div class="upload-zone-label">Click to upload component screenshots (multiple allowed)</div>
+      <input type="file" id="comp-img-upload" accept="image/*" multiple style="display:none" onchange="handleUpload(this,'comp-imgs',1)">
+    </div>
+    <div id="comp-imgs" class="image-grid"></div>
+    <div class="img-count" id="comp-imgs-count" style="color:var(--amber)">0 images (min 1 per component)</div>
+
+    <!-- BOLT CLEARANCE TABLE -->
+    <div class="sub-label" style="margin-top:20px;">Bolted Joint Clearance Log</div>
+    <p class="prompt" style="margin-bottom:8px;">Document every bolted joint in your assembly. Clearance holes in 3D printed parts must be nominal + 0.016" (0.4mm). Clearance holes in laser cut metal are nominal (kerf compensated in MetalFab software). Socket head screws should be counterbored into printed parts so the head sits flush or below surface.</p>
+    <div class="table-container" style="margin-bottom:8px;">
+      <table id="bolt-table">
+        <thead><tr>
+          <th style="width:150px;">Joint Description</th>
+          <th style="width:70px;">Bolt Size</th>
+          <th style="width:80px;">Clr Hole &mdash; Printed<br><span style="font-size:8px;font-weight:normal;">in (nom + 0.016")</span></th>
+          <th style="width:80px;">Clr Hole &mdash; Metal<br><span style="font-size:8px;font-weight:normal;">in (nominal)</span></th>
+          <th style="width:90px;">Head Treatment</th>
+          <th style="width:80px;">Counterbore &oslash;<br><span style="font-size:8px;font-weight:normal;">in (head + 0.020")</span></th>
+          <th style="width:80px;">Counterbore Depth<br><span style="font-size:8px;font-weight:normal;">in (head ht + 0.010")</span></th>
+          <th style="width:90px;">Nut Treatment</th>
+          <th class="no-print" style="width:30px;"></th>
+        </tr></thead>
+        <tbody id="bolt-body"></tbody>
+      </table>
+    </div>
+    <button class="add-row-btn no-print" onclick="addBoltRow()">[ + Add Bolted Joint ]</button>
+    <div class="bolt-note">All dimensions in inches. Common bolt sizes for reference: M3=0.118", M4=0.157", M5=0.197", M6=0.236" &mdash; add 0.016" to each for clearance in printed parts.</div>
+  </div>
+</div>
+
+<!-- MODULE 03: TOLERANCE & FIT VERIFICATION -->
+<div class="module">
+  <div class="module-header">
+    <span class="mod-num">03</span><span class="mod-title">Tolerance &amp; Fit Verification</span><span class="mod-pts">20 pts</span>
+    <span class="mod-dot" id="dot-03"></span>
+    <button class="rubric-toggle" id="rt-03" onclick="toggleRubric(3)">[ Rubric ]</button>
+  </div>
+  <div class="rubric-panel" id="rubric-03">
+    <div class="rubric-inner">
+      <div class="rubric-title-row"><span>Grading Criteria</span><span>Points</span></div>
+      <div class="rubric-row"><div class="rubric-criteria"><strong>Hex Bore Check:</strong> Bore diameter entered and within acceptable clearance range.</div><div class="rubric-pts">4 pts</div></div>
+      <div class="rubric-row"><div class="rubric-criteria"><strong>Press Fit Check:</strong> Each press fit pair documented with modeled interference. N/A acceptable if no press fits used.</div><div class="rubric-pts">3 pts</div></div>
+      <div class="rubric-row"><div class="rubric-criteria"><strong>Wall Thickness &amp; Feature Size:</strong> Minimum wall and minimum feature confirmed or N/A.</div><div class="rubric-pts">4 pts</div></div>
+      <div class="rubric-row"><div class="rubric-criteria"><strong>Metal Wall Thickness:</strong> Minimum metal wall confirmed or N/A.</div><div class="rubric-pts">3 pts</div></div>
+      <div class="rubric-row"><div class="rubric-criteria"><strong>Shaft Engagement Confirmation:</strong> Modeled engagement matches Assignment 02 plan or deviation documented.</div><div class="rubric-pts">3 pts</div></div>
+      <div class="rubric-row"><div class="rubric-criteria"><strong>Hex Extension Height:</strong> Modeled hex extension within 0.45"&mdash;0.55" rule.</div><div class="rubric-pts">3 pts</div></div>
+    </div>
+  </div>
+  <div class="module-body">
+    <p class="prompt">Work through each check while your SolidWorks model is open. Enter what your model actually shows &mdash; not what you intended. If a check does not apply to your design, mark it N/A. Out-of-spec values earn no credit but can still be corrected before submission.</p>
+
+    <!-- HEX BORE -->
+    <div class="tol-card">
+      <div class="tol-card-header">
+        <span class="tol-card-title">01 &mdash; Hex Shaft Bore</span>
+        <div class="tol-card-dot" id="tdot-hexbore"></div>
+      </div>
+      <div class="tol-card-rule">
+        The hex shaft is <strong>0.500 in / 12.700 mm</strong> nominal (1/2" aluminum hex). Components that the shaft passes through must have a bore that allows assembly without forcing but does not allow wobble. Clearance fit target bore: <strong>0.516 in / 13.106 mm</strong>. Acceptable range: 0.508&ndash;0.524 in / 12.90&ndash;13.31 mm.
+      </div>
+      <div class="tol-target">Target: 0.516" / 13.106mm &nbsp;|&nbsp; Range: 0.508"&ndash;0.524" / 12.90&ndash;13.31mm</div>
+      <div class="tol-inputs" style="grid-template-columns:1fr 1fr 1fr 1fr;">
+        <div class="field-row"><label>Modeled Bore (in)</label><input type="number" data-tol="hexbore-in" step="0.001" min="0.4" max="0.7" placeholder="0.516" oninput="tolSyncInToMm('hexbore');checkTol('hexbore',0.508,0.524);saveToStorage();updateScoreAndDots()"></div>
+        <div class="field-row"><label>Modeled Bore (mm)</label><input type="number" data-tol="hexbore-mm" step="0.01" min="10" max="18" placeholder="13.106" oninput="tolSyncMmToIn('hexbore');checkTol('hexbore',0.508,0.524);saveToStorage();updateScoreAndDots()"></div>
+        <div class="field-row" style="justify-content:flex-end;padding-top:18px;"><div class="tol-status" id="tstat-hexbore" style="color:var(--dim)">Awaiting input</div></div>
+        <div class="field-row" style="justify-content:flex-end;padding-top:18px;"></div>
+      </div>
+    </div>
+
+    <!-- PRESS FIT -->
+    <div class="tol-card">
+      <div class="tol-card-header">
+        <span class="tol-card-title">02 &mdash; Press Fits (Printed-to-Printed)</span>
+        <div class="tol-card-dot" id="tdot-pressfit"></div>
+      </div>
+      <div class="tol-card-rule">
+        Press fits between 3D printed ABS parts require the shaft/pin to be <strong>0.006 in / 0.15 mm smaller than the bore</strong> (interference fit). Example: a 0.500" pin presses into a 0.494" bore. Too much interference will crack printed parts. This check only applies if your assembly uses printed-to-printed press fits.
+      </div>
+      <div class="tol-target">Target interference: 0.006" / 0.15mm (shaft = bore &minus; 0.006")</div>
+      <div class="tol-na-row">
+        <input type="checkbox" id="na-pressfit" data-tol="pressfit-na" onchange="handleTolNA('pressfit');saveToStorage();updateScoreAndDots()">
+        <label for="na-pressfit">N/A &mdash; my design does not use printed-to-printed press fits</label>
+      </div>
+      <div id="pressfit-fields" style="margin-top:10px;">
+        <div class="field-row">
+          <label>Describe each press fit pair: part name, pin OD, bore ID, calculated interference</label>
+          <textarea data-field="pressfit-detail" placeholder="Example: Body hub pin 0.494&quot; OD pressed into top cap bore 0.500&quot; — interference 0.006&quot; / 0.15mm. Checked in SolidWorks mate simulation, no interference conflicts." oninput="autoResize(this);updateMirror(this.dataset.field,this.value);checkTolText('pressfit');saveToStorage();updateScoreAndDots()"></textarea>
+          <div class="print-mirror" data-mirror="pressfit-detail"></div>
+          <div class="sent-count" data-min="1" data-field-ref="pressfit-detail"><span class="sent-dot"></span><span><span class="current">0</span> / 1 sentence minimum</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MIN WALL ABS -->
+    <div class="tol-card">
+      <div class="tol-card-header">
+        <span class="tol-card-title">03 &mdash; Minimum Wall Thickness (ABS / 3D Printed)</span>
+        <div class="tol-card-dot" id="tdot-wall"></div>
+      </div>
+      <div class="tol-card-rule">
+        Structural ABS walls must be <strong>minimum 2.0 mm / 0.079 in</strong>. Absolute floor is <strong>1.2 mm / 0.047 in</strong> (2 perimeters at 0.6mm nozzle). Walls thinner than 2.0mm will flex under impact. Walls thinner than 1.2mm will not print reliably. This check only applies if your design includes 3D printed parts.
+      </div>
+      <div class="tol-target">Structural min: 2.0mm / 0.079" &nbsp;|&nbsp; Absolute floor: 1.2mm / 0.047"</div>
+      <div class="tol-na-row">
+        <input type="checkbox" id="na-wall" data-tol="wall-na" onchange="handleTolNA('wall');saveToStorage();updateScoreAndDots()">
+        <label for="na-wall">N/A &mdash; my design has no 3D printed parts</label>
+      </div>
+      <div id="wall-fields" style="margin-top:10px;">
+        <div class="tol-inputs">
+          <div class="field-row"><label>Thinnest Printed Wall (in)</label><input type="number" data-tol="wall-in" step="0.001" min="0" max="1" placeholder="0.079" oninput="tolSyncInToMm('wall');checkTol('wall',0.047,null);saveToStorage();updateScoreAndDots()"></div>
+          <div class="field-row"><label>Thinnest Printed Wall (mm)</label><input type="number" data-tol="wall-mm" step="0.01" min="0" max="25" placeholder="2.0" oninput="tolSyncMmToIn('wall');checkTol('wall',0.047,null);saveToStorage();updateScoreAndDots()"></div>
+          <div class="field-row" style="justify-content:flex-end;padding-top:18px;"><div class="tol-status" id="tstat-wall" style="color:var(--dim)">Awaiting input</div></div>
+        </div>
+        <div class="field-row" style="margin-top:8px;"><label>Where is this thin wall located?</label><input type="text" data-field="wall-location" placeholder="e.g. Blade arm leading edge, inner hub wall near hex bore..." oninput="updateScoreAndDots();saveToStorage()"></div>
+        <div class="print-mirror single-line" data-mirror="wall-location" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- MIN FEATURE SIZE -->
+    <div class="tol-card">
+      <div class="tol-card-header">
+        <span class="tol-card-title">04 &mdash; Minimum Feature Size (3D Print, 0.6mm Nozzle)</span>
+        <div class="tol-card-dot" id="tdot-feat"></div>
+      </div>
+      <div class="tol-card-rule">
+        At a 0.6mm nozzle, the minimum printable feature is <strong>1.2 mm / 0.047 in</strong> (2 perimeters). Features smaller than this &mdash; thin fins, sharp tips, narrow slots &mdash; will either not print or will print poorly. Design around this constraint or accept that fine details will not resolve cleanly.
+      </div>
+      <div class="tol-target">Minimum feature: 1.2mm / 0.047"</div>
+      <div class="tol-na-row">
+        <input type="checkbox" id="na-feat" data-tol="feat-na" onchange="handleTolNA('feat');saveToStorage();updateScoreAndDots()">
+        <label for="na-feat">N/A &mdash; my design has no 3D printed parts</label>
+      </div>
+      <div id="feat-fields" style="margin-top:10px;">
+        <div class="tol-inputs">
+          <div class="field-row"><label>Smallest Printed Feature (in)</label><input type="number" data-tol="feat-in" step="0.001" min="0" max="1" placeholder="0.047" oninput="tolSyncInToMm('feat');checkTol('feat',0.047,null);saveToStorage();updateScoreAndDots()"></div>
+          <div class="field-row"><label>Smallest Printed Feature (mm)</label><input type="number" data-tol="feat-mm" step="0.01" min="0" max="25" placeholder="1.2" oninput="tolSyncMmToIn('feat');checkTol('feat',0.047,null);saveToStorage();updateScoreAndDots()"></div>
+          <div class="field-row" style="justify-content:flex-end;padding-top:18px;"><div class="tol-status" id="tstat-feat" style="color:var(--dim)">Awaiting input</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- METAL WALL -->
+    <div class="tol-card">
+      <div class="tol-card-header">
+        <span class="tol-card-title">05 &mdash; Minimum Metal Wall (Laser Cut Parts)</span>
+        <div class="tol-card-dot" id="tdot-metal"></div>
+      </div>
+      <div class="tol-card-rule">
+        Laser cut metal parts should respect minimum wall thicknesses: <strong>Steel min 0.031 in / 0.8 mm</strong>, <strong>Aluminum min 0.039 in / 1.0 mm</strong>. Thinner walls may distort during cutting or deform under impact loads.
+      </div>
+      <div class="tol-target">Steel min: 0.031" / 0.8mm &nbsp;|&nbsp; Aluminum min: 0.039" / 1.0mm</div>
+      <div class="tol-na-row">
+        <input type="checkbox" id="na-metal" data-tol="metal-na" onchange="handleTolNA('metal');saveToStorage();updateScoreAndDots()">
+        <label for="na-metal">N/A &mdash; my design has no laser cut metal parts</label>
+      </div>
+      <div id="metal-fields" style="margin-top:10px;">
+        <div class="tol-inputs">
+          <div class="field-row"><label>Thinnest Metal Wall (in)</label><input type="number" data-tol="metal-in" step="0.001" min="0" max="1" placeholder="0.031" oninput="tolSyncInToMm('metal');checkTolMetal();saveToStorage();updateScoreAndDots()"></div>
+          <div class="field-row"><label>Thinnest Metal Wall (mm)</label><input type="number" data-tol="metal-mm" step="0.01" min="0" max="25" placeholder="0.8" oninput="tolSyncMmToIn('metal');checkTolMetal();saveToStorage();updateScoreAndDots()"></div>
+          <div class="field-row" style="justify-content:flex-end;padding-top:18px;"><div class="tol-status" id="tstat-metal" style="color:var(--dim)">Awaiting input</div></div>
+        </div>
+        <div class="field-row" style="margin-top:8px;"><label>Metal type at thinnest wall</label><select data-tol="metal-type" onchange="checkTolMetal();saveToStorage()"><option value="">Select...</option><option value="steel">Steel</option><option value="aluminum">Aluminum</option><option value="other">Other</option></select></div>
+      </div>
+    </div>
+
+    <!-- SHAFT ENGAGEMENT -->
+    <div class="tol-card">
+      <div class="tol-card-header">
+        <span class="tol-card-title">06 &mdash; Hex Shaft Engagement Confirmation</span>
+        <div class="tol-card-dot" id="tdot-shaft"></div>
+      </div>
+      <div class="tol-card-rule">
+        Your Assignment 02 build plan specified a hex shaft engagement depth. Confirm your SolidWorks model reflects that planned depth. If it changed, document the deviation and reason.
+      </div>
+      <div class="tol-inputs" style="grid-template-columns:1fr 1fr 1fr 1fr;">
+        <div class="field-row"><label>A02 Planned Depth (in)</label><input type="number" data-tol="shaft-plan-in" step="0.05" min="0.25" max="3.1" placeholder="From A02" oninput="tolSyncInToMm('shaft-plan');checkShaftMatch();saveToStorage();updateScoreAndDots()"></div>
+        <div class="field-row"><label>Planned (mm)</label><input type="number" data-tol="shaft-plan-mm" step="0.1" min="6" max="79" placeholder="mm" oninput="tolSyncMmToIn('shaft-plan');checkShaftMatch();saveToStorage();updateScoreAndDots()"></div>
+        <div class="field-row"><label>Modeled Depth (in)</label><input type="number" data-tol="shaft-actual-in" step="0.05" min="0.25" max="3.1" placeholder="From SW" oninput="tolSyncInToMm('shaft-actual');checkShaftMatch();saveToStorage();updateScoreAndDots()"></div>
+        <div class="field-row"><label>Modeled (mm)</label><input type="number" data-tol="shaft-actual-mm" step="0.1" min="6" max="79" placeholder="mm" oninput="tolSyncMmToIn('shaft-actual');checkShaftMatch();saveToStorage();updateScoreAndDots()"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:8px;">
+        <div class="tol-card-dot" id="tdot-shaft-match" style="width:8px;height:8px;flex-shrink:0"></div>
+        <div class="tol-status" id="tstat-shaft" style="color:var(--dim)">Enter both values to compare</div>
+      </div>
+      <div class="field-row" style="margin-top:10px;" id="shaft-deviation-field" style="display:none;">
+        <label>Reason for deviation (if values differ by more than 0.05")</label>
+        <textarea data-field="shaft-deviation" placeholder="Explain why the engagement depth changed from your A02 plan." style="min-height:50px;" oninput="autoResize(this);updateMirror(this.dataset.field,this.value);saveToStorage();updateScoreAndDots()"></textarea>
+        <div class="print-mirror" data-mirror="shaft-deviation"></div>
+      </div>
+    </div>
+
+    <!-- HEX EXTENSION HEIGHT -->
+    <div class="tol-card">
+      <div class="tol-card-header">
+        <span class="tol-card-title">07 &mdash; Hex Extension Height</span>
+        <div class="tol-card-dot" id="tdot-hexext"></div>
+      </div>
+      <div class="tol-card-rule">
+        The hex shaft must extend above the full body height by <strong>0.50 in &plusmn; 0.05 in (12.70 mm &plusmn; 1.27 mm)</strong>. Acceptable range: <strong>0.45&ndash;0.55 in / 11.43&ndash;13.97 mm</strong>. This extension mates with the standard launcher. Too short and the launcher won't grip. Too long and launch will be inconsistent.
+      </div>
+      <div class="tol-target">Target: 0.500" / 12.70mm &nbsp;|&nbsp; Range: 0.45"&ndash;0.55" / 11.43&ndash;13.97mm</div>
+      <div class="tol-inputs">
+        <div class="field-row"><label>Modeled Hex Extension (in)</label><input type="number" data-tol="hexext-in" step="0.01" min="0.1" max="1.0" placeholder="0.500" oninput="tolSyncInToMm('hexext');checkTol('hexext',0.45,0.55);saveToStorage();updateScoreAndDots()"></div>
+        <div class="field-row"><label>Modeled Hex Extension (mm)</label><input type="number" data-tol="hexext-mm" step="0.01" min="3" max="25" placeholder="12.70" oninput="tolSyncMmToIn('hexext');checkTol('hexext',0.45,0.55);saveToStorage();updateScoreAndDots()"></div>
+        <div class="field-row" style="justify-content:flex-end;padding-top:18px;"><div class="tol-status" id="tstat-hexext" style="color:var(--dim)">Awaiting input</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODULE 04: ASSEMBLY VALIDATION -->
+<div class="module">
+  <div class="module-header">
+    <span class="mod-num">04</span><span class="mod-title">Assembly Validation</span><span class="mod-pts">15 pts</span>
+    <span class="mod-dot" id="dot-04"></span>
+    <button class="rubric-toggle" id="rt-04" onclick="toggleRubric(4)">[ Rubric ]</button>
+  </div>
+  <div class="rubric-panel" id="rubric-04">
+    <div class="rubric-inner">
+      <div class="rubric-title-row"><span>Grading Criteria</span><span>Points</span></div>
+      <div class="rubric-row"><div class="rubric-criteria"><strong>Assembly Dimensions:</strong> Mass, height, OD, and hex extension all entered and within competition limits.</div><div class="rubric-pts">6 pts</div></div>
+      <div class="rubric-row"><div class="rubric-criteria"><strong>Center of Mass:</strong> CoM offset from spin axis entered. Within target earns full credit; above target with explanation earns partial.</div><div class="rubric-pts">3 pts</div></div>
+      <div class="rubric-row"><div class="rubric-criteria"><strong>Interference Check:</strong> SolidWorks interference detection run and result documented.</div><div class="rubric-pts">3 pts</div></div>
+      <div class="rubric-row"><div class="rubric-criteria"><strong>Required Screenshots:</strong> All 4 screenshots uploaded (mass properties, isometric, top, side).</div><div class="rubric-pts">3 pts</div></div>
+    </div>
+  </div>
+  <div class="module-body">
+    <p class="prompt">Pull all values directly from your SolidWorks assembly. Mass properties: Evaluate &rarr; Mass Properties with all components visible and correct materials assigned. Run Evaluate &rarr; Interference Detection before submitting.</p>
+
+    <div class="val-grid">
+      <!-- TOTAL MASS -->
+      <div class="val-card">
+        <div class="val-card-label">Total Assembly Mass</div>
+        <div class="val-card-target">Limit: 907g / 2.000 lbs &nbsp;|&nbsp; Weighed fight-ready including hex shaft</div>
+        <div class="val-card-inputs">
+          <input type="number" data-val="asm-mass-g" step="0.1" min="0" max="2000" placeholder="0.0" oninput="valSyncMassGToLbs();checkVal('asm-mass',0,907);saveToStorage();updateScoreAndDots()">
+          <span class="unit-badge">g</span>
+          <input type="number" data-val="asm-mass-lbs" step="0.001" min="0" max="5" placeholder="0.000" oninput="valSyncMassLbsToG();checkVal('asm-mass',0,907);saveToStorage();updateScoreAndDots()">
+          <span class="unit-badge">lbs</span>
+        </div>
+        <div class="val-indicator"><div class="val-dot" id="vdot-asm-mass"></div><div class="val-status" id="vstat-asm-mass" style="color:var(--dim)">Awaiting input</div></div>
+      </div>
+      <!-- FULL HEIGHT -->
+      <div class="val-card">
+        <div class="val-card-label">Full Body Height</div>
+        <div class="val-card-target">Target: 3.00" &plusmn;0.1" &nbsp;|&nbsp; Range: 2.90"&ndash;3.10" / 73.66&ndash;78.74mm &nbsp;|&nbsp; Base tip to top of body, below hex extension</div>
+        <div class="val-card-inputs">
+          <input type="number" data-val="asm-height-in" step="0.01" min="0" max="6" placeholder="0.00" oninput="valSyncInToMm('asm-height');checkVal('asm-height',2.90,3.10);saveToStorage();updateScoreAndDots()">
+          <span class="unit-badge">in</span>
+          <input type="number" data-val="asm-height-mm" step="0.1" min="0" max="150" placeholder="0.0" oninput="valSyncMmToIn('asm-height');checkVal('asm-height',2.90,3.10);saveToStorage();updateScoreAndDots()">
+          <span class="unit-badge">mm</span>
+        </div>
+        <div class="val-indicator"><div class="val-dot" id="vdot-asm-height"></div><div class="val-status" id="vstat-asm-height" style="color:var(--dim)">Awaiting input</div></div>
+      </div>
+      <!-- MAX SPINNING OD -->
+      <div class="val-card">
+        <div class="val-card-label">Maximum Spinning OD</div>
+        <div class="val-card-target">Max: 5.000" / 127.0mm &nbsp;|&nbsp; Furthest two points in any direction, all components assembled</div>
+        <div class="val-card-inputs">
+          <input type="number" data-val="asm-od-in" step="0.01" min="0" max="10" placeholder="0.00" oninput="valSyncInToMm('asm-od');checkVal('asm-od',0,5.0);saveToStorage();updateScoreAndDots()">
+          <span class="unit-badge">in</span>
+          <input type="number" data-val="asm-od-mm" step="0.1" min="0" max="250" placeholder="0.0" oninput="valSyncMmToIn('asm-od');checkVal('asm-od',0,5.0);saveToStorage();updateScoreAndDots()">
+          <span class="unit-badge">mm</span>
+        </div>
+        <div class="val-indicator"><div class="val-dot" id="vdot-asm-od"></div><div class="val-status" id="vstat-asm-od" style="color:var(--dim)">Awaiting input</div></div>
+      </div>
+      <!-- HEX EXTENSION (repeated here for assembly-level confirmation) -->
+      <div class="val-card">
+        <div class="val-card-label">Hex Extension Above Body</div>
+        <div class="val-card-target">Target: 0.50" &plusmn;0.05" / 12.70mm &plusmn;1.27mm &nbsp;|&nbsp; Range: 0.45"&ndash;0.55"</div>
+        <div class="val-card-inputs">
+          <input type="number" data-val="asm-hexext-in" step="0.01" min="0" max="2" placeholder="0.00" oninput="valSyncInToMm('asm-hexext');checkVal('asm-hexext',0.45,0.55);saveToStorage();updateScoreAndDots()">
+          <span class="unit-badge">in</span>
+          <input type="number" data-val="asm-hexext-mm" step="0.1" min="0" max="50" placeholder="0.0" oninput="valSyncMmToIn('asm-hexext');checkVal('asm-hexext',0.45,0.55);saveToStorage();updateScoreAndDots()">
+          <span class="unit-badge">mm</span>
+        </div>
+        <div class="val-indicator"><div class="val-dot" id="vdot-asm-hexext"></div><div class="val-status" id="vstat-asm-hexext" style="color:var(--dim)">Awaiting input</div></div>
+      </div>
+      <!-- CENTER OF MASS -->
+      <div class="val-card">
+        <div class="val-card-label">Center of Mass Offset from Spin Axis</div>
+        <div class="val-card-target">Target: &le;1.0mm / &le;0.039" offset &nbsp;|&nbsp; From SolidWorks mass properties, X and Y distance from origin on spin axis</div>
+        <div class="val-card-inputs">
+          <input type="number" data-val="asm-com-mm" step="0.01" min="0" max="50" placeholder="0.00" oninput="valSyncComMmToIn();checkValCom();saveToStorage();updateScoreAndDots()">
+          <span class="unit-badge">mm</span>
+          <input type="number" data-val="asm-com-in" step="0.001" min="0" max="2" placeholder="0.000" oninput="valSyncComInToMm();checkValCom();saveToStorage();updateScoreAndDots()">
+          <span class="unit-badge">in</span>
+        </div>
+        <div class="val-indicator"><div class="val-dot" id="vdot-asm-com"></div><div class="val-status" id="vstat-asm-com" style="color:var(--dim)">Awaiting input</div></div>
+      </div>
+      <!-- INTERFERENCE -->
+      <div class="val-card">
+        <div class="val-card-label">SolidWorks Interference Detection</div>
+        <div class="val-card-target">Evaluate &rarr; Interference Detection &rarr; Calculate &nbsp;|&nbsp; All conflicts must be resolved before submission</div>
+        <div style="margin-top:8px;">
+          <div class="collab-options" style="gap:16px;flex-wrap:wrap;">
+            <label class="collab-opt"><input type="radio" name="interference" value="clear" data-field="interference-result" onchange="checkInterference();saveToStorage();updateScoreAndDots()"> <span>No interference detected &mdash; all clear</span></label>
+            <label class="collab-opt"><input type="radio" name="interference" value="found" data-field="interference-result" onchange="checkInterference();saveToStorage();updateScoreAndDots()"> <span>Interference found &mdash; documented below</span></label>
+          </div>
+          <div id="interference-detail" style="display:none;margin-top:8px;">
+            <div class="field-row">
+              <textarea data-field="interference-desc" placeholder="Describe the interference conflict and how you resolved it. If still unresolved, explain why and your plan to fix it." style="min-height:54px;" oninput="autoResize(this);updateMirror(this.dataset.field,this.value);saveToStorage();updateScoreAndDots()"></textarea>
+              <div class="print-mirror" data-mirror="interference-desc"></div>
+            </div>
+          </div>
+        </div>
+        <div class="val-indicator" style="margin-top:10px;"><div class="val-dot" id="vdot-interference"></div><div class="val-status" id="vstat-interference" style="color:var(--dim)">Not selected</div></div>
+      </div>
+    </div>
+
+    <!-- SCREENSHOTS -->
+    <div class="sub-label" style="margin-top:20px;">Required Assembly Screenshots</div>
+    <p class="prompt" style="margin-bottom:12px;">All four screenshots are required. Take them with your full assembly visible, correct materials assigned, and no suppressed features.</p>
+    <div class="grid-2" style="gap:14px;">
+      <div>
+        <label class="field-row" style="margin-bottom:6px;"><span style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;">01 &mdash; SolidWorks Mass Properties Dialog</span></label>
+        <div class="upload-zone no-print" onclick="document.getElementById('ss-mass-upload').click()" style="padding:12px">
+          <div class="upload-zone-label">Click to upload mass properties screenshot</div>
+          <input type="file" id="ss-mass-upload" accept="image/*" multiple style="display:none" onchange="handleUpload(this,'ss-mass',1)">
+        </div>
+        <div id="ss-mass" class="image-grid"></div>
+        <div class="img-count" id="ss-mass-count" style="color:var(--amber)">0 images (required)</div>
+      </div>
+      <div>
+        <label class="field-row" style="margin-bottom:6px;"><span style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;">02 &mdash; Assembly Isometric View</span></label>
+        <div class="upload-zone no-print" onclick="document.getElementById('ss-iso-upload').click()" style="padding:12px">
+          <div class="upload-zone-label">Click to upload isometric screenshot</div>
+          <input type="file" id="ss-iso-upload" accept="image/*" multiple style="display:none" onchange="handleUpload(this,'ss-iso',1)">
+        </div>
+        <div id="ss-iso" class="image-grid"></div>
+        <div class="img-count" id="ss-iso-count" style="color:var(--amber)">0 images (required)</div>
+      </div>
+      <div>
+        <label class="field-row" style="margin-bottom:6px;"><span style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;">03 &mdash; Assembly Top View</span></label>
+        <div class="upload-zone no-print" onclick="document.getElementById('ss-top-upload').click()" style="padding:12px">
+          <div class="upload-zone-label">Click to upload top view screenshot</div>
+          <input type="file" id="ss-top-upload" accept="image/*" multiple style="display:none" onchange="handleUpload(this,'ss-top',1)">
+        </div>
+        <div id="ss-top" class="image-grid"></div>
+        <div class="img-count" id="ss-top-count" style="color:var(--amber)">0 images (required)</div>
+      </div>
+      <div>
+        <label class="field-row" style="margin-bottom:6px;"><span style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;">04 &mdash; Assembly Side View</span></label>
+        <div class="upload-zone no-print" onclick="document.getElementById('ss-side-upload').click()" style="padding:12px">
+          <div class="upload-zone-label">Click to upload side view screenshot</div>
+          <input type="file" id="ss-side-upload" accept="image/*" multiple style="display:none" onchange="handleUpload(this,'ss-side',1)">
+        </div>
+        <div id="ss-side" class="image-grid"></div>
+        <div class="img-count" id="ss-side-count" style="color:var(--amber)">0 images (required)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- APPROVAL GATE -->
+<div class="approval-gate" id="approval-gate">
+  <span class="approval-eyebrow">Instructor Design Approval</span>
+  <div class="approval-text">
+    Your design must be reviewed and approved by Mr. Pina before you can submit. When your design is ready, bring this document up during class for review. Mr. Pina will enter the approval code to unlock Module 05 and your submission.<br><br>
+    Do not submit without approval. Unapproved designs will not be accepted.
+  </div>
+  <div class="approval-input-row no-print">
+    <input type="password" id="approval-pwd" placeholder="Enter approval code" autocomplete="off">
+    <button class="approval-submit" onclick="checkApproval()">[ Verify ]</button>
+  </div>
+  <div class="approval-error" id="approval-error">Incorrect code. See Mr. Pina.</div>
+  <div class="approval-success" id="approval-success">
+    <div class="approval-success-title">Design Approved</div>
+    <div class="approval-timestamp" id="approval-timestamp"></div>
+  </div>
+</div>
+
+<!-- MODULE 05: DEVIATION LOG (locked until approval) -->
+<div class="module" id="module-05" style="position:relative">
+  <div class="module-locked-overlay" id="module-05-lock">
+    <div class="module-locked-icon">&#128274;</div>
+    <div class="module-locked-text">Instructor Approval Required<br>to Unlock This Module</div>
+  </div>
+  <div class="module-header">
+    <span class="mod-num">05</span><span class="mod-title">Deviation Log</span><span class="mod-pts">5 pts</span>
+    <span class="mod-dot" id="dot-05"></span>
+    <button class="rubric-toggle" id="rt-05" onclick="toggleRubric(5)">[ Rubric ]</button>
+  </div>
+  <div class="rubric-panel" id="rubric-05">
+    <div class="rubric-inner">
+      <div class="rubric-title-row"><span>Grading Criteria</span><span>Points</span></div>
+      <div class="rubric-row"><div class="rubric-criteria"><strong>Full Credit:</strong> Radio selected. If deviations occurred, each one is honestly and specifically documented. Deviations earn full credit when documented.</div><div class="rubric-pts">5 pts</div></div>
+      <div class="rubric-row"><div class="rubric-criteria"><strong>No Credit:</strong> Radio not selected, or deviations clearly present but not documented.</div><div class="rubric-pts">0 pts</div></div>
+    </div>
+  </div>
+  <div class="module-body">
+    <p class="prompt">After instructor approval, document any final deviations between your approved design and your actual submission. This is your last chance to flag changes made between approval and submission. Full credit for honest documentation &mdash; zero credit for leaving this blank when deviations exist.</p>
+    <div class="collab-options" style="gap:20px;flex-wrap:wrap;margin-bottom:12px;">
+      <label class="collab-opt"><input type="radio" name="dev-status" value="match" data-field="dev-status" onchange="updateDevState();updateScoreAndDots();saveToStorage()"> <span>Final design matches approved design &mdash; no post-approval changes</span></label>
+      <label class="collab-opt"><input type="radio" name="dev-status" value="deviated" data-field="dev-status" onchange="updateDevState();updateScoreAndDots();saveToStorage()"> <span>Post-approval changes were made &mdash; documented below</span></label>
+    </div>
+    <div id="dev-log-section" style="display:none;">
+      <div class="table-container" style="margin-bottom:10px;">
+        <table id="dev-log-table">
+          <thead><tr>
+            <th style="width:22%">What Changed</th>
+            <th style="width:26%">Approved Design</th>
+            <th style="width:26%">Final Submission</th>
+            <th style="width:21%">Reason</th>
+            <th class="no-print" style="width:5%"></th>
+          </tr></thead>
+          <tbody id="dev-log-body"></tbody>
+        </table>
+      </div>
+      <button class="add-row-btn no-print" onclick="addDevLogRow()">[ + Add Deviation ]</button>
+    </div>
+  </div>
+</div>
+
+<!-- DECLARATION -->
+<div class="declaration-block">
+  <div class="declaration-title">Academic Integrity Declaration</div>
+  <div class="declaration-text">I confirm that the SolidWorks assembly and documentation submitted here represent my own design work. All screenshots are from my own model. I understand that using AI tools, reference designs, online calculators, manufacturer resources, and any other available resource is permitted and expected &mdash; the design decisions are mine. I understand that submitting without instructor approval or submitting someone else's model constitutes academic dishonesty.</div>
+  <label class="decl-checkbox"><input type="checkbox" data-field="declaration"><span class="decl-checkbox-label">I understand and agree to the above.</span></label>
+</div>
+
+<!-- INSTRUCTOR SCORING TABLE (print-only) -->
+<table class="instructor-table">
+  <thead><tr><th>Module</th><th>Description</th><th class="score-cell">Pts Possible</th><th class="score-cell">Pts Earned</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>01</td><td>Design Continuity</td><td>5</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td>02</td><td>Component CAD Documentation</td><td>25</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td>03</td><td>Tolerance &amp; Fit Verification</td><td>20</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td>04</td><td>Assembly Validation</td><td>15</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td>05</td><td>Deviation Log</td><td>5</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr><td colspan="2"><strong>Total</strong></td><td>70</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+  </tbody>
+</table>
+
+<div class="footer">
+  <span>IDEA-BLADE &nbsp;|&nbsp; Assignment 03 &nbsp;|&nbsp; Don Bosco Technical Institute &nbsp;|&nbsp; IDEA-113</span>
+  <span class="footer-pts">70 Points Total</span>
+</div>
+</div>
+<script>
+/* ================================================================
+   IDEA-BLADE A03 - v1 (CAD Design Package)
+   Storage key: idea113-blade-03
+   Approval hash: SHA-256 of password (stored, not plaintext)
+   ================================================================ */
+const BUILD_VERSION='v1';
+const STORAGE_KEY='idea113-blade-03';
+const TOTAL_PTS=70;
+const APPROVAL_HASH='ec929973e52a87f1896dac3036bf607051238d042fef08147b9a78ba6a3a5adf';
+const MASS_LIMIT_G=907;
+let autoSaveInterval=null;
+let imgStore={'comp-imgs':[],'ss-mass':[],'ss-iso':[],'ss-top':[],'ss-side':[]};
+let compColorIndex=0;
+let activeLayerDrag=null;
+let isApproved=false;
+
+/* -------- UNIT CONVERSIONS -------- */
+const inToMm=v=>+(v*25.4).toFixed(3);
+const mmToIn=v=>+(v/25.4).toFixed(4);
+const gToLbs=v=>+(v/453.592).toFixed(4);
+const lbsToG=v=>+(v*453.592).toFixed(1);
+const gToOz=v=>+(v/28.3495).toFixed(3);
+
+/* -------- SHA-256 APPROVAL -------- */
+async function sha256(msg){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function checkApproval(){
+  const pwd=document.getElementById('approval-pwd').value;
+  const hash=await sha256(pwd);
+  if(hash===APPROVAL_HASH){
+    setApproved(true,new Date().toLocaleString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric',hour:'numeric',minute:'2-digit'}));
+    saveToStorage();
+  } else {
+    const err=document.getElementById('approval-error');
+    err.style.display='block';
+    setTimeout(()=>err.style.display='none',3000);
+    document.getElementById('approval-pwd').value='';
+  }
+}
+function setApproved(state,timestamp){
+  isApproved=state;
+  const gate=document.getElementById('approval-gate');
+  const lock=document.getElementById('module-05-lock');
+  const mod05=document.getElementById('module-05');
+  const success=document.getElementById('approval-success');
+  const ts=document.getElementById('approval-timestamp');
+  if(state){
+    gate.classList.add('approved');
+    if(lock){lock.style.opacity='0';lock.style.pointerEvents='none';}
+    mod05.classList.add('unlocked');
+    success.style.display='block';
+    if(timestamp && ts) ts.textContent='Approved: '+timestamp;
+    document.getElementById('approval-error').style.display='none';
+  } else {
+    gate.classList.remove('approved');
+    if(lock){lock.style.opacity='1';lock.style.pointerEvents='all';}
+    mod05.classList.remove('unlocked');
+    success.style.display='none';
+  }
+  updateScoreAndDots();
+}
+
+/* -------- MATRIX RAIN -------- */
+(function(){
+  const canvas=document.getElementById('bg-canvas');
+  const ctx=canvas.getContext('2d');
+  let drops=[],cols=0,lastTime=0,ripples=[];
+  let COL_W=18;
+  let config={size:14,density:.85,speed:.5,fade:.08,charTypes:['matrix'],colorTypes:['green']};
+  let activeCharsList=[];
+  const charSets={matrix:'ｦｧｨｩｪｫｬｭｮｯｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ01234567></>+-'.split(''),binary:'01'.split(''),hex:'0123456789ABCDEF'.split('')};
+  const palettes={green:{bright:'rgba(0,255,65,.8)',dim:'rgba(74,122,82,.3)'},cyan:{bright:'rgba(0,240,255,.9)',dim:'rgba(0,100,120,.3)'},gold:{bright:'rgba(200,255,0,.9)',dim:'rgba(100,120,0,.3)'},amber:{bright:'rgba(255,140,0,.9)',dim:'rgba(150,70,0,.3)'}};
+  function applySettings(){
+    const sz=parseInt(document.getElementById('mx-size').value),dv=parseInt(document.getElementById('mx-density').value),sv=parseInt(document.getElementById('mx-speed').value),fv=parseInt(document.getElementById('mx-fade').value);
+    config.size=sz;config.density=1-(dv/100)*.25;config.speed=.1+(sv/100)*1.4;config.fade=.30-(fv/100)*.28;
+    document.getElementById('mx-out-size').innerText=sz;document.getElementById('mx-out-density').innerText=dv;document.getElementById('mx-out-speed').innerText=sv;document.getElementById('mx-out-fade').innerText=fv;
+    let old=COL_W;COL_W=config.size+4;
+    if(COL_W!==old){let n=Math.floor(canvas.width/COL_W);if(n>cols){for(let i=cols;i<n;i++)drops[i]=Math.random()*-50;}cols=n;}
+    config.charTypes=Array.from(document.querySelectorAll('.mx-tag[data-type="char"].active')).map(t=>t.dataset.val);
+    config.colorTypes=Array.from(document.querySelectorAll('.mx-tag[data-type="color"].active')).map(t=>t.dataset.val);
+    activeCharsList=config.charTypes.map(t=>charSets[t]).flat();
+  }
+  applySettings();
+  ['mx-size','mx-density','mx-speed','mx-fade'].forEach(id=>document.getElementById(id)?.addEventListener('input',applySettings));
+  document.querySelectorAll('.mx-tag').forEach(tag=>{tag.addEventListener('click',function(){const type=this.dataset.type;this.classList.toggle('active');if(document.querySelectorAll(`.mx-tag[data-type="${type}"].active`).length===0)this.classList.add('active');applySettings();});});
+  document.getElementById('mx-random-btn')?.addEventListener('click',()=>{
+    ['mx-size','mx-density','mx-speed','mx-fade'].forEach(id=>{const el=document.getElementById(id);el.value=id==='mx-size'?Math.floor(Math.random()*24)+10:Math.floor(Math.random()*100)+1;});
+    ['char','color'].forEach(type=>{const tags=document.querySelectorAll(`.mx-tag[data-type="${type}"]`);tags.forEach(t=>t.classList.remove('active'));const n=Math.floor(Math.random()*tags.length)+1;Array.from(tags).sort(()=>.5-Math.random()).slice(0,n).forEach(t=>t.classList.add('active'));});
+    applySettings();
+  });
+  const panel=document.getElementById('matrix-controls'),btn=document.getElementById('mx-toggle-btn');
+  btn?.addEventListener('click',()=>{btn.classList.toggle('active');panel.classList.toggle('open');});
+  window.addEventListener('mousedown',e=>{
+    if(panel.classList.contains('open')&&!e.target.closest('#matrix-controls')&&!e.target.closest('#mx-toggle-btn')){panel.classList.remove('open');btn.classList.remove('active');}
+    if(!e.target.closest('#matrix-controls')&&!e.target.closest('#mx-toggle-btn')){
+      ripples.push({x:e.clientX,y:e.clientY,life:1.0});
+      const cc=Math.floor(e.clientX/COL_W),sr=Math.floor(e.clientY/COL_W);
+      for(let i=-3;i<=3;i++){let c=cc+i;if(c>=0&&c<cols)drops[c]=sr-Math.abs(i);}
+    }
+  });
+  function init(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;cols=Math.floor(canvas.width/COL_W);drops=Array.from({length:cols},()=>Math.random()*-50);ctx.fillStyle='#020A04';ctx.fillRect(0,0,canvas.width,canvas.height);}
+  function draw(ts){
+    requestAnimationFrame(draw);if(ts-lastTime<1000/16)return;lastTime=ts;
+    ctx.fillStyle=`rgba(0,0,0,${config.fade})`;ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.font=config.size+'px "Share Tech Mono",monospace';
+    const mw=(COL_W-config.size)*.8;
+    for(let i=0;i<cols;i++){
+      const ch=activeCharsList[Math.floor(Math.random()*activeCharsList.length)];
+      const y=drops[i]*COL_W;
+      const ox=Math.sin(y*.02+ts*.002+i)*mw;
+      const ac=palettes[config.colorTypes[Math.floor(Math.random()*config.colorTypes.length)]];
+      ctx.fillStyle=Math.random()>.95?ac.bright:ac.dim;
+      ctx.fillText(ch,i*COL_W+ox,y);
+      if(y>canvas.height&&Math.random()>config.density)drops[i]=0;
+      drops[i]+=config.speed;
+    }
+    for(let i=ripples.length-1;i>=0;i--){
+      let r=ripples[i];r.life-=.06;if(r.life<=0){ripples.splice(i,1);continue;}
+      const pc=palettes[config.colorTypes[0]];
+      const s1=(1-r.life)*80;ctx.strokeStyle=pc.bright.replace(/[\d.]+\)$/,`${r.life})`);ctx.lineWidth=1.5;ctx.strokeRect(r.x-s1/2,r.y-s1/2,s1,s1);
+      const s2=(1-r.life)*120;ctx.strokeStyle=pc.bright.replace(/[\d.]+\)$/,`${r.life*.4})`);ctx.strokeRect(r.x-s2/2,r.y-s2/2,s2,s2);
+    }
+  }
+  if(!window.matchMedia('(prefers-reduced-motion:reduce)').matches){init();requestAnimationFrame(draw);window.addEventListener('resize',init);}
+})();
+
+/* -------- SCROLL PROGRESS -------- */
+window.addEventListener('scroll',function(){const el=document.getElementById('scroll-progress');const doc=document.documentElement;el.style.width=Math.min(doc.scrollTop/(doc.scrollHeight-doc.clientHeight)*100,100)+'%';},{passive:true});
+
+/* -------- TOOLTIP -------- */
+document.addEventListener('mouseover',e=>{let th=e.target.closest('th[data-tip]');if(th){let tip=document.getElementById('custom-tooltip');let parts=th.getAttribute('data-tip').split(' — ');tip.innerHTML=parts.length>1?`<strong>${parts[0]}</strong>${parts[1]}`:th.getAttribute('data-tip');tip.classList.add('show');}});
+document.addEventListener('mousemove',e=>{let tip=document.getElementById('custom-tooltip');if(tip&&tip.classList.contains('show')){tip.style.left=(e.clientX+10)+'px';tip.style.top=(e.clientY+10)+'px';}});
+document.addEventListener('mouseout',e=>{let th=e.target.closest('th[data-tip]');if(th){let tip=document.getElementById('custom-tooltip');if(tip)tip.classList.remove('show');}});
+
+/* -------- RUBRIC TOGGLES -------- */
+function toggleRubric(n){const p=document.getElementById('rubric-0'+n);const b=document.getElementById('rt-0'+n);const open=p.classList.toggle('open');b.classList.toggle('open',open);b.textContent=open?'[ Close ]':'[ Rubric ]';}
+
+/* -------- SENTENCE COUNTER -------- */
+function countSentences(text){if(!text.trim())return 0;const m=text.trim().match(/[^.!?]+[.!?]+/g)||[];const left=text.trim().replace(/[^.!?]+[.!?]+/g,'').trim();return m.length+(left.length>10?1:0);}
+function autoResize(ta){ta.style.height='0';ta.style.height=ta.scrollHeight+'px';}
+function resizeAll(){document.querySelectorAll('textarea[data-field]').forEach(autoResize);}
+function updateMirror(field,value){document.querySelectorAll(`[data-mirror="${field}"]`).forEach(m=>{m.textContent=value;});}
+function updateCounter(fieldId,text){
+  const counter=document.querySelector(`.sent-count[data-field-ref="${fieldId}"]`);if(!counter)return;
+  const min=parseInt(counter.dataset.min),max=counter.dataset.max?parseInt(counter.dataset.max):Infinity,count=countSentences(text);
+  const span=counter.querySelector('span:last-child');
+  let suffix=max!==Infinity?` to ${max} sentences`:(min===1?' sentence minimum':' sentences minimum');
+  span.innerHTML=`<span class="current">${count}</span> / ${min}${suffix}`;
+  const has=text.trim().length>0;counter.classList.toggle('met',count>=min&&count<=max);counter.classList.toggle('unmet',has&&(count<min||count>max));counter.classList.toggle('active',has);
+}
+function getFieldVal(f){const el=document.querySelector(`[data-field="${f}"]`);return el?el.value.trim():'';}
+function sentOk(f,min){return countSentences(getFieldVal(f))>=min;}
+function notEmpty(f){return getFieldVal(f).length>0;}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+/* -------- COLLAB STATE -------- */
+function updateCollabState(){
+  const solo=document.querySelector('input[name="collab"][value="solo"]');
+  const inp=document.querySelector('[data-field="collab-names"]');
+  if(solo&&inp){if(solo.checked){inp.disabled=true;inp.style.opacity='.3';inp.value='';updateMirror('collab-names','');}else{inp.disabled=false;inp.style.opacity='1';}}
+}
+
+/* -------- CONTINUITY STATE -------- */
+function updateContinuityState(){
+  const sel=document.querySelector('input[name="plan-status"]:checked');
+  document.getElementById('continuity-unchanged').style.display=(sel&&sel.value==='unchanged')?'block':'none';
+  document.getElementById('continuity-deviations').style.display=(sel&&sel.value==='deviations')?'block':'none';
+}
+
+/* -------- INTERFERENCE STATE -------- */
+function checkInterference(){
+  const sel=document.querySelector('input[name="interference"]:checked');
+  document.getElementById('interference-detail').style.display=(sel&&sel.value==='found')?'block':'none';
+  const dot=document.getElementById('vdot-interference'),stat=document.getElementById('vstat-interference');
+  if(!sel){dot.className='val-dot';stat.textContent='Not selected';stat.style.color='var(--dim)';}
+  else if(sel.value==='clear'){dot.className='val-dot ok';stat.textContent='Clear — no conflicts';stat.style.color='var(--green)';}
+  else{const desc=getFieldVal('interference-desc');dot.className=desc?'val-dot ok':'val-dot warn';stat.textContent=desc?'Conflicts documented':'Document the conflict below';stat.style.color=desc?'var(--teal)':'var(--amber)';}
+}
+
+/* -------- DEVIATION STATE -------- */
+function updateDevState(){
+  const sel=document.querySelector('input[name="dev-status"]:checked');
+  document.getElementById('dev-log-section').style.display=(sel&&sel.value==='deviated')?'block':'none';
+}
+
+/* -------- CONTINUITY DEVIATION TABLE -------- */
+function addDevRow(d){
+  d=d||{};const tbody=document.getElementById('dev-body');const tr=document.createElement('tr');
+  tr.innerHTML=`<td><textarea style="min-height:44px;" oninput="autoResize(this);updateScoreAndDots();saveToStorage()" placeholder="What changed">${esc(d.a||'')}</textarea></td><td><textarea style="min-height:44px;" oninput="autoResize(this);updateScoreAndDots();saveToStorage()" placeholder="Original A02 plan">${esc(d.b||'')}</textarea></td><td><textarea style="min-height:44px;" oninput="autoResize(this);updateScoreAndDots();saveToStorage()" placeholder="Final CAD decision">${esc(d.c||'')}</textarea></td><td><textarea style="min-height:44px;" oninput="autoResize(this);updateScoreAndDots();saveToStorage()" placeholder="Reason">${esc(d.d||'')}</textarea></td><td class="no-print" style="text-align:center;vertical-align:middle;padding:0 6px;"><span class="action-btn del" onclick="this.closest('tr').remove();updateScoreAndDots();saveToStorage()">&#x2716;</span></td>`;
+  tr.querySelectorAll('textarea').forEach(ta=>autoResize(ta));tbody.appendChild(tr);
+}
+function getDevRows(){return Array.from(document.querySelectorAll('#dev-body tr')).map(tr=>{const t=tr.querySelectorAll('textarea');return{a:t[0]?.value||'',b:t[1]?.value||'',c:t[2]?.value||'',d:t[3]?.value||''};});}
+function loadDevRows(arr){document.getElementById('dev-body').innerHTML='';(arr||[]).forEach(d=>addDevRow(d));}
+
+/* -------- DEV LOG TABLE -------- */
+function addDevLogRow(d){
+  d=d||{};const tbody=document.getElementById('dev-log-body');const tr=document.createElement('tr');
+  tr.innerHTML=`<td><textarea style="min-height:44px;" oninput="autoResize(this);updateScoreAndDots();saveToStorage()" placeholder="What changed">${esc(d.a||'')}</textarea></td><td><textarea style="min-height:44px;" oninput="autoResize(this);updateScoreAndDots();saveToStorage()" placeholder="Approved design">${esc(d.b||'')}</textarea></td><td><textarea style="min-height:44px;" oninput="autoResize(this);updateScoreAndDots();saveToStorage()" placeholder="Final submission">${esc(d.c||'')}</textarea></td><td><textarea style="min-height:44px;" oninput="autoResize(this);updateScoreAndDots();saveToStorage()" placeholder="Reason">${esc(d.d||'')}</textarea></td><td class="no-print" style="text-align:center;vertical-align:middle;padding:0 6px;"><span class="action-btn del" onclick="this.closest('tr').remove();updateScoreAndDots();saveToStorage()">&#x2716;</span></td>`;
+  tr.querySelectorAll('textarea').forEach(ta=>autoResize(ta));tbody.appendChild(tr);
+}
+function getDevLogRows(){return Array.from(document.querySelectorAll('#dev-log-body tr')).map(tr=>{const t=tr.querySelectorAll('textarea');return{a:t[0]?.value||'',b:t[1]?.value||'',c:t[2]?.value||'',d:t[3]?.value||''};});}
+function loadDevLogRows(arr){document.getElementById('dev-log-body').innerHTML='';(arr||[]).forEach(d=>addDevLogRow(d));}
+
+/* -------- COMPONENT TABLE -------- */
+const defaultColors=['#303833','#1B241D','#00FF41','#4A5B4D','#111813'];
+const matOpts=['Select...','Steel','Aluminum','Polycarbonate','HIPS','ABS','PLA','Wood / MDF','Hardware / COTS','Brass','Acrylic','Other'];
+const procOpts=['Select...','3D Print (FDM)','Laser Cut (Fiber)','Laser Cut (Diode)','CNC Router','Manual Mill','Manual Lathe','Drill Press','Hand Tools','Other'];
+const hwOpts=['Select...','Shaft Collar','Hex Shaft','Bolts / Nuts','Threaded Inserts','Washers / Spacers','Bearings','Pins / Dowels','Other Hardware'];
+const ifaceOpts=['Select...','Bolted','Press Fit','Slip Fit','Adhesive','Threaded','Captured / Sandwiched','Interlocking','Other'];
+
+function buildSelect(cls,opts,val){
+  let isC=val&&!opts.includes(val)&&val!=='Select...';let sv=isC?'Other':(val||'Select...');
+  let h=`<select class="${cls}" onchange="checkCustom(this)">`;
+  opts.forEach(o=>h+=`<option value="${o}"${o===sv?' selected':''}>${o}</option>`);
+  h+=`</select><input type="text" class="${cls}-custom custom-hidden-input" style="display:${isC?'block':'none'}" value="${isC?esc(val):''}" placeholder="Specify..." oninput="updateScoreAndDots();saveToStorage();">`;
+  return h;
+}
+window.checkCustom=function(sel){
+  const ci=sel.nextElementSibling;
+  if(ci&&ci.classList.contains('custom-hidden-input')){if(sel.value==='Other'){ci.style.display='block';ci.focus();}else ci.style.display='none';}
+  if(sel.classList.contains('input-mat')){handleMatChange(sel);}else{updateScoreAndDots();saveToStorage();updateStats();}
+};
+window.handleMatChange=function(sel){
+  const tr=sel.closest('tr');const procTd=tr.querySelector('.input-proc')?.parentElement;if(!procTd)return;
+  const isHw=(sel.value==='Hardware / COTS');const opts=isHw?hwOpts:procOpts;
+  let cur=extractVal(tr,'input-proc');if(!opts.includes(cur))cur='Select...';
+  procTd.innerHTML=buildSelect('input-proc',opts,cur);
+  procTd.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',()=>{updateScoreAndDots();saveToStorage();updateStats();}));
+  // Show/hide supplier wrap
+  const sw=tr.querySelector('.supplier-wrap');if(sw)sw.style.opacity=isHw?'1':'.4';
+  updateScoreAndDots();saveToStorage();updateStats();
+};
+function extractVal(tr,cls){
+  let sel=tr.querySelector('.'+cls);if(!sel)return'';
+  if(sel.value==='Other'){const c=tr.querySelector('.'+cls+'-custom');return c?c.value.trim():'';}
+  return sel.value==='Select...'?'':sel.value;
+}
+
+function addTableRow(tbodyId,data){
+  const tbody=document.getElementById(tbodyId);if(!tbody)return;
+  const tr=document.createElement('tr');tr.setAttribute('draggable','true');
+  const d={color:data?.color||defaultColors[compColorIndex%defaultColors.length],name:data?.name||'',mat:data?.mat||'',proc:data?.proc||'',thickIn:data?.thickIn||'',thickMm:data?.thickMm||'',odIn:data?.odIn||'',odMm:data?.odMm||'',massG:data?.massG||'',supplier:data?.supplier||'',hwDl:!!data?.hwDl,iface:data?.iface||''};
+  compColorIndex++;
+  const isHw=(d.mat==='Hardware / COTS');const pOpts=isHw?hwOpts:procOpts;
+  tr.innerHTML=`
+    <td class="no-print" style="width:60px;text-align:center;vertical-align:middle;">
+      <div style="display:flex;align-items:center;justify-content:space-evenly;height:100%;min-height:40px;">
+        <span style="cursor:grab;color:var(--dim);font-size:14px;user-select:none;" class="drag-handle">&#9776;</span>
+        <span class="action-btn" onclick="duplicateCompRow(this)" title="Duplicate">&#10697;</span>
+        <span class="action-btn del" onclick="deleteCompRow(this)" title="Delete">&#x2716;</span>
+      </div>
+    </td>
+    <td style="width:40px;"><input type="color" class="input-color" value="${d.color}" style="height:35px;padding:2px;cursor:pointer;width:100%;background:transparent;border:none;"></td>
+    <td style="width:150px;"><input type="text" class="input-name" value="${esc(d.name)}" placeholder="Component name" style="width:100%;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--white);font-family:'Share Tech Mono',monospace;padding:8px 10px;font-size:12px;"></td>
+    <td style="width:130px;">${(()=>{let isC=d.mat&&!matOpts.includes(d.mat)&&d.mat!=='Select...';let sv=isC?'Other':(d.mat||'Select...');let h=`<select class="input-mat" onchange="checkCustom(this)">`;matOpts.forEach(o=>h+=`<option value="${o}"${o===sv?' selected':''}>${o}</option>`);h+=`</select><input type="text" class="input-mat-custom custom-hidden-input" style="display:${isC?'block':'none'}" value="${isC?esc(d.mat):''}" placeholder="Specify..." oninput="updateStats();saveToStorage();">`;return h;})()}</td>
+    <td style="width:120px;">${buildSelect('input-proc',pOpts,d.proc)}</td>
+    <td style="width:90px;"><div class="dual-cell"><div class="unit-label">in</div><input type="number" class="input-thick-in" step="0.01" min="0" max="4" value="${d.thickIn}" placeholder="0.00" oninput="syncDual(this,'thick','in');updateStats();saveToStorage();updateScoreAndDots()"><div class="dual-sep"></div><div class="unit-label">mm</div><input type="number" class="input-thick-mm" step="0.01" min="0" max="100" value="${d.thickMm}" placeholder="0.0" oninput="syncDual(this,'thick','mm');updateStats();saveToStorage();updateScoreAndDots()"></div></td>
+    <td style="width:90px;"><div class="dual-cell"><div class="unit-label">in</div><input type="number" class="input-od-in" step="0.01" min="0" max="5.5" value="${d.odIn}" placeholder="0.00" oninput="syncDual(this,'od','in');updateStats();saveToStorage();updateScoreAndDots()"><div class="dual-sep"></div><div class="unit-label">mm</div><input type="number" class="input-od-mm" step="0.1" min="0" max="140" value="${d.odMm}" placeholder="0.0" oninput="syncDual(this,'od','mm');updateStats();saveToStorage();updateScoreAndDots()"></div></td>
+    <td style="width:90px;"><div class="mass-cell"><input type="number" class="input-mass-g" step="0.1" min="0" max="2000" value="${d.massG}" placeholder="0.0 g" oninput="updateStats();saveToStorage();updateScoreAndDots()"><div class="mass-convert" id="">&#8594; <span class="mass-oz-disp">${d.massG?gToOz(d.massG)+' oz':'-'}</span></div></div></td>
+    <td style="width:160px;"><div class="supplier-wrap" style="opacity:${isHw?'1':'.4'}"><input type="text" class="input-supplier" value="${esc(d.supplier)}" placeholder="Paste product URL..." style="width:100%;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--ice);font-family:'Share Tech Mono',monospace;padding:8px 10px;font-size:10px;"><div class="hw-chk-row"><input type="checkbox" class="input-hw-dl" ${d.hwDl?'checked':''} id="hwdl-${compColorIndex}" onchange="updateScoreAndDots();saveToStorage()"><label for="hwdl-${compColorIndex}">3D model downloaded &amp; inserted</label></div></div></td>
+    <td style="width:130px;">${buildSelect('input-iface',ifaceOpts,d.iface)}</td>
+  `;
+  tr.querySelectorAll('input:not(.custom-hidden-input),select').forEach(el=>{
+    if(!el.onchange&&!el.oninput)el.addEventListener('input',()=>{updateScoreAndDots();saveToStorage();updateStats();});
+  });
+  tbody.appendChild(tr);attachCompDragEvents(tr);updateStats();updateScoreAndDots();
+}
+function syncDual(el,field,unit){
+  const tr=el.closest('tr');if(!tr)return;
+  const val=parseFloat(el.value);if(isNaN(val))return;
+  if(unit==='in'){const mm=tr.querySelector(`.input-${field}-mm`);if(mm)mm.value=inToMm(val);}
+  else{const inch=tr.querySelector(`.input-${field}-in`);if(inch)inch.value=mmToIn(val);}
+}
+function deleteCompRow(btn){btn.closest('tr').remove();updateStats();updateScoreAndDots();saveToStorage();}
+function duplicateCompRow(btn){
+  const tr=btn.closest('tr');const clone=tr.cloneNode(true);
+  tr.parentNode.insertBefore(clone,tr.nextSibling);
+  const orig=tr.querySelectorAll('input,select'),cloned=clone.querySelectorAll('input,select');
+  orig.forEach((el,i)=>{if(el.type!=='color')cloned[i].value=el.value;else cloned[i].value=defaultColors[compColorIndex%defaultColors.length];});
+  compColorIndex++;
+  clone.querySelectorAll('input:not(.custom-hidden-input),select').forEach(el=>{if(!el.onchange&&!el.oninput)el.addEventListener('input',()=>{updateScoreAndDots();saveToStorage();updateStats();});});
+  attachCompDragEvents(clone);updateStats();updateScoreAndDots();saveToStorage();
+}
+function attachCompDragEvents(tr){
+  tr.addEventListener('dragstart',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT'||e.target.classList.contains('action-btn')){e.preventDefault();return;}activeLayerDrag={row:this};e.dataTransfer.effectAllowed='move';this.style.opacity='.4';});
+  tr.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='move';tr.classList.add('drag-over');});
+  tr.addEventListener('dragleave',()=>tr.classList.remove('drag-over'));
+  tr.addEventListener('drop',function(e){e.preventDefault();this.classList.remove('drag-over');if(activeLayerDrag&&activeLayerDrag.row!==this){const tbody=this.parentNode,rect=this.getBoundingClientRect(),next=(e.clientY-rect.top)/(rect.bottom-rect.top)>.5;tbody.insertBefore(activeLayerDrag.row,next?this.nextSibling:this);updateStats();updateScoreAndDots();saveToStorage();}});
+  tr.addEventListener('dragend',function(){this.style.opacity='1';activeLayerDrag=null;});
+}
+function getCompData(){
+  return Array.from(document.querySelectorAll('#comp-body tr')).map(tr=>({
+    color:tr.querySelector('.input-color')?.value||'',name:tr.querySelector('.input-name')?.value||'',
+    mat:extractVal(tr,'input-mat'),proc:extractVal(tr,'input-proc'),
+    thickIn:tr.querySelector('.input-thick-in')?.value||'',thickMm:tr.querySelector('.input-thick-mm')?.value||'',
+    odIn:tr.querySelector('.input-od-in')?.value||'',odMm:tr.querySelector('.input-od-mm')?.value||'',
+    massG:tr.querySelector('.input-mass-g')?.value||'',
+    supplier:tr.querySelector('.input-supplier')?.value||'',
+    hwDl:tr.querySelector('.input-hw-dl')?.checked||false,
+    iface:extractVal(tr,'input-iface')
+  }));
+}
+function loadComps(arr){
+  document.getElementById('comp-body').innerHTML='';compColorIndex=0;
+  if(!arr||arr.length===0){
+    [{name:'',mat:'Select...',proc:'Select...','iface':'Select...'},{name:'',mat:'Select...',proc:'Select...','iface':'Select...'},{name:'',mat:'Select...',proc:'Select...','iface':'Select...'},{name:'',mat:'Hardware / COTS',proc:'Select...','iface':'Select...'},{name:'',mat:'Select...',proc:'Select...','iface':'Select...'}].forEach(d=>addTableRow('comp-body',d));
+  } else arr.forEach(d=>addTableRow('comp-body',d));
+  updateStats();
+}
+
+/* -------- STAT BARS -------- */
+function updateStats(){
+  const comps=getCompData();
+  // Total mass
+  let totalG=comps.reduce((s,c)=>s+(parseFloat(c.massG)||0),0);
+  const massEl=document.getElementById('stat-mass');const massLbsEl=document.getElementById('stat-mass-lbs');
+  if(massEl){massEl.textContent=totalG.toFixed(1)+' g';massEl.className='stat-card-value '+(totalG>MASS_LIMIT_G?'warn':'ok');}
+  if(massLbsEl)massLbsEl.textContent=gToLbs(totalG).toFixed(3)+' lbs | Limit: 907g / 2.000 lbs';
+  // Update mass oz in each row
+  document.querySelectorAll('.input-mass-g').forEach(inp=>{const oz=inp.closest('td')?.querySelector('.mass-oz-disp');if(oz){const g=parseFloat(inp.value)||0;oz.textContent=g?gToOz(g)+' oz':'-';}});
+  // Process count
+  const procs=new Set(comps.map(c=>c.proc).filter(p=>p&&p!=='Select...'));
+  const procEl=document.getElementById('stat-procs');if(procEl){procEl.textContent=procs.size;procEl.className='stat-card-value '+(procs.size>=3?'ok':'warn');}
+  // Fastener count display
+  updateFastenerDisplay();
+}
+function updateFastenerDisplay(){
+  const n=parseInt(document.getElementById('fastener-count')?.value)||0;
+  const el=document.getElementById('stat-fasteners-disp');if(el){el.textContent=n;el.className='stat-card-value '+(n>=3?'ok':'warn');}
+}
+
+/* -------- BOLT CLEARANCE TABLE -------- */
+const headOpts=['Select...','Counterbore (socket head flush/below)','Through clearance (head exposed)','N/A'];
+const nutOpts=['Select...','Nut trap (captured in printed pocket)','Accessible face (nut on surface)','N/A'];
+function addBoltRow(d){
+  d=d||{};const tbody=document.getElementById('bolt-body');const tr=document.createElement('tr');
+  tr.innerHTML=`
+    <td><input type="text" value="${esc(d.desc||'')}" placeholder="e.g. Top cap to blade ring" style="width:150px" oninput="updateScoreAndDots();saveToStorage()"></td>
+    <td><input type="text" value="${esc(d.size||'')}" placeholder="e.g. M4" style="width:60px;text-align:center" oninput="updateScoreAndDots();saveToStorage()"></td>
+    <td><input type="number" value="${d.clrP||''}" step="0.001" min="0" max="1" placeholder="0.000" style="width:80px;text-align:center" oninput="updateScoreAndDots();saveToStorage()"></td>
+    <td><input type="number" value="${d.clrM||''}" step="0.001" min="0" max="1" placeholder="0.000" style="width:80px;text-align:center" oninput="updateScoreAndDots();saveToStorage()"></td>
+    <td><select style="width:90px;" onchange="handleHeadSelect(this);saveToStorage()">${headOpts.map(o=>`<option value="${o}"${o===d.head?' selected':''}>${o}</option>`).join('')}</select></td>
+    <td><input type="number" value="${d.cbOd||''}" step="0.001" min="0" max="1" placeholder="0.000" style="width:80px;text-align:center" oninput="saveToStorage()"></td>
+    <td><input type="number" value="${d.cbDp||''}" step="0.001" min="0" max="1" placeholder="0.000" style="width:80px;text-align:center" oninput="saveToStorage()"></td>
+    <td><select style="width:90px;" onchange="saveToStorage()">${nutOpts.map(o=>`<option value="${o}"${o===d.nut?' selected':''}>${o}</option>`).join('')}</select></td>
+    <td class="no-print" style="text-align:center;vertical-align:middle;padding:0 6px;"><span class="action-btn del" onclick="this.closest('tr').remove();updateScoreAndDots();saveToStorage()">&#x2716;</span></td>
+  `;
+  tbody.appendChild(tr);
+}
+window.handleHeadSelect=function(sel){updateScoreAndDots();};
+function getBoltData(){
+  return Array.from(document.querySelectorAll('#bolt-body tr')).map(tr=>{
+    const inp=tr.querySelectorAll('input');const sel=tr.querySelectorAll('select');
+    return{desc:inp[0]?.value||'',size:inp[1]?.value||'',clrP:inp[2]?.value||'',clrM:inp[3]?.value||'',head:sel[0]?.value||'',cbOd:inp[4]?.value||'',cbDp:inp[5]?.value||'',nut:sel[1]?.value||''};
+  });
+}
+function loadBoltData(arr){document.getElementById('bolt-body').innerHTML='';(arr||[]).forEach(d=>addBoltRow(d));}
+
+/* -------- TOLERANCE CHECKS -------- */
+function tolSyncInToMm(key){const inp=document.querySelector(`[data-tol="${key}-in"]`);const mm=document.querySelector(`[data-tol="${key}-mm"]`);if(inp&&mm&&inp.value!=='')mm.value=inToMm(parseFloat(inp.value)||0);}
+function tolSyncMmToIn(key){const mm=document.querySelector(`[data-tol="${key}-mm"]`);const inp=document.querySelector(`[data-tol="${key}-in"]`);if(mm&&inp&&mm.value!=='')inp.value=mmToIn(parseFloat(mm.value)||0);}
+function getTolIn(key){const el=document.querySelector(`[data-tol="${key}-in"]`);return el?parseFloat(el.value)||null:null;}
+function setTolDot(id,state,text){
+  const dot=document.getElementById('tdot-'+id);const stat=document.getElementById('tstat-'+id);
+  if(!dot)return;
+  if(state==='ok'){dot.className='tol-card-dot ok';if(stat){stat.textContent=text||'In spec';stat.style.color='var(--green)';}}
+  else if(state==='warn'){dot.className='tol-card-dot warn';if(stat){stat.textContent=text||'Out of spec';stat.style.color='var(--amber)';}}
+  else{dot.className='tol-card-dot';if(stat){stat.textContent=text||'Awaiting input';stat.style.color='var(--dim)';}}
+}
+function checkTol(key,min,max){
+  const v=getTolIn(key);if(v===null){setTolDot(key,'','Awaiting input');return;}
+  const ok=(v>=min)&&(max===null||v<=max);
+  setTolDot(key,ok?'ok':'warn',ok?`In spec (${v.toFixed(3)}")`:`Out of spec (${v.toFixed(3)}")`);
+}
+function checkTolText(key){
+  const val=getFieldVal(key+'-detail');const na=document.getElementById('na-'+key)?.checked;
+  if(na){setTolDot(key,'ok','N/A');return;}
+  setTolDot(key,val?'ok':'','Awaiting input');
+}
+function handleTolNA(key){
+  const na=document.getElementById('na-'+key)?.checked;
+  const fields=document.getElementById(key+'-fields');
+  if(fields)fields.style.opacity=na?'.4':'1';
+  if(na)setTolDot(key,'ok','N/A &mdash; not applicable');
+  else setTolDot(key,'','');
+  updateScoreAndDots();
+}
+function checkShaftMatch(){
+  const plan=parseFloat(document.querySelector('[data-tol="shaft-plan-in"]')?.value)||null;
+  const actual=parseFloat(document.querySelector('[data-tol="shaft-actual-in"]')?.value)||null;
+  const dot=document.getElementById('tdot-shaft-match'),stat=document.getElementById('tstat-shaft');
+  const devField=document.getElementById('shaft-deviation-field');
+  if(!plan||!actual){if(dot)dot.className='tol-card-dot';if(stat){stat.textContent='Enter both values to compare';stat.style.color='var(--dim)';};return;}
+  const diff=Math.abs(plan-actual);
+  if(devField)devField.style.display=diff>0.05?'block':'none';
+  if(diff<=0.05){if(dot)dot.className='tol-card-dot ok';if(stat){stat.textContent='Match — within 0.05" tolerance';stat.style.color='var(--green)';}}
+  else{if(dot)dot.className='tol-card-dot warn';if(stat){stat.textContent=`Deviation: ${diff.toFixed(3)}" — document reason below`;stat.style.color='var(--amber)';}}
+  setTolDot('shaft',diff<=0.05?'ok':'warn');
+}
+function checkTolMetal(){
+  const v=getTolIn('metal');const type=document.querySelector('[data-tol="metal-type"]')?.value;
+  if(v===null||!type||type==='Select...'){setTolDot('metal','','Awaiting input');return;}
+  let min=type==='steel'?0.031:type==='aluminum'?0.039:0.031;
+  const ok=v>=min;
+  setTolDot('metal',ok?'ok':'warn',ok?`In spec (${v.toFixed(3)}")`:`Below ${type} minimum (${v.toFixed(3)}")`);
+}
+
+/* -------- ASSEMBLY VALIDATION -------- */
+function valSyncInToMm(key){const inch=document.querySelector(`[data-val="${key}-in"]`);const mm=document.querySelector(`[data-val="${key}-mm"]`);if(inch&&mm&&inch.value!=='')mm.value=inToMm(parseFloat(inch.value)||0);}
+function valSyncMmToIn(key){const mm=document.querySelector(`[data-val="${key}-mm"]`);const inch=document.querySelector(`[data-val="${key}-in"]`);if(mm&&inch&&mm.value!=='')inch.value=mmToIn(parseFloat(mm.value)||0);}
+function valSyncMassGToLbs(){const g=document.querySelector('[data-val="asm-mass-g"]');const lbs=document.querySelector('[data-val="asm-mass-lbs"]');if(g&&lbs&&g.value!=='')lbs.value=gToLbs(parseFloat(g.value)||0);}
+function valSyncMassLbsToG(){const lbs=document.querySelector('[data-val="asm-mass-lbs"]');const g=document.querySelector('[data-val="asm-mass-g"]');if(lbs&&g&&lbs.value!=='')g.value=lbsToG(parseFloat(lbs.value)||0);}
+function valSyncComMmToIn(){const mm=document.querySelector('[data-val="asm-com-mm"]');const inch=document.querySelector('[data-val="asm-com-in"]');if(mm&&inch&&mm.value!=='')inch.value=+(parseFloat(mm.value)/25.4).toFixed(4);}
+function valSyncComInToMm(){const inch=document.querySelector('[data-val="asm-com-in"]');const mm=document.querySelector('[data-val="asm-com-mm"]');if(inch&&mm&&inch.value!=='')mm.value=inToMm(parseFloat(inch.value)||0);}
+function setValDot(id,state,text){
+  const dot=document.getElementById('vdot-'+id);const stat=document.getElementById('vstat-'+id);if(!dot)return;
+  if(state==='ok'){dot.className='val-dot ok';if(stat){stat.textContent=text||'In spec';stat.style.color='var(--green)';}}
+  else if(state==='warn'){dot.className='val-dot warn';if(stat){stat.textContent=text||'Out of spec';stat.style.color='var(--amber)';}}
+  else{dot.className='val-dot';if(stat){stat.textContent=text||'Awaiting input';stat.style.color='var(--dim)';}}
+}
+function checkVal(key,min,max){
+  const inEl=document.querySelector(`[data-val="${key}-in"]`)||document.querySelector(`[data-val="${key}-g"]`);
+  let v=null;
+  if(key==='asm-mass'){const gEl=document.querySelector('[data-val="asm-mass-g"]');v=gEl?parseFloat(gEl.value)||null:null;}
+  else v=inEl?parseFloat(inEl.value)||null:null;
+  if(v===null){setValDot(key,'','Awaiting input');return;}
+  const ok=(v>=min)&&(max===null||v<=max);
+  let txt='';
+  if(key==='asm-mass')txt=ok?`${v.toFixed(1)}g — within 907g limit`:`${v.toFixed(1)}g — EXCEEDS 907g limit`;
+  else if(key==='asm-height')txt=ok?`${v.toFixed(2)}" / ${inToMm(v).toFixed(1)}mm — in spec`:`${v.toFixed(2)}" — OUT OF RANGE (2.90"–3.10")`;
+  else if(key==='asm-od')txt=ok?`${v.toFixed(2)}" / ${inToMm(v).toFixed(1)}mm — under 5.000" limit`:`${v.toFixed(2)}" — EXCEEDS 5.000" limit`;
+  else if(key==='asm-hexext')txt=ok?`${v.toFixed(2)}" / ${inToMm(v).toFixed(1)}mm — in spec`:`${v.toFixed(2)}" — OUT OF RANGE (0.45"–0.55")`;
+  setValDot(key,ok?'ok':'warn',txt);
+}
+function checkValCom(){
+  const mmEl=document.querySelector('[data-val="asm-com-mm"]');
+  const v=mmEl?parseFloat(mmEl.value)||null:null;
+  if(v===null){setValDot('asm-com','','Awaiting input');return;}
+  const ok=v<=1.0;
+  setValDot('asm-com',ok?'ok':'warn',ok?`${v.toFixed(2)}mm offset — balanced`:`${v.toFixed(2)}mm — above 1.0mm target, may cause wobble`);
+}
+
+/* -------- IMAGE UPLOAD -------- */
+function handleUpload(input,zone,min){
+  if(!imgStore[zone])imgStore[zone]=[];
+  Array.from(input.files).forEach(file=>{const r=new FileReader();r.onload=ev=>{imgStore[zone].push({src:ev.target.result,caption:''});renderImgs(zone);updateImgCount(zone,min);updateScoreAndDots();saveToStorage();};r.readAsDataURL(file);});
+  input.value='';
+}
+function renderImgs(zone){
+  const c=document.getElementById(zone);if(!c)return;c.innerHTML='';
+  (imgStore[zone]||[]).forEach((img,i)=>{
+    const item=document.createElement('div');item.className='image-item';
+    const imgEl=document.createElement('img');imgEl.src=img.src;imgEl.addEventListener('click',()=>openLightbox(img.src));
+    const cap=document.createElement('input');cap.type='text';cap.className='img-caption';cap.placeholder='Caption...';cap.value=img.caption||'';cap.addEventListener('input',()=>{imgStore[zone][i].caption=cap.value;saveToStorage();});
+    const rm=document.createElement('button');rm.className='img-remove no-print';rm.textContent='x';rm.addEventListener('click',()=>{imgStore[zone].splice(i,1);renderImgs(zone);updateImgCount(zone,0);updateScoreAndDots();saveToStorage();});
+    item.appendChild(imgEl);item.appendChild(cap);item.appendChild(rm);c.appendChild(item);
+  });
+}
+function updateImgCount(zone,min){
+  const count=(imgStore[zone]||[]).length;const el=document.getElementById(zone+'-count');if(!el)return;
+  el.textContent=count+' image'+(count!==1?'s':'')+(min?' (min '+min+')':'');
+  el.style.color=count===0?'var(--amber)':count<min?'var(--gold)':'var(--green)';
+}
+function openLightbox(src){document.getElementById('lightbox-img').src=src;document.getElementById('lightbox').style.display='flex';}
+function closeLightbox(){document.getElementById('lightbox').style.display='none';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLightbox();});
+
+/* -------- SCORE & DOTS -------- */
+function moduleComplete(n){
+  switch(n){
+    case 1:{
+      const sel=document.querySelector('input[name="plan-status"]:checked');if(!sel)return false;
+      if(sel.value==='unchanged')return sentOk('continuity-confirm',1);
+      return document.querySelectorAll('#dev-body tr').length>0;
+    }
+    case 2:{
+      const comps=getCompData();if(comps.length<2)return false;
+      const allFilled=comps.every(c=>c.name&&c.mat&&c.mat!=='Select...'&&c.proc&&c.proc!=='Select...'&&c.iface&&c.iface!=='Select...');
+      const totalG=comps.reduce((s,c)=>s+(parseFloat(c.massG)||0),0);
+      const procs=new Set(comps.map(c=>c.proc).filter(p=>p&&p!=='Select...')).size;
+      const fast=parseInt(getFieldVal('fastener-count'))||0;
+      const hwOk=comps.filter(c=>c.mat==='Hardware / COTS').every(c=>c.supplier&&c.hwDl);
+      const boltOk=document.querySelectorAll('#bolt-body tr').length>0;
+      return allFilled&&totalG<=MASS_LIMIT_G&&totalG>0&&procs>=3&&fast>=3&&hwOk&&boltOk;
+    }
+    case 3:{
+      const hexOk=getTolIn('hexbore')!==null&&getTolIn('hexbore')>=0.508&&getTolIn('hexbore')<=0.524;
+      const pfOk=document.getElementById('na-pressfit')?.checked||sentOk('pressfit-detail',1);
+      const wallOk=document.getElementById('na-wall')?.checked||(getTolIn('wall')!==null&&getTolIn('wall')>=0.047);
+      const featOk=document.getElementById('na-feat')?.checked||(getTolIn('feat')!==null&&getTolIn('feat')>=0.047);
+      const metalOk=document.getElementById('na-metal')?.checked||(getTolIn('metal')!==null);
+      const shaftOk=getTolIn('shaft-plan-in')!==null&&getTolIn('shaft-actual-in')!==null;
+      const hexextOk=getTolIn('hexext')!==null&&getTolIn('hexext')>=0.45&&getTolIn('hexext')<=0.55;
+      return hexOk&&pfOk&&wallOk&&featOk&&metalOk&&shaftOk&&hexextOk;
+    }
+    case 4:{
+      const massOk=(parseFloat(document.querySelector('[data-val="asm-mass-g"]')?.value)||0)>0;
+      const htOk=(parseFloat(document.querySelector('[data-val="asm-height-in"]')?.value)||0)>0;
+      const odOk=(parseFloat(document.querySelector('[data-val="asm-od-in"]')?.value)||0)>0;
+      const hexextOk=(parseFloat(document.querySelector('[data-val="asm-hexext-in"]')?.value)||0)>0;
+      const comOk=(parseFloat(document.querySelector('[data-val="asm-com-mm"]')?.value)||null)!==null;
+      const intOk=document.querySelector('input[name="interference"]:checked')!==null;
+      const ssOk=['ss-mass','ss-iso','ss-top','ss-side'].every(z=>(imgStore[z]||[]).length>=1);
+      return massOk&&htOk&&odOk&&hexextOk&&comOk&&intOk&&ssOk;
+    }
+    case 5:{
+      if(!isApproved)return false;
+      const sel=document.querySelector('input[name="dev-status"]:checked');if(!sel)return false;
+      if(sel.value==='match')return true;
+      return document.querySelectorAll('#dev-log-body tr').length>0;
+    }
+  }
+  return false;
+}
+
+function updateScoreAndDots(){
+  let score=0;
+  // M1 (5)
+  const planSel=document.querySelector('input[name="plan-status"]:checked');
+  if(planSel){if(planSel.value==='unchanged'&&sentOk('continuity-confirm',1))score+=5;else if(planSel.value==='deviations'&&document.querySelectorAll('#dev-body tr').length>0)score+=5;else score+=2;}
+  // M2 (25)
+  const comps=getCompData();let totalG=0;
+  if(comps.length>0){
+    const procs=new Set(comps.map(c=>c.proc).filter(p=>p&&p!=='Select...')).size;
+    totalG=comps.reduce((s,c)=>s+(parseFloat(c.massG)||0),0);
+    const named=comps.filter(c=>c.name&&c.mat&&c.mat!=='Select...'&&c.massG).length;
+    score+=Math.round(10*named/comps.length);
+    if(totalG>0&&totalG<=MASS_LIMIT_G)score+=2;
+    if(procs>=3)score+=2;const fast=parseInt(getFieldVal('fastener-count'))||0;if(fast>=3)score+=1;
+    const hwComps=comps.filter(c=>c.mat==='Hardware / COTS');
+    if(hwComps.length===0)score+=5;else{const hwOk=hwComps.filter(c=>c.supplier&&c.hwDl).length;score+=Math.round(5*hwOk/hwComps.length);}
+    if(document.querySelectorAll('#bolt-body tr').length>0)score+=5;
+  }
+  // M3 (20)
+  const hexV=getTolIn('hexbore');if(hexV!==null&&hexV>=0.508&&hexV<=0.524)score+=4;else if(hexV!==null)score+=2;
+  const pfNA=document.getElementById('na-pressfit')?.checked;if(pfNA)score+=3;else if(sentOk('pressfit-detail',1))score+=3;
+  const wallNA=document.getElementById('na-wall')?.checked;if(wallNA)score+=2;else if(getTolIn('wall')!==null&&getTolIn('wall')>=0.047)score+=2;
+  const featNA=document.getElementById('na-feat')?.checked;if(featNA)score+=2;else if(getTolIn('feat')!==null&&getTolIn('feat')>=0.047)score+=2;
+  const metalNA=document.getElementById('na-metal')?.checked;if(metalNA)score+=3;else if(getTolIn('metal')!==null)score+=3;
+  const sp=getTolIn('shaft-plan-in'),sa=getTolIn('shaft-actual-in');if(sp!==null&&sa!==null)score+=3;
+  const hexextV=getTolIn('hexext');if(hexextV!==null&&hexextV>=0.45&&hexextV<=0.55)score+=3;else if(hexextV!==null)score+=1;
+  // M4 (15)
+  const asmG=parseFloat(document.querySelector('[data-val="asm-mass-g"]')?.value)||0;
+  const asmH=parseFloat(document.querySelector('[data-val="asm-height-in"]')?.value)||0;
+  const asmOD=parseFloat(document.querySelector('[data-val="asm-od-in"]')?.value)||0;
+  const asmHE=parseFloat(document.querySelector('[data-val="asm-hexext-in"]')?.value)||0;
+  const asmCom=document.querySelector('[data-val="asm-com-mm"]')?.value;
+  if(asmG>0&&asmG<=MASS_LIMIT_G)score+=2;else if(asmG>0)score+=1;
+  if(asmH>=2.9&&asmH<=3.1)score+=2;else if(asmH>0)score+=1;
+  if(asmOD>0&&asmOD<=5.0)score+=1;else if(asmOD>5.0)score+=0;
+  if(asmHE>=0.45&&asmHE<=0.55)score+=1;
+  if(asmCom!==undefined&&asmCom!=='')score+=3;
+  if(document.querySelector('input[name="interference"]:checked'))score+=3;
+  const ssZones=['ss-mass','ss-iso','ss-top','ss-side'];
+  const ssCount=ssZones.filter(z=>(imgStore[z]||[]).length>=1).length;
+  score+=Math.round(3*ssCount/4);
+  // M5 (5)
+  if(isApproved){const devSel=document.querySelector('input[name="dev-status"]:checked');if(devSel){if(devSel.value==='match')score+=5;else if(document.querySelectorAll('#dev-log-body tr').length>0)score+=5;}}
+  score=Math.min(Math.max(score,0),TOTAL_PTS);
+  for(let i=1;i<=5;i++){const dot=document.getElementById('dot-0'+i);if(dot)dot.classList.toggle('complete',moduleComplete(i));}
+  const tb=document.getElementById('tb-score');if(tb)tb.textContent=score+' / '+TOTAL_PTS+' pts';
+}
+
+/* -------- SAVE STATUS -------- */
+let saveTimer=null;
+function flashSave(){const el=document.getElementById('tb-save-status');el.textContent='Saved';el.classList.add('flash');clearTimeout(saveTimer);saveTimer=setTimeout(()=>{el.textContent='Auto-save on';el.classList.remove('flash');},2000);}
+
+/* -------- SAVE & LOAD -------- */
+function getTolData(){
+  const keys=['hexbore-in','hexbore-mm','wall-in','wall-mm','feat-in','feat-mm','metal-in','metal-mm','metal-type','hexext-in','hexext-mm','shaft-plan-in','shaft-plan-mm','shaft-actual-in','shaft-actual-mm'];
+  const d={};keys.forEach(k=>{const el=document.querySelector(`[data-tol="${k}"]`);if(el)d[k]=el.type==='checkbox'?el.checked:el.value;});
+  const naKeys=['pressfit-na','wall-na','feat-na','metal-na'];
+  naKeys.forEach(k=>{const el=document.querySelector(`[data-tol="${k}"]`);if(el)d[k]=el.checked;});
+  return d;
+}
+function getValData(){
+  const keys=['asm-mass-g','asm-mass-lbs','asm-height-in','asm-height-mm','asm-od-in','asm-od-mm','asm-hexext-in','asm-hexext-mm','asm-com-mm','asm-com-in'];
+  const d={};keys.forEach(k=>{const el=document.querySelector(`[data-val="${k}"]`);if(el)d[k]=el.value;});
+  return d;
+}
+function collectData(){
+  const data={_version:BUILD_VERSION};
+  document.querySelectorAll('[data-field]').forEach(el=>{
+    if(el.type==='radio'){if(el.checked)data[el.dataset.field]=el.value;}
+    else if(el.type==='checkbox')data[el.dataset.field]=el.checked;
+    else data[el.dataset.field]=el.value;
+  });
+  data._comps=getCompData();data._bolts=getBoltData();data._devRows=getDevRows();data._devLogRows=getDevLogRows();
+  data._tol=getTolData();data._val=getValData();data._imgs=imgStore;
+  data._approved=isApproved;data._approvalTimestamp=document.getElementById('approval-timestamp')?.textContent||'';
+  return data;
+}
+function saveToStorage(){const d=collectData();try{localStorage.setItem(STORAGE_KEY,JSON.stringify(d));flashSave();}catch(e){document.getElementById('tb-save-status').textContent='Storage full — use Download';}}
+function loadData(data){
+  if(!data)return;
+  if(data._version&&data._version!==BUILD_VERSION){const w=document.getElementById('version-warning');w.style.display='block';w.textContent='Warning: data from '+data._version+'. Current build is '+BUILD_VERSION+'.';}
+  Object.entries(data).forEach(([key,val])=>{
+    if(key.startsWith('_'))return;
+    document.querySelectorAll(`[data-field="${key}"]`).forEach(el=>{
+      if(el.type==='radio')el.checked=(el.value===val);
+      else if(el.type==='checkbox')el.checked=!!val;
+      else{el.value=val;if(el.tagName==='TEXTAREA')requestAnimationFrame(()=>autoResize(el));updateMirror(key,val);updateCounter(key,val);}
+    });
+  });
+  if(data._comps)loadComps(data._comps);else loadComps([]);
+  if(data._bolts)loadBoltData(data._bolts);
+  if(data._devRows)loadDevRows(data._devRows);
+  if(data._devLogRows)loadDevLogRows(data._devLogRows);
+  if(data._tol){Object.entries(data._tol).forEach(([k,v])=>{const el=document.querySelector(`[data-tol="${k}"]`);if(el){if(el.type==='checkbox')el.checked=!!v;else el.value=v;}});}
+  if(data._val){Object.entries(data._val).forEach(([k,v])=>{const el=document.querySelector(`[data-val="${k}"]`);if(el)el.value=v;});}
+  if(data._imgs){imgStore=data._imgs;Object.keys(imgStore).forEach(z=>renderImgs(z));['comp-imgs','ss-mass','ss-iso','ss-top','ss-side'].forEach(z=>updateImgCount(z,z==='comp-imgs'?1:1));}
+  if(data._approved)setApproved(true,data._approvalTimestamp);
+  updateCollabState();updateContinuityState();updateDevState();checkInterference();updateStats();
+  // Re-run all tolerance/val checks
+  checkTol('hexbore',0.508,0.524);checkTol('wall',0.047,null);checkTol('feat',0.047,null);checkTolMetal();checkShaftMatch();checkTol('hexext',0.45,0.55);
+  checkVal('asm-mass',0,907);checkVal('asm-height',2.90,3.10);checkVal('asm-od',0,5.0);checkVal('asm-hexext',0.45,0.55);checkValCom();checkInterference();
+  const pfNA=document.getElementById('na-pressfit')?.checked;if(pfNA)handleTolNA('pressfit');
+  const wallNA=document.getElementById('na-wall')?.checked;if(wallNA)handleTolNA('wall');
+  const featNA=document.getElementById('na-feat')?.checked;if(featNA)handleTolNA('feat');
+  const metalNA=document.getElementById('na-metal')?.checked;if(metalNA)handleTolNA('metal');
+  updateScoreAndDots();
+}
+function loadFromStorage(){
+  const scriptTag=document.getElementById('__ib_data__');
+  if(scriptTag&&scriptTag.type==='application/json'){try{loadData(JSON.parse(scriptTag.textContent));return;}catch(e){console.error(e);}}
+  try{const raw=localStorage.getItem(STORAGE_KEY);if(raw)loadData(JSON.parse(raw));else loadComps([]);}catch(e){loadComps([]);}
+}
+
+/* -------- DOWNLOAD -------- */
+function downloadHTML(){
+  saveToStorage();
+  const data=collectData();
+  const clone=document.documentElement.cloneNode(true);
+  clone.querySelectorAll('input[type="text"],input[type="number"],input[type="password"],textarea,select').forEach(el=>{if(el.tagName==='TEXTAREA')el.textContent='';else el.removeAttribute('value');if(el.tagName==='SELECT')el.querySelectorAll('option').forEach(o=>o.removeAttribute('selected'));});
+  clone.querySelectorAll('input[type="radio"],input[type="checkbox"]').forEach(el=>el.removeAttribute('checked'));
+  clone.querySelector('#comp-body').innerHTML='';clone.querySelector('#bolt-body').innerHTML='';clone.querySelector('#dev-body').innerHTML='';clone.querySelector('#dev-log-body').innerHTML='';
+  clone.querySelectorAll('#__ib_data__').forEach(el=>el.remove());
+  const sc=document.createElement('script');sc.id='__ib_data__';sc.type='application/json';sc.textContent=JSON.stringify(data);clone.querySelector('head').appendChild(sc);
+  const html='<!DOCTYPE html>\n'+clone.outerHTML;
+  const blob=new Blob([html],{type:'text/html'});const url=URL.createObjectURL(blob);const a=document.createElement('a');
+  const name=(document.querySelector('[data-field="student-name"]')?.value||'Student').trim().replace(/\s+/g,'_')||'Student';
+  a.href=url;a.download='IDEABLADE_A03_'+name+'.html';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+
+/* -------- CLEAR & RESTORE -------- */
+function showClearDialog(){document.getElementById('clear-dialog').classList.add('active');}
+function hideClearDialog(){document.getElementById('clear-dialog').classList.remove('active');}
+function showRestoreDialog(){document.getElementById('restore-dialog').classList.add('active');}
+function hideRestoreDialog(){document.getElementById('restore-dialog').classList.remove('active');}
+function confirmClear(){
+  hideClearDialog();localStorage.removeItem(STORAGE_KEY);
+  document.querySelectorAll('[data-field]').forEach(el=>{if(el.type==='radio'||el.type==='checkbox')el.checked=false;else el.value='';});
+  document.querySelectorAll('[data-mirror]').forEach(el=>el.textContent='');
+  document.querySelectorAll('textarea[data-field]').forEach(ta=>ta.style.height='');
+  document.querySelectorAll('.sent-count').forEach(sc=>{sc.querySelector('.current').textContent='0';sc.classList.remove('met','unmet','active');});
+  document.querySelectorAll('[data-tol]').forEach(el=>{if(el.type==='checkbox')el.checked=false;else el.value='';});
+  document.querySelectorAll('[data-val]').forEach(el=>el.value='');
+  imgStore={'comp-imgs':[],'ss-mass':[],'ss-iso':[],'ss-top':[],'ss-side':[]};
+  Object.keys(imgStore).forEach(z=>{const c=document.getElementById(z);if(c)c.innerHTML='';updateImgCount(z,0);});
+  loadComps([]);loadBoltData([]);loadDevRows([]);loadDevLogRows([]);
+  setApproved(false,'');isApproved=false;
+  document.getElementById('approval-pwd').value='';
+  updateCollabState();updateContinuityState();updateDevState();updateStats();updateScoreAndDots();
+  autoFillDate();
+}
+function confirmRestore(){hideRestoreDialog();localStorage.removeItem(STORAGE_KEY);setTimeout(()=>location.reload(),50);}
+
+/* -------- PREFLIGHT -------- */
+function runPreflight(){
+  const issues=[];
+  if(!notEmpty('student-name'))issues.push('Header: Student name is empty');
+  if(!document.querySelector('input[name="plan-status"]:checked'))issues.push('Module 01: Plan status not selected');
+  const comps=getCompData();
+  if(comps.length===0)issues.push('Module 02: No components documented');
+  else{comps.forEach((c,i)=>{if(!c.name)issues.push(`Module 02: Component ${i+1} — missing name`);if(!c.massG)issues.push(`Module 02: Component ${i+1} (${c.name||'?'}) — missing mass value`);});
+  const procs=new Set(comps.map(c=>c.proc).filter(p=>p&&p!=='Select...')).size;if(procs<3)issues.push('Module 02: Fewer than 3 distinct manufacturing processes documented ('+procs+' found)');
+  const fast=parseInt(getFieldVal('fastener-count'))||0;if(fast<3)issues.push('Module 02: Fastener count is below 3 ('+fast+' entered)');
+  if(document.querySelectorAll('#bolt-body tr').length===0)issues.push('Module 02: Bolt clearance table is empty');
+  const totalG=comps.reduce((s,c)=>s+(parseFloat(c.massG)||0),0);if(totalG>MASS_LIMIT_G)issues.push(`Module 02: Total mass ${totalG.toFixed(1)}g exceeds 907g limit`);}
+  if((imgStore['comp-imgs']||[]).length<1)issues.push('Module 02: No component screenshots uploaded');
+  const hexV=getTolIn('hexbore');if(hexV===null)issues.push('Module 03: Hex bore check — no value entered');
+  const hexextV=getTolIn('hexext');if(hexextV===null)issues.push('Module 03: Hex extension check — no value entered');
+  const sp=getTolIn('shaft-plan-in'),sa=getTolIn('shaft-actual-in');if(!sp||!sa)issues.push('Module 03: Shaft engagement confirmation — values missing');
+  const ssZones=['ss-mass','ss-iso','ss-top','ss-side'];const ssNames=['mass properties','isometric view','top view','side view'];
+  ssZones.forEach((z,i)=>{if((imgStore[z]||[]).length<1)issues.push(`Module 04: Missing required screenshot — ${ssNames[i]}`);});
+  if(!document.querySelector('input[name="interference"]:checked'))issues.push('Module 04: Interference detection result not selected');
+  if(!isApproved)issues.push('Instructor approval required before submission');
+  if(!document.querySelector('[data-field="declaration"]')?.checked)issues.push('Academic integrity declaration not checked');
+  return issues;
+}
+function printWithPreflight(){
+  const issues=runPreflight();if(issues.length===0){window.print();return;}
+  const list=document.getElementById('preflight-list');list.innerHTML='';
+  issues.forEach(i=>{const div=document.createElement('div');div.className='preflight-issue';div.textContent=i;list.appendChild(div);});
+  document.getElementById('preflight-dialog').classList.add('active');
+}
+function hidePreflight(){document.getElementById('preflight-dialog').classList.remove('active');}
+function proceedPrint(){hidePreflight();window.print();}
+
+/* -------- ANIMATIONS -------- */
+function initAnimations(){
+  if(window.matchMedia('(prefers-reduced-motion:reduce)').matches){document.querySelectorAll('.module').forEach(m=>m.classList.add('visible'));return;}
+  const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:.08});
+  document.querySelectorAll('.module').forEach(m=>obs.observe(m));
+}
+
+/* -------- DATE -------- */
+function autoFillDate(){const el=document.querySelector('[data-field="student-date"]');if(!el||el.value.trim()!=='')return;const now=new Date();el.value=String(now.getMonth()+1).padStart(2,'0')+' / '+String(now.getDate()).padStart(2,'0')+' / '+now.getFullYear();updateMirror('student-date',el.value);}
+
+/* -------- INIT -------- */
+document.addEventListener('DOMContentLoaded',()=>{
+  document.querySelectorAll('textarea[data-field]').forEach(ta=>{ta.addEventListener('input',()=>{autoResize(ta);updateMirror(ta.dataset.field,ta.value);updateCounter(ta.dataset.field,ta.value);updateScoreAndDots();saveToStorage();});});
+  document.querySelectorAll('input[type="text"][data-field],input[type="number"][data-field],select[data-field]').forEach(inp=>{inp.addEventListener('input',()=>{updateMirror(inp.dataset.field,inp.value);updateScoreAndDots();saveToStorage();});});
+  document.querySelectorAll('input[name="collab"]').forEach(r=>r.addEventListener('change',()=>{updateCollabState();saveToStorage();}));
+  document.querySelectorAll('input[name="plan-status"]').forEach(r=>r.addEventListener('change',()=>{updateContinuityState();updateScoreAndDots();saveToStorage();}));
+  document.querySelectorAll('input[name="interference"]').forEach(r=>r.addEventListener('change',()=>{checkInterference();updateScoreAndDots();saveToStorage();}));
+  document.querySelectorAll('input[type="checkbox"][data-field]').forEach(r=>r.addEventListener('change',()=>{updateScoreAndDots();saveToStorage();}));
+  document.getElementById('approval-pwd')?.addEventListener('keydown',e=>{if(e.key==='Enter')checkApproval();});
+  loadFromStorage();autoFillDate();
+  setInterval(saveToStorage,30000);
+  window.addEventListener('resize',resizeAll);
+  document.fonts.ready.then(()=>{resizeAll();});
+  requestAnimationFrame(()=>resizeAll());
+  initAnimations();
+});
+</script>
+</body>
+</html>
