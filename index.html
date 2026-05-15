@@ -197,6 +197,7 @@ nav a:hover { color: var(--green); text-shadow: var(--glow-green); }
   padding: 1.1rem 1.5rem;
   border-bottom: 1px solid rgba(0,255,65,0.1);
   background: var(--bg2);
+  cursor: pointer;
 }
 .course-header-left { display: flex; flex-direction: column; gap: 0.3rem; }
 .course-id {
@@ -213,7 +214,8 @@ nav a:hover { color: var(--green); text-shadow: var(--glow-green); }
 .badge-grade { color: var(--gold); border: 1px solid rgba(200,255,0,0.3); background: rgba(200,255,0,0.05); }
 .badge-block { color: var(--cyan); border: 1px solid rgba(0,240,255,0.3); background: rgba(0,240,255,0.05); }
 
-.assignment-list { padding: 0.5rem 0; }
+.assignment-list { padding: 0.5rem 0; max-height: 800px; overflow: hidden; transition: max-height 0.35s ease, opacity 0.35s ease; }
+.course-card.collapsed .assignment-list { max-height: 0; opacity: 0; }
 .assignment-item {
   display: flex; align-items: center; justify-content: space-between;
   flex-wrap: wrap; gap: 0.5rem;
@@ -362,6 +364,12 @@ body::after {
   .dot-live { animation: none; }
   * { transition-duration: 0.01ms !important; }
 }
+.assignment-pts { font-size: 0.62rem; color: var(--amber); letter-spacing: 0.06em; }
+.course-collapse-arrow { font-family: 'Orbitron', sans-serif; font-size: 0.7rem; color: var(--dim); transition: transform 0.3s; flex-shrink: 0; }
+.course-card.collapsed .course-collapse-arrow { transform: rotate(180deg); }
+.badge-instructor { color: var(--ice); border: 1px solid rgba(136,221,255,0.3); background: rgba(136,221,255,0.05); }
+#materials-fab { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 500; background: var(--bg1); border: 1px solid rgba(200,255,0,0.35); color: var(--gold); font-family: 'Orbitron', sans-serif; font-size: 0.58rem; padding: 0.5rem 0.9rem; border-radius: 999px; cursor: pointer; box-shadow: 0 0 10px rgba(200,255,0,0.15); letter-spacing: 0.06em; }
+#materials-drawer { position: fixed; bottom: 4rem; right: 1.5rem; width: min(320px, calc(100vw - 3rem)); z-index: 499; background: var(--bg1); border: 1px solid rgba(200,255,0,0.25); border-radius: 4px; padding: 1.2rem; display: none; }
 </style>
 </head>
 <body>
@@ -375,6 +383,7 @@ body::after {
     <nav>
       <a href="#idea-113">IDEA-113</a>
       <a href="#idea-208">IDEA-208</a>
+      <a href="#idea-303">IDEA-303</a>
       <a href="#idea-403">IDEA-403</a>
     </nav>
     <div class="header-year">2025 - 2026</div>
@@ -387,7 +396,7 @@ body::after {
   <p class="hero-sub">Assignment portal for the IDEA pathway. Click an assignment to open it, complete your work, export a PDF, and submit to Google Classroom.</p>
   <div class="hero-meta">
     <div class="hero-stat">
-      <span class="value">3</span>
+      <span class="value">4</span>
       <span class="label">Active Courses</span>
     </div>
     <div class="hero-stat">
@@ -452,7 +461,7 @@ body::after {
           <span class="assignment-status" style="color:var(--cyan)">Resource</span>
         </div>
       </div>
-      <div class="assignment-item linked" data-posted="2026-05-14" data-due="2026-05-19" data-url="idea113-blade-03.html">
+      <div class="assignment-item linked" data-posted="2026-05-14" data-due="2026-05-19" data-url="idea113-blade-03.html" data-points="80">
         <div class="assignment-left">
           <div class="assignment-dot"></div>
           <div class="assignment-name">IDEA-Blade - Assignment 03: CAD Design Package</div>
@@ -463,7 +472,7 @@ body::after {
           <span class="assignment-status"></span>
         </div>
       </div>
-      <div class="assignment-item linked" data-posted="2026-05-12" data-due="2026-05-13" data-url="idea113-blade-02.html">
+      <div class="assignment-item linked" data-posted="2026-05-12" data-due="2026-05-13" data-url="idea113-blade-02.html" data-points="63">
         <div class="assignment-left">
           <div class="assignment-dot"></div>
           <div class="assignment-name">IDEA-Blade - Assignment 02: Build Strategy</div>
@@ -474,7 +483,7 @@ body::after {
           <span class="assignment-status"></span>
         </div>
       </div>
-      <div class="assignment-item linked" data-posted="2026-05-09" data-due="2026-05-12" data-url="idea113-blade-01.html">
+      <div class="assignment-item linked" data-posted="2026-05-09" data-due="2026-05-12" data-url="idea113-blade-01.html" data-points="50">
         <div class="assignment-left">
           <div class="assignment-dot"></div>
           <div class="assignment-name">IDEA-Blade - Assignment 01: Concept Package</div>
@@ -500,7 +509,7 @@ body::after {
       </div>
     </div>
     <div class="assignment-list">
-      <div class="assignment-item linked" data-posted="2026-05-11" data-due="2026-05-13" data-url="MSET-Mold-01.html">
+      <div class="assignment-item linked" data-posted="2026-05-11" data-due="2026-05-13" data-url="MSET-Mold-01.html" data-points="50">
         <div class="assignment-left">
           <div class="assignment-dot"></div>
           <div class="assignment-name">MSET-Mold - Assignment 01: Part Concept &amp; Model</div>
@@ -509,6 +518,29 @@ body::after {
           <span class="assignment-due">Due: May 13, 2026</span>
           <span class="assignment-code">idea208-mold-01</span>
           <span class="assignment-status"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="course-card" id="idea-303">
+    <div class="course-header">
+      <div class="course-header-left">
+        <div class="course-id">IDEA-303</div>
+        <div class="course-updated">Under Construction</div>
+      </div>
+      <div class="course-meta">
+        <span class="course-badge badge-grade">Junior</span>
+        <span class="course-badge badge-block">Block 3</span>
+        <span class="course-badge badge-instructor">Mr. C</span>
+      </div>
+    </div>
+    <div class="assignment-list">
+      <div class="empty-state" style="border-color:rgba(255,140,0,0.25)">
+        <div class="empty-icon" style="color:var(--amber)">[ ]</div>
+        <div class="empty-text">
+          <strong style="color:var(--amber)">This course is under construction.</strong><br>
+          Assignments will appear here when posted.
         </div>
       </div>
     </div>
@@ -526,7 +558,7 @@ body::after {
       </div>
     </div>
     <div class="assignment-list">
-      <div class="assignment-item linked" data-posted="2026-05-01" data-due="2026-05-08" data-url="idea403-senior-progress.html">
+      <div class="assignment-item linked" data-posted="2026-05-01" data-due="2026-05-08" data-url="idea403-senior-progress.html" data-points="50">
         <div class="assignment-left">
           <div class="assignment-dot"></div>
           <div class="assignment-name">Senior Project - Progress Check</div>
@@ -555,6 +587,10 @@ body::after {
   <div class="changelog-body" id="changelog-body">
     <div class="changelog-entry">
       <span class="changelog-date">May 14, 2026</span>
+      <span class="changelog-note">Portal updated. Collapsible course cards. Point totals on assignments. IDEA-303 added (Mr. C). Shared Materials drawer added. NEW badge and status logic refined.</span>
+    </div>
+    <div class="changelog-entry">
+      <span class="changelog-date">May 14, 2026</span>
       <span class="changelog-note">IDEA-113 updated. Added IDEA-Blade Assignment 03: CAD Design Package.</span>
     </div>
     <div class="changelog-entry">
@@ -581,6 +617,28 @@ body::after {
   <div class="footer-sub">Don Bosco Technical Institute &bull; Rosemead, CA &bull; mrpina-dev.github.io/IDEA</div>
 </footer>
 
+<button id="materials-fab">MATERIALS &#9652;</button>
+<div id="materials-drawer">
+  <div style="font-family:'Orbitron',sans-serif;font-size:0.58rem;color:var(--gold);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:0.35rem">SHARED MATERIALS</div>
+  <div style="font-size:0.65rem;color:var(--dim);margin-bottom:0.5rem">Resources available to all IDEA sections.</div>
+  <hr style="border:none;border-top:1px solid rgba(200,255,0,0.1);margin:0.75rem 0">
+  <div style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem 0;border-bottom:1px solid rgba(74,122,82,0.1)">
+    <div style="width:6px;height:6px;border-radius:50%;background:var(--dim);flex-shrink:0"></div>
+    <div>
+      <div style="color:var(--white);font-size:0.75rem">IDEA Coin Database</div>
+      <div style="color:var(--amber);font-size:0.55rem;font-family:'Orbitron',sans-serif;text-transform:uppercase;letter-spacing:0.06em">COMING SOON</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem 0;border-bottom:1px solid rgba(74,122,82,0.1)">
+    <div style="width:6px;height:6px;border-radius:50%;background:var(--dim);flex-shrink:0"></div>
+    <div>
+      <div style="color:var(--white);font-size:0.75rem">Class Materials List</div>
+      <div style="color:var(--amber);font-size:0.55rem;font-family:'Orbitron',sans-serif;text-transform:uppercase;letter-spacing:0.06em">COMING SOON</div>
+    </div>
+  </div>
+  <div style="font-size:0.6rem;color:var(--dim);margin-top:0.75rem">More resources will be added here.</div>
+</div>
+
 <script>
 // Scroll progress
 const scrollBar = document.getElementById('scroll-bar');
@@ -598,17 +656,51 @@ document.querySelectorAll('.course-card').forEach((el, i) => {
   observer.observe(el);
 });
 
-// Dynamic statuses and NEW badges
+// Weekday counter: counts Mon-Fri days from 'from' (inclusive) up to 'to' (exclusive)
+function countWeekdays(from, to) {
+  let count = 0;
+  const d = new Date(from);
+  while (d < to) {
+    const day = d.getDay();
+    if (day !== 0 && day !== 6) count++;
+    d.setDate(d.getDate() + 1);
+  }
+  return count;
+}
+
+// Dynamic statuses, NEW badges, and point totals
 const now = new Date();
 const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
 document.querySelectorAll('.assignment-item').forEach(item => {
-  // Handle NEW badge
+  const dot = item.querySelector('.assignment-dot');
+  const statusLabel = item.querySelector('.assignment-status');
+  const dueLabel = item.querySelector('.assignment-due');
+  const right = item.querySelector('.assignment-right');
+
+  // Determine past-due state first (needed to gate NEW badge)
+  let isPastDue = false;
+  if (item.dataset.due) {
+    const [y, m, d] = item.dataset.due.split('-');
+    const dueDate = new Date(y, m - 1, d);
+    if (today > dueDate) {
+      isPastDue = true;
+      if (dot) dot.className = 'assignment-dot dot-soon';
+      if (statusLabel) { statusLabel.className = 'assignment-status status-soon'; statusLabel.textContent = 'Past Due'; }
+      if (dueLabel) dueLabel.classList.add('past');
+    } else {
+      if (dot) dot.className = 'assignment-dot dot-live';
+      if (statusLabel) { statusLabel.className = 'assignment-status status-live'; statusLabel.textContent = 'Live'; }
+      if (dueLabel) dueLabel.classList.remove('past');
+    }
+  }
+
+  // NEW badge: only if posted within last 3 weekdays AND not past due
   if (item.dataset.posted) {
     const [y, m, d] = item.dataset.posted.split('-');
     const postedDate = new Date(y, m - 1, d);
-    const diffDays = (today - postedDate) / (1000 * 60 * 60 * 24);
-    if (diffDays <= 7 && diffDays >= 0) {
+    const weekdaysSince = countWeekdays(postedDate, today);
+    if (weekdaysSince <= 3 && !isPastDue) {
       const badge = document.createElement('span');
       badge.className = 'badge-new';
       badge.textContent = 'New';
@@ -616,31 +708,12 @@ document.querySelectorAll('.assignment-item').forEach(item => {
     }
   }
 
-  // Handle Dynamic Status
-  if (item.dataset.due) {
-    const [y, m, d] = item.dataset.due.split('-');
-    const dueDate = new Date(y, m - 1, d);
-    const dot = item.querySelector('.assignment-dot');
-    const statusLabel = item.querySelector('.assignment-status');
-    const dueLabel = item.querySelector('.assignment-due');
-
-    if (today > dueDate) {
-      // Past due
-      if (dot) dot.className = 'assignment-dot dot-soon';
-      if (statusLabel) {
-        statusLabel.className = 'assignment-status status-soon';
-        statusLabel.textContent = 'Past Due';
-      }
-      if (dueLabel) dueLabel.classList.add('past');
-    } else {
-      // Live
-      if (dot) dot.className = 'assignment-dot dot-live';
-      if (statusLabel) {
-        statusLabel.className = 'assignment-status status-live';
-        statusLabel.textContent = 'Live';
-      }
-      if (dueLabel) dueLabel.classList.remove('past');
-    }
+  // Point totals
+  if (item.dataset.points && right && statusLabel) {
+    const pts = document.createElement('span');
+    pts.className = 'assignment-pts';
+    pts.textContent = item.dataset.points + ' pts';
+    right.insertBefore(pts, statusLabel);
   }
 });
 
@@ -657,6 +730,33 @@ const body = document.getElementById('changelog-body');
 btn.addEventListener('click', () => {
   btn.classList.toggle('open');
   body.classList.toggle('open');
+});
+
+// Collapsible course cards — inject arrow and wire click
+document.querySelectorAll('.course-header').forEach(header => {
+  const arrow = document.createElement('span');
+  arrow.className = 'course-collapse-arrow';
+  arrow.textContent = '▾';
+  header.appendChild(arrow);
+  header.addEventListener('click', () => {
+    header.closest('.course-card').classList.toggle('collapsed');
+  });
+});
+
+// Materials FAB + drawer
+const fab = document.getElementById('materials-fab');
+const drawer = document.getElementById('materials-drawer');
+fab.addEventListener('click', e => {
+  e.stopPropagation();
+  const open = drawer.style.display === 'block';
+  drawer.style.display = open ? 'none' : 'block';
+  fab.innerHTML = open ? 'MATERIALS &#9652;' : 'MATERIALS &#9662;';
+});
+document.addEventListener('click', e => {
+  if (drawer.style.display === 'block' && !drawer.contains(e.target) && e.target !== fab) {
+    drawer.style.display = 'none';
+    fab.innerHTML = 'MATERIALS &#9652;';
+  }
 });
 
 // Canvas particles
