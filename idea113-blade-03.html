@@ -532,6 +532,8 @@ tr.drag-over{border-top:2px solid var(--green)!important;background-color:rgba(0
   .instructor-table .score-cell{min-width:60px}
   .prework-callout{display:block!important}
 }
+.drag-handle{cursor:grab}
+body.dragging{cursor:grabbing!important}
 </style>
 </head>
 <body>
@@ -1546,7 +1548,7 @@ document.addEventListener('mousemove',e=>{let tip=document.getElementById('custo
 document.addEventListener('mouseout',e=>{let th=e.target.closest('th[data-tip]');if(th){let tip=document.getElementById('custom-tooltip');if(tip)tip.classList.remove('show');}});
 
 /* -------- RUBRIC TOGGLES -------- */
-function toggleRubric(n){const p=document.getElementById('rubric-0'+n);const b=document.getElementById('rt-0'+n);const open=p.classList.toggle('open');b.classList.toggle('open',open);b.textContent=open?'[ Close ]':'[ Rubric ]';}
+function toggleRubric(n){const lock=document.getElementById('module-0'+n+'-lock');if(lock&&lock.style.opacity!=='0'&&lock.style.pointerEvents!=='none')return;const p=document.getElementById('rubric-0'+n);const b=document.getElementById('rt-0'+n);const open=p.classList.toggle('open');b.classList.toggle('open',open);b.textContent=open?'[ Close ]':'[ Rubric ]';}
 
 /* -------- SENTENCE COUNTER -------- */
 function countSentences(text){if(!text.trim())return 0;const m=text.trim().match(/[^.!?]+[.!?]+/g)||[];const left=text.trim().replace(/[^.!?]+[.!?]+/g,'').trim();return m.length+(left.length>10?1:0);}
@@ -1704,11 +1706,11 @@ function duplicateCompRow(btn){
   attachCompDragEvents(clone);updateStats();updateScoreAndDots();saveToStorage();
 }
 function attachCompDragEvents(tr){
-  tr.addEventListener('dragstart',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT'||e.target.classList.contains('action-btn')){e.preventDefault();return;}activeLayerDrag={row:this};e.dataTransfer.effectAllowed='move';this.style.opacity='.4';});
+  tr.addEventListener('dragstart',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT'||e.target.classList.contains('action-btn')){e.preventDefault();return;}activeLayerDrag={row:this};e.dataTransfer.effectAllowed='move';this.style.opacity='.4';document.body.classList.add('dragging');});
   tr.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='move';tr.classList.add('drag-over');});
   tr.addEventListener('dragleave',()=>tr.classList.remove('drag-over'));
   tr.addEventListener('drop',function(e){e.preventDefault();this.classList.remove('drag-over');if(activeLayerDrag&&activeLayerDrag.row!==this){const tbody=this.parentNode,rect=this.getBoundingClientRect(),next=(e.clientY-rect.top)/(rect.bottom-rect.top)>.5;tbody.insertBefore(activeLayerDrag.row,next?this.nextSibling:this);updateStats();updateScoreAndDots();saveToStorage();}});
-  tr.addEventListener('dragend',function(){this.style.opacity='1';activeLayerDrag=null;});
+  tr.addEventListener('dragend',function(){this.style.opacity='1';activeLayerDrag=null;document.body.classList.remove('dragging');});
 }
 function getCompData(){
   return Array.from(document.querySelectorAll('#comp-body tr')).map(tr=>{
@@ -2119,11 +2121,23 @@ function updateScoreAndDots(){
 /* -------- SAVE STATUS -------- */
 let saveTimer=null;
 let autoSaveEnabled=true;
-function flashSave(){
+let lastSaveTime=null;
+let saveElapsedInterval=null;
+function updateSaveElapsed(){
   const el=document.getElementById('tb-save-status');
-  if(!autoSaveEnabled){el.textContent='SAVED';el.classList.add('flash');clearTimeout(saveTimer);saveTimer=setTimeout(()=>{el.textContent='AUTO-SAVE OFF';el.classList.remove('flash');el.classList.add('autosave-off');},2200);return;}
+  if(!el||el.classList.contains('flash'))return;
+  if(!autoSaveEnabled){el.textContent='AUTO-SAVE OFF';return;}
+  if(!lastSaveTime){el.textContent='AUTO-SAVE ON';return;}
+  const sec=Math.round((Date.now()-lastSaveTime)/1000);
+  if(sec<60)el.textContent='Saved '+sec+'s ago';
+  else el.textContent='Saved '+Math.round(sec/60)+'m ago';
+}
+function flashSave(){
+  lastSaveTime=Date.now();
+  const el=document.getElementById('tb-save-status');
+  if(!autoSaveEnabled){el.textContent='SAVED';el.classList.add('flash');clearTimeout(saveTimer);saveTimer=setTimeout(()=>{el.classList.remove('flash');el.classList.add('autosave-off');updateSaveElapsed();},2200);return;}
   el.textContent='SAVED';el.classList.add('flash');el.classList.remove('storage-full','autosave-off');
-  clearTimeout(saveTimer);saveTimer=setTimeout(()=>{el.textContent='AUTO-SAVE ON';el.classList.remove('flash');},2200);
+  clearTimeout(saveTimer);saveTimer=setTimeout(()=>{el.classList.remove('flash');updateSaveElapsed();},2200);
 }
 function showDBWriteError(){const el=document.getElementById('tb-save-status');el.textContent='DB WRITE ERROR';el.classList.add('storage-full');el.classList.remove('flash');}
 function toggleAutoSave(){
@@ -2139,7 +2153,7 @@ function toggleAutoSave(){
     status.textContent='AUTO-SAVE OFF';status.classList.add('autosave-off');
     clearInterval(autoSaveInterval);autoSaveInterval=null;
   }
-  try{localStorage.setItem('m3_autosave',autoSaveEnabled?'1':'0');}catch(e){}
+  try{localStorage.setItem('idea113-blade-03-autosave',autoSaveEnabled?'1':'0');}catch(e){}
 }
 let tableExpandAnchor=null;
 function toggleExpandTable(){
@@ -2156,6 +2170,7 @@ function toggleExpandTable(){
     }
     tableExpandAnchor=null;
     if(btn)btn.textContent='[ EXPAND TABLE ]';
+    tc.scrollIntoView({behavior:'smooth',block:'nearest'});
   } else {
     // Expand: store position, move to body as overlay
     tableExpandAnchor={parent:tc.parentNode,next:tc.nextSibling};
@@ -2269,8 +2284,8 @@ function showClearDialog(){document.getElementById('clear-dialog').classList.add
 function hideClearDialog(){document.getElementById('clear-dialog').classList.remove('active');}
 function showRestoreDialog(){document.getElementById('restore-dialog').classList.add('active');}
 function hideRestoreDialog(){document.getElementById('restore-dialog').classList.remove('active');}
-function confirmClear(){
-  hideClearDialog();localStorage.removeItem(STORAGE_KEY);localStorage.removeItem('m3_fitCalc_entries');
+async function confirmClear(){
+  hideClearDialog();localStorage.removeItem(STORAGE_KEY);localStorage.removeItem('idea113-blade-03-fitcalc');
   document.querySelectorAll('[data-field]').forEach(el=>{if(el.type==='radio'||el.type==='checkbox')el.checked=false;else el.value='';});
   document.querySelectorAll('[data-mirror]').forEach(el=>el.textContent='');
   document.querySelectorAll('textarea[data-field]').forEach(ta=>ta.style.height='');
@@ -2279,7 +2294,7 @@ function confirmClear(){
   document.querySelectorAll('[data-val]').forEach(el=>el.value='');
   imgStore={'ss-mass':[],'ss-iso':[],'ss-top':[],'ss-side':[]};
   Object.keys(imgStoreDbCount).forEach(z=>imgStoreDbCount[z]=0);
-  dbClearImgs();
+  await dbClearImgs();
   Object.keys(imgStore).forEach(z=>{const c=document.getElementById(z);if(c)c.innerHTML='';updateImgCount(z,0);});
   loadComps([]);loadBoltData([]);loadDevRows([]);loadDevLogRows([]);
   document.getElementById('fit-entries').innerHTML='';fitEntries=[];fitEntryIdCounter=0;addFitEntry({typeId:1,name:'Hex Shaft Bore'});addFitEntry();
@@ -2307,7 +2322,7 @@ function runPreflight(){
   if(document.querySelectorAll('#bolt-body tr').length===0)issues.push('Module 02: Bolt clearance table is empty');
   const totalG=comps.reduce((s,c)=>s+(parseFloat(c.massG)||0)*(c.qty||1),0);if(totalG>MASS_LIMIT_G)issues.push(`Module 02: Total mass ${totalG.toFixed(1)}g exceeds 907g limit`);}
   comps.forEach((c,i)=>{if(!c.hasRowImg)issues.push(`Module 02: Component ${i+1} (${c.name||'?'}) — no screenshot uploaded`);});
-  const hexV=getTolIn('hexbore');if(hexV===null)issues.push('Module 03: Hex bore check — no value entered');
+  if(!hexBoreFitCalcOk())issues.push('Module 03: Fit calculator — complete at least one joint entry and click Calculate');
   const hexextV=getTolIn('hexext');if(hexextV===null)issues.push('Module 03: Hex extension check — no value entered');
   const sp=getTolIn('shaft-plan-in'),sa=getTolIn('shaft-actual-in');if(!sp||!sa)issues.push('Module 03: Shaft engagement confirmation — values missing');
   const ssZones=['ss-mass','ss-iso','ss-top','ss-side'];const ssNames=['mass properties','isometric view','top view','cross-section view'];
@@ -2353,11 +2368,11 @@ function toggleModuleCollapse(n,evt){
     if(panel&&panel.classList.contains('open')){panel.classList.remove('open');const btn=document.getElementById('rt-0'+n);if(btn){btn.classList.remove('open');btn.textContent='[ Rubric ]';}}
     mod.classList.add('collapsed');
   }
-  try{localStorage.setItem('mod_'+n+'_collapsed',(!isCollapsed).toString());}catch(e){}
+  try{localStorage.setItem('idea113-blade-03-mod-'+n+'-collapsed',(!isCollapsed).toString());}catch(e){}
 }
 function initCollapseState(){
   for(let n=1;n<=5;n++){
-    const saved=localStorage.getItem('mod_'+n+'_collapsed');
+    const saved=localStorage.getItem('idea113-blade-03-mod-'+n+'-collapsed');
     if(saved==='true'){
       const mods=document.querySelectorAll('.module');
       const mod=mods[n-1];
@@ -2620,12 +2635,12 @@ function saveFitCalcData(){
       resultWhy:document.getElementById('fc-rw-'+id)?.textContent||''
     };
   });
-  try{localStorage.setItem('m3_fitCalc_entries',JSON.stringify(entries));}catch(e){}
+  try{localStorage.setItem('idea113-blade-03-fitcalc',JSON.stringify(entries));}catch(e){}
 }
 function loadFitCalcData(){
   const hexBoreDefault={typeId:1,name:'Hex Shaft Bore'};
   try{
-    const raw=localStorage.getItem('m3_fitCalc_entries');
+    const raw=localStorage.getItem('idea113-blade-03-fitcalc');
     if(raw){
       const arr=JSON.parse(raw);
       document.getElementById('fit-entries').innerHTML='';fitEntries=[];fitEntryIdCounter=0;
@@ -2729,8 +2744,11 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   loadFitCalcData();
   initCollapseState();
   // Restore auto-save preference
-  try{const saved=localStorage.getItem('m3_autosave');if(saved==='0'){autoSaveEnabled=false;const btn=document.getElementById('autosave-toggle-btn');const st=document.getElementById('tb-save-status');if(btn)btn.textContent='[ AUTO-SAVE OFF ]';if(st){st.textContent='AUTO-SAVE OFF';st.classList.add('autosave-off');}}}catch(e){}
+  try{const saved=localStorage.getItem('idea113-blade-03-autosave');if(saved==='0'){autoSaveEnabled=false;const btn=document.getElementById('autosave-toggle-btn');const st=document.getElementById('tb-save-status');if(btn)btn.textContent='[ AUTO-SAVE OFF ]';if(st){st.textContent='AUTO-SAVE OFF';st.classList.add('autosave-off');}}}catch(e){}
   if(autoSaveEnabled)autoSaveInterval=setInterval(saveToStorage,30000);
+  saveElapsedInterval=setInterval(updateSaveElapsed,10000);
+  const footerSpan=document.querySelector('.footer span');
+  if(footerSpan)footerSpan.textContent+='  |  '+BUILD_VERSION;
   window.addEventListener('resize',resizeAll);
   document.fonts.ready.then(()=>{resizeAll();});
   requestAnimationFrame(()=>resizeAll());
