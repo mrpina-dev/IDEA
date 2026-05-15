@@ -329,10 +329,11 @@ body::after {
   nav { gap: 0.75rem; }
   nav a { font-size: 0.55rem; }
 
-  .hero { padding: 3rem 1rem 2.5rem; }
+  .hero { padding: 2rem 1rem 1.5rem; }
+  .hero h1 { font-size: clamp(1.4rem, 6vw, 2rem); }
   .hero-sub { font-size: 0.76rem; }
-  .hero-meta { gap: 1.5rem; }
-  .hero-stat .value { font-size: 1.2rem; }
+  .hero-meta { margin-top: 1.2rem; gap: 1rem; }
+  .hero-stat .value { font-size: 1.1rem; }
 
   .submit-panel { padding: 0 1rem; }
   .submit-steps { flex-direction: column; gap: 1rem; }
@@ -361,6 +362,7 @@ body::after {
   .assignment-due { display: none; }
   .strip-link { font-size: 0.6rem; }
   #strip-soon { display: none; }
+  #strip-search { width: 100px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -407,6 +409,27 @@ body::after {
   border: 1px solid rgba(255,140,0,0.25); padding: 0.15rem 0.4rem;
   border-radius: 2px; margin-left: auto; white-space: nowrap;
 }
+#submit-toggle {
+  font-family: 'Orbitron', sans-serif; font-size: 0.58rem;
+  width: 100%; display: flex; justify-content: space-between;
+  background: none; border: none; color: var(--dim);
+  cursor: pointer; padding-bottom: 0.75rem;
+  letter-spacing: 0.18em; text-transform: uppercase;
+}
+#submit-chevron { transition: transform 0.3s; }
+#submit-toggle.open #submit-chevron { transform: rotate(180deg); }
+#strip-search {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(74,122,82,0.3);
+  border-radius: 2px; color: var(--white);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.65rem; padding: 0.2rem 0.6rem;
+  width: 160px; outline: none;
+  letter-spacing: 0.04em;
+  transition: border-color 0.2s;
+}
+#strip-search::placeholder { color: var(--dim); }
+#strip-search:focus { border-color: rgba(0,255,65,0.5); }
 </style>
 </head>
 <body>
@@ -432,6 +455,7 @@ body::after {
   <span id="strip-sep"></span>
   <a class="strip-link" href="#" target="_blank" rel="noopener"><span class="strip-glyph">▸ </span>IDEA Coin Database</a>
   <a class="strip-link" href="#" target="_blank" rel="noopener"><span class="strip-glyph">▸ </span>Class Materials List</a>
+  <input type="text" id="strip-search" placeholder="filter assignments...">
   <span id="strip-soon">COMING SOON</span>
 </div>
 
@@ -449,8 +473,11 @@ body::after {
       <span class="label">Hours / Day</span>
     </div>
     <div class="hero-stat">
-      <span class="value" style="color:var(--cyan);text-shadow:var(--glow-cyan);animation-delay:1.6s">Mr. Pina</span><br>
-      <span class="value" style="color:var(--ice);text-shadow:0 0 10px rgba(136,221,255,0.8),0 0 28px rgba(136,221,255,0.3);animation-delay:2.4s;font-size:1.1rem">Mr. C</span>
+      <span class="value">
+        <span style="color:var(--cyan); text-shadow:var(--glow-cyan)">Mr. Pina</span>
+        <span style="color:var(--dim); margin: 0 0.4rem; font-size:0.9em">/</span>
+        <span style="color:var(--ice); text-shadow: 0 0 10px rgba(136,221,255,0.8), 0 0 28px rgba(136,221,255,0.3)">Mr. C</span>
+      </span>
       <span class="label">Instructors</span>
     </div>
   </div>
@@ -458,19 +485,25 @@ body::after {
 
 <div class="submit-panel">
   <div class="submit-inner">
-    <div class="submit-label">How to Submit</div>
-    <div class="submit-steps">
-      <div class="submit-step">
-        <div class="step-num">01</div>
-        <div class="step-text">Click the assignment link below. It opens directly in your browser - <strong>no download needed.</strong></div>
-      </div>
-      <div class="submit-step">
-        <div class="step-num">02</div>
-        <div class="step-text">Complete all sections. Progress <strong>saves automatically</strong> every 30 seconds. Use the Save button to save manually.</div>
-      </div>
-      <div class="submit-step">
-        <div class="step-num">03</div>
-        <div class="step-text">When finished, click <strong>Export HTML</strong> and upload the HTML file directly to Google Classroom. Do not submit a PDF.</div>
+    <button id="submit-toggle">
+      <span>HOW TO SUBMIT</span>
+      <span id="submit-chevron">v</span>
+    </button>
+    <div id="submit-steps-wrap" style="overflow:hidden; transition: max-height 0.35s ease;">
+      <div class="submit-label">How to Submit</div>
+      <div class="submit-steps">
+        <div class="submit-step">
+          <div class="step-num">01</div>
+          <div class="step-text">Click the assignment link below. It opens directly in your browser - <strong>no download needed.</strong></div>
+        </div>
+        <div class="submit-step">
+          <div class="step-num">02</div>
+          <div class="step-text">Complete all sections. Progress <strong>saves automatically</strong> every 30 seconds. Use the Save button to save manually.</div>
+        </div>
+        <div class="submit-step">
+          <div class="step-num">03</div>
+          <div class="step-text">When finished, click <strong>Export HTML</strong> and upload the HTML file directly to Google Classroom. Do not submit a PDF.</div>
+        </div>
       </div>
     </div>
   </div>
@@ -636,6 +669,10 @@ body::after {
   </button>
   <div class="changelog-body" id="changelog-body">
     <div class="changelog-entry">
+      <span class="changelog-date">May 15, 2026</span>
+      <span class="changelog-note">Assignment filter added to header strip. Submit instructions collapse after first visit. Past due assignments dimmed. Hero section tightened on mobile. Instructor display fixed.</span>
+    </div>
+    <div class="changelog-entry">
       <span class="changelog-date">May 14, 2026</span>
       <span class="changelog-note">Materials strip added to sticky header - IDEA Coin Database and Class Materials List now always visible. Course header meta alignment fixed. Mr. C added to instructor display.</span>
     </div>
@@ -724,10 +761,12 @@ document.querySelectorAll('.assignment-item').forEach(item => {
       if (dot) dot.className = 'assignment-dot dot-soon';
       if (statusLabel) { statusLabel.className = 'assignment-status status-soon'; statusLabel.textContent = 'Past Due'; }
       if (dueLabel) dueLabel.classList.add('past');
+      item.style.opacity = '0.45';
     } else {
       if (dot) dot.className = 'assignment-dot dot-live';
       if (statusLabel) { statusLabel.className = 'assignment-status status-live'; statusLabel.textContent = 'Live'; }
       if (dueLabel) dueLabel.classList.remove('past');
+      item.style.opacity = '1';
     }
   }
 
@@ -768,6 +807,31 @@ btn.addEventListener('click', () => {
   body.classList.toggle('open');
 });
 
+// Submit instructions collapsible
+const submitToggle = document.getElementById('submit-toggle');
+const submitWrap = document.getElementById('submit-steps-wrap');
+(function() {
+  const seenKey = 'idea-portal-submit-seen';
+  function setSubmitState(open) {
+    if (open) {
+      submitWrap.style.maxHeight = '300px';
+      submitToggle.classList.add('open');
+    } else {
+      submitWrap.style.maxHeight = '0';
+      submitToggle.classList.remove('open');
+    }
+  }
+  if (localStorage.getItem(seenKey)) {
+    setSubmitState(false);
+  } else {
+    setSubmitState(true);
+    setTimeout(() => localStorage.setItem(seenKey, '1'), 2000);
+  }
+  submitToggle.addEventListener('click', () => {
+    setSubmitState(!submitToggle.classList.contains('open'));
+  });
+})();
+
 // Collapsible course cards — inject arrow and wire click
 document.querySelectorAll('.course-header').forEach(header => {
   const arrow = document.createElement('span');
@@ -778,6 +842,58 @@ document.querySelectorAll('.course-header').forEach(header => {
     header.closest('.course-card').classList.toggle('collapsed');
   });
 });
+
+// Assignment search filter
+(function() {
+  const searchInput = document.getElementById('strip-search');
+  searchInput.addEventListener('input', () => {
+    const query = searchInput.value.trim().toLowerCase();
+    document.querySelectorAll('.course-card').forEach(card => {
+      const courseId = (card.querySelector('.course-id') || {}).textContent.toLowerCase() || '';
+      const list = card.querySelector('.assignment-list');
+      const items = card.querySelectorAll('.assignment-item');
+      let hasVisible = false;
+
+      if (!query) {
+        items.forEach(item => { item.style.display = ''; });
+        list.style.maxHeight = '';
+        list.style.opacity = '';
+        const nr = list.querySelector('.no-results');
+        if (nr) nr.remove();
+        delete card.dataset.collapsed;
+      } else {
+        if (!('collapsed' in card.dataset)) {
+          card.dataset.collapsed = card.classList.contains('collapsed') ? 'true' : 'false';
+        }
+        items.forEach(item => {
+          const name = (item.querySelector('.assignment-name') || {}).textContent || '';
+          if (name.toLowerCase().includes(query) || courseId.includes(query)) {
+            item.style.display = '';
+            hasVisible = true;
+          } else {
+            item.style.display = 'none';
+          }
+        });
+        let nr = list.querySelector('.no-results');
+        if (!hasVisible) {
+          if (!nr) {
+            nr = document.createElement('div');
+            nr.className = 'no-results';
+            nr.style.cssText = 'padding:0.8rem 1.5rem; font-size:0.72rem; color:var(--dim)';
+            nr.textContent = 'No matching assignments.';
+            list.appendChild(nr);
+          }
+          list.style.maxHeight = '';
+          list.style.opacity = '';
+        } else {
+          if (nr) nr.remove();
+          list.style.maxHeight = '800px';
+          list.style.opacity = '1';
+        }
+      }
+    });
+  });
+})();
 
 // Canvas particles
 const canvas = document.getElementById('bg-canvas');
