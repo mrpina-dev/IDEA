@@ -365,6 +365,14 @@ body::after {
   * { transition-duration: 0.01ms !important; }
 }
 .assignment-pts { font-size: 0.62rem; color: var(--amber); letter-spacing: 0.06em; }
+.gc-link {
+  font-family: 'Orbitron', sans-serif; font-size: 0.55rem; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--dim);
+  border: 1px solid rgba(74,122,82,0.3); padding: 0.2rem 0.6rem;
+  border-radius: 2px; text-decoration: none;
+  transition: color 0.2s, border-color 0.2s; cursor: pointer;
+}
+.gc-link:hover { color: var(--green); border-color: rgba(0,255,65,0.4); }
 .course-collapse-arrow { font-family: 'Orbitron', sans-serif; font-size: 0.7rem; color: var(--dim); transition: transform 0.3s; flex-shrink: 0; }
 .course-card.collapsed .course-collapse-arrow { transform: rotate(180deg); }
 .badge-instructor { color: var(--ice); border: 1px solid rgba(136,221,255,0.3); background: rgba(136,221,255,0.05); }
@@ -424,7 +432,7 @@ body::after {
       </div>
       <div class="submit-step">
         <div class="step-num">03</div>
-        <div class="step-text">When finished, click <strong>Print / Export PDF</strong> and upload the PDF to Google Classroom.</div>
+        <div class="step-text">When finished, click <strong>Export HTML</strong> and upload the HTML file directly to Google Classroom. Do not submit a PDF.</div>
       </div>
     </div>
   </div>
@@ -447,6 +455,7 @@ body::after {
       <div class="course-meta">
         <span class="course-badge badge-grade">Freshman</span>
         <span class="course-badge badge-block">Block 1</span>
+        <a class="gc-link" href="https://classroom.google.com/c/ODM4MDY5NDA1NjMy" target="_blank" rel="noopener" onclick="event.stopPropagation()">Classroom ↗</a>
       </div>
     </div>
     <div class="assignment-list">
@@ -506,6 +515,7 @@ body::after {
       <div class="course-meta">
         <span class="course-badge badge-grade">Sophomore</span>
         <span class="course-badge badge-block">Block 2</span>
+        <a class="gc-link" href="https://classroom.google.com/c/ODQ4Mjc3MzUwMTE1" target="_blank" rel="noopener" onclick="event.stopPropagation()">Classroom ↗</a>
       </div>
     </div>
     <div class="assignment-list">
@@ -533,6 +543,7 @@ body::after {
         <span class="course-badge badge-grade">Junior</span>
         <span class="course-badge badge-block">Block 3</span>
         <span class="course-badge badge-instructor">Mr. C</span>
+        <a class="gc-link" href="https://classroom.google.com/c/ODM4MTUxNzk3NDgw" target="_blank" rel="noopener" onclick="event.stopPropagation()">Classroom ↗</a>
       </div>
     </div>
     <div class="assignment-list">
@@ -555,6 +566,7 @@ body::after {
       <div class="course-meta">
         <span class="course-badge badge-grade">Senior</span>
         <span class="course-badge badge-block">Block 4</span>
+        <a class="gc-link" href="https://classroom.google.com/c/ODM4MDc0ODE5MzI3" target="_blank" rel="noopener" onclick="event.stopPropagation()">Classroom ↗</a>
       </div>
     </div>
     <div class="assignment-list">
@@ -585,6 +597,10 @@ body::after {
     <span class="changelog-arrow">&#9660;</span>
   </button>
   <div class="changelog-body" id="changelog-body">
+    <div class="changelog-entry">
+      <span class="changelog-date">May 14, 2026</span>
+      <span class="changelog-note">Portal updated. Google Classroom links added to each course card. Submission instructions updated to HTML export workflow. Collapsible cards, point totals, IDEA-303, and Materials drawer from earlier today also reflected here.</span>
+    </div>
     <div class="changelog-entry">
       <span class="changelog-date">May 14, 2026</span>
       <span class="changelog-note">Portal updated. Collapsible course cards. Point totals on assignments. IDEA-303 added (Mr. C). Shared Materials drawer added. NEW badge and status logic refined.</span>
