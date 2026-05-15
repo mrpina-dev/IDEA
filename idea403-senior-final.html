@@ -7,23 +7,23 @@
 <link rel="icon" href="android-chrome-512x512.png">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap');
-:root{--bg0:#06060F;--bg1:#0A0A18;--bg2:#0E0E22;--green:#00FF41;--gold:#C8FF00;--cyan:#00F0FF;--amber:#FF8C00;--teal:#00AA88;--white:#E8EEF8;--dim:#4A5278;--accent:#7744CC;--accent2:#4466FF;--accent-dim:rgba(119,68,204,0.18);--accent-border:rgba(119,68,204,0.35);--border:rgba(68,102,255,0.2);--border-strong:rgba(119,68,204,0.45);--glow-accent:0 0 10px rgba(119,68,204,0.8),0 0 28px rgba(119,68,204,0.3);--glow-green:0 0 10px rgba(0,255,65,0.8),0 0 28px rgba(0,255,65,0.3);--glow-amber:0 0 10px rgba(255,140,0,0.8),0 0 28px rgba(255,140,0,0.3)}
+:root{--bg0:#020A04;--bg1:#050F07;--bg2:#081209;--green:#00FF41;--gold:#C8FF00;--cyan:#00F0FF;--amber:#FF8C00;--teal:#00AA88;--white:#E8FFE8;--dim:#4A7A52;--border:rgba(0,255,65,0.15);--border-strong:rgba(0,255,65,0.35);--glow-green:0 0 10px rgba(0,255,65,0.8),0 0 28px rgba(0,255,65,0.3);--glow-amber:0 0 10px rgba(255,140,0,0.8),0 0 28px rgba(255,140,0,0.3)}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{background:var(--bg0);color:var(--white);font-family:"Rajdhani",sans-serif;font-size:15px;line-height:1.6;min-height:100vh;overflow-x:hidden}
-#scroll-bar{position:fixed;top:0;left:0;height:2px;width:0%;background:linear-gradient(90deg,var(--accent2),var(--accent));z-index:9999;transition:width 0.1s linear;box-shadow:var(--glow-accent)}
+#scroll-bar{position:fixed;top:0;left:0;height:2px;width:0%;background:linear-gradient(90deg,var(--gold),var(--green));z-index:9999;transition:width 0.1s linear;box-shadow:var(--glow-green)}
 #df-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0.5}
 #toolbar{position:sticky;top:0;z-index:1000;background:rgba(6,6,15,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border-strong);padding:10px 20px;display:flex;flex-direction:column;gap:8px}
 .progress-row{display:flex;align-items:center;gap:12px}
 .progress-track{flex:1;height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden}
-.progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:2px;transition:width 0.4s ease}
+.progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--gold),var(--green));border-radius:2px;transition:width 0.4s ease}
 .progress-label{font-family:"Share Tech Mono",monospace;font-size:10px;color:var(--dim);white-space:nowrap}
-.score-display{font-family:"Share Tech Mono",monospace;font-size:11px;color:var(--accent);white-space:nowrap}
+.score-display{font-family:"Share Tech Mono",monospace;font-size:11px;color:var(--green);white-space:nowrap}
 .btn-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .tool-btn{font-family:"Share Tech Mono",monospace;font-size:10px;letter-spacing:1px;padding:5px 12px;background:transparent;border:1px solid var(--border-strong);color:var(--white);cursor:pointer;transition:all 0.2s;text-transform:uppercase}
-.tool-btn:hover{border-color:var(--accent);color:var(--accent)}
-.tool-btn.primary{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
-.tool-btn.primary:hover{box-shadow:var(--glow-accent)}
+.tool-btn:hover{border-color:var(--green);color:var(--green)}
+.tool-btn.primary{border-color:var(--green);color:var(--green);background:rgba(0,255,65,0.12)}
+.tool-btn.primary:hover{box-shadow:var(--glow-green)}
 .tool-btn.amber-btn{border-color:var(--amber);color:var(--amber)}
 #save-status{font-family:"Share Tech Mono",monospace;font-size:9px;color:var(--dim);margin-left:auto;transition:color 0.3s}
 #save-status.saved{color:var(--green)}
@@ -32,13 +32,13 @@ body{background:var(--bg0);color:var(--white);font-family:"Rajdhani",sans-serif;
 .dialog-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:5000;display:none;align-items:center;justify-content:center}
 .dialog-overlay.open{display:flex}
 .dialog-box{background:var(--bg1);border:1px solid var(--border-strong);padding:28px 32px;max-width:480px;width:90%}
-.dialog-title{font-family:"Orbitron",sans-serif;font-size:13px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:12px}
+.dialog-title{font-family:"Orbitron",sans-serif;font-size:13px;letter-spacing:3px;color:var(--green);text-transform:uppercase;margin-bottom:12px}
 .dialog-body{font-size:14px;color:var(--white);line-height:1.6;margin-bottom:20px}
 .dialog-body ul{padding-left:16px;margin-top:8px}
 .dialog-body ul li{color:var(--amber);font-size:13px;margin:4px 0}
 .dialog-actions{display:flex;gap:10px;justify-content:flex-end}
 .d-btn{font-family:"Share Tech Mono",monospace;font-size:10px;letter-spacing:1px;padding:6px 16px;border:1px solid var(--border-strong);background:transparent;color:var(--white);cursor:pointer;text-transform:uppercase;transition:all 0.2s}
-.d-btn:hover{border-color:var(--accent);color:var(--accent)}
+.d-btn:hover{border-color:var(--green);color:var(--green)}
 .d-btn.danger{border-color:var(--amber);color:var(--amber)}
 .d-btn.confirm{border-color:var(--green);color:var(--green)}
 #lightbox{position:fixed;inset:0;background:rgba(0,0,0,0.93);z-index:8000;display:none;align-items:center;justify-content:center}
@@ -48,33 +48,33 @@ body{background:var(--bg0);color:var(--white);font-family:"Rajdhani",sans-serif;
 .header{margin-bottom:28px;border:1px solid var(--border-strong);background:linear-gradient(135deg,var(--bg1),var(--bg2));padding:28px 28px 22px;position:relative;overflow:hidden}
 .header::before{content:"";position:absolute;top:0;right:0;width:200px;height:200px;background:radial-gradient(ellipse at top right,rgba(119,68,204,0.15),transparent 70%);pointer-events:none}
 .header-eyebrow{font-family:"Share Tech Mono",monospace;font-size:10px;letter-spacing:4px;color:var(--dim);text-transform:uppercase;margin-bottom:6px}
-.header-title{font-family:"Orbitron",sans-serif;font-size:26px;font-weight:900;color:var(--white);letter-spacing:2px;margin-bottom:4px;text-shadow:var(--glow-accent)}
-.header-sub{font-family:"Share Tech Mono",monospace;font-size:11px;color:var(--accent);letter-spacing:2px;margin-bottom:20px}
+.header-title{font-family:"Orbitron",sans-serif;font-size:26px;font-weight:900;color:var(--white);letter-spacing:2px;margin-bottom:4px;text-shadow:var(--glow-green)}
+.header-sub{font-family:"Share Tech Mono",monospace;font-size:11px;color:var(--green);letter-spacing:2px;margin-bottom:20px}
 .header-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:16px}
 .header-fields .field-full{grid-column:1/-1}
 .field-label{font-family:"Share Tech Mono",monospace;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;display:block;margin-bottom:4px}
 .field-input{width:100%;background:var(--bg0);border:1px solid var(--border);color:var(--white);font-family:"Rajdhani",sans-serif;font-size:14px;padding:7px 10px;outline:none;transition:border-color 0.2s}
-.field-input:focus{border-color:var(--accent)}
+.field-input:focus{border-color:var(--green)}
 .field-input[readonly]{color:var(--cyan);cursor:default}
 .callout{border:1px solid var(--border-strong);padding:16px 20px;margin-bottom:16px;font-size:13px;line-height:1.7;color:var(--white)}
-.callout.submission{background:rgba(68,102,255,0.06);border-color:var(--accent2)}
-.callout.submission .callout-title{color:var(--accent2)}
+.callout.submission{background:rgba(68,102,255,0.06);border-color:var(--gold)}
+.callout.submission .callout-title{color:var(--gold)}
 .callout.info{background:rgba(0,240,255,0.05);border-color:rgba(0,240,255,0.3)}
 .callout.info .callout-title{color:var(--cyan)}
 .callout-title{font-family:"Orbitron",sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;margin-bottom:8px}
 .callout ol,.callout ul{padding-left:18px;margin-top:6px}
 .callout li{margin:4px 0;font-size:13px}
-.callout a{color:var(--accent)}
+.callout a{color:var(--green)}
 .points-bar{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--border-strong);background:var(--bg1);padding:12px 20px;margin-bottom:24px}
 .points-bar-label{font-family:"Share Tech Mono",monospace;font-size:10px;color:var(--dim);letter-spacing:2px;text-transform:uppercase}
-.points-bar-value{font-family:"Orbitron",sans-serif;font-size:20px;font-weight:700;color:var(--accent);animation:breathe 3s ease-in-out infinite}
+.points-bar-value{font-family:"Orbitron",sans-serif;font-size:20px;font-weight:700;color:var(--green);animation:breathe 3s ease-in-out infinite}
 @keyframes breathe{0%,100%{text-shadow:0 0 8px rgba(119,68,204,0.5)}50%{text-shadow:0 0 20px rgba(119,68,204,0.9),0 0 40px rgba(119,68,204,0.4)}}
 .module{border:1px solid var(--border);background:var(--bg1);margin-bottom:16px;position:relative;overflow:hidden;opacity:0;transform:translateY(20px);transition:opacity 0.65s ease,transform 0.65s ease}
 .module.visible{opacity:1;transform:translateY(0)}
 .module-header{display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--bg2);border-bottom:1px solid var(--border);cursor:pointer;user-select:none;position:relative;overflow:hidden}
 .module-header::after{content:"";position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(180deg,rgba(119,68,204,0.06) 0%,transparent 100%);transition:left 0.5s ease;pointer-events:none}
 .module-header:hover::after{left:0}
-.mod-num{font-family:"Orbitron",sans-serif;font-size:10px;letter-spacing:2px;color:var(--accent);background:var(--accent-dim);border:1px solid var(--accent-border);padding:3px 8px;white-space:nowrap}
+.mod-num{font-family:"Orbitron",sans-serif;font-size:10px;letter-spacing:2px;color:var(--green);background:rgba(0,255,65,0.12);border:1px solid rgba(0,255,65,0.3);padding:3px 8px;white-space:nowrap}
 .mod-title{font-family:"Rajdhani",sans-serif;font-size:15px;font-weight:700;color:var(--white);flex:1;letter-spacing:0.5px}
 .mod-pts{font-family:"Share Tech Mono",monospace;font-size:11px;color:var(--gold);white-space:nowrap}
 .mod-pts-breakdown{font-family:"Share Tech Mono",monospace;font-size:9px;color:var(--dim);white-space:nowrap}
@@ -82,7 +82,7 @@ body{background:var(--bg0);color:var(--white);font-family:"Rajdhani",sans-serif;
 .completion-dot.partial{background:var(--teal);border-color:var(--teal)}
 .completion-dot.complete{background:var(--green);border-color:var(--green);box-shadow:var(--glow-green)}
 .rubric-toggle{font-family:"Share Tech Mono",monospace;font-size:9px;letter-spacing:1px;color:var(--dim);background:transparent;border:1px solid var(--border);padding:3px 8px;cursor:pointer;text-transform:uppercase;transition:all 0.2s;white-space:nowrap}
-.rubric-toggle:hover{color:var(--accent);border-color:var(--accent-border)}
+.rubric-toggle:hover{color:var(--green);border-color:rgba(0,255,65,0.3)}
 .chevron{font-size:10px;color:var(--dim);transition:transform 0.3s;flex-shrink:0}
 .chevron.collapsed{transform:rotate(-90deg)}
 .module-body{padding:20px 20px 16px;display:flex;flex-direction:column;gap:16px;transition:max-height 0.4s ease,padding 0.4s ease,opacity 0.3s ease;max-height:9999px;overflow:hidden}
@@ -92,15 +92,15 @@ body{background:var(--bg0);color:var(--white);font-family:"Rajdhani",sans-serif;
 .rubric-panel table{width:100%;border-collapse:collapse;font-size:12px}
 .rubric-panel th{font-family:"Share Tech Mono",monospace;font-size:9px;letter-spacing:2px;color:var(--dim);padding:7px 12px;border-bottom:1px solid var(--border);text-align:left;text-transform:uppercase}
 .rubric-panel td{padding:7px 12px;border-bottom:1px solid rgba(68,102,255,0.08);color:var(--dim);line-height:1.5;vertical-align:top}
-.rubric-panel td:first-child{font-family:"Share Tech Mono",monospace;font-size:10px;color:var(--accent);white-space:nowrap}
+.rubric-panel td:first-child{font-family:"Share Tech Mono",monospace;font-size:10px;color:var(--green);white-space:nowrap}
 .rubric-panel td:last-child{font-family:"Share Tech Mono",monospace;font-size:11px;color:var(--gold);text-align:right;white-space:nowrap}
 .prompt{display:flex;flex-direction:column;gap:6px}
 .prompt-q{font-family:"Rajdhani",sans-serif;font-size:14px;font-weight:700;color:var(--white);letter-spacing:0.3px}
 .prompt-desc{font-size:12px;color:var(--dim);line-height:1.6}
 .prompt-desc em{color:var(--gold);font-style:normal}
-.prompt-desc a{color:var(--accent)}
+.prompt-desc a{color:var(--green)}
 .response-area{width:100%;background:var(--bg0);border:1px solid var(--border);color:var(--white);font-family:"Rajdhani",sans-serif;font-size:14px;padding:10px 12px;resize:none;outline:none;min-height:72px;line-height:1.6;transition:border-color 0.2s;overflow:hidden}
-.response-area:focus{border-color:var(--accent)}
+.response-area:focus{border-color:var(--green)}
 .counter-row{display:flex;align-items:center;gap:8px}
 .sent-counter{font-family:"Share Tech Mono",monospace;font-size:10px;transition:color 0.3s}
 .sent-counter.none{color:var(--dim)}
@@ -121,15 +121,15 @@ table.data-table tbody tr.status-blocked{background:rgba(255,140,0,0.06)}
 table.data-table tbody tr.status-dropped{background:rgba(119,68,204,0.06)}
 .row-actions{display:flex;gap:4px;align-items:center;justify-content:center;padding:4px}
 .row-btn{font-family:"Share Tech Mono",monospace;font-size:9px;padding:3px 6px;border:1px solid var(--border);background:transparent;color:var(--dim);cursor:pointer;transition:all 0.15s}
-.row-btn:hover{color:var(--accent);border-color:var(--accent-border)}
+.row-btn:hover{color:var(--green);border-color:rgba(0,255,65,0.3)}
 .row-btn.del:hover{color:var(--amber);border-color:var(--amber)}
 .drag-handle{cursor:grab;color:var(--dim);padding:4px 6px;font-size:12px;user-select:none}
 body.dragging{cursor:grabbing !important}
-tr.drag-over{border-top:2px solid var(--accent) !important}
+tr.drag-over{border-top:2px solid var(--green) !important}
 .add-row-btn{font-family:"Share Tech Mono",monospace;font-size:10px;letter-spacing:1px;padding:6px 14px;background:transparent;border:1px dashed var(--border);color:var(--dim);cursor:pointer;width:100%;text-align:center;text-transform:uppercase;transition:all 0.2s;margin-top:4px}
-.add-row-btn:hover{border-color:var(--accent);color:var(--accent)}
+.add-row-btn:hover{border-color:var(--green);color:var(--green)}
 .upload-zone{border:1px dashed var(--border-strong);background:rgba(119,68,204,0.03);padding:20px;text-align:center;cursor:pointer;transition:border-color 0.2s,background 0.2s;position:relative}
-.upload-zone:hover{border-color:var(--accent);background:var(--accent-dim)}
+.upload-zone:hover{border-color:var(--green);background:rgba(0,255,65,0.12)}
 .upload-zone input[type=file]{display:none}
 .upload-zone-label{font-family:"Share Tech Mono",monospace;font-size:11px;color:var(--dim);letter-spacing:1px;text-transform:uppercase}
 .upload-zone-sub{font-size:12px;color:var(--dim);margin-top:4px}
@@ -142,19 +142,19 @@ tr.drag-over{border-top:2px solid var(--accent) !important}
 .img-gallery{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px}
 .img-item{position:relative;width:160px}
 .img-item img{width:100%;height:110px;object-fit:cover;cursor:pointer;border:1px solid var(--border);display:block;transition:border-color 0.2s}
-.img-item img:hover{border-color:var(--accent)}
+.img-item img:hover{border-color:var(--green)}
 .img-caption{width:100%;background:var(--bg0);border:1px solid var(--border);border-top:none;color:var(--white);font-family:"Rajdhani",sans-serif;font-size:12px;padding:4px 6px;outline:none;transition:border-color 0.2s}
-.img-caption:focus{border-color:var(--accent)}
+.img-caption:focus{border-color:var(--green)}
 .img-remove{position:absolute;top:3px;right:3px;font-size:9px;font-family:"Share Tech Mono",monospace;background:rgba(0,0,0,0.7);border:1px solid var(--amber);color:var(--amber);padding:2px 5px;cursor:pointer;transition:all 0.15s}
 .img-remove:hover{background:rgba(255,140,0,0.2)}
 .approval-gate{border:1px solid var(--border-strong);background:linear-gradient(135deg,var(--bg1),var(--bg2));padding:28px;margin-bottom:16px}
-.approval-gate-title{font-family:"Orbitron",sans-serif;font-size:13px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:8px}
+.approval-gate-title{font-family:"Orbitron",sans-serif;font-size:13px;letter-spacing:3px;color:var(--green);text-transform:uppercase;margin-bottom:8px}
 .approval-gate-desc{font-size:13px;color:var(--dim);margin-bottom:16px;line-height:1.6}
 .approval-input-row{display:flex;gap:10px;align-items:center}
 .approval-input{flex:1;background:var(--bg0);border:1px solid var(--border-strong);color:var(--white);font-family:"Share Tech Mono",monospace;font-size:14px;padding:8px 14px;outline:none;letter-spacing:4px;transition:border-color 0.2s}
-.approval-input:focus{border-color:var(--accent)}
-.approval-submit{font-family:"Share Tech Mono",monospace;font-size:10px;letter-spacing:2px;padding:8px 18px;background:var(--accent-dim);border:1px solid var(--accent-border);color:var(--accent);cursor:pointer;text-transform:uppercase;transition:all 0.2s}
-.approval-submit:hover{box-shadow:var(--glow-accent)}
+.approval-input:focus{border-color:var(--green)}
+.approval-submit{font-family:"Share Tech Mono",monospace;font-size:10px;letter-spacing:2px;padding:8px 18px;background:rgba(0,255,65,0.12);border:1px solid rgba(0,255,65,0.3);color:var(--green);cursor:pointer;text-transform:uppercase;transition:all 0.2s}
+.approval-submit:hover{box-shadow:var(--glow-green)}
 .approval-error{font-family:"Share Tech Mono",monospace;font-size:10px;color:var(--amber);margin-top:6px;display:none}
 .approval-error.show{display:block}
 .approval-anim{display:none;flex-direction:column;align-items:center;gap:10px;padding:20px;text-align:center}
@@ -175,13 +175,13 @@ tr.drag-over{border-top:2px solid var(--accent) !important}
 .decl-eyebrow{font-family:"Share Tech Mono",monospace;font-size:10px;color:var(--dim);letter-spacing:3px;text-transform:uppercase;margin-bottom:10px}
 .declaration p{font-size:13px;color:var(--dim);line-height:1.7}
 .decl-check-row{display:flex;align-items:flex-start;gap:10px;margin-top:14px}
-.decl-check-row input[type=checkbox]{margin-top:3px;cursor:pointer;accent-color:var(--accent);flex-shrink:0}
+.decl-check-row input[type=checkbox]{margin-top:3px;cursor:pointer;accent-color:var(--green);flex-shrink:0}
 .decl-check-row label{font-size:13px;color:var(--white);cursor:pointer;line-height:1.5}
 .sig-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
 .sig-field{border-top:1px solid var(--border-strong);padding-top:6px}
 .sig-field label{font-family:"Share Tech Mono",monospace;font-size:9px;color:var(--dim);letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:4px}
 .sig-field input{width:100%;background:transparent;border:none;color:var(--white);font-family:"Rajdhani",sans-serif;font-size:14px;outline:none;border-bottom:1px solid var(--border);padding-bottom:4px;transition:border-color 0.2s}
-.sig-field input:focus{border-color:var(--accent)}
+.sig-field input:focus{border-color:var(--green)}
 .instructor-section{display:none}
 .checklist-module{border:1px solid var(--border);background:var(--bg1);margin-bottom:16px;padding:20px}
 .checklist-title{font-family:"Orbitron",sans-serif;font-size:10px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:12px}
@@ -189,22 +189,22 @@ tr.drag-over{border-top:2px solid var(--accent) !important}
 .checklist li{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--dim);line-height:1.5}
 .checklist li::before{content:"[ ]";font-family:"Share Tech Mono",monospace;font-size:11px;color:var(--dim);flex-shrink:0;margin-top:2px}
 .pres-rubric-card{border:1px solid var(--border-strong);background:rgba(119,68,204,0.04);padding:18px 20px}
-.pres-rubric-title{font-family:"Orbitron",sans-serif;font-size:11px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:14px}
-.pres-rubric-note{font-size:12px;color:var(--dim);margin-bottom:12px;line-height:1.6;border-left:2px solid var(--accent-border);padding-left:10px}
+.pres-rubric-title{font-family:"Orbitron",sans-serif;font-size:11px;letter-spacing:3px;color:var(--green);text-transform:uppercase;margin-bottom:14px}
+.pres-rubric-note{font-size:12px;color:var(--dim);margin-bottom:12px;line-height:1.6;border-left:2px solid rgba(0,255,65,0.3);padding-left:10px}
 .pres-rubric-table{width:100%;border-collapse:collapse;font-size:13px}
 .pres-rubric-table th{font-family:"Share Tech Mono",monospace;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;padding:7px 12px;border:1px solid var(--border);background:var(--bg2);text-align:left}
 .pres-rubric-table td{padding:10px 12px;border:1px solid var(--border);color:var(--white);vertical-align:top;line-height:1.55;font-size:13px}
 .pres-rubric-table td:first-child{color:var(--white);font-weight:600;min-width:140px}
 .pres-rubric-table td:last-child{font-family:"Share Tech Mono",monospace;font-size:12px;color:var(--gold);text-align:right;white-space:nowrap;width:60px}
 .pres-rubric-table td.desc{color:var(--dim);font-size:12px}
-.pres-rubric-table tfoot td{background:var(--bg2);font-weight:700;color:var(--accent);font-family:"Orbitron",sans-serif;font-size:11px;letter-spacing:2px}
+.pres-rubric-table tfoot td{background:var(--bg2);font-weight:700;color:var(--green);font-family:"Orbitron",sans-serif;font-size:11px;letter-spacing:2px}
 .section-divider{font-family:"Share Tech Mono",monospace;font-size:9px;letter-spacing:4px;color:var(--dim);text-transform:uppercase;text-align:center;padding:12px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:20px 0;background:var(--bg1)}
 .footer{border-top:1px solid var(--border);padding:20px 0 10px;display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap}
 .footer-block{display:flex;flex-direction:column;gap:4px}
 .footer-label{font-family:"Share Tech Mono",monospace;font-size:9px;color:var(--dim);letter-spacing:2px;text-transform:uppercase}
-.footer-value{font-family:"Share Tech Mono",monospace;font-size:11px;color:var(--accent)}
+.footer-value{font-family:"Share Tech Mono",monospace;font-size:11px;color:var(--green)}
 #tooltip{position:fixed;z-index:9990;pointer-events:none;background:var(--bg2);border:1px solid var(--border-strong);padding:8px 12px;max-width:260px;font-size:12px;color:var(--white);line-height:1.5;display:none}
-#tooltip .tip-title{font-weight:700;color:var(--accent);font-size:12px;display:block;margin-bottom:2px}
+#tooltip .tip-title{font-weight:700;color:var(--green);font-size:12px;display:block;margin-bottom:2px}
 .print-mirror{display:none}
 @media print{
   #scroll-bar,#toolbar,#df-canvas,.rubric-toggle,.rubric-panel,.module-lock-overlay,
@@ -272,6 +272,7 @@ tr.drag-over{border-top:2px solid var(--accent) !important}
 <div class="callout info">
   <div class="callout-title">Presentation Day - 05/21</div>
   <p>Presentations are <strong>6-8 minutes each</strong> with a hard stop. Q&amp;A is within that window, not added on top. You are also required to ask <strong>at least one substantive question</strong> during a classmate's presentation - see Module 06. Prepare your question in advance. No question = 5-point deduction from your presentation score.</p>
+  <p style="margin-top:8px;">Note: The live presentation may be delivered with your project partner if your project was a collaboration. The HTML deliverable package must be completed individually - it is a personal reflection and documentation record, not a shared submission.</p>
 </div>
 <div class="points-bar"><span class="points-bar-label">Part A: Deliverable Package</span><span class="points-bar-value">70 pts</span></div>
 <!-- MOD 01 -->
@@ -317,7 +318,7 @@ tr.drag-over{border-top:2px solid var(--accent) !important}
 <!-- MOD 05 -->
 <div class="module" id="mod05"><div class="module-header" onclick="toggleModule('mod05')"><span class="mod-num">MOD 05</span><span class="mod-title">Presentation Prep</span><span class="mod-pts">10 pts</span><span class="mod-pts-breakdown">05-A (outline):6 &nbsp;&middot;&nbsp; 05-B (Q&amp;A prep):4</span><div class="completion-dot" id="dot-mod05"></div><button class="rubric-toggle" onclick="toggleRubric(event,'r_05')">Rubric &#9660;</button><span class="chevron" id="chev-mod05">&#9660;</span></div>
 <div class="module-body" id="body-mod05">
-<div class="rubric-panel" id="r_05"><table><tr><th>Item</th><th>Full Credit</th><th>Pts</th></tr><tr><td>05-A</td><td>At least 4 slides outlined. Each has a slide number, title, and specific description of what it shows - not "intro slide."</td><td>6</td></tr><tr><td>05-B</td><td>Question is specific and substantive. Prepared answer demonstrates actual understanding.</td><td>4</td></tr></table></div>
+<div class="rubric-panel" id="r_05"><table><tr><th>Item</th><th>Full Credit</th><th>Pts</th></tr><tr><td>05-A</td><td>At least 4 slides outlined. Each has a number, title, and specific description of what it shows. 80/20 rule applies: slides must be predominantly visual.</td><td>6</td></tr><tr><td>05-B</td><td>Question is specific and substantive. Prepared answer demonstrates actual understanding.</td><td>4</td></tr></table></div>
 <div class="prompt"><div class="prompt-q">05-A - Slide Outline</div><div class="prompt-desc">Map out your presentation slide by slide. <em>Min. 4 slides.</em> "Introduction slide" is not a valid description - write what is actually on the slide.</div></div>
 <div class="table-wrap"><table class="data-table" id="slides-table"><thead><tr><th style="width:32px;"></th><th data-tip="Slide # -- Slide number in order." style="width:70px;">#</th><th data-tip="Title -- Slide title as it appears.">Slide Title</th><th data-tip="Content -- What this slide specifically shows or communicates.">What It Shows / Communicates</th><th style="width:80px;" class="no-print"></th></tr></thead><tbody id="slides-body"></tbody></table></div>
 <button class="add-row-btn no-print" onclick="addSlidesRow()">+ Add Slide</button>
@@ -325,6 +326,16 @@ tr.drag-over{border-top:2px solid var(--accent) !important}
 <div class="prompt-q" style="font-size:12px;color:var(--dim);margin-top:8px;">The Question:</div><textarea class="response-area" id="q_05b_q" data-min="1" placeholder="What question do you expect?" oninput="autoResize(this);updateCounter(this,'c_05b_q',1);saveField('q_05b_q');updateCompletion()" style="min-height:60px;"></textarea><div class="counter-row"><span class="sent-counter none" id="c_05b_q">0 / 1 sentence</span></div><div class="print-mirror" id="pm_q_05b_q"></div>
 <div class="prompt-q" style="font-size:12px;color:var(--dim);margin-top:8px;">Your Prepared Answer:</div><textarea class="response-area" id="q_05b_a" data-min="2" placeholder="Your prepared answer..." oninput="autoResize(this);updateCounter(this,'c_05b_a',2);saveField('q_05b_a');updateCompletion()"></textarea><div class="counter-row"><span class="sent-counter none" id="c_05b_a">0 / 2 sentences</span></div><div class="print-mirror" id="pm_q_05b_a"></div></div>
 </div></div>
+
+<!-- APPROVAL GATE -->
+<div class="approval-gate" id="approval-gate">
+<div class="approval-gate-title">Instructor Approval Required</div>
+<div class="approval-gate-desc">All modules must be complete before requesting approval. Mr. Pina will enter the code at the end of class on 05/21. Do not submit without it.</div>
+<div class="approval-input-row" id="approval-input-row"><input class="approval-input" type="password" id="approval-code" placeholder="Enter approval code" onkeydown="if(event.key==='Enter')submitApproval()"><button class="approval-submit" onclick="submitApproval()">Submit</button></div>
+<div class="approval-error" id="approval-error">Incorrect code. See Mr. Pina.</div>
+<div class="approval-anim" id="approval-anim"><div class="anim-text" id="anim-line1">IDENTITY VERIFIED</div><div class="anim-text" id="anim-line2">ACCESS GRANTED</div></div>
+<div class="approval-confirmed" id="approval-confirmed"><div class="approval-confirmed-icon">&#10003;</div><div><div class="approval-confirmed-text">APPROVAL CONFIRMED</div><div class="approval-confirmed-time" id="approval-time"></div></div></div>
+</div>
 
 <!-- MOD 06 LOCKED -->
 <div class="module" id="mod06" style="position:relative;">
@@ -346,22 +357,12 @@ tr.drag-over{border-top:2px solid var(--accent) !important}
 <div class="pres-rubric-title">Part B: Presentation Scoring Criteria</div>
 <div class="pres-rubric-note">This rubric is provided so you know exactly what is being evaluated. Scores are entered separately by Mr. Pina - there are no fields for you to fill in here. Presentations are 6-8 minutes with a hard stop. Q&amp;A is included within that window, not added on top.</div>
 <table class="pres-rubric-table"><thead><tr><th>Category</th><th>What Full Credit Looks Like</th><th>Pts</th></tr></thead><tbody>
-<tr><td>Slide Quality</td><td class="desc">Slides are visual aids, not scripts. Each slide shows something - a diagram, photo, data, or comparison. No walls of bullet points. Text supports what you are saying, not a transcript of it.</td><td>10</td></tr>
+<tr><td>Slide Quality</td><td class="desc">Slides follow an 80/20 rule - at minimum 80% of each slide's surface area must be visual content (diagrams, photos, screenshots, data charts, physical mockups). Text may occupy no more than 20% of any slide. Bullet-point slides with no supporting visuals receive zero credit for this category.</td><td>10</td></tr>
 <tr><td>Delivery</td><td class="desc">Clear and confident. You are talking to the room, not reading off the screen. Stays within the 6-8 minute window. Speaks to the work, not around it.</td><td>10</td></tr>
 <tr><td>Technical Depth</td><td class="desc">Explains the decisions behind the design - not just what it looks like, but why it is the way it is. Covers at least one tradeoff or constraint you navigated. Demonstrates actual engineering thinking.</td><td>15</td></tr>
 <tr><td>Q&amp;A</td><td class="desc">Answers questions accurately and honestly. Does not bluff. If you do not know, say so and explain what you do know. A wrong answer delivered confidently is worse than an honest "I am not sure, but here is what I think."</td><td>15</td></tr>
 </tbody><tfoot><tr><td colspan="2">Total</td><td>50</td></tr></tfoot></table>
 </div></div></div>
-
-<!-- APPROVAL GATE -->
-<div class="approval-gate" id="approval-gate">
-<div class="approval-gate-title">Instructor Approval Required</div>
-<div class="approval-gate-desc">All modules must be complete before requesting approval. Mr. Pina will enter the code at the end of class on 05/21. Do not submit without it.</div>
-<div class="approval-input-row" id="approval-input-row"><input class="approval-input" type="password" id="approval-code" placeholder="Enter approval code" onkeydown="if(event.key==='Enter')submitApproval()"><button class="approval-submit" onclick="submitApproval()">Submit</button></div>
-<div class="approval-error" id="approval-error">Incorrect code. See Mr. Pina.</div>
-<div class="approval-anim" id="approval-anim"><div class="anim-text" id="anim-line1">IDENTITY VERIFIED</div><div class="anim-text" id="anim-line2">ACCESS GRANTED</div></div>
-<div class="approval-confirmed" id="approval-confirmed"><div class="approval-confirmed-icon">&#10003;</div><div><div class="approval-confirmed-text">APPROVAL CONFIRMED</div><div class="approval-confirmed-time" id="approval-time"></div></div></div>
-</div>
 
 <!-- DECLARATION -->
 <div class="declaration">
