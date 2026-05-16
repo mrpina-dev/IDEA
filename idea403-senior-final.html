@@ -223,7 +223,43 @@ tr.drag-over{border-top:2px solid var(--green) !important}
   @page{size:letter;margin:.5in}
   -webkit-print-color-adjust:exact;print-color-adjust:exact
 }
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none !important;transition:none !important}}
+@media (prefers-reduced-motion: reduce) {
+  #bg-canvas { display: none; }
+  @keyframes breathe { 0%,100%,50% { text-shadow: none; } }
+  .anim-text { animation: none !important; }
+  .progress-fill { transition: none !important; }
+}
+.table-expand-btn {
+  font-family: "Share Tech Mono", monospace;
+  font-size: 10px; letter-spacing: 1px; padding: 4px 10px;
+  background: transparent; border: 1px solid var(--border);
+  color: var(--dim); cursor: pointer; text-transform: uppercase;
+  transition: all 0.2s; margin-bottom: 6px; display: inline-block;
+}
+.table-expand-btn:hover { color: var(--gold); border-color: var(--border-strong); }
+#table-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.96); z-index: 7000;
+  flex-direction: column; padding: 20px;
+}
+#table-overlay.open { display: flex; }
+#table-overlay-inner { flex: 1; overflow: auto; }
+#table-overlay-close {
+  font-family: "Share Tech Mono", monospace; font-size: 10px;
+  letter-spacing: 2px; padding: 6px 16px; background: transparent;
+  border: 1px solid var(--border-strong); color: var(--white);
+  cursor: pointer; text-transform: uppercase; margin-bottom: 12px;
+  align-self: flex-end; transition: all 0.2s;
+}
+#table-overlay-close:hover { color: var(--gold); }
+.row-thumb { width: 40px; height: 40px; object-fit: cover; border: 1px solid var(--border); cursor: pointer; display: none; }
+.row-thumb.has-img { display: block; }
+body {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='4' fill='none' stroke='%23FFB800' stroke-width='1.5'/%3E%3Ccircle cx='10' cy='10' r='1.5' fill='%23FFB800'/%3E%3C/svg%3E") 10 10, crosshair;
+}
+a, button, [role=button], .linked, label[for], select, .drag-handle, .upload-zone, .module-header, .rubric-toggle, .img-item img, .changelog-toggle {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='6' fill='none' stroke='%23FFB800' stroke-width='1.5'/%3E%3Ccircle cx='10' cy='10' r='2' fill='%23FFB800'/%3E%3C/svg%3E") 10 10, pointer;
+}
 </style>
 </head>
 <body>
@@ -289,6 +325,7 @@ tr.drag-over{border-top:2px solid var(--green) !important}
 <div class="module-body" id="body-mod02">
 <div class="rubric-panel" id="r_02"><table><tr><th>Item</th><th>Full Credit</th><th>Pts</th></tr><tr><td>02-A</td><td>At least 5 entries. Each has a specific date, honest duration, and concrete task description. "Worked on project" earns no credit.</td><td>12</td></tr><tr><td>02-B</td><td>2-4 images uploaded with captions showing actual project work.</td><td>8</td></tr></table></div>
 <div class="prompt"><div class="prompt-q">02-A - Work Session Log</div><div class="prompt-desc">Document your work sessions. <em>Min. 5 entries.</em> Be specific about what was accomplished each session.</div></div>
+<button class="table-expand-btn no-print" onclick="openTableOverlay('worklog-table')">&#x26F6; Expand Table</button>
 <div class="table-wrap"><table class="data-table" id="worklog-table"><thead><tr><th style="width:32px;"></th><th data-tip="Date -- Date of the work session. MM/DD format.">Date</th><th data-tip="Duration -- How long you worked. Be honest.">Duration</th><th data-tip="Tasks Completed -- Specific description of what was accomplished. No vague entries.">Tasks Completed</th><th style="width:80px;" class="no-print"></th></tr></thead><tbody id="worklog-body"></tbody></table></div>
 <button class="add-row-btn no-print" onclick="addWorklogRow()">+ Add Session</button>
 <div class="prompt" style="margin-top:8px;"><div class="prompt-q">02-B - Evidence Images</div><div class="prompt-desc">Upload 2-4 photos showing real project progress. Each image requires a caption. <em>Min. 2 images.</em></div></div>
@@ -301,7 +338,8 @@ tr.drag-over{border-top:2px solid var(--green) !important}
 <div class="module-body" id="body-mod03">
 <div class="rubric-panel" id="r_03"><table><tr><th>Item</th><th>Full Credit</th><th>Pts</th></tr><tr><td>03-A</td><td>Every major deliverable from original scope is listed with honest status. Nothing planned is omitted, even if dropped.</td><td>12</td></tr><tr><td>03-B</td><td>Completion estimate is specific. Written summary matches the table. No vague or inflated claims.</td><td>8</td></tr></table></div>
 <div class="prompt"><div class="prompt-q">03-A - Component / Feature Status Table</div><div class="prompt-desc">List every major deliverable, component, or feature from your original scope. Assign each an honest status. Do not omit anything planned, even if dropped. <em>Min. 3 entries.</em></div></div>
-<div class="table-wrap"><table class="data-table" id="status-table"><thead><tr><th style="width:32px;"></th><th data-tip="Item -- Component, feature, or deliverable name.">Item / Deliverable</th><th data-tip="Description -- Brief description of what this item is or does.">Description</th><th data-tip="Status -- Honest current status." style="width:140px;">Status</th><th data-tip="Notes -- Relevant notes, issues, or context.">Notes</th><th style="width:80px;" class="no-print"></th></tr></thead><tbody id="status-body"></tbody></table></div>
+<button class="table-expand-btn no-print" onclick="openTableOverlay('status-table')">&#x26F6; Expand Table</button>
+<div class="table-wrap"><table class="data-table" id="status-table"><thead><tr><th style="width:32px;"></th><th data-tip="Item -- Component, feature, or deliverable name.">Item / Deliverable</th><th data-tip="Description -- Brief description of what this item is or does.">Description</th><th data-tip="Status -- Honest current status." style="width:140px;">Status</th><th data-tip="Notes -- Relevant notes, issues, or context.">Notes</th><th class="no-print" style="width:56px;">Img</th><th style="width:80px;" class="no-print"></th></tr></thead><tbody id="status-body"></tbody></table></div>
 <button class="add-row-btn no-print" onclick="addStatusRow()">+ Add Item</button>
 <div class="prompt" style="margin-top:12px;"><div class="prompt-q">03-B - Completion Summary</div><div class="prompt-desc">Estimate your overall completion percentage and give an honest written assessment of what is and is not done. Be specific enough that a reader can verify your estimate from the table above. <em>Min. 3 sentences</em></div><textarea class="response-area" id="q_03b" data-min="3" placeholder="Completion estimate and honest assessment..." oninput="autoResize(this);updateCounter(this,'c_03b',3);saveField('q_03b');updateCompletion()"></textarea><div class="counter-row"><span class="sent-counter none" id="c_03b">0 / 3 sentences</span></div><div class="print-mirror" id="pm_q_03b"></div></div>
 </div></div>
@@ -320,6 +358,7 @@ tr.drag-over{border-top:2px solid var(--green) !important}
 <div class="module-body" id="body-mod05">
 <div class="rubric-panel" id="r_05"><table><tr><th>Item</th><th>Full Credit</th><th>Pts</th></tr><tr><td>05-A</td><td>At least 4 slides outlined. Each has a number, title, and specific description of what it shows. 80/20 rule applies: slides must be predominantly visual.</td><td>6</td></tr><tr><td>05-B</td><td>Question is specific and substantive. Prepared answer demonstrates actual understanding.</td><td>4</td></tr></table></div>
 <div class="prompt"><div class="prompt-q">05-A - Slide Outline</div><div class="prompt-desc">Map out your presentation slide by slide. <em>Min. 4 slides.</em> "Introduction slide" is not a valid description - write what is actually on the slide.</div></div>
+<button class="table-expand-btn no-print" onclick="openTableOverlay('slides-table')">&#x26F6; Expand Table</button>
 <div class="table-wrap"><table class="data-table" id="slides-table"><thead><tr><th style="width:32px;"></th><th data-tip="Slide # -- Slide number in order." style="width:70px;">#</th><th data-tip="Title -- Slide title as it appears.">Slide Title</th><th data-tip="Content -- What this slide specifically shows or communicates.">What It Shows / Communicates</th><th style="width:80px;" class="no-print"></th></tr></thead><tbody id="slides-body"></tbody></table></div>
 <button class="add-row-btn no-print" onclick="addSlidesRow()">+ Add Slide</button>
 <div class="prompt" style="margin-top:12px;"><div class="prompt-q">05-B - Anticipated Question &amp; Prepared Answer</div><div class="prompt-desc">Write one question you think Mr. Pina or a classmate might ask. Then write your prepared answer. <em>Min. 2 sentences each.</em></div>
@@ -411,6 +450,10 @@ tr.drag-over{border-top:2px solid var(--green) !important}
 <div class="footer-block"><span class="footer-label">Total Points</span><span class="footer-value">120 pts</span></div>
 </div>
 </div><!-- /page -->
+<div id="table-overlay">
+  <button id="table-overlay-close" onclick="closeTableOverlay()">Close / Collapse &times;</button>
+  <div id="table-overlay-inner"></div>
+</div>
 <script>
 const ASSIGNMENT_ID='idea403-senior-final';
 const BUILD_VERSION='v1';
@@ -546,7 +589,7 @@ function closeDialog(id){document.getElementById(id).classList.remove('open')}
 async function confirmClear(){
   closeDialog('clear-dialog');await dbClearImgs();localStorage.removeItem(ASSIGNMENT_ID+'-data');
   FIELDS.forEach(id=>{localStorage.removeItem(ASSIGNMENT_ID+'-'+id);const el=document.getElementById(id);if(el){el.value='';autoResize(el);updateMirror(id)}});
-  const dc=document.getElementById('decl-check');if(dc)dc.checked=false;
+  const dc=document.getElementById('decl-check');if(dc){dc.checked=false;localStorage.removeItem(ASSIGNMENT_ID+'-decl-check');}
   imgStore={evidence:[]};renderGallery('evidence');
   loadWorklog([]);loadStatus([]);loadSlides([]);
   approved=false;approvalTimestamp=null;
@@ -573,17 +616,17 @@ function getWorklogData(){return Array.from(document.querySelectorAll('#worklog-
 
 // STATUS TABLE
 const STATUS_OPTS=['Complete','In Progress','Not Started','Dropped'];
-function makeStatusRow(item='',desc='',status='Not Started',notes=''){
-  const tr=document.createElement('tr');tr.setAttribute('data-row-id',Math.random().toString(36).substr(2,8));
+function makeStatusRow(item='',desc='',status='Not Started',notes='',rowId=null){
+  const tr=document.createElement('tr');const rid=rowId||Math.random().toString(36).substr(2,8);tr.setAttribute('data-row-id',rid);
   const opts=STATUS_OPTS.map(o=>`<option value="${o}" ${o===status?'selected':''}>${o}</option>`).join('');
-  tr.innerHTML=`<td><span class="drag-handle">&#9776;</span></td><td><input type="text" placeholder="Component or feature" value="${esc(item)}" oninput="saveTableData();updateCompletion()"></td><td><textarea placeholder="What is this item?" oninput="autoResize(this);saveTableData()">${esc(desc)}</textarea></td><td><select onchange="colorStatusRow(this);saveTableData();updateCompletion()"><option value="">-- Status --</option>${opts}</select></td><td><textarea placeholder="Notes or issues..." oninput="autoResize(this);saveTableData()">${esc(notes)}</textarea></td><td class="no-print"><div class="row-actions"><button class="row-btn" onclick="dupStatusRow(this)">&#8645;</button><button class="row-btn del" onclick="this.closest('tr').remove();saveTableData();updateCompletion()">&#10005;</button></div></td>`;
+  tr.innerHTML=`<td><span class="drag-handle">&#9776;</span></td><td><input type="text" placeholder="Component or feature" value="${esc(item)}" oninput="saveTableData();updateCompletion()"></td><td><textarea placeholder="What is this item?" oninput="autoResize(this);saveTableData()">${esc(desc)}</textarea></td><td><select onchange="colorStatusRow(this);saveTableData();updateCompletion()"><option value="">-- Status --</option>${opts}</select></td><td><textarea placeholder="Notes or issues..." oninput="autoResize(this);saveTableData()">${esc(notes)}</textarea></td><td class="no-print" style="width:56px;vertical-align:middle;"><div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px;"><img class="row-thumb" data-row-thumb="${rid}" id="thumb-${rid}" src="" alt=""><button class="row-btn" onclick="document.getElementById('file-row-${rid}').click()">IMG +</button><input type="file" id="file-row-${rid}" accept="image/*" style="display:none" onchange="handleStatusRowImg('${rid}',this)"></div></td><td class="no-print"><div class="row-actions"><button class="row-btn" onclick="dupStatusRow(this)">&#8645;</button><button class="row-btn del" onclick="dbDelete('row-${rid}-img');this.closest('tr').remove();saveTableData();updateCompletion()">&#10005;</button></div></td>`;
   addDragHandlers(tr);tr.querySelectorAll('textarea').forEach(t=>setTimeout(()=>autoResize(t),0));colorStatusRow(tr.querySelector('select'));return tr;
 }
 function colorStatusRow(sel){const tr=sel.closest('tr');tr.className='';const v=sel.value;if(v==='Complete')tr.classList.add('status-complete');else if(v==='In Progress')tr.classList.add('status-inprogress');else if(v==='Not Started')tr.classList.add('status-blocked');else if(v==='Dropped')tr.classList.add('status-dropped')}
 function addStatusRow(){document.getElementById('status-body').appendChild(makeStatusRow());updateCompletion();saveTableData()}
 function dupStatusRow(btn){const tr=btn.closest('tr');const inp=tr.querySelector('input');const tas=tr.querySelectorAll('textarea');const sel=tr.querySelector('select');const nr=makeStatusRow(inp?.value||'',tas[0]?.value||'',sel?.value||'Not Started',tas[1]?.value||'');tr.parentNode.insertBefore(nr,tr.nextSibling);saveTableData();updateCompletion()}
-function loadStatus(rows){const tb=document.getElementById('status-body');tb.innerHTML='';rows.forEach(r=>tb.appendChild(makeStatusRow(r.item||'',r.desc||'',r.status||'Not Started',r.notes||'')))}
-function getStatusData(){return Array.from(document.querySelectorAll('#status-body tr')).map(tr=>{const inp=tr.querySelector('input');const tas=tr.querySelectorAll('textarea');const sel=tr.querySelector('select');return{item:inp?.value||'',desc:tas[0]?.value||'',status:sel?.value||'',notes:tas[1]?.value||''}})}
+function loadStatus(rows){const tb=document.getElementById('status-body');tb.innerHTML='';rows.forEach(r=>{const tr=tb.appendChild(makeStatusRow(r.item||'',r.desc||'',r.status||'Not Started',r.notes||'',r.rowId||null));if(r.hasRowImg&&r.rowId&&db){const req=db.transaction('images','readonly').objectStore('images').get('row-'+r.rowId+'-img');req.onsuccess=e=>{if(e.target.result&&e.target.result.data){const src=e.target.result.data;const thumb=tr.querySelector('img[data-row-thumb]');if(thumb){thumb.src=src;thumb.classList.add('has-img');thumb.onclick=()=>openLightbox(src)}}}}})}
+function getStatusData(){return Array.from(document.querySelectorAll('#status-body tr')).map(tr=>{const inp=tr.querySelector('input[type=text]');const tas=tr.querySelectorAll('textarea');const sel=tr.querySelector('select');const rowId=tr.getAttribute('data-row-id');const thumb=rowId?tr.querySelector(`img[data-row-thumb="${rowId}"]`):null;return{item:inp?.value||'',desc:tas[0]?.value||'',status:sel?.value||'',notes:tas[1]?.value||'',rowId,hasRowImg:!!(thumb&&thumb.classList.contains('has-img'))}})}
 
 // SLIDES TABLE
 function makeSlidesRow(num='',title='',content=''){
@@ -624,7 +667,7 @@ function renderGallery(zoneId){
 function removeImg(zoneId,idx){imgStore[zoneId].splice(idx,1);renderGallery(zoneId);dbSave('zone-'+zoneId,imgStore[zoneId]);updateCompletion()}
 function openLightbox(src){document.getElementById('lightbox-img').src=src;document.getElementById('lightbox').classList.add('open')}
 function closeLightbox(){document.getElementById('lightbox').classList.remove('open')}
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeLightbox();closeDialog('preflight-dialog')}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeLightbox();closeDialog('preflight-dialog');closeTableOverlay()}});
 
 async function submitApproval(){
   const input=document.getElementById('approval-code').value;
@@ -720,6 +763,38 @@ async function doExport(){
 function showTooltip(e){const tip=e.currentTarget.getAttribute('data-tip');if(!tip)return;const parts=tip.split(' -- ');document.getElementById('tip-title').textContent=parts[0]||'';document.getElementById('tip-body').textContent=parts[1]||'';const t=document.getElementById('tooltip');t.style.display='block';moveTooltip(e)}
 function moveTooltip(e){const t=document.getElementById('tooltip');t.style.left=(e.clientX+14)+'px';t.style.top=(e.clientY+14)+'px'}
 function hideTooltip(){document.getElementById('tooltip').style.display='none'}
+
+function dbDelete(id){if(!db)return;db.transaction('images','readwrite').objectStore('images').delete(id)}
+
+function handleStatusRowImg(rowId,input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const src=e.target.result;
+    const thumb=document.querySelector(`img[data-row-thumb="${rowId}"]`);
+    if(thumb){thumb.src=src;thumb.classList.add('has-img');thumb.onclick=()=>openLightbox(src)}
+    dbSave('row-'+rowId+'-img',src);
+    saveTableData();
+  };
+  reader.readAsDataURL(file);
+}
+
+let _overlayOrigin=null;
+function openTableOverlay(tableId){
+  const wrap=document.getElementById(tableId).closest('.table-wrap');
+  _overlayOrigin=wrap;
+  const clone=wrap.cloneNode(true);
+  clone.style.maxWidth='100%';
+  const inner=document.getElementById('table-overlay-inner');
+  inner.innerHTML='';
+  inner.appendChild(clone);
+  document.getElementById('table-overlay').classList.add('open');
+}
+function closeTableOverlay(){
+  document.getElementById('table-overlay').classList.remove('open');
+  document.getElementById('table-overlay-inner').innerHTML='';
+  _overlayOrigin=null;
+}
 
 document.addEventListener('DOMContentLoaded',init);
 </script>
