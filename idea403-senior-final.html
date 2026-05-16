@@ -56,15 +56,21 @@ body{background:var(--bg0);color:var(--white);font-family:"Rajdhani",sans-serif;
 .field-input{width:100%;background:var(--bg0);border:1px solid var(--border);color:var(--white);font-family:"Rajdhani",sans-serif;font-size:14px;padding:7px 10px;outline:none;transition:border-color 0.2s}
 .field-input:focus{border-color:var(--green)}
 .field-input[readonly]{color:var(--cyan);cursor:default}
-.callout{border:1px solid var(--border-strong);padding:16px 20px;margin-bottom:16px;font-size:13px;line-height:1.7;color:var(--white)}
-.callout.submission{background:rgba(255,184,0,0.06);border-color:var(--green)}
+.callout{position:relative;overflow:hidden;padding:12px 16px 12px 20px;margin-bottom:16px;font-size:13px;line-height:1.6;color:var(--white);border:1px solid var(--border);background:linear-gradient(135deg,rgba(255,255,255,0.015) 0%,transparent 100%)}
+.callout::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px}
+.callout.submission{border-color:rgba(0,204,85,0.3)}
+.callout.submission::before{background:linear-gradient(180deg,var(--green),transparent)}
+.callout.info{border-color:rgba(0,240,255,0.25)}
+.callout.info::before{background:linear-gradient(180deg,var(--cyan),transparent)}
+.callout-title{font-family:"Orbitron",sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px}
 .callout.submission .callout-title{color:var(--green)}
-.callout.info{background:rgba(0,240,255,0.05);border-color:rgba(0,240,255,0.3)}
+.callout.submission .callout-title::before{content:"⬡";font-size:13px;line-height:1}
 .callout.info .callout-title{color:var(--cyan)}
-.callout-title{font-family:"Orbitron",sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;margin-bottom:8px}
-.callout ol,.callout ul{padding-left:18px;margin-top:6px}
-.callout li{margin:4px 0;font-size:13px}
+.callout.info .callout-title::before{content:"◈";font-size:13px;line-height:1}
+.callout ol,.callout ul{padding-left:14px;margin-top:6px}
+.callout li{margin:3px 0;font-size:12px;line-height:1.5}
 .callout a{color:var(--green)}
+.callout p+p{margin-top:6px}
 .points-bar{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--border-strong);background:var(--bg1);padding:12px 20px;margin-bottom:24px}
 .points-bar-label{font-family:"Share Tech Mono",monospace;font-size:10px;color:var(--dim);letter-spacing:2px;text-transform:uppercase}
 .points-bar-value{font-family:"Orbitron",sans-serif;font-size:20px;font-weight:700;color:var(--green);animation:breathe 3s ease-in-out infinite}
@@ -115,10 +121,13 @@ table.data-table td select{cursor:pointer;background:var(--bg0)}
 table.data-table td textarea{resize:none;overflow:hidden;min-height:34px;line-height:1.5}
 table.data-table tbody tr{transition:background 0.2s}
 table.data-table tbody tr:hover{background:rgba(255,184,0,0.06)}
-table.data-table tbody tr.status-complete{background:rgba(0,204,85,0.04)}
-table.data-table tbody tr.status-inprogress{background:rgba(0,170,136,0.06)}
-table.data-table tbody tr.status-blocked{background:rgba(255,140,0,0.06)}
-table.data-table tbody tr.status-dropped{background:rgba(255,184,0,0.06)}
+table.data-table tbody tr.status-complete{background:rgba(0,204,85,0.08);border-left:3px solid var(--green);box-shadow:inset 3px 0 12px rgba(0,204,85,0.06)}
+table.data-table tbody tr.status-inprogress{background:rgba(0,170,136,0.08);border-left:3px solid var(--teal)}
+table.data-table tbody tr.status-blocked{background:rgba(255,140,0,0.06);border-left:3px solid var(--amber)}
+table.data-table tbody tr.status-dropped{background:rgba(255,184,0,0.05);border-left:3px solid var(--dim)}
+.status-dropped td:nth-child(2){text-decoration:line-through;opacity:0.55}
+@keyframes statusFlash{0%{opacity:1}30%{opacity:0.4}100%{opacity:1}}
+.status-flash-anim{animation:statusFlash 0.4s ease forwards}
 .row-actions{display:flex;gap:4px;align-items:center;justify-content:center;padding:4px}
 .row-btn{font-family:"Share Tech Mono",monospace;font-size:9px;padding:3px 6px;border:1px solid var(--border);background:transparent;color:var(--dim);cursor:pointer;transition:all 0.15s}
 .row-btn:hover{color:var(--green);border-color:rgba(255,184,0,0.40)}
@@ -159,9 +168,6 @@ tr.drag-over{border-top:2px solid var(--green) !important}
 .approval-error.show{display:block}
 .approval-anim{display:none;flex-direction:column;align-items:center;gap:10px;padding:20px;text-align:center}
 .approval-anim.running{display:flex}
-.anim-text{font-family:"Share Tech Mono",monospace;font-size:13px;color:var(--green);letter-spacing:3px;overflow:hidden;white-space:nowrap;width:0}
-.anim-text.typing{animation:typewriter 0.8s steps(20) forwards}
-@keyframes typewriter{from{width:0}to{width:100%}}
 .approval-confirmed{display:none;align-items:center;gap:12px;padding:14px;background:rgba(0,204,85,0.06);border:1px solid rgba(255,184,0,0.40)}
 .approval-confirmed.show{display:flex}
 .approval-confirmed-icon{font-size:20px;color:var(--green)}
@@ -260,6 +266,25 @@ body {
 a, button, [role=button], .linked, label[for], select, .drag-handle, .upload-zone, .module-header, .rubric-toggle, .img-item img, .changelog-toggle {
   cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='6' fill='none' stroke='%23FFB800' stroke-width='1.5'/%3E%3Ccircle cx='10' cy='10' r='2' fill='%23FFB800'/%3E%3C/svg%3E") 10 10, pointer;
 }
+@keyframes scanLine{from{top:0}to{top:100%}}
+@keyframes flashPage{0%{opacity:0}20%{opacity:1}100%{opacity:0}}
+@keyframes badgePulse{0%,100%{text-shadow:0 0 10px rgba(0,204,85,0.6)}50%{text-shadow:0 0 24px rgba(0,204,85,1),0 0 48px rgba(0,204,85,0.5)}}
+@keyframes particleFade{0%{transform:translate(0,0) scale(1);opacity:0.9}100%{transform:translate(var(--tx),var(--ty)) scale(0);opacity:0}}
+@keyframes counterPop{0%{transform:scale(1)}50%{transform:scale(1.18)}100%{transform:scale(1)}}
+@keyframes progressFlow{0%{background-position:0% 50%}100%{background-position:100% 50%}}
+@keyframes rippleOut{to{transform:scale(2.5);opacity:0}}
+.approval-gate{position:relative;overflow:hidden}
+#approval-scan-line{position:absolute;left:0;right:0;height:2px;background:var(--green);box-shadow:var(--glow-green);pointer-events:none;display:none;z-index:5}
+#approval-hex-block{display:none;font-family:"Share Tech Mono",monospace;font-size:12px;letter-spacing:3px;color:var(--green);padding:12px 0;text-align:center;line-height:1.8}
+#approval-badge{display:none;text-align:center;padding:16px 0 8px}
+#approval-badge .badge-main{font-family:"Orbitron",sans-serif;font-size:18px;font-weight:900;color:var(--green);letter-spacing:4px;animation:badgePulse 1.5s ease-in-out infinite}
+#approval-badge .badge-sub{font-family:"Share Tech Mono",monospace;font-size:10px;color:var(--dim);letter-spacing:3px;margin-top:6px;text-transform:uppercase}
+.anim-particle{position:absolute;width:6px;height:6px;border-radius:50%;pointer-events:none;animation:particleFade 0.8s ease-out forwards}
+.sent-counter.pop{animation:counterPop 0.3s ease}
+.progress-fill{background-size:200% 100%;animation:progressFlow 3s linear infinite}
+.module{transition:opacity 0.65s ease,transform 0.65s ease,box-shadow 0.3s ease}
+.module:hover{box-shadow:0 0 0 1px rgba(0,204,85,0.2),0 4px 24px rgba(0,204,85,0.06)}
+.tool-btn{position:relative;overflow:hidden}
 </style>
 </head>
 <body>
@@ -372,7 +397,7 @@ a, button, [role=button], .linked, label[for], select, .drag-handle, .upload-zon
 <div class="approval-gate-desc">All modules must be complete before requesting approval. Mr. Pina will enter the code at the end of class on 05/21. Do not submit without it.</div>
 <div class="approval-input-row" id="approval-input-row"><input class="approval-input" type="password" id="approval-code" placeholder="Enter approval code" onkeydown="if(event.key==='Enter')submitApproval()"><button class="approval-submit" onclick="submitApproval()">Submit</button></div>
 <div class="approval-error" id="approval-error">Incorrect code. See Mr. Pina.</div>
-<div class="approval-anim" id="approval-anim"><div class="anim-text" id="anim-line1">IDENTITY VERIFIED</div><div class="anim-text" id="anim-line2">ACCESS GRANTED</div></div>
+<div class="approval-anim" id="approval-anim"><div id="approval-scan-line"></div><div id="approval-hex-block"></div><div id="approval-badge"><div class="badge-main">CLEARANCE GRANTED</div><div class="badge-sub">Module 06 Unlocked &nbsp;//&nbsp; Export Enabled</div></div></div>
 <div class="approval-confirmed" id="approval-confirmed"><div class="approval-confirmed-icon">&#10003;</div><div><div class="approval-confirmed-text">APPROVAL CONFIRMED</div><div class="approval-confirmed-time" id="approval-time"></div></div></div>
 </div>
 
@@ -474,7 +499,8 @@ function dbClearImgs(){return new Promise(res=>{if(!db)return res();const r=db.t
 async function init(){
   document.querySelectorAll('.footer-version-tag').forEach(el=>el.textContent=BUILD_VERSION);
   initCanvas();
-  const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}})},{threshold:0.05});
+  let _modIdx=0;
+  const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.style.transitionDelay=Math.min(_modIdx*80,400)+'ms';_modIdx++;e.target.classList.add('visible');obs.unobserve(e.target)}})},{threshold:0.05});
   document.querySelectorAll('.module').forEach(m=>obs.observe(m));
   window.addEventListener('scroll',()=>{const p=window.scrollY/(document.documentElement.scrollHeight-window.innerHeight)*100;document.getElementById('scroll-bar').style.width=Math.min(p,100)+'%'});
   document.addEventListener('paste',handlePaste);
@@ -491,9 +517,14 @@ async function init(){
   updateCompletion();
 }
 
+document.addEventListener('DOMContentLoaded',()=>{document.querySelectorAll('.tool-btn').forEach(btn=>{btn.addEventListener('click',function(e){const r=document.createElement('span');const rect=btn.getBoundingClientRect();const size=Math.max(rect.width,rect.height);r.style.cssText=`position:absolute;border-radius:50%;background:rgba(0,204,85,0.18);width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px;transform:scale(0);animation:rippleOut 0.4s ease forwards;pointer-events:none;`;btn.appendChild(r);r.addEventListener('animationend',()=>r.remove())})})});
+
 function initCanvas(){
   const cv=document.getElementById('bg-canvas'),ctx=cv.getContext('2d');
   let W,H,particles=[];
+  let mouseX=-9999,mouseY=-9999;
+  window.addEventListener('mousemove',e=>{mouseX=e.clientX;mouseY=e.clientY});
+  window.addEventListener('mouseleave',()=>{mouseX=-9999;mouseY=-9999});
   function resize(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight}
   resize();window.addEventListener('resize',()=>{resize();build()});
   function build(){
@@ -502,12 +533,13 @@ function initCanvas(){
     for(let i=0;i<cnt;i++){
       const size=Math.random()*2.2+0.3;
       const isGold=Math.random()>0.35;
+      const bvx=(Math.random()-0.5)*0.12;
+      const bvy=(Math.random()-0.5)*0.08-0.04;
       particles.push({
         x:Math.random()*W, y:Math.random()*H,
         r:size,
         opacity:Math.random()*0.55+0.08,
-        vx:(Math.random()-0.5)*0.12,
-        vy:(Math.random()-0.5)*0.08-0.04,
+        vx:bvx, vy:bvy, baseVx:bvx, baseVy:bvy,
         twinkleSpeed:Math.random()*0.025+0.006,
         twinklePhase:Math.random()*Math.PI*2,
         color:isGold
@@ -519,8 +551,17 @@ function initCanvas(){
   build();
   function draw(){
     ctx.clearRect(0,0,W,H);
+    const grad=ctx.createRadialGradient(mouseX,mouseY,0,mouseX,mouseY,70);
+    grad.addColorStop(0,'rgba(255,184,0,0.07)');grad.addColorStop(1,'transparent');
+    ctx.beginPath();ctx.arc(mouseX,mouseY,70,0,Math.PI*2);ctx.fillStyle=grad;ctx.fill();
     particles.forEach(p=>{
       p.twinklePhase+=p.twinkleSpeed;
+      const dx=p.x-mouseX;const dy=p.y-mouseY;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<120&&dist>0){const force=(1-dist/120)*0.8;p.vx+=(dx/dist)*force;p.vy+=(dy/dist)*force}
+      else{p.vx+=(p.baseVx-p.vx)*0.04;p.vy+=(p.baseVy-p.vy)*0.04}
+      const speed=Math.sqrt(p.vx*p.vx+p.vy*p.vy);
+      if(speed>2.0){p.vx=(p.vx/speed)*2.0;p.vy=(p.vy/speed)*2.0}
       p.x+=p.vx; p.y+=p.vy;
       if(p.x<0)p.x=W; if(p.x>W)p.x=0;
       if(p.y<0)p.y=H; if(p.y>H)p.y=0;
@@ -576,7 +617,7 @@ function updateSaveStatusElapsed(){if(!autoSaveEnabled||!lastSaveTime)return;con
 
 function autoResize(el){el.style.height='0';el.style.height=el.scrollHeight+'px'}
 function countSentences(t){t=t.trim();if(!t)return 0;const m=t.match(/[^.!?]*[.!?]+/g);if(!m)return t.length>10?1:0;return m.filter(s=>s.trim().length>2).length}
-function updateCounter(el,cid,min){const c=document.getElementById(cid);if(!c)return;const n=countSentences(el.value);c.textContent=`${n} / ${min} sentence${min>1?'s':''}`;c.className='sent-counter '+((!el.value.trim())?'none':(n<min)?'warn':'ok');updateMirror(el.id)}
+function updateCounter(el,cid,min){const c=document.getElementById(cid);if(!c)return;const prevOk=c.classList.contains('ok');const n=countSentences(el.value);c.textContent=`${n} / ${min} sentence${min>1?'s':''}`;c.className='sent-counter '+((!el.value.trim())?'none':(n<min)?'warn':'ok');if(!prevOk&&c.classList.contains('ok')){c.classList.add('pop');c.addEventListener('animationend',()=>c.classList.remove('pop'),{once:true})}updateMirror(el.id)}
 function updateMirror(id){const m=document.getElementById('pm_'+id);const el=document.getElementById(id);if(m&&el)m.textContent=el.type==='checkbox'?(el.checked?'Confirmed':''):el.value}
 
 function toggleModule(id){const body=document.getElementById('body-'+id);const chev=document.getElementById('chev-'+id);if(!body)return;const isCol=body.classList.contains('collapsed');body.classList.toggle('collapsed',!isCol);if(chev)chev.classList.toggle('collapsed',!isCol);localStorage.setItem(ASSIGNMENT_ID+'-collapse-'+id,isCol?'0':'1')}
@@ -622,7 +663,7 @@ function makeStatusRow(item='',desc='',status='Not Started',notes='',rowId=null)
   tr.innerHTML=`<td><span class="drag-handle">&#9776;</span></td><td><input type="text" placeholder="Component or feature" value="${esc(item)}" oninput="saveTableData();updateCompletion()"></td><td><textarea placeholder="What is this item?" oninput="autoResize(this);saveTableData()">${esc(desc)}</textarea></td><td><select onchange="colorStatusRow(this);saveTableData();updateCompletion()"><option value="">-- Status --</option>${opts}</select></td><td><textarea placeholder="Notes or issues..." oninput="autoResize(this);saveTableData()">${esc(notes)}</textarea></td><td class="no-print" style="width:56px;vertical-align:middle;"><div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px;"><img class="row-thumb" data-row-thumb="${rid}" id="thumb-${rid}" src="" alt=""><button class="row-btn" onclick="document.getElementById('file-row-${rid}').click()">IMG +</button><input type="file" id="file-row-${rid}" accept="image/*" style="display:none" onchange="handleStatusRowImg('${rid}',this)"></div></td><td class="no-print"><div class="row-actions"><button class="row-btn" onclick="dupStatusRow(this)">&#8645;</button><button class="row-btn del" onclick="dbDelete('row-${rid}-img');this.closest('tr').remove();saveTableData();updateCompletion()">&#10005;</button></div></td>`;
   addDragHandlers(tr);tr.querySelectorAll('textarea').forEach(t=>setTimeout(()=>autoResize(t),0));colorStatusRow(tr.querySelector('select'));return tr;
 }
-function colorStatusRow(sel){const tr=sel.closest('tr');tr.className='';const v=sel.value;if(v==='Complete')tr.classList.add('status-complete');else if(v==='In Progress')tr.classList.add('status-inprogress');else if(v==='Not Started')tr.classList.add('status-blocked');else if(v==='Dropped')tr.classList.add('status-dropped')}
+function colorStatusRow(sel){const tr=sel.closest('tr');tr.className='';const v=sel.value;if(v==='Complete')tr.classList.add('status-complete');else if(v==='In Progress')tr.classList.add('status-inprogress');else if(v==='Not Started')tr.classList.add('status-blocked');else if(v==='Dropped')tr.classList.add('status-dropped');tr.classList.add('status-flash-anim');tr.addEventListener('animationend',()=>tr.classList.remove('status-flash-anim'),{once:true})}
 function addStatusRow(){document.getElementById('status-body').appendChild(makeStatusRow());updateCompletion();saveTableData()}
 function dupStatusRow(btn){const tr=btn.closest('tr');const inp=tr.querySelector('input');const tas=tr.querySelectorAll('textarea');const sel=tr.querySelector('select');const nr=makeStatusRow(inp?.value||'',tas[0]?.value||'',sel?.value||'Not Started',tas[1]?.value||'');tr.parentNode.insertBefore(nr,tr.nextSibling);saveTableData();updateCompletion()}
 function loadStatus(rows){const tb=document.getElementById('status-body');tb.innerHTML='';rows.forEach(r=>{const tr=tb.appendChild(makeStatusRow(r.item||'',r.desc||'',r.status||'Not Started',r.notes||'',r.rowId||null));if(r.hasRowImg&&r.rowId&&db){const req=db.transaction('images','readonly').objectStore('images').get('row-'+r.rowId+'-img');req.onsuccess=e=>{if(e.target.result&&e.target.result.data){const src=e.target.result.data;const thumb=tr.querySelector('img[data-row-thumb]');if(thumb){thumb.src=src;thumb.classList.add('has-img');thumb.onclick=()=>openLightbox(src)}}}}})}
@@ -681,12 +722,59 @@ async function submitApproval(){
   }else document.getElementById('approval-error').classList.add('show');
 }
 function runApprovalAnimation(){
-  const anim=document.getElementById('approval-anim');anim.classList.add('running');
-  const l1=document.getElementById('anim-line1');const l2=document.getElementById('anim-line2');
-  l1.style.width='0';l2.style.width='0';
-  setTimeout(()=>l1.classList.add('typing'),200);
-  setTimeout(()=>l2.classList.add('typing'),1200);
-  setTimeout(()=>{anim.classList.remove('running');l1.classList.remove('typing');l2.classList.remove('typing');showApprovalConfirmed();document.getElementById('lock-mod06').classList.add('unlocked')},2600);
+  const flash=document.createElement('div');
+  flash.style.cssText='position:fixed;inset:0;background:rgba(0,204,85,0.12);z-index:9000;pointer-events:none;animation:flashPage 0.5s ease forwards;';
+  document.body.appendChild(flash);
+  flash.addEventListener('animationend',()=>flash.remove());
+  const scanLine=document.getElementById('approval-scan-line');
+  const anim=document.getElementById('approval-anim');
+  anim.classList.add('running');
+  scanLine.style.display='block';
+  scanLine.style.animation='scanLine 0.7s linear forwards';
+  scanLine.addEventListener('animationend',()=>{scanLine.style.display='none'},{once:true});
+  const hexBlock=document.getElementById('approval-hex-block');
+  hexBlock.style.display='block';
+  const chars='0123456789ABCDEF';
+  const targetLines=['IDENTITY_VERIFIED','ACCESS_GRANTED'];
+  let frame=0;const totalFrames=28;
+  const hexInterval=setInterval(()=>{
+    frame++;
+    if(frame<totalFrames){
+      hexBlock.innerHTML=Array.from({length:2},()=>Array.from({length:16},()=>chars[Math.floor(Math.random()*chars.length)]).join('')).join('<br>');
+    }else{
+      clearInterval(hexInterval);
+      hexBlock.innerHTML=targetLines.map(line=>line.split('').map((ch,i)=>`<span style="display:inline-block;animation:flashPage 0.15s ${i*30}ms ease both;opacity:0;animation-fill-mode:forwards">${ch}</span>`).join('')).join('<br>');
+      setTimeout(()=>{
+        document.getElementById('approval-badge').style.display='block';
+        setTimeout(()=>{
+          spawnApprovalParticles();
+          setTimeout(()=>{
+            anim.classList.remove('running');
+            hexBlock.style.display='none';
+            document.getElementById('approval-badge').style.display='none';
+            showApprovalConfirmed();
+            document.getElementById('lock-mod06').classList.add('unlocked');
+          },900);
+        },1200);
+      },600);
+    }
+  },30);
+}
+function spawnApprovalParticles(){
+  const gate=document.getElementById('approval-gate');
+  const rect=gate.getBoundingClientRect();
+  const cx=rect.width/2;const cy=rect.height/2;
+  for(let i=0;i<22;i++){
+    const p=document.createElement('div');
+    p.className='anim-particle';
+    const angle=(i/22)*Math.PI*2;
+    const dist=60+Math.random()*80;
+    const tx=Math.cos(angle)*dist;const ty=Math.sin(angle)*dist;
+    const isGold=Math.random()>0.5;
+    p.style.cssText=`left:${cx}px;top:${cy}px;background:${isGold?'var(--gold)':'var(--green)'};--tx:${tx}px;--ty:${ty}px;animation-delay:${Math.random()*200}ms;`;
+    gate.appendChild(p);
+    p.addEventListener('animationend',()=>p.remove());
+  }
 }
 function showApprovalConfirmed(){document.getElementById('approval-confirmed').classList.add('show');document.getElementById('approval-input-row').style.display='none';if(approvalTimestamp)document.getElementById('approval-time').textContent='Approved: '+approvalTimestamp;document.getElementById('lock-mod06').classList.add('unlocked')}
 
