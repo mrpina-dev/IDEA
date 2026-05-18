@@ -303,10 +303,6 @@ tr.drag-over{border-top:2px solid var(--green)!important;background:rgba(0,255,6
 .copy-flash{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--green);letter-spacing:1px;display:none}
 .copy-flash.show{display:block}
 /* INSTRUCTOR */
-.instructor-section{margin-top:20px;padding:16px 20px;background:rgba(0,255,65,.02);border:1px solid rgba(0,255,65,.1)}
-.instructor-title{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:10px}
-.instructor-comment{background:var(--bg2);border:1px solid rgba(0,255,65,.12);border-bottom:1px solid var(--dim);color:var(--green);font-family:'Rajdhani',sans-serif;font-size:14px;padding:10px 12px;outline:none;width:100%;resize:none;min-height:60px;overflow:hidden}
-.instructor-comment:focus{border-color:var(--green)!important}
 .instructor-table{display:none}
 /* FOOTER */
 .footer{display:flex;justify-content:space-between;align-items:center;margin-top:32px;padding:14px 20px;border:1px solid rgba(0,255,65,.12);background:var(--bg1);font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:2px;flex-wrap:wrap;gap:10px}
@@ -348,9 +344,9 @@ tr.drag-over{border-top:2px solid var(--green)!important;background:rgba(0,255,6
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   #bg-canvas,#scroll-progress,#toolbar,.submit-callout,.sent-count,.add-row-btn,.rubric-toggle,.rubric-panel,
   .dialog-overlay,#custom-tooltip,.action-btn,.upload-zone,.img-remove,#mx-toggle-btn,#matrix-controls,
-  .tool-panel,.card-actions,.ss-anim-strip,.paste-hint-text,.row-upload-btn,.row-paste-hint,.instructor-section,
+  .tool-panel,.card-actions,.ss-anim-strip,.paste-hint-text,.row-upload-btn,.row-paste-hint,
   .no-print,.card-del,#tb-save-status,input[type="checkbox"],input[type="radio"]{display:none!important}
-  .info-field input,.field-row textarea,.card-field input,.card-field select,.card-field textarea,.abt-input,.instructor-comment{display:none!important}
+  .info-field input,.field-row textarea,.card-field input,.card-field select,.card-field textarea,.abt-input{display:none!important}
   .print-mirror{display:block!important}
   .module,.header,.declaration-block,.gate-panel,.rulebook-block{break-inside:avoid;page-break-inside:avoid}
   .page{padding:0!important;max-width:100%!important;margin:0!important}
@@ -645,10 +641,11 @@ tr.drag-over{border-top:2px solid var(--green)!important;background:rgba(0,255,6
   <div class="tool-panel-header">
     <span class="tool-panel-icon">TOOL</span>
     <span class="tool-panel-title">Print Queue</span>
-    <span class="tool-panel-note">Submit requests via email - attach .3mf file before sending</span>
+    <span class="tool-panel-note">Email requests to Mr. Pina — attach files before sending</span>
   </div>
   <div class="tool-panel-body">
     <p class="prompt">Use this tool to submit 3D print jobs. Fill out a card for each print request, then click <strong>Open in Mail</strong> or <strong>Copy Email</strong> to submit to Mr. Pina. Attach your .3mf file before sending.</p>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--amber);letter-spacing:.5px;padding:8px 12px;border:1px solid rgba(255,140,0,.3);background:rgba(255,140,0,.04);">⚠ Email requests to <strong style="color:var(--gold)">apina@boscotech.edu</strong> — attach all required files before sending. Requests without attachments will not be processed.</div>
     <div id="pq-container"></div>
     <button class="tool-add-btn" onclick="addPrintRequest()">[ + Add Print Request ]</button>
   </div>
@@ -659,19 +656,15 @@ tr.drag-over{border-top:2px solid var(--green)!important;background:rgba(0,255,6
   <div class="tool-panel-header">
     <span class="tool-panel-icon">TOOL</span>
     <span class="tool-panel-title">Work Orders</span>
-    <span class="tool-panel-note">Submit fabrication requests via email - attach required files before sending</span>
+    <span class="tool-panel-note">Email requests to Mr. Pina — attach files before sending</span>
   </div>
   <div class="tool-panel-body">
     <p class="prompt">Use this tool to submit laser cutting, CNC, and machining requests. Fill out a card for each operation, then click <strong>Open in Mail</strong> or <strong>Copy Email</strong> to submit to Mr. Pina. Attach required files before sending.</p>
+    <a class="rulebook-link-btn" href="https://youtu.be/UVPCtZr1sUA" target="_blank">Watch: SolidWorks DXF Export Tutorial</a>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--amber);letter-spacing:.5px;padding:8px 12px;border:1px solid rgba(255,140,0,.3);background:rgba(255,140,0,.04);">⚠ Email requests to <strong style="color:var(--gold)">apina@boscotech.edu</strong> — attach all required files before sending. Requests without attachments will not be processed.</div>
     <div id="wo-container"></div>
     <button class="tool-add-btn" onclick="addWorkOrder()">[ + Add Work Order ]</button>
   </div>
-</div>
-
-<!-- INSTRUCTOR SECTION (screen-only) -->
-<div class="instructor-section no-print">
-  <div class="instructor-title">Instructor Comment (screen only, not printed)</div>
-  <textarea class="instructor-comment" data-field="instructor-comment" placeholder="Type feedback here before re-exporting to student..." oninput="autoResize(this);saveToStorage()"></textarea>
 </div>
 
 <!-- INSTRUCTOR SCORING TABLE (print-only) -->
@@ -1026,7 +1019,7 @@ function loadWOData(arr){const c=document.getElementById('wo-container');if(!c)r
 function moduleComplete(n){
   switch(n){
     case 1:{const rows=getMfgData();if(rows.length<3)return false;return rows.every(r=>r.process&&r.status&&r.status!=='');}
-    case 2:{const noC=document.getElementById('no-changes-cb')?.checked;const changesOk=noC||getChangeData().length>0;const stepsOk=getStepData().length>=2;const photosOk=(imgStore['asm-photos']||[]).length>=2;return changesOk&&stepsOk&&photosOk;}
+    case 2:{const noC=document.getElementById('no-changes-cb')?.checked;const changesOk=noC||getChangeData().length>0;const stepsOk=getStepData().filter(s=>s.desc.trim()).length>=2;const photosOk=(imgStore['asm-photos']||[]).length>=2;return changesOk&&stepsOk&&photosOk;}
     case 3:{return['od','height','hexext','weight','fasteners'].every(k=>{const inp=document.querySelector(`[data-meas="${k}"]`);return inp&&inp.value!=='';});}
   }
   return false;
@@ -1037,7 +1030,7 @@ function updateScoreAndDots(){
   const mfgRows=getMfgData();const completeM=mfgRows.filter(r=>r.process&&r.status&&r.status!=='').length;score+=Math.round(Math.min(completeM,3)/3*20);
   // M2
   const noC=document.getElementById('no-changes-cb')?.checked;const changesOk=noC||getChangeData().length>0;if(changesOk)score+=5;
-  const steps=getStepData();if(steps.length>=2)score+=10;else if(steps.length===1)score+=4;
+  const steps=getStepData().filter(s=>s.desc.trim());if(steps.length>=2)score+=10;else if(steps.length===1)score+=4;
   const photos=(imgStore['asm-photos']||[]).length;if(photos>=2)score+=5;else if(photos===1)score+=2;
   // M3
   const measKeys=['od','height','hexext','weight','fasteners'];const filled=measKeys.filter(k=>{const inp=document.querySelector(`[data-meas="${k}"]`);return inp&&inp.value!=='';}).length;score+=filled*4;
@@ -1127,7 +1120,7 @@ function runPreflight(){
   if(!name)issues.push('Header: Student name is required');
   const mfgRows=getMfgData();if(mfgRows.length<3)issues.push('Module 01: Minimum 3 manufacturing processes required ('+mfgRows.length+' found)');
   else{const inc=mfgRows.filter(r=>!r.process||!r.status);if(inc.length)issues.push(`Module 01: ${inc.length} row(s) missing process name or status`);}
-  const steps=getStepData();if(steps.length<2)issues.push('Module 02: Minimum 2 assembly steps required ('+steps.length+' found)');
+  const steps=getStepData().filter(s=>s.desc.trim());if(steps.length<2)issues.push('Module 02: Minimum 2 assembly steps required ('+steps.length+' found)');
   const photos=(imgStore['asm-photos']||[]).length;if(photos<2)issues.push('Module 02: Minimum 2 assembled photos required ('+photos+' found)');
   ['od','height','hexext','weight','fasteners'].forEach(k=>{const inp=document.querySelector(`[data-meas="${k}"]`);if(!inp||inp.value===''){const labels={od:'Overall Diameter',height:'Full Height',hexext:'Hex Extension',weight:'Total Weight',fasteners:'Fasteners'};issues.push('Module 03: '+labels[k]+' not entered');}});
   if(!document.querySelector('[data-field="declaration"]')?.checked)issues.push('Declaration: Build integrity declaration not checked');
