@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" sizes="512x512" href="/IDEA/android-chrome-512x512.png">
+<title>IDEA Coins - Leaderboard &amp; Transactions</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600&display=swap');
+
+:root {
+  --bg0: #020A04;
+  --bg1: #050F07;
+  --bg2: #081209;
+  --green: #00FF41;
+  --gold: #C8FF00;
+  --cyan: #00F0FF;
+  --amber: #FF8C00;
+  --teal: #00AA88;
+  --white: #E8FFE8;
+  --dim: #4A7A52;
+  --ice: #88DDFF;
+  --red: #FF4444;
+  --blue: #4488FF;
+  --glow-green: 0 0 10px rgba(0,255,65,0.8), 0 0 28px rgba(0,255,65,0.3);
+  --glow-gold: 0 0 10px rgba(200,255,0,0.8), 0 0 28px rgba(200,255,0,0.3);
+  --glow-cyan: 0 0 10px rgba(0,240,255,0.8), 0 0 28px rgba(0,240,255,0.3);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg0);
+  color: var(--white);
+  font-family: 'Share Tech Mono', monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+#bg-canvas {
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0; pointer-events: none; opacity: 0.35;
+}
+
+#scroll-bar {
+  position: fixed; top: 0; left: 0;
+  height: 2px; width: 0%;
+  background: var(--gold);
+  box-shadow: var(--glow-gold);
+  z-index: 1000; transition: width 0.1s linear;
+}
+
+header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(2,10,4,0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0,255,65,0.15);
+  padding: 0 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 64px; gap: 1rem;
+}
+.logo {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 900; font-size: 1.5rem;
+  color: var(--green); text-shadow: var(--glow-green);
+  letter-spacing: 0.15em; text-decoration: none; white-space: nowrap;
+}
+.logo span { color: var(--gold); text-shadow: var(--glow-gold); }
+.header-right { display: flex; align-items: center; gap: 2rem; }
+nav { display: flex; gap: 1.5rem; align-items: center; }
+nav a {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.62rem; font-weight: 600;
+  letter-spacing: 0.12em; color: var(--dim);
+  text-decoration: none; text-transform: uppercase;
+  transition: color 0.2s, text-shadow 0.2s; cursor: pointer; white-space: nowrap;
+}
+nav a:hover { color: var(--green); text-shadow: var(--glow-green); }
+nav a.active { color: var(--gold); text-shadow: var(--glow-gold); }
+.header-year {
+  font-size: 0.6rem; color: var(--dim); letter-spacing: 0.1em; white-space: nowrap;
+  border: 1px solid rgba(74,122,82,0.4); padding: 0.2rem 0.5rem; border-radius: 2px;
+}
+
+.page-wrap {
+  position: relative; z-index: 1;
+  max-width: 1100px; margin: 0 auto;
+  padding: 3rem 2rem 5rem;
+}
+
+.page-eyebrow {
+  font-size: 0.65rem; letter-spacing: 0.25em;
+  color: var(--teal); text-transform: uppercase;
+  margin-bottom: 0.75rem; font-family: 'Orbitron', sans-serif;
+}
+.page-title {
+  font-family: 'Orbitron', sans-serif; font-weight: 900;
+  font-size: clamp(1.6rem, 3.5vw, 2.8rem);
+  line-height: 1.05; color: var(--white); margin-bottom: 0.3rem;
+}
+.page-title .accent { color: var(--gold); text-shadow: var(--glow-gold); }
+.page-sub { font-size: 0.78rem; color: var(--dim); margin-top: 0.4rem; }
+
+.last-updated {
+  display: inline-block; margin-top: 0.75rem;
+  font-size: 0.6rem; color: var(--dim); letter-spacing: 0.12em;
+  border: 1px solid rgba(74,122,82,0.3); padding: 0.2rem 0.6rem; border-radius: 2px;
+  transition: color 0.4s, border-color 0.4s;
+}
+.last-updated.fresh { color: var(--teal); border-color: rgba(0,170,136,0.5); }
+
+.tab-bar {
+  display: flex; gap: 0; margin-top: 2rem; margin-bottom: 2rem;
+  border-bottom: 1px solid rgba(0,255,65,0.12);
+}
+.tab-btn {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.62rem; font-weight: 600; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--dim);
+  background: none; border: none; border-bottom: 2px solid transparent;
+  padding: 0.65rem 1.4rem; cursor: pointer; margin-bottom: -1px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.tab-btn:hover { color: var(--white); }
+.tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); text-shadow: var(--glow-gold); }
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+.loading-state {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 3rem 0; color: var(--dim); font-size: 0.75rem;
+  letter-spacing: 0.08em;
+}
+.loading-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--gold); box-shadow: var(--glow-gold);
+  animation: blink 1s ease-in-out infinite;
+}
+.loading-dot:nth-child(2) { animation-delay: 0.2s; }
+.loading-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink {
+  0%,100% { opacity: 0.15; } 50% { opacity: 1; }
+}
+
+.filter-bar {
+  display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;
+}
+.filter-btn {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.54rem; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--dim); background: none;
+  border: 1px solid rgba(74,122,82,0.3); border-radius: 2px;
+  padding: 0.3rem 0.8rem; cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+.filter-btn:hover { color: var(--white); border-color: rgba(0,255,65,0.3); }
+.filter-btn.active {
+  color: var(--gold); border-color: rgba(200,255,0,0.5);
+  background: rgba(200,255,0,0.05); text-shadow: var(--glow-gold);
+}
+
+.leaderboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.coin-card {
+  background: var(--bg1);
+  border: 1px solid rgba(0,255,65,0.12);
+  border-radius: 4px; padding: 1.2rem 1.4rem;
+  position: relative; overflow: hidden;
+  opacity: 0; transform: translateY(16px);
+  transition: opacity 0.45s ease, transform 0.45s ease, border-color 0.3s;
+}
+.coin-card.visible { opacity: 1; transform: translateY(0); }
+.coin-card:hover { border-color: rgba(200,255,0,0.3); }
+.coin-card.negative {
+  background: rgba(40, 4, 4, 0.7);
+  border-color: rgba(255,68,68,0.18);
+}
+.coin-card.negative:hover { border-color: rgba(255,68,68,0.45); }
+.coin-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(160deg, rgba(200,255,0,0.04) 0%, transparent 55%);
+  opacity: 0; transition: opacity 0.3s; pointer-events: none;
+}
+.coin-card:hover::before { opacity: 1; }
+.coin-card.negative::before {
+  background: linear-gradient(160deg, rgba(255,68,68,0.06) 0%, transparent 55%);
+}
+
+.coin-rank {
+  font-family: 'Orbitron', sans-serif; font-size: 0.5rem;
+  color: var(--dim); letter-spacing: 0.18em; margin-bottom: 0.5rem;
+}
+.coin-name {
+  font-family: 'Orbitron', sans-serif; font-size: 0.88rem; font-weight: 700;
+  color: var(--white); letter-spacing: 0.04em; margin-bottom: 0.15rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.coin-section {
+  font-size: 0.58rem; color: var(--dim); letter-spacing: 0.1em; margin-bottom: 1rem;
+}
+.coin-balance-label {
+  font-size: 0.5rem; color: var(--dim); letter-spacing: 0.18em;
+  text-transform: uppercase; margin-bottom: 0.15rem; font-family: 'Orbitron', sans-serif;
+}
+.coin-balance {
+  font-family: 'Orbitron', sans-serif; font-weight: 700;
+  font-size: 2.1rem; line-height: 1;
+  color: var(--gold); text-shadow: var(--glow-gold);
+  animation: breathe-gold 3s ease-in-out infinite;
+}
+.coin-card.negative .coin-balance {
+  color: var(--red); text-shadow: 0 0 10px rgba(255,68,68,0.8), 0 0 28px rgba(255,68,68,0.3);
+  animation: none;
+}
+@keyframes breathe-gold {
+  0%,100% { text-shadow: 0 0 8px rgba(200,255,0,0.6), 0 0 20px rgba(200,255,0,0.2); }
+  50%      { text-shadow: 0 0 16px rgba(200,255,0,1), 0 0 40px rgba(200,255,0,0.5); }
+}
+
+.coin-meta {
+  display: flex; gap: 1.5rem; margin-top: 0.85rem; padding-top: 0.7rem;
+  border-top: 1px solid rgba(0,255,65,0.07);
+}
+.coin-meta-item { display: flex; flex-direction: column; gap: 0.1rem; }
+.coin-meta-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.48rem; color: var(--dim); letter-spacing: 0.15em; text-transform: uppercase;
+}
+.coin-meta-value { font-size: 0.72rem; color: var(--ice); }
+.coin-meta-debt { color: var(--red); }
+
+.txn-filters {
+  display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.2rem; align-items: center;
+}
+.txn-search {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(74,122,82,0.3); border-radius: 2px;
+  color: var(--white); font-family: 'Share Tech Mono', monospace;
+  font-size: 0.65rem; padding: 0.35rem 0.75rem; width: 200px; outline: none;
+  letter-spacing: 0.04em; transition: border-color 0.2s;
+}
+.txn-search::placeholder { color: var(--dim); }
+.txn-search:focus { border-color: rgba(0,255,65,0.5); }
+
+.txn-type-select {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(74,122,82,0.3); border-radius: 2px;
+  color: var(--white); font-family: 'Share Tech Mono', monospace;
+  font-size: 0.65rem; padding: 0.35rem 0.75rem; outline: none;
+  letter-spacing: 0.04em; transition: border-color 0.2s; cursor: pointer;
+  -webkit-appearance: none; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%234A7A52'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 0.6rem center;
+  padding-right: 1.8rem;
+}
+.txn-type-select:focus { border-color: rgba(0,255,65,0.5); }
+.txn-type-select option { background: #050F07; color: var(--white); }
+
+.txn-count {
+  font-size: 0.6rem; color: var(--dim); letter-spacing: 0.1em; margin-left: auto;
+  font-family: 'Orbitron', sans-serif;
+}
+
+.txn-table-wrap { overflow-x: auto; }
+.txn-table {
+  width: 100%; border-collapse: collapse; font-size: 0.72rem;
+}
+.txn-table th {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.5rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--dim); padding: 0.5rem 1rem;
+  border-bottom: 1px solid rgba(0,255,65,0.15);
+  text-align: left; white-space: nowrap;
+}
+.txn-table td {
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid rgba(0,255,65,0.05);
+  color: var(--white); letter-spacing: 0.02em;
+  vertical-align: middle;
+}
+.txn-table tr:hover td { background: rgba(0,255,65,0.025); }
+.txn-table tr:last-child td { border-bottom: none; }
+.txn-date { color: var(--dim); font-size: 0.62rem; white-space: nowrap; }
+.txn-name { color: var(--ice); white-space: nowrap; }
+.txn-amount {
+  font-family: 'Orbitron', sans-serif; font-size: 0.7rem; font-weight: 600; white-space: nowrap;
+}
+.txn-amount.positive { color: var(--green); }
+.txn-amount.negative { color: var(--red); }
+.txn-reason { color: var(--dim); font-size: 0.63rem; }
+
+.type-badge {
+  display: inline-block; font-family: 'Orbitron', sans-serif;
+  font-size: 0.46rem; letter-spacing: 0.15em; text-transform: uppercase;
+  padding: 0.2rem 0.5rem; border-radius: 2px; white-space: nowrap;
+}
+.type-award  { color: var(--green); border: 1px solid rgba(0,255,65,0.35); background: rgba(0,255,65,0.07); }
+.type-fine   { color: var(--red);   border: 1px solid rgba(255,68,68,0.35); background: rgba(255,68,68,0.07); }
+.type-purchase { color: var(--amber); border: 1px solid rgba(255,140,0,0.35); background: rgba(255,140,0,0.07); }
+.type-payout { color: var(--blue);  border: 1px solid rgba(68,136,255,0.35); background: rgba(68,136,255,0.07); }
+.type-other  { color: var(--dim);   border: 1px solid rgba(74,122,82,0.3);  background: transparent; }
+
+footer {
+  position: relative; z-index: 1;
+  border-top: 1px solid rgba(0,255,65,0.1);
+  padding: 2rem; text-align: center;
+}
+.footer-logo {
+  font-family: 'Orbitron', sans-serif; font-size: 0.72rem;
+  font-weight: 700; color: var(--dim); letter-spacing: 0.2em; margin-bottom: 0.5rem;
+}
+.footer-sub { font-size: 0.58rem; color: rgba(74,122,82,0.6); letter-spacing: 0.1em; }
+
+body::after {
+  content: ''; position: fixed; inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px);
+  pointer-events: none; z-index: 999;
+}
+
+.empty-row td {
+  color: var(--dim); font-size: 0.72rem; padding: 1.5rem 1rem;
+}
+
+@media (max-width: 768px) {
+  header { height: auto; padding: 0.8rem 1rem; flex-wrap: wrap; }
+  .logo { font-size: 1.1rem; }
+  .header-right { gap: 0.75rem; }
+  .header-year { display: none; }
+  nav { gap: 0.75rem; }
+  nav a { font-size: 0.55rem; }
+  .page-wrap { padding: 2rem 1rem 3rem; }
+  .leaderboard-grid { grid-template-columns: 1fr 1fr; }
+  .txn-search { width: 140px; }
+  .txn-count { display: none; }
+}
+
+@media (max-width: 520px) {
+  .leaderboard-grid { grid-template-columns: 1fr; }
+  .tab-btn { font-size: 0.56rem; padding: 0.55rem 0.9rem; }
+  .txn-reason { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coin-card { opacity: 1; transform: none; transition: none; }
+  .coin-balance { animation: none; }
+  * { transition-duration: 0.01ms !important; }
+}
+</style>
+</head>
+<body>
+
+<div id="scroll-bar"></div>
+<canvas id="bg-canvas"></canvas>
+
+<header>
+  <a class="logo" href="/IDEA/">IDEA<span>.</span></a>
+  <div class="header-right">
+    <nav>
+      <a href="/IDEA/">Portal</a>
+      <a href="/IDEA/coins/" class="active">Coins</a>
+    </nav>
+    <div class="header-year">2025 - 2026</div>
+  </div>
+</header>
+
+<div class="page-wrap">
+  <div class="page-eyebrow">IDEA Pathway &mdash; Don Bosco Technical Institute</div>
+  <h1 class="page-title">IDEA <span class="accent">Coin</span> Ledger</h1>
+  <p class="page-sub">Live leaderboard and transaction history. Read-only. Refreshes every 60 seconds.</p>
+  <div class="last-updated" id="last-updated">Fetching data&hellip;</div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="leaderboard">Leaderboard</button>
+    <button class="tab-btn" data-tab="transactions">Transaction Log</button>
+  </div>
+
+  <!-- Leaderboard Tab -->
+  <div class="tab-panel active" id="tab-leaderboard">
+    <div class="filter-bar" id="section-filters">
+      <button class="filter-btn active" data-section="All">All</button>
+      <button class="filter-btn" data-section="IDEA-113">IDEA-113</button>
+      <button class="filter-btn" data-section="IDEA-208-2">IDEA-208-2</button>
+      <button class="filter-btn" data-section="IDEA-304.1">IDEA-304.1</button>
+      <button class="filter-btn" data-section="IDEA-403">IDEA-403</button>
+    </div>
+    <div id="leaderboard-loading" class="loading-state">
+      <div class="loading-dot"></div>
+      <div class="loading-dot"></div>
+      <div class="loading-dot"></div>
+      <span>Loading leaderboard&hellip;</span>
+    </div>
+    <div class="leaderboard-grid" id="leaderboard-grid" style="display:none"></div>
+  </div>
+
+  <!-- Transaction Log Tab -->
+  <div class="tab-panel" id="tab-transactions">
+    <div class="txn-filters">
+      <input type="text" class="txn-search" id="txn-name-filter" placeholder="Filter by name&hellip;">
+      <select class="txn-type-select" id="txn-type-filter">
+        <option value="">All Types</option>
+        <option value="Award">Award</option>
+        <option value="Fine">Fine</option>
+        <option value="Purchase">Purchase</option>
+        <option value="Payout">Payout</option>
+      </select>
+      <span class="txn-count" id="txn-count"></span>
+    </div>
+    <div id="txn-loading" class="loading-state">
+      <div class="loading-dot"></div>
+      <div class="loading-dot"></div>
+      <div class="loading-dot"></div>
+      <span>Loading transactions&hellip;</span>
+    </div>
+    <div class="txn-table-wrap" id="txn-table-wrap" style="display:none">
+      <table class="txn-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Name</th>
+            <th>Amount</th>
+            <th>Type</th>
+            <th>Reason</th>
+          </tr>
+        </thead>
+        <tbody id="txn-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo">IDEA &mdash; Integrated Design, Engineering &amp; Art</div>
+  <div class="footer-sub">Don Bosco Technical Institute &bull; Rosemead, CA &bull; mrpina-dev.github.io/IDEA</div>
+</footer>
+
+<script>
+const SUMMARY_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTHVkr4mLhBYvO6tDjQxC-nFoc5rKG0CRySci77ac2a1bM4oDSGJef5McBYlhI6nXE2dlfgCy7UuRbn/pub?gid=1867931882&single=true&output=csv";
+const TRANSACTIONS_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTHVkr4mLhBYvO6tDjQxC-nFoc5rKG0CRySci77ac2a1bM4oDSGJef5McBYlhI6nXE2dlfgCy7UuRbn/pub?gid=256552383&single=true&output=csv";
+
+function parseCSVRow(line) {
+  const result = [];
+  let current = '', inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQuotes && line[i + 1] === '"') { current += '"'; i++; }
+      else { inQuotes = !inQuotes; }
+    } else if (ch === ',' && !inQuotes) {
+      result.push(current); current = '';
+    } else {
+      current += ch;
+    }
+  }
+  result.push(current);
+  return result;
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  if (lines.length < 2) return [];
+  const headers = parseCSVRow(lines[0]).map(h => h.trim());
+  return lines.slice(1).map(line => {
+    const vals = parseCSVRow(line);
+    const row = {};
+    headers.forEach((h, i) => { row[h] = (vals[i] || '').trim(); });
+    return row;
+  }).filter(row => headers.some(h => row[h]));
+}
+
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function fmtNum(n) {
+  if (isNaN(n)) return '—';
+  return n.toLocaleString(undefined, { maximumFractionDigits: 0 });
+}
+
+function pick(row) {
+  return function(...keys) {
+    for (const k of keys) {
+      if (row[k] !== undefined && row[k] !== '') return row[k];
+    }
+    return '';
+  };
+}
+
+function typeBadgeClass(type) {
+  switch ((type || '').toLowerCase()) {
+    case 'award':    return 'type-award';
+    case 'fine':     return 'type-fine';
+    case 'purchase': return 'type-purchase';
+    case 'payout':   return 'type-payout';
+    default:         return 'type-other';
+  }
+}
+
+let summaryData = [];
+let txnData = [];
+let activeSection = 'All';
+let txnNameQ = '';
+let txnTypeQ = '';
+let loaded = false;
+
+async function fetchData() {
+  try {
+    const [sRes, tRes] = await Promise.all([
+      fetch(SUMMARY_CSV + '&_=' + Date.now()),
+      fetch(TRANSACTIONS_CSV + '&_=' + Date.now())
+    ]);
+    summaryData = parseCSV(await sRes.text());
+    txnData = parseCSV(await tRes.text());
+
+    summaryData.sort((a, b) => {
+      const p = r => parseFloat(pick(r)('Coin Balance', 'Coins', 'Balance') || 0);
+      return p(b) - p(a);
+    });
+
+    txnData.sort((a, b) => {
+      const da = new Date(pick(a)('Date', 'Timestamp') || 0);
+      const db = new Date(pick(b)('Date', 'Timestamp') || 0);
+      return db - da;
+    });
+
+    renderLeaderboard();
+    renderTransactions();
+
+    const ts = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const el = document.getElementById('last-updated');
+    el.textContent = 'Last updated: ' + ts;
+    el.classList.add('fresh');
+    setTimeout(() => el.classList.remove('fresh'), 3000);
+
+    if (!loaded) {
+      loaded = true;
+      document.getElementById('leaderboard-loading').style.display = 'none';
+      document.getElementById('leaderboard-grid').style.display = 'grid';
+      document.getElementById('txn-loading').style.display = 'none';
+      document.getElementById('txn-table-wrap').style.display = 'block';
+    }
+  } catch (err) {
+    const el = document.getElementById('last-updated');
+    el.textContent = 'Fetch error — retrying in 60s';
+  }
+}
+
+function renderLeaderboard() {
+  const grid = document.getElementById('leaderboard-grid');
+  const data = activeSection === 'All'
+    ? summaryData
+    : summaryData.filter(r => (pick(r)('Section', 'Class') || '').trim() === activeSection);
+
+  grid.innerHTML = '';
+
+  if (!data.length) {
+    grid.innerHTML = '<div style="color:var(--dim);font-size:0.78rem;padding:1rem 0;grid-column:1/-1">No students found.</div>';
+    return;
+  }
+
+  data.forEach((row, i) => {
+    const p = pick(row);
+    const name     = p('Name', 'Student', 'Full Name') || '—';
+    const section  = p('Section', 'Class', 'Course') || '—';
+    const coinBal  = parseFloat(p('Coin Balance', 'Coins', 'Balance') || 0);
+    const bankBal  = parseFloat(p('Bank Balance', 'Bank') || 0);
+    const debt     = parseFloat(p('Debt') || 0);
+    const isNeg    = coinBal < 0;
+
+    const card = document.createElement('div');
+    card.className = 'coin-card' + (isNeg ? ' negative' : '');
+    card.style.transitionDelay = Math.min(i * 0.04, 0.6) + 's';
+
+    card.innerHTML =
+      '<div class="coin-rank">#' + (i + 1) + '</div>' +
+      '<div class="coin-name">' + escHtml(name) + '</div>' +
+      '<div class="coin-section">' + escHtml(section) + '</div>' +
+      '<div class="coin-balance-label">Coin Balance</div>' +
+      '<div class="coin-balance">' + fmtNum(coinBal) + '</div>' +
+      '<div class="coin-meta">' +
+        '<div class="coin-meta-item">' +
+          '<span class="coin-meta-label">Bank</span>' +
+          '<span class="coin-meta-value">' + fmtNum(bankBal) + '</span>' +
+        '</div>' +
+        (debt > 0
+          ? '<div class="coin-meta-item">' +
+              '<span class="coin-meta-label">Debt</span>' +
+              '<span class="coin-meta-value coin-meta-debt">' + fmtNum(debt) + '</span>' +
+            '</div>'
+          : '') +
+      '</div>';
+
+    grid.appendChild(card);
+    requestAnimationFrame(() => requestAnimationFrame(() => card.classList.add('visible')));
+  });
+}
+
+function renderTransactions() {
+  const tbody = document.getElementById('txn-tbody');
+  const countEl = document.getElementById('txn-count');
+
+  const filtered = txnData.filter(row => {
+    const p = pick(row);
+    const name = (p('Name', 'Student', 'Full Name') || '').toLowerCase();
+    const type = p('Type', 'Transaction Type') || '';
+    if (txnNameQ && !name.includes(txnNameQ)) return false;
+    if (txnTypeQ && type.toLowerCase() !== txnTypeQ.toLowerCase()) return false;
+    return true;
+  });
+
+  countEl.textContent = filtered.length + ' transaction' + (filtered.length !== 1 ? 's' : '');
+  tbody.innerHTML = '';
+
+  if (!filtered.length) {
+    const tr = document.createElement('tr');
+    tr.className = 'empty-row';
+    tr.innerHTML = '<td colspan="5">No transactions match your filter.</td>';
+    tbody.appendChild(tr);
+    return;
+  }
+
+  filtered.forEach(row => {
+    const p = pick(row);
+    const date   = p('Date', 'Timestamp') || '—';
+    const name   = p('Name', 'Student', 'Full Name') || '—';
+    const amount = parseFloat(p('Amount') || 0);
+    const type   = p('Type', 'Transaction Type') || '—';
+    const reason = p('Reason', 'Description', 'Note') || '—';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td class="txn-date">' + escHtml(date) + '</td>' +
+      '<td class="txn-name">' + escHtml(name) + '</td>' +
+      '<td class="txn-amount ' + (amount >= 0 ? 'positive' : 'negative') + '">' +
+        (amount >= 0 ? '+' : '') + fmtNum(amount) +
+      '</td>' +
+      '<td><span class="type-badge ' + typeBadgeClass(type) + '">' + escHtml(type) + '</span></td>' +
+      '<td class="txn-reason">' + escHtml(reason) + '</td>';
+    tbody.appendChild(tr);
+  });
+}
+
+// Tab switching
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// Section filters
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeSection = btn.dataset.section;
+    if (loaded) renderLeaderboard();
+  });
+});
+
+// Transaction filters
+document.getElementById('txn-name-filter').addEventListener('input', e => {
+  txnNameQ = e.target.value.trim().toLowerCase();
+  if (loaded) renderTransactions();
+});
+document.getElementById('txn-type-filter').addEventListener('change', e => {
+  txnTypeQ = e.target.value;
+  if (loaded) renderTransactions();
+});
+
+// Scroll progress bar
+const scrollBar = document.getElementById('scroll-bar');
+window.addEventListener('scroll', () => {
+  const total = document.documentElement.scrollHeight - window.innerHeight;
+  scrollBar.style.width = (total > 0 ? (window.scrollY / total) * 100 : 0) + '%';
+}, { passive: true });
+
+// Fetch on load + every 60 seconds
+fetchData();
+setInterval(fetchData, 60000);
+
+// Background particles
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let W, H;
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+resize();
+window.addEventListener('resize', resize);
+function rand(a, b) { return Math.random() * (b - a) + a; }
+class Particle {
+  constructor() { this.reset(); }
+  reset() {
+    this.x = rand(0, W); this.y = rand(0, H);
+    this.size = rand(0.7, 2.0);
+    this.speedX = rand(-0.12, 0.12); this.speedY = rand(-0.22, -0.04);
+    this.opacity = rand(0.15, 0.85); this.fadeSpeed = rand(0.002, 0.006); this.fading = false;
+  }
+  update() {
+    this.x += this.speedX; this.y += this.speedY;
+    this.opacity += this.fading ? -this.fadeSpeed * 3 : this.fadeSpeed;
+    if (this.opacity >= 0.85) this.fading = true;
+    if (this.y < -10 || this.opacity <= 0) this.reset();
+  }
+  draw() {
+    ctx.save(); ctx.globalAlpha = Math.max(0, this.opacity);
+    ctx.fillStyle = '#C8FF00'; ctx.shadowBlur = 4; ctx.shadowColor = '#C8FF00';
+    ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fill(); ctx.restore();
+  }
+}
+const particles = Array.from({ length: 90 }, () => new Particle());
+function animate() {
+  ctx.clearRect(0, 0, W, H);
+  particles.forEach(p => { p.update(); p.draw(); });
+  requestAnimationFrame(animate);
+}
+const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+if (!mq.matches) animate();
+else canvas.style.display = 'none';
+</script>
+</body>
+</html>
