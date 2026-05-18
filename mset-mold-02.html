@@ -26,7 +26,7 @@ body{background:#020A04;color:var(--white);font-family:var(--font-b);font-size:1
 body.dragging{cursor:grabbing!important}
 #bg-canvas{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;pointer-events:none;display:block}
 #scroll-bar{position:fixed;top:0;left:0;height:2px;width:0%;background:linear-gradient(90deg,var(--green),var(--gold));box-shadow:var(--glow-green);z-index:600;transition:width .08s linear}
-#save-status{position:fixed;top:8px;right:14px;z-index:600;font-family:var(--font-u);font-size:10px;color:var(--dim);letter-spacing:.5px;pointer-events:none;transition:color .3s,text-shadow .3s}
+#save-status{font-family:var(--font-u);font-size:10px;color:var(--dim);letter-spacing:.5px;pointer-events:none;transition:color .3s,text-shadow .3s}
 #save-status.saved{color:var(--green);text-shadow:var(--glow-green)}
 #save-status.off,#save-status.warn{color:var(--amber)}
 #ver-warn{display:none;position:fixed;top:48px;left:50%;transform:translateX(-50%);background:rgba(255,140,0,.1);border:1px solid var(--amber);padding:9px 22px;font-family:var(--font-u);font-size:12px;color:var(--amber);z-index:550;text-align:center}
@@ -46,7 +46,7 @@ body.dragging{cursor:grabbing!important}
 .tb-b{border-color:var(--dim);color:var(--dim)}.tb-b:hover{border-color:var(--white);color:var(--white)}
 .tb-c{border-color:rgba(255,140,0,.3);color:rgba(255,140,0,.5)}.tb-c:hover{border-color:var(--amber);color:var(--amber)}
 #main{position:relative;z-index:2;max-width:980px;margin:0 auto;padding:36px 24px 100px}
-#title-block,#inst-wrap,.module,#gate,#decl,#sub-ck,#instr-sect{background:rgba(5,15,7,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);position:relative}
+#title-block,#inst-wrap,.module,#gate,#decl,#sub-ck{background:rgba(5,15,7,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);position:relative}
 #title-block{border:1.5px solid rgba(0,255,65,.35);margin-bottom:28px;font-family:var(--font-d);transition:box-shadow .35s,border-color .35s}
 #title-block:hover{border-color:rgba(0,255,65,.6);box-shadow:0 0 24px rgba(0,255,65,.18)}
 .tbl-top{display:flex;border-bottom:1px solid rgba(0,255,65,.2)}
@@ -228,7 +228,7 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
 #gate-submit:hover{background:rgba(0,255,65,.1);box-shadow:var(--glow-green)}
 #gate-err{font-family:var(--font-u);font-size:11px;color:var(--amber);margin-top:10px;min-height:16px}
 #gate-approved-state{display:none}
-.ga-icon{font-size:32px;margin-bottom:8px}
+.ga-icon{font-size:48px;margin-bottom:12px;color:var(--green);text-shadow:var(--glow-green);animation:glowGreen 2s ease-in-out infinite}
 .ga-title{font-family:var(--font-d);font-size:18px;font-weight:700;color:var(--green);letter-spacing:3px;text-transform:uppercase;text-shadow:var(--glow-green)}
 .ga-ts{font-family:var(--font-b);font-size:11px;color:var(--cyan);margin-top:8px;animation:glowCyan 4s ease-in-out infinite}
 .print-mirror{display:none;font-family:var(--font-d);font-size:13px;color:var(--white);padding:4px 0;line-height:1.6;white-space:pre-wrap;word-break:break-word}
@@ -269,6 +269,12 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
 @keyframes glowGold{0%,100%{text-shadow:0 0 5px rgba(200,255,0,.2)}50%{text-shadow:var(--glow-gold)}}
 @keyframes glowCyan{0%,100%{text-shadow:0 0 5px rgba(0,240,255,.2)}50%{text-shadow:var(--glow-cyan)}}
 @keyframes gateFlicker{0%,100%{border-color:rgba(0,255,65,.25)}25%{border-color:var(--green)}75%{border-color:rgba(0,255,65,.1)}}
+@keyframes gateBorderFlash{0%,33%,67%,100%{border-color:rgba(0,255,65,.25);box-shadow:none}16%,50%,83%{border-color:var(--green);box-shadow:var(--glow-green)}}
+.gate-flash{animation:gateBorderFlash .6s ease!important}
+#gate-scanline{position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,transparent,var(--green),transparent);pointer-events:none;z-index:10;animation:scanlineSweep .65s ease-in-out forwards}
+@keyframes scanlineSweep{from{top:0}to{top:calc(100% - 4px)}}
+#gate-anim-txt{font-family:var(--font-b);font-size:14px;color:var(--green);letter-spacing:3px;margin-top:18px;min-height:36px}
+.gate-anim-lg{font-family:var(--font-d)!important;font-size:30px!important;font-weight:700!important;letter-spacing:5px!important;text-shadow:var(--glow-green)!important;animation:glowGreen 1s ease-in-out infinite!important}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}#bg-canvas{display:none}}
 @page{size:letter;margin:.5in}
 @media print{
@@ -295,7 +301,6 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
 <body>
 <canvas id="bg-canvas"></canvas>
 <div id="scroll-bar"></div>
-<div id="save-status">AUTO-SAVE ON</div>
 <div id="ver-warn"></div>
 <div id="tip-box"></div>
 <div id="lightbox"><div id="lb-close">[ ESC / CLOSE ]</div><img id="lb-img" src="" alt=""></div>
@@ -314,6 +319,7 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
   <div class="tb-l">
     <div id="prog-wrap"><div id="prog-track"><div id="prog-fill"></div></div><div id="prog-pct">0%</div></div>
     <div id="score-display">0 / 80 PTS</div>
+    <div id="save-status">AUTO-SAVE ON</div>
   </div>
   <div class="tb-r">
     <button class="tb-btn tb-primary" onclick="runPF('export')">EXPORT HTML</button>
@@ -426,6 +432,7 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
     <div class="fg" style="margin-top:16px">
       <div class="fl">MOLD BLOCK VIEW <span class="req">MIN 1 IMAGE</span></div>
       <div class="fhint">Use wireframe mode or set the block body to transparent so the encapsulated part is visible inside.</div>
+      <div class="warn-bar">⚠ Screenshots must show internal geometry. Use wireframe mode (View > Display > Wireframe), set bodies to transparent (right-click body > Appearance > Transparency), or hide interfering bodies in the Solid Bodies folder before screenshotting.</div>
       <div class="upload-zone" id="uz-block_view" data-key="block_view" data-min-images="1">
         <div class="paste-badge">PASTE TARGET</div>
         <div class="uz-inner"><div class="uz-lbl">Drop, paste, or <span>click to upload</span></div></div>
@@ -503,6 +510,7 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
     <div class="fg">
       <div class="fl">VIEWS <span class="req">MIN 2 IMAGES</span></div>
       <div class="fhint">Image 1: transparent or cross-section view confirming the cavity. Image 2: both mold halves visible in the part after the split.</div>
+      <div class="warn-bar">⚠ Screenshots must show internal geometry. Use wireframe mode (View > Display > Wireframe), set bodies to transparent (right-click body > Appearance > Transparency), or hide interfering bodies in the Solid Bodies folder before screenshotting.</div>
       <div class="upload-zone" id="uz-combine_split" data-key="combine_split" data-min-images="2">
         <div class="paste-badge">PASTE TARGET</div>
         <div class="uz-inner"><div class="uz-lbl">Drop, paste, or <span>click to upload</span></div></div>
@@ -521,7 +529,7 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
   </div>
   <div class="rub-panel" id="rub-3"><table class="rub-table">
     <tr><th>PTS</th><th>DESCRIPTOR</th></tr>
-    <tr><td>14</td><td>Pins and sockets created in correct bodies via Feature Scope. Pin center positions documented with reference edge distances (dual-unit). All workflow confirmations checked. Image uploaded.</td></tr>
+    <tr><td>14</td><td>Pins and sockets created in correct bodies via Feature Scope. All workflow confirmations checked. Image uploaded.</td></tr>
     <tr><td>9</td><td>Features created but Feature Scope undocumented or pin positions missing.</td></tr>
     <tr><td>5</td><td>Partial. Workflow incomplete or confirmations missing.</td></tr>
     <tr><td>0</td><td>Not submitted.</td></tr>
@@ -548,45 +556,11 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
         <li>Exit sketch.</li>
         <li><strong>Insert &gt; Features &gt; Extruded Boss/Base.</strong> Select the sketch. Set the extrude direction toward the bottom half body. Depth: <em>10.00mm / 0.394"</em>. In Feature Scope, uncheck All Bodies and select the <em>top half body only</em>. Confirm. Two cylindrical pins now protrude from the parting face of the top half.</li>
         <li>Open a <em>new sketch</em> on the same parting reference plane.</li>
-        <li>Sketch two circles at <em>identical positions</em> to Step 2, sized to <em>4.50mm / 0.177" diameter</em>. Use the same reference edge distances from Step 2.</li>
+        <li>Open a new sketch on the same parting reference plane. Use Convert Entities or sketch the same circle positions — then apply a Concentric relation between each new circle and the corresponding pin boss circle edge. This guarantees exact position match. Resize the circles to <em>4.50mm / 0.177"</em>.</li>
         <li>Exit sketch.</li>
         <li><strong>Insert &gt; Features &gt; Extruded Cut.</strong> Set direction into the bottom half body interior. Depth: <em>11.00mm / 0.433"</em>. In Feature Scope, uncheck All Bodies and select the <em>bottom half body only</em>. Confirm. Two sockets appear in the parting face of the bottom half.</li>
         <li>Verify: hide the top half in Solid Bodies. Confirm sockets are present and correctly positioned in the bottom half parting face.</li>
       </ol>
-    </div>
-    <div class="section-div">Pin Center Position Documentation</div>
-    <div class="callout">Record the distance from each pin center to two reference edges on the parting face. Use the same two reference edges for both pins. This documents the exact positions needed to replicate in the socket sketch.</div>
-    <div class="pin-grid">
-      <div class="pin-card">
-        <div class="pin-card-label">PIN 1</div>
-        <div class="pin-dim-label">Distance from Reference Edge A</div>
-        <div class="du-row" style="margin-bottom:10px">
-          <div class="du-field"><label>IN</label><input type="number" id="p1-ea-in" step="0.001" min="0" placeholder="0.000" data-save="true" oninput="syncDU('p1-ea','in');updateComp()"></div>
-          <div class="du-sep">/</div>
-          <div class="du-field"><label>MM</label><input type="number" id="p1-ea-mm" step="0.01" min="0" placeholder="0.00" data-save="true" oninput="syncDU('p1-ea','mm');updateComp()"></div>
-        </div>
-        <div class="pin-dim-label">Distance from Reference Edge B</div>
-        <div class="du-row">
-          <div class="du-field"><label>IN</label><input type="number" id="p1-eb-in" step="0.001" min="0" placeholder="0.000" data-save="true" oninput="syncDU('p1-eb','in');updateComp()"></div>
-          <div class="du-sep">/</div>
-          <div class="du-field"><label>MM</label><input type="number" id="p1-eb-mm" step="0.01" min="0" placeholder="0.00" data-save="true" oninput="syncDU('p1-eb','mm');updateComp()"></div>
-        </div>
-      </div>
-      <div class="pin-card">
-        <div class="pin-card-label">PIN 2</div>
-        <div class="pin-dim-label">Distance from Reference Edge A</div>
-        <div class="du-row" style="margin-bottom:10px">
-          <div class="du-field"><label>IN</label><input type="number" id="p2-ea-in" step="0.001" min="0" placeholder="0.000" data-save="true" oninput="syncDU('p2-ea','in');updateComp()"></div>
-          <div class="du-sep">/</div>
-          <div class="du-field"><label>MM</label><input type="number" id="p2-ea-mm" step="0.01" min="0" placeholder="0.00" data-save="true" oninput="syncDU('p2-ea','mm');updateComp()"></div>
-        </div>
-        <div class="pin-dim-label">Distance from Reference Edge B</div>
-        <div class="du-row">
-          <div class="du-field"><label>IN</label><input type="number" id="p2-eb-in" step="0.001" min="0" placeholder="0.000" data-save="true" oninput="syncDU('p2-eb','in');updateComp()"></div>
-          <div class="du-sep">/</div>
-          <div class="du-field"><label>MM</label><input type="number" id="p2-eb-mm" step="0.01" min="0" placeholder="0.00" data-save="true" oninput="syncDU('p2-eb','mm');updateComp()"></div>
-        </div>
-      </div>
     </div>
     <div class="fg">
       <div class="fl">WORKFLOW CONFIRMATIONS</div>
@@ -599,6 +573,7 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
     <div class="fg">
       <div class="fl">ALIGNMENT FEATURE VIEW <span class="req">MIN 1 IMAGE</span></div>
       <div class="fhint">Show the parting faces of both halves — pins visible on the top half, sockets visible on the bottom half. Separate images or a combined layout both acceptable.</div>
+      <div class="warn-bar">⚠ Screenshots must show internal geometry. Use wireframe mode (View > Display > Wireframe), set bodies to transparent (right-click body > Appearance > Transparency), or hide interfering bodies in the Solid Bodies folder before screenshotting.</div>
       <div class="upload-zone" id="uz-align_view" data-key="align_view" data-min-images="1">
         <div class="paste-badge">PASTE TARGET</div>
         <div class="uz-inner"><div class="uz-lbl">Drop, paste, or <span>click to upload</span></div></div>
@@ -684,6 +659,7 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
     <div class="fg">
       <div class="fl">POUR SPOUT VIEW <span class="req">MIN 1 IMAGE</span></div>
       <div class="fhint">Show the spout on the upper half and an assembled mold view illustrating the pour orientation.</div>
+      <div class="warn-bar">⚠ Screenshots must show internal geometry. Use wireframe mode (View > Display > Wireframe), set bodies to transparent (right-click body > Appearance > Transparency), or hide interfering bodies in the Solid Bodies folder before screenshotting.</div>
       <div class="upload-zone" id="uz-spout_view" data-key="spout_view" data-min-images="1">
         <div class="paste-badge">PASTE TARGET</div>
         <div class="uz-inner"><div class="uz-lbl">Drop, paste, or <span>click to upload</span></div></div>
@@ -739,12 +715,16 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
     <div class="fg">
       <div class="ck" onclick="togCk('ck-m5a',event)"><input type="checkbox" id="ck-m5a" data-save="true" onchange="updateComp()"><label><strong style="color:var(--gold)">Nozzle:</strong> 0.6mm confirmed in printer profile</label></div>
       <div class="ck" onclick="togCk('ck-m5b',event)"><input type="checkbox" id="ck-m5b" data-save="true" onchange="updateComp()"><label><strong style="color:var(--gold)">Variable Layer Height:</strong> enabled — cavity surfaces set to 0.10mm / 0.004", bulk sections set to 0.30mm / 0.012"</label></div>
-      <div class="ck" onclick="togCk('ck-m5c',event)"><input type="checkbox" id="ck-m5c" data-save="true" onchange="updateComp()"><label><strong style="color:var(--gold)">Wall Count:</strong> 5 perimeters</label></div>
-      <div class="ck" onclick="togCk('ck-m5d',event)"><input type="checkbox" id="ck-m5d" data-save="true" onchange="updateComp()"><label><strong style="color:var(--gold)">Infill:</strong> 60% — Gyroid pattern</label></div>
-      <div class="ck" onclick="togCk('ck-m5e',event)"><input type="checkbox" id="ck-m5e" data-save="true" onchange="updateComp()"><label><strong style="color:var(--gold)">Top/Bottom Shell Layers:</strong> 6</label></div>
+      <div class="ck" onclick="togCk('ck-m5c',event)"><input type="checkbox" id="ck-m5c" data-save="true" onchange="updateComp()"><label><strong style="color:var(--gold)">Wall Count:</strong> 4 perimeters</label></div>
+      <div class="ck" onclick="togCk('ck-m5d',event)"><input type="checkbox" id="ck-m5d" data-save="true" onchange="updateComp()"><label><strong style="color:var(--gold)">Infill:</strong> 20% Gyroid</label></div>
+      <div class="ck" onclick="togCk('ck-m5e',event)"><input type="checkbox" id="ck-m5e" data-save="true" onchange="updateComp()"><label><strong style="color:var(--gold)">Top/Bottom Shell Layers:</strong> 5</label></div>
       <div class="ck" onclick="togCk('ck-m5f',event)"><input type="checkbox" id="ck-m5f" data-save="true" onchange="updateComp()"><label><strong style="color:var(--gold)">Outer Wall Speed:</strong> 60mm/s</label></div>
       <div class="ck" onclick="togCk('ck-m5g',event)"><input type="checkbox" id="ck-m5g" data-save="true" onchange="updateComp()"><label><strong style="color:var(--gold)">Brim:</strong> 8mm applied to both halves</label></div>
       <div class="ck" onclick="togCk('ck-m5h',event)"><input type="checkbox" id="ck-m5h" data-save="true" onchange="updateComp()"><label><strong style="color:var(--gold)">Both mold halves</strong> loaded as separate objects on the build plate in Bambu Studio</label></div>
+    </div>
+    <button class="info-btn" onclick="togInfo('inf-step-export')">HOW TO EXPORT MOLD HALVES AS STEP AP214 FILES</button>
+    <div class="info-box" id="inf-step-export">
+      Both mold halves must be exported as separate STEP AP214 files from the multibody .SLDPRT for use in Bambu Studio or other software. For each half: (1) In the FeatureManager, expand the Solid Bodies folder. (2) Right-click the body name (e.g. MoldTop). (3) Click Save As. (4) In the Save As dialog, set file type to STEP AP214 (*.step / *.stp). (5) Click Options — ensure <em>Selected Bodies</em> is chosen, not the entire part. (6) Click OK, then Save. Repeat for the second body. You will end up with two separate .step files — one per mold half — ready to import into Bambu Studio as individual objects.
     </div>
     <div class="fg">
       <div class="fl">BAMBU STUDIO SCREENSHOT <span class="req">MIN 1 IMAGE</span></div>
@@ -838,11 +818,6 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
   <div class="fg" style="margin-top:14px">
     <div class="ck" onclick="togCk('ck-decl',event)"><input type="checkbox" id="ck-decl" data-save="true" onchange="updateComp()"><label>I confirm the above declaration</label></div>
   </div>
-</div>
-<!-- INSTRUCTOR SECTION -->
-<div id="instr-sect">
-  <div class="instr-lbl">INSTRUCTOR FEEDBACK — screen only, not printed</div>
-  <input type="text" id="instr-comment" placeholder="Type feedback before re-exporting to student..." data-save="true">
 </div>
 <!-- PRINT-ONLY SCORING TABLE -->
 <div class="print-only">
@@ -1366,18 +1341,17 @@ function collapseMeasTable(){
 /* ===== COMPLETION ===== */
 const MOD_PTS=[0,12,12,14,14,8,20];
 function ctrOk(id){const cfg=CTR_FIELDS.find(c=>c.id===id);if(!cfg)return false;const n=cntSf(id);return n>=cfg.min&&n<=cfg.max;}
-function pinFilled(){return['p1-ea-in','p1-eb-in','p2-ea-in','p2-eb-in'].every(id=>getV(id)!=='');}
 function spoutOk(){const d=parseFloat(document.getElementById('spout-dia-mm')?.value),dr=parseFloat(document.getElementById('spout-draft')?.value);return!isNaN(d)&&d>=SPOUT_MIN_MM&&!isNaN(dr)&&dr>=1&&dr<=2;}
 function m1ok(){return getV('student-name')!==''&&ctrOk('geom-confirm')&&allOffsetsOk()&&imgStore.block_view.length>=1&&getCk('ck-m1a')&&getCk('ck-m1b')&&getCk('ck-m1c');}
 function m2ok(){return ctrOk('combine-desc')&&getCk('ck-m2a')&&getCk('ck-m2b')&&getCk('ck-m2c')&&ctrOk('split-desc')&&getCk('ck-m2d')&&getCk('ck-m2e')&&imgStore.combine_split.length>=2;}
-function m3ok(){return pinFilled()&&getCk('ck-m3a')&&getCk('ck-m3b')&&getCk('ck-m3c')&&getCk('ck-m3d')&&getCk('ck-m3e')&&imgStore.align_view.length>=1;}
+function m3ok(){return getCk('ck-m3a')&&getCk('ck-m3b')&&getCk('ck-m3c')&&getCk('ck-m3d')&&getCk('ck-m3e')&&imgStore.align_view.length>=1;}
 function m4ok(){return ctrOk('pour-orient')&&ctrOk('high-point')&&ctrOk('flat-zone')&&spoutOk()&&getCk('ck-m4a')&&getCk('ck-m4b')&&getCk('ck-m4c')&&getCk('ck-m4d')&&getCk('ck-m4e')&&imgStore.spout_view.length>=1;}
 function m5ok(){return getV('machine-sel')!==''&&getCk('ck-m5a')&&getCk('ck-m5b')&&getCk('ck-m5c')&&getCk('ck-m5d')&&getCk('ck-m5e')&&getCk('ck-m5f')&&getCk('ck-m5g')&&getCk('ck-m5h')&&imgStore.bambu_ss.length>=1;}
 function m6ok(){return imgStore.print_halves.length>=1&&imgStore.print_assembled.length>=1&&measFilledCount()>=2&&ctrOk('surface-notes')&&getCk('ck-m6a')&&getCk('ck-m6b')&&getCk('ck-m6c');}
 const MFNS=[null,m1ok,m2ok,m3ok,m4ok,m5ok,m6ok];
 function m1partial(){return getV('student-name')!==''||ctrOk('geom-confirm')||allOffsetsOk();}
 function m2partial(){return ctrOk('combine-desc')||getCk('ck-m2a');}
-function m3partial(){return pinFilled()||getCk('ck-m3a');}
+function m3partial(){return getCk('ck-m3a');}
 function m4partial(){return ctrOk('pour-orient')||ctrOk('high-point');}
 function m5partial(){return getV('machine-sel')!==''||getCk('ck-m5a');}
 function m6partial(){return imgStore.print_halves.length>=1||imgStore.print_assembled.length>=1;}
@@ -1541,22 +1515,66 @@ async function submitGate(){
 }
 function runGateAnimation(ts){
   const gate=document.getElementById('gate');
-  gate.style.animation='gateFlicker .4s ease';
-  setTimeout(()=>{gate.style.animation='';},400);
-  let line='';const msg1='IDENTITY VERIFIED';const msg2='ACCESS GRANTED';
-  const tsEl=document.getElementById('gate-ts');
   const lock=document.getElementById('gate-lock-state');
   const appr=document.getElementById('gate-approved-state');
-  let idx=0;
-  const type=()=>{
-    if(idx<msg1.length){line+=msg1[idx++];tsEl.textContent=line;setTimeout(type,60);}
-    else if(idx===msg1.length){idx++;setTimeout(type,400);}
-    else if(idx<msg1.length+1+msg2.length){const ci=idx-msg1.length-1;line=msg2.slice(0,ci+1);idx++;tsEl.textContent=line;setTimeout(type,60);}
-    else{setTimeout(()=>showGateApproved(ts),300);}
-  };
-  lock.style.opacity='.5';
-  appr.style.display='block';tsEl.textContent='';
-  setTimeout(type,200);
+
+  // (a) Flash gate border green 3 times fast
+  gate.classList.add('gate-flash');
+  setTimeout(()=>gate.classList.remove('gate-flash'),700);
+
+  // (b) Scanline sweep top-to-bottom
+  const scanline=document.createElement('div');
+  scanline.id='gate-scanline';
+  gate.appendChild(scanline);
+
+  // Fade out lock state during sweep
+  lock.style.transition='opacity .4s';
+  lock.style.opacity='0';
+
+  // After sweep completes (~700ms), begin typewriter
+  setTimeout(()=>{
+    scanline.remove();
+
+    // (c) Typewriter text container
+    const animTxt=document.createElement('div');
+    animTxt.id='gate-anim-txt';
+    gate.appendChild(animTxt);
+
+    const msg1='IDENTITY VERIFIED...';
+    const msg2='ACCESS GRANTED';
+    let idx=0;
+
+    const typeMsg1=()=>{
+      if(idx<msg1.length){animTxt.textContent+=msg1[idx++];setTimeout(typeMsg1,55);}
+      else{
+        // Pause 400ms, then clear and type msg2 in large glowing style
+        setTimeout(()=>{
+          animTxt.textContent='';
+          animTxt.className='gate-anim-lg';
+          idx=0;
+          const typeMsg2=()=>{
+            if(idx<msg2.length){animTxt.textContent+=msg2[idx++];setTimeout(typeMsg2,60);}
+            else{
+              // (d) Clip-path wipe from center revealing approved state
+              setTimeout(()=>{
+                animTxt.remove();
+                lock.style.display='none';
+                appr.style.clipPath='circle(0% at 50% 50%)';
+                appr.style.display='block';
+                void appr.offsetWidth;
+                appr.style.transition='clip-path .5s ease-out';
+                appr.style.clipPath='circle(150% at 50% 50%)';
+                // (e) Finalize after wipe completes
+                setTimeout(()=>showGateApproved(ts),560);
+              },300);
+            }
+          };
+          typeMsg2();
+        },400);
+      }
+    };
+    typeMsg1();
+  },750);
 }
 function showGateApproved(ts){
   document.getElementById('gate-lock-state').style.display='none';
