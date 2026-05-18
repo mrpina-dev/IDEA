@@ -851,7 +851,7 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
   </div>
   <div class="tool-panel-body">
     <p class="callout">Use this tool to submit your mold half print jobs. Fill in a card for each part you need printed, then use the email button to open a pre-filled message to Mr. Pina. Attach your 3MF or STEP file before sending.</p>
-    <div style="background:rgba(255,176,0,.06);border:1px solid rgba(255,176,0,.25);padding:10px 14px;font-family:var(--font-u);font-size:10px;letter-spacing:.5px;color:var(--amber)">⚠ Email requests to <strong>apina@boscotech.edu</strong> — attach your 3MF or STEP file to the email before sending. Requests without attached files will not be queued.</div>
+    <div style="background:rgba(255,140,0,.07);border-left:4px solid var(--amber);border-top:1px solid rgba(255,140,0,.25);border-right:1px solid rgba(255,140,0,.25);border-bottom:1px solid rgba(255,140,0,.25);padding:11px 14px;font-family:var(--font-u);font-size:12px;letter-spacing:.4px;color:var(--amber)">⚠ USE THIS ONLY IF ALL 3D PRINTERS ARE UNAVAILABLE. If any printer is free, print directly. This queue is a last resort for when every machine in the room is occupied.</div>
     <div id="pq-container"></div>
     <button class="add-row no-print" onclick="addPrintRequest()" style="margin-top:4px">+ ADD PRINT REQUEST</button>
   </div>
@@ -1504,21 +1504,22 @@ function addPrintRequest(){
   card.innerHTML=`<div class="card-header"><span class="card-num">REQUEST #${n}</span><span class="card-name" id="pq-name-${n}">—</span><span class="card-del" onclick="document.getElementById('pq-card-${n}').remove();saveData()" title="Remove">&#x2715;</span></div>
 <div class="card-body">
 <div class="card-grid">
-<div class="card-field"><label>Student Name</label><input type="text" id="pq-student-${n}" placeholder="Last, First" oninput="updateCardName(${n});saveData()"></div>
-<div class="card-field"><label>Period</label><select id="pq-period-${n}" onchange="saveData()"><option value="">—</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option></select></div>
-<div class="card-field"><label>Printer</label><select id="pq-printer-${n}" onchange="saveData()"><option value="">— Select Printer —</option><option>X1C-1 (0.6mm nozzle)</option><option>X1C-2 (0.6mm nozzle)</option><option>X1C-3 (0.6mm nozzle)</option><option>X1C-4 (0.6mm nozzle)</option><option>H2D-1 (0.6mm nozzle)</option><option>H2D-2 (0.6mm nozzle)</option><option>H2D-3 (0.6mm nozzle)</option><option>H2D-4 (0.6mm nozzle)</option></select></div>
+<div class="card-field"><label>Student Name</label><input type="text" id="pq-student-${n}" placeholder="Last, First" oninput="updateCardName(${n});saveData()"><div class="fhint">If multiple students are printing together (recommended - faster), list all names here.</div></div>
+<div class="card-field"><label>Printer</label><select id="pq-printer-${n}" onchange="saveData()"><option value="">— Select Printer —</option><option>X1C-1 (0.6mm nozzle)</option><option>X1C-2 (0.6mm nozzle)</option><option>X1C-3 (0.6mm nozzle)</option><option>X1C-4 (0.6mm nozzle)</option><option>H2D-3 (0.6mm nozzle)</option><option>H2D-4 (0.6mm nozzle)</option></select></div>
 <div class="card-field"><label>Material</label><select id="pq-material-${n}" disabled><option>HIPS (Generic ABS)</option></select></div>
 <div class="card-field"><label>Mold Half</label><select id="pq-half-${n}" onchange="saveData()"><option value="">— Select —</option><option>Half A (Cavity Side)</option><option>Half B (Core Side)</option><option>Both Halves</option></select></div>
 <div class="card-field"><label>Estimated Print Time</label><input type="text" id="pq-time-${n}" placeholder="e.g. 3h 20m" oninput="saveData()"></div>
 </div>
 <div class="card-field"><label>Notes</label><textarea id="pq-notes-${n}" placeholder="Special instructions, support settings, color preference, etc." rows="2" oninput="autoResizePQ(this);saveData()"></textarea></div>
 <div class="card-actions">
-<button class="card-action-btn" onclick="openPQMail(${n})">&#x2709; EMAIL REQUEST</button>
+<button class="card-action-btn" onclick="openPQMail(${n})">&#x2709; Open in Gmail</button>
 <button class="card-action-btn" onclick="copyPQEmail(${n})">&#x2398; COPY EMAIL</button>
 <span class="copy-flash" id="pq-flash-${n}">COPIED</span>
 </div>
 </div>`;
   document.getElementById('pq-container').appendChild(card);
+  const sn=document.getElementById('student-name')?.value.trim();
+  if(sn){const inp=document.getElementById('pq-student-'+n);if(inp){inp.value=sn;updateCardName(n);}}
 }
 function updateCardName(n){
   const v=document.getElementById('pq-student-'+n)?.value.trim();
@@ -1540,7 +1541,7 @@ function buildPQEmail(n){
 }
 function openPQMail(n){
   const {subject,body}=buildPQEmail(n);
-  window.location.href=`mailto:${INSTRUCTOR_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.open('https://mail.google.com/mail/?view=cm&to='+encodeURIComponent(INSTRUCTOR_EMAIL)+'&su='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body),'_blank');
 }
 function copyPQEmail(n){
   const {subject,body}=buildPQEmail(n);
