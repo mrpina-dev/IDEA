@@ -8,7 +8,8 @@
       "Bash(Measure-Object -Line)",
       "Bash(Select-Object -ExpandProperty Lines)",
       "Bash(node -e ' *)",
-      "Bash(git pull *)"
+      "Bash(git pull *)",
+      "Bash(git stash *)"
     ]
   }
 }

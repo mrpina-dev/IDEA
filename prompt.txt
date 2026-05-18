@@ -1,9 +1,22 @@
-Open /IDEA/idea113-blade-04.html and make the following two changes:
+﻿Edit coins/index.html. Color code leaderboard cards by student section.
 
-1. GMAIL OPEN IN MAIL FIX - Students use Gmail in Chrome on Windows 10. The mailto: protocol does not open Gmail reliably in this setup. Replace the window.open mailto: calls in both openPQMail() and openWOMail() with direct Gmail compose URLs using this format:
-https://mail.google.com/mail/?view=cm&to=RECIPIENT&su=ENCODED_SUBJECT&body=ENCODED_BODY
-Use encodeURIComponent() for subject and body. The To field should pre-fill apina@boscotech.edu. Update both functions. Do not change the Copy Email logic.
+In the renderLeaderboard() function, add this section color map in JavaScript:
 
-2. PRINT QUEUE SELF-SERVICE NOTE - In the Print Queue tool panel body, directly above the cards container div, add a clearly visible amber callout box stating that the print queue is for scheduling only when all printers are occupied. If a printer is available, students are expected to slice and run the print themselves. Keep it to two sentences. Style it as an amber bordered notice consistent with other amber callouts in the file.
+const SECTION_COLORS = {
+  'IDEA-113':   '#00FF41',
+  'IDEA-208-1': '#C8FF00',
+  'IDEA-208-2': '#00F0FF',
+  'IDEA-304.1': '#FF8C00',
+  'IDEA-403':   '#FF88CC',
+};
 
-After all changes, commit with message "fix: Gmail compose links, print queue self-service note" and push to origin.
+For each card:
+1. Look up the student's section in SECTION_COLORS. Default to #4A7A52 if not found.
+2. Apply a 3px solid left border to the card using that color at 60% opacity.
+3. Apply a subtle top gradient inside the card using that color at 4% opacity (like the existing ::before pseudo but using the section color instead of gold).
+4. Color the .coin-section text using that color at 80% opacity instead of var(--dim).
+5. On card hover, bring the left border to 100% opacity.
+
+Do not change card background colors. The existing red tint on negative cards should be preserved - just also apply the left border color on those cards.
+
+Commit with message "feat: color code leaderboard cards by section" and push.
