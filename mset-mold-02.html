@@ -276,12 +276,42 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
 #gate-anim-txt{font-family:var(--font-b);font-size:14px;color:var(--green);letter-spacing:3px;margin-top:18px;min-height:36px}
 .gate-anim-lg{font-family:var(--font-d)!important;font-size:30px!important;font-weight:700!important;letter-spacing:5px!important;text-shadow:var(--glow-green)!important;animation:glowGreen 1s ease-in-out infinite!important}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}#bg-canvas{display:none}}
+/* ===== TOOL PANELS ===== */
+.tool-panel{border:1px solid rgba(0,255,65,.2);background:var(--bg1);margin-bottom:28px;position:relative;overflow:hidden}
+.tool-panel.visible{opacity:1;transform:translateY(0)}
+.tool-panel::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:linear-gradient(180deg,var(--green),rgba(0,255,65,.05));z-index:1}
+.tool-panel-header{display:flex;align-items:center;gap:12px;padding:12px 20px 12px 24px;border-bottom:1px solid rgba(0,255,65,.12);background:rgba(0,255,65,.03)}
+.tool-panel-icon{font-family:var(--font-u);font-size:10px;font-weight:700;color:var(--dim);letter-spacing:1px;background:rgba(0,255,65,.07);padding:3px 8px;border:1px solid rgba(0,255,65,.18)}
+.tool-panel-title{font-family:var(--font-d);font-size:14px;font-weight:700;letter-spacing:2px;color:var(--green);flex:1;text-transform:uppercase}
+.tool-panel-note{font-family:var(--font-u);font-size:10px;color:var(--dim);letter-spacing:.5px}
+.tool-panel-body{padding:20px 24px;display:flex;flex-direction:column;gap:14px;position:relative;z-index:1}
+.tool-add-btn{font-family:var(--font-u);font-size:10px;letter-spacing:1.5px;padding:7px 16px;border:1px dashed rgba(0,255,65,.3);background:transparent;color:var(--green);cursor:pointer;text-transform:uppercase;transition:all .2s;align-self:flex-start}
+.tool-add-btn:hover{border-color:rgba(0,255,65,.6);background:rgba(0,255,65,.04)}
+.req-card{border:1px solid rgba(0,255,65,.15);background:var(--bg2);margin-bottom:10px}
+.card-header{display:flex;align-items:center;gap:10px;padding:10px 16px;background:rgba(0,255,65,.03);border-bottom:1px solid rgba(0,255,65,.1)}
+.card-num{font-family:var(--font-u);font-size:10px;font-weight:700;color:var(--green);letter-spacing:2px}
+.card-name{font-family:var(--font-b);font-size:10px;color:var(--dim);letter-spacing:.5px;flex:1}
+.card-del{font-size:14px;color:var(--dim);cursor:pointer;transition:color .2s}
+.card-del:hover{color:var(--amber)}
+.card-body{padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.card-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card-field{display:flex;flex-direction:column;gap:4px}
+.card-field label{font-family:var(--font-u);font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase}
+.card-field input,.card-field select,.card-field textarea{background:var(--bg1);border:1px solid rgba(0,255,65,.12);border-bottom:1px solid rgba(0,255,65,.25);color:var(--white);font-family:var(--font-d);font-size:14px;padding:8px 10px;outline:none;width:100%;transition:border-color .2s}
+.card-field input:focus,.card-field select:focus,.card-field textarea:focus{border-color:var(--green)!important;background:rgba(0,255,65,.03)}
+.card-field select option{background:var(--bg1);color:var(--white)}
+.card-field textarea{resize:none;min-height:54px;overflow:hidden}
+.card-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:4px;padding-top:10px;border-top:1px solid rgba(0,255,65,.08)}
+.card-action-btn{font-family:var(--font-u);font-size:10px;font-weight:700;letter-spacing:2px;padding:8px 16px;border:1px solid rgba(0,255,65,.4);background:rgba(0,255,65,.05);color:var(--green);cursor:pointer;text-transform:uppercase;transition:background .2s,box-shadow .2s}
+.card-action-btn:hover{background:rgba(0,255,65,.12);box-shadow:0 0 10px rgba(0,255,65,.2)}
+.copy-flash{font-family:var(--font-b);font-size:9px;color:var(--green);letter-spacing:1px;display:none}
+.copy-flash.show{display:block}
 @page{size:letter;margin:.5in}
 @media print{
   #scroll-bar,#toolbar,.rub-btn,.rub-panel,.upload-zone,.add-row,.dup-row,.del-row,
   .drag-handle,.expand-btn,.dlg,#lightbox,#bg-canvas,.img-rm,.ctr-row,
   .info-btn,.info-box,#inst-wrap,#instr-sect,#gate-input-row,#gate-err,
-  #save-status,#ver-warn,.locked-overlay,#meas-overlay,#tip-box{display:none!important}
+  #save-status,#ver-warn,.locked-overlay,#meas-overlay,#tip-box,.tool-panel,.no-print{display:none!important}
   .print-only{display:block!important}
   .print-mirror{display:block!important}
   body{background:#020A04!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -811,6 +841,20 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
       <div class="ck" onclick="togCk('ck-m6c',event)"><input type="checkbox" id="ck-m6c" data-save="true" onchange="updateComp()"><label>Minimum 2 dimensions verified and logged in the table above</label></div>
     </div>
   </div></div>
+</div>
+<!-- PRINT QUEUE -->
+<div class="tool-panel no-print" id="pq-panel" style="opacity:1;transform:none">
+  <div class="tool-panel-header">
+    <span class="tool-panel-icon">TOOL</span>
+    <span class="tool-panel-title">Print Queue</span>
+    <span class="tool-panel-note">Submit print jobs to Mr. Pina — attach files before sending</span>
+  </div>
+  <div class="tool-panel-body">
+    <p class="callout">Use this tool to submit your mold half print jobs. Fill in a card for each part you need printed, then use the email button to open a pre-filled message to Mr. Pina. Attach your 3MF or STEP file before sending.</p>
+    <div style="background:rgba(255,176,0,.06);border:1px solid rgba(255,176,0,.25);padding:10px 14px;font-family:var(--font-u);font-size:10px;letter-spacing:.5px;color:var(--amber)">⚠ Email requests to <strong>apina@boscotech.edu</strong> — attach your 3MF or STEP file to the email before sending. Requests without attached files will not be queued.</div>
+    <div id="pq-container"></div>
+    <button class="add-row no-print" onclick="addPrintRequest()" style="margin-top:4px">+ ADD PRINT REQUEST</button>
+  </div>
 </div>
 <!-- DECLARATION -->
 <div id="decl" class="visible">
@@ -1381,6 +1425,7 @@ function gather(){
   document.querySelectorAll('[data-save="true"]').forEach(el=>{if(!el.id)return;d[el.id]=el.type==='checkbox'?el.checked:el.value;});
   d._offsets={};FACES.forEach(f=>{d._offsets[f]={in:document.getElementById('off-'+f+'-in')?.value||'',mm:document.getElementById('off-'+f+'-mm')?.value||''};});
   d._meas=getMeasRows();
+  d._printRequests=getPrintData();
   return d;
 }
 function apply(d){
@@ -1389,6 +1434,7 @@ function apply(d){
   Object.entries(d).forEach(([k,v])=>{if(k.startsWith('_'))return;const el=document.getElementById(k);if(!el)return;if(el.type==='checkbox')el.checked=v;else el.value=v;});
   if(d._offsets)FACES.forEach(f=>{const o=d._offsets[f];if(!o)return;const inEl=document.getElementById('off-'+f+'-in'),mmEl=document.getElementById('off-'+f+'-mm');if(inEl&&o.in)inEl.value=o.in;if(mmEl&&o.mm)mmEl.value=o.mm;syncOff(f,'mm');});
   if(d._meas&&d._meas.length)loadMeasRows(d._meas);else if(!document.querySelector('#meas-tbody tr')){addMeasRow();addMeasRow();}
+  loadPrintData(d._printRequests||[]);
   if(d._approved){approved=true;showGateApproved(d._approvedTs);}
   document.querySelectorAll('textarea').forEach(ta=>{ta.style.height='auto';ta.style.height=ta.scrollHeight+'px';ta.dispatchEvent(new Event('input'));});
   CTR_FIELDS.forEach(({id,min,max})=>updCtr(id,min,max));
@@ -1408,7 +1454,7 @@ async function loadData(){
   records.forEach(r=>{if(r.id.startsWith('zone-')){const key=r.id.slice(5);if(imgStore[key]!==undefined){imgStore[key]=r.data||[];renderZone(key);}}});
   const raw=localStorage.getItem(PFX+'data');
   if(raw){try{apply(JSON.parse(raw));setSS('','restored from browser');}catch(e){console.error(e);}}
-  else{if(!document.querySelector('#meas-tbody tr')){addMeasRow();addMeasRow();}}
+  else{if(!document.querySelector('#meas-tbody tr')){addMeasRow();addMeasRow();}loadPrintData([]);}
 }
 function loadImgsFromJSON(d){
   ZONES.forEach(z=>{if(d['_img_'+z]){imgStore[z]=d['_img_'+z];renderZone(z);}});
@@ -1447,6 +1493,95 @@ function toggleAutoSave(){
   setSS(autoSaveOn?'':'off',autoSaveOn?'AUTO-SAVE ON':'AUTO-SAVE OFF');
 }
 
+/* ===== PRINT QUEUE ===== */
+const INSTRUCTOR_EMAIL='apina@boscotech.edu';
+let pqCounter=0;
+function addPrintRequest(){
+  pqCounter++;
+  const n=pqCounter;
+  const card=document.createElement('div');
+  card.className='req-card';card.id='pq-card-'+n;
+  card.innerHTML=`<div class="card-header"><span class="card-num">REQUEST #${n}</span><span class="card-name" id="pq-name-${n}">—</span><span class="card-del" onclick="document.getElementById('pq-card-${n}').remove();saveData()" title="Remove">&#x2715;</span></div>
+<div class="card-body">
+<div class="card-grid">
+<div class="card-field"><label>Student Name</label><input type="text" id="pq-student-${n}" placeholder="Last, First" oninput="updateCardName(${n});saveData()"></div>
+<div class="card-field"><label>Period</label><select id="pq-period-${n}" onchange="saveData()"><option value="">—</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option></select></div>
+<div class="card-field"><label>Printer</label><select id="pq-printer-${n}" onchange="saveData()"><option value="">— Select Printer —</option><option>X1C-1 (0.6mm nozzle)</option><option>X1C-2 (0.6mm nozzle)</option><option>X1C-3 (0.6mm nozzle)</option><option>X1C-4 (0.6mm nozzle)</option><option>H2D-1 (0.6mm nozzle)</option><option>H2D-2 (0.6mm nozzle)</option><option>H2D-3 (0.6mm nozzle)</option><option>H2D-4 (0.6mm nozzle)</option></select></div>
+<div class="card-field"><label>Material</label><select id="pq-material-${n}" disabled><option>HIPS (Generic ABS)</option></select></div>
+<div class="card-field"><label>Mold Half</label><select id="pq-half-${n}" onchange="saveData()"><option value="">— Select —</option><option>Half A (Cavity Side)</option><option>Half B (Core Side)</option><option>Both Halves</option></select></div>
+<div class="card-field"><label>Estimated Print Time</label><input type="text" id="pq-time-${n}" placeholder="e.g. 3h 20m" oninput="saveData()"></div>
+</div>
+<div class="card-field"><label>Notes</label><textarea id="pq-notes-${n}" placeholder="Special instructions, support settings, color preference, etc." rows="2" oninput="autoResizePQ(this);saveData()"></textarea></div>
+<div class="card-actions">
+<button class="card-action-btn" onclick="openPQMail(${n})">&#x2709; EMAIL REQUEST</button>
+<button class="card-action-btn" onclick="copyPQEmail(${n})">&#x2398; COPY EMAIL</button>
+<span class="copy-flash" id="pq-flash-${n}">COPIED</span>
+</div>
+</div>`;
+  document.getElementById('pq-container').appendChild(card);
+}
+function updateCardName(n){
+  const v=document.getElementById('pq-student-'+n)?.value.trim();
+  const el=document.getElementById('pq-name-'+n);
+  if(el)el.textContent=v||'—';
+}
+function autoResizePQ(ta){ta.style.height='auto';ta.style.height=ta.scrollHeight+'px';}
+function buildPQEmail(n){
+  const student=document.getElementById('pq-student-'+n)?.value.trim()||getV('student-name')||'Student';
+  const period=document.getElementById('pq-period-'+n)?.value||'—';
+  const printer=document.getElementById('pq-printer-'+n)?.value||'—';
+  const material=document.getElementById('pq-material-'+n)?.value||'HIPS (Generic ABS)';
+  const half=document.getElementById('pq-half-'+n)?.value||'—';
+  const time=document.getElementById('pq-time-'+n)?.value.trim()||'—';
+  const notes=document.getElementById('pq-notes-'+n)?.value.trim()||'None';
+  const subject=`Print Request — ${student} — MSET-MOLD-02 — ${half}`;
+  const body=`Print Request — MSET-MOLD-02\n\nStudent: ${student}\nPeriod: ${period}\nMold Half: ${half}\nPrinter: ${printer}\nMaterial: ${material}\nEst. Print Time: ${time}\nNotes: ${notes}\n\n⚠ File attached to this email.`;
+  return {subject,body};
+}
+function openPQMail(n){
+  const {subject,body}=buildPQEmail(n);
+  window.location.href=`mailto:${INSTRUCTOR_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+function copyPQEmail(n){
+  const {subject,body}=buildPQEmail(n);
+  const text=`To: ${INSTRUCTOR_EMAIL}\nSubject: ${subject}\n\n${body}`;
+  navigator.clipboard.writeText(text).then(()=>{
+    const fl=document.getElementById('pq-flash-'+n);
+    if(!fl)return;fl.classList.add('show');setTimeout(()=>fl.classList.remove('show'),2000);
+  });
+}
+function getPrintData(){
+  const cards=[];
+  document.querySelectorAll('.req-card').forEach(card=>{
+    const id=card.id.replace('pq-card-','');
+    cards.push({
+      student:document.getElementById('pq-student-'+id)?.value||'',
+      period:document.getElementById('pq-period-'+id)?.value||'',
+      printer:document.getElementById('pq-printer-'+id)?.value||'',
+      half:document.getElementById('pq-half-'+id)?.value||'',
+      time:document.getElementById('pq-time-'+id)?.value||'',
+      notes:document.getElementById('pq-notes-'+id)?.value||''
+    });
+  });
+  return cards;
+}
+function loadPrintData(cards){
+  document.getElementById('pq-container').innerHTML='';
+  pqCounter=0;
+  if(!cards||!cards.length){addPrintRequest();return;}
+  cards.forEach(c=>{
+    addPrintRequest();
+    const n=pqCounter;
+    if(document.getElementById('pq-student-'+n))document.getElementById('pq-student-'+n).value=c.student||'';
+    if(document.getElementById('pq-period-'+n))document.getElementById('pq-period-'+n).value=c.period||'';
+    if(document.getElementById('pq-printer-'+n))document.getElementById('pq-printer-'+n).value=c.printer||'';
+    if(document.getElementById('pq-half-'+n))document.getElementById('pq-half-'+n).value=c.half||'';
+    if(document.getElementById('pq-time-'+n))document.getElementById('pq-time-'+n).value=c.time||'';
+    if(document.getElementById('pq-notes-'+n)){document.getElementById('pq-notes-'+n).value=c.notes||'';autoResizePQ(document.getElementById('pq-notes-'+n));}
+    updateCardName(n);
+  });
+}
+
 /* ===== DIALOGS ===== */
 function openDlg(id){document.getElementById(id)?.classList.add('open');}
 function closeDlg(id){document.getElementById(id)?.classList.remove('open');}
@@ -1467,6 +1602,7 @@ async function doClear(){
   FACES.forEach(f=>syncOff(f,'mm'));
   checkOffStat();checkSpout();
   addMeasRow();addMeasRow();
+  document.getElementById('pq-container').innerHTML='';pqCounter=0;addPrintRequest();
   updateComp();updAllMirrors();
   setSS('','cleared');
 }
