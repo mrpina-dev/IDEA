@@ -329,6 +329,131 @@ body::after {
   color: var(--dim); font-size: 0.72rem; padding: 1.5rem 1rem;
 }
 
+/* ── Stats Bar ─────────────────────────────────────── */
+.stats-bar {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem; margin-top: 1.25rem;
+}
+.stat-tile {
+  background: var(--bg1);
+  border: 1px solid rgba(200,255,0,0.18);
+  border-radius: 4px; padding: 0.85rem 1rem;
+  position: relative; overflow: hidden;
+}
+.stat-tile::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(200,255,0,0.04) 0%, transparent 60%);
+  pointer-events: none;
+}
+.stat-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.48rem; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--dim); margin-bottom: 0.4rem;
+}
+.stat-value {
+  font-family: 'Orbitron', sans-serif; font-weight: 700;
+  font-size: 1.3rem; line-height: 1;
+  color: var(--gold); text-shadow: var(--glow-gold);
+}
+
+/* ── Analytics Tab ─────────────────────────────────── */
+.analytics-divider {
+  border: none; border-top: 1px solid rgba(0,255,65,0.1); margin: 2rem 0;
+}
+.analytics-section-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.62rem; font-weight: 600;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--teal); margin-bottom: 1.25rem;
+}
+.breakdown-wrap {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;
+}
+.breakdown-table { width: 100%; border-collapse: collapse; font-size: 0.72rem; }
+.breakdown-table th {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.5rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--dim); padding: 0.4rem 0.75rem;
+  border-bottom: 1px solid rgba(0,255,65,0.15); text-align: left;
+}
+.breakdown-table td {
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid rgba(0,255,65,0.05); color: var(--white);
+}
+.breakdown-table tr:last-child td { border-bottom: none; }
+.reason-group { margin-bottom: 1.25rem; }
+.reason-group-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.52rem; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--dim); margin-bottom: 0.6rem;
+}
+.reason-item {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 0.75rem; padding: 0.35rem 0;
+  border-bottom: 1px solid rgba(0,255,65,0.04); font-size: 0.68rem;
+}
+.reason-item:last-child { border-bottom: none; }
+.reason-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.reason-count {
+  font-family: 'Orbitron', sans-serif; font-size: 0.52rem; color: var(--dim);
+  background: rgba(0,255,65,0.06); border: 1px solid rgba(0,255,65,0.15);
+  padding: 0.15rem 0.45rem; border-radius: 2px; white-space: nowrap; flex-shrink: 0;
+}
+.spotlight-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.85rem;
+}
+.spotlight-card {
+  background: var(--bg1); border: 1px solid rgba(0,255,65,0.12);
+  border-radius: 4px; padding: 1rem 1.1rem; overflow: hidden;
+}
+.spotlight-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.48rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--dim); margin-bottom: 0.45rem;
+}
+.spotlight-name {
+  font-family: 'Orbitron', sans-serif; font-weight: 700;
+  font-size: 0.8rem; color: var(--white); letter-spacing: 0.02em;
+  margin-bottom: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.spotlight-value { font-size: 0.68rem; color: var(--gold); }
+.spotlight-value.red { color: var(--red); }
+.bar-chart-outer { padding-bottom: 2.25rem; }
+.bar-chart {
+  display: flex; align-items: flex-end; gap: 4px;
+  height: 80px; border-bottom: 1px solid rgba(0,255,65,0.08);
+  overflow: visible;
+}
+.bar-col {
+  flex: 1; min-width: 16px; height: 100%;
+  display: flex; align-items: flex-end; position: relative;
+}
+.bar {
+  width: 100%; background: var(--gold);
+  box-shadow: 0 0 5px rgba(200,255,0,0.3);
+  border-radius: 2px 2px 0 0; cursor: default;
+  position: relative; transition: box-shadow 0.2s;
+}
+.bar:hover { box-shadow: 0 0 14px rgba(200,255,0,0.85); }
+.bar-tooltip {
+  display: none; position: absolute;
+  bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+  background: var(--bg1); border: 1px solid rgba(200,255,0,0.3);
+  color: var(--white); font-size: 0.58rem; letter-spacing: 0.03em;
+  padding: 0.25rem 0.5rem; border-radius: 2px;
+  white-space: nowrap; z-index: 10; pointer-events: none;
+  font-family: 'Share Tech Mono', monospace;
+}
+.bar:hover .bar-tooltip { display: block; }
+.bar-label {
+  position: absolute; top: calc(100% + 4px); left: 50%;
+  transform: rotate(-45deg); transform-origin: top left;
+  font-size: 0.46rem; color: var(--dim); white-space: nowrap;
+  font-family: 'Share Tech Mono', monospace; pointer-events: none;
+}
+.chart-note { margin-top: 0.75rem; font-size: 0.62rem; color: var(--dim); letter-spacing: 0.05em; }
+.chart-placeholder { color: var(--dim); font-size: 0.72rem; padding: 2rem 0; letter-spacing: 0.04em; }
+
 @media (max-width: 768px) {
   header { height: auto; padding: 0.8rem 1rem; flex-wrap: wrap; }
   .logo { font-size: 1.1rem; }
@@ -340,12 +465,16 @@ body::after {
   .leaderboard-grid { grid-template-columns: 1fr 1fr; }
   .txn-search { width: 140px; }
   .txn-count { display: none; }
+  .stats-bar { grid-template-columns: 1fr 1fr; }
+  .breakdown-wrap { grid-template-columns: 1fr; }
+  .spotlight-grid { grid-template-columns: 1fr 1fr; }
 }
 
 @media (max-width: 520px) {
   .leaderboard-grid { grid-template-columns: 1fr; }
   .tab-btn { font-size: 0.56rem; padding: 0.55rem 0.9rem; }
   .txn-reason { display: none; }
+  .stats-bar { grid-template-columns: 1fr 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -377,9 +506,29 @@ body::after {
   <p class="page-sub">Live leaderboard and transaction history. Read-only. Refreshes every 60 seconds.</p>
   <div class="last-updated" id="last-updated">Fetching data&hellip;</div>
 
+  <div class="stats-bar">
+    <div class="stat-tile">
+      <div class="stat-label">Coins in Circulation</div>
+      <div class="stat-value" id="stat-circulation">—</div>
+    </div>
+    <div class="stat-tile">
+      <div class="stat-label">Total Debt</div>
+      <div class="stat-value" id="stat-debt" style="color:var(--red);text-shadow:0 0 10px rgba(255,68,68,0.8),0 0 28px rgba(255,68,68,0.3)">—</div>
+    </div>
+    <div class="stat-tile">
+      <div class="stat-label">Transactions Logged</div>
+      <div class="stat-value" id="stat-txns">—</div>
+    </div>
+    <div class="stat-tile">
+      <div class="stat-label">Award / Fine Ratio</div>
+      <div class="stat-value" id="stat-ratio">—</div>
+    </div>
+  </div>
+
   <div class="tab-bar">
     <button class="tab-btn active" data-tab="leaderboard">Leaderboard</button>
     <button class="tab-btn" data-tab="transactions">Transaction Log</button>
+    <button class="tab-btn" data-tab="analytics">Analytics</button>
   </div>
 
   <div class="tab-panel active" id="tab-leaderboard">
@@ -432,6 +581,21 @@ body::after {
         <tbody id="txn-tbody"></tbody>
       </table>
     </div>
+  </div>
+
+  <div class="tab-panel" id="tab-analytics">
+    <div class="analytics-section-title">Transaction Breakdown</div>
+    <div class="breakdown-wrap">
+      <div id="analytics-breakdown-table"></div>
+      <div id="analytics-reasons"></div>
+    </div>
+    <hr class="analytics-divider">
+    <div class="analytics-section-title">Student Spotlights</div>
+    <div class="spotlight-grid" id="analytics-spotlights"></div>
+    <hr class="analytics-divider">
+    <div class="analytics-section-title">Activity Over Time</div>
+    <div id="analytics-chart"></div>
+    <div class="chart-note" id="analytics-chart-note"></div>
   </div>
 </div>
 
@@ -538,6 +702,8 @@ async function fetchData() {
 
     renderLeaderboard();
     renderTransactions();
+    updateStatsBar();
+    renderAnalytics();
 
     const ts = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     const el = document.getElementById('last-updated');
@@ -556,6 +722,152 @@ async function fetchData() {
     const el = document.getElementById('last-updated');
     el.textContent = 'Fetch error — retrying in 60s';
   }
+}
+
+function updateStatsBar() {
+  const circulation = summaryData.reduce((s, r) => {
+    const bal = parseFloat(pick(r)('Awarded') || 0) - parseFloat(pick(r)('Fines') || 0);
+    return s + Math.max(0, bal);
+  }, 0);
+  const totalDebt    = summaryData.reduce((s, r) => s + parseFloat(pick(r)('Debt') || 0), 0);
+  const totalAwarded = summaryData.reduce((s, r) => s + parseFloat(pick(r)('Awarded') || 0), 0);
+  const totalFines   = summaryData.reduce((s, r) => s + parseFloat(pick(r)('Fines') || 0), 0);
+  const ratio = totalFines > 0 ? (totalAwarded / totalFines).toFixed(1) + ':1' : 'No Fines';
+  document.getElementById('stat-circulation').textContent = fmtNum(circulation);
+  document.getElementById('stat-debt').textContent = fmtNum(totalDebt);
+  document.getElementById('stat-txns').textContent = txnData.length.toLocaleString();
+  document.getElementById('stat-ratio').textContent = ratio;
+}
+
+function renderAnalytics() {
+  if (!document.getElementById('tab-analytics')) return;
+
+  // ─── Section 1: Breakdown ──────────────────────────────
+  const TYPES = ['Award', 'Fine', 'Purchase', 'Payout'];
+  const typeStats = TYPES.map(t => {
+    const rows = txnData.filter(r => (pick(r)('Type', 'Transaction Type') || '').toLowerCase() === t.toLowerCase());
+    return { t, count: rows.length, total: rows.reduce((s, r) => s + parseFloat(pick(r)('Amount') || 0), 0) };
+  }).sort((a, b) => b.count - a.count);
+
+  let tblHtml = '<table class="breakdown-table"><thead><tr><th>Type</th><th>Count</th><th>Total</th></tr></thead><tbody>';
+  typeStats.forEach(({ t, count, total }) => {
+    tblHtml +=
+      '<tr><td><span class="type-badge ' + typeBadgeClass(t) + '">' + t + '</span></td>' +
+      '<td style="font-family:\'Orbitron\',sans-serif;font-size:0.7rem;color:var(--ice)">' + count + '</td>' +
+      '<td style="font-family:\'Orbitron\',sans-serif;font-size:0.68rem;font-weight:600;color:' +
+        (total >= 0 ? 'var(--green)' : 'var(--red)') + '">' +
+        (total >= 0 ? '+' : '') + fmtNum(total) + '</td></tr>';
+  });
+  tblHtml += '</tbody></table>';
+  document.getElementById('analytics-breakdown-table').innerHTML = tblHtml;
+
+  function topReasons(typeStr) {
+    const freq = {};
+    txnData.forEach(r => {
+      if ((pick(r)('Type', 'Transaction Type') || '').toLowerCase() !== typeStr.toLowerCase()) return;
+      const rsn = (pick(r)('Reason', 'Description', 'Note') || '').trim();
+      if (rsn) freq[rsn] = (freq[rsn] || 0) + 1;
+    });
+    return Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  }
+
+  function reasonsHtml(entries, color) {
+    if (!entries.length) return '<div style="color:var(--dim);font-size:0.65rem;padding:0.4rem 0">No data yet.</div>';
+    return entries.map(([rsn, cnt]) =>
+      '<div class="reason-item">' +
+      '<span class="reason-text" style="color:' + color + '">' +
+        escHtml(rsn.length > 35 ? rsn.slice(0, 35) + '…' : rsn) + '</span>' +
+      '<span class="reason-count">' + cnt + 'x</span></div>'
+    ).join('');
+  }
+
+  document.getElementById('analytics-reasons').innerHTML =
+    '<div class="reason-group"><div class="reason-group-title">Top Fine Reasons</div>' +
+    reasonsHtml(topReasons('Fine'), 'var(--red)') + '</div>' +
+    '<div class="reason-group"><div class="reason-group-title">Top Award Reasons</div>' +
+    reasonsHtml(topReasons('Award'), 'var(--green)') + '</div>';
+
+  // ─── Section 2: Spotlights ─────────────────────────────
+  const sData = summaryData.map(r => ({
+    name:    pick(r)('Name', 'Student', 'Full Name') || '—',
+    bal:     parseFloat(pick(r)('Awarded') || 0) - parseFloat(pick(r)('Fines') || 0),
+    debt:    parseFloat(pick(r)('Debt') || 0),
+    awarded: parseFloat(pick(r)('Awarded') || 0),
+    fines:   parseFloat(pick(r)('Fines') || 0),
+    spent:   parseFloat(pick(r)('Spent') || 0),
+  }));
+
+  function topBy(field) {
+    if (!sData.length) return null;
+    return sData.reduce((best, s) => s[field] > best[field] ? s : best, sData[0]);
+  }
+
+  const actMap = {};
+  txnData.forEach(r => {
+    const n = (pick(r)('Name', 'Student', 'Full Name') || '').trim();
+    if (n) actMap[n] = (actMap[n] || 0) + 1;
+  });
+  const activeTop = Object.entries(actMap).sort((a, b) => b[1] - a[1])[0];
+
+  function spotCard(label, name, valStr, red) {
+    return '<div class="spotlight-card">' +
+      '<div class="spotlight-label">' + escHtml(label) + '</div>' +
+      '<div class="spotlight-name">' + escHtml(name || 'No data') + '</div>' +
+      (valStr ? '<div class="spotlight-value' + (red ? ' red' : '') + '">' + escHtml(valStr) + '</div>' : '') +
+      '</div>';
+  }
+
+  const w = topBy('bal'), d = topBy('debt'), aw = topBy('awarded'), fi = topBy('fines'), sp = topBy('spent');
+  document.getElementById('analytics-spotlights').innerHTML =
+    spotCard('Wealthiest',   w  ? w.name  : null, w  ? fmtNum(w.bal)      + ' coins' : '', false) +
+    spotCard('Biggest Debt', d  ? d.name  : null, d  ? fmtNum(d.debt)     + ' debt'  : '', true)  +
+    spotCard('Most Awarded', aw ? aw.name : null, aw ? '+' + fmtNum(aw.awarded)       : '', false) +
+    spotCard('Most Fined',   fi ? fi.name : null, fi ? fmtNum(fi.fines)   + ' fines' : '', true)  +
+    spotCard('Most Active',  activeTop ? activeTop[0] : null, activeTop ? activeTop[1] + ' txns' : '', false) +
+    spotCard('Top Spender',  sp ? sp.name : null, sp ? fmtNum(sp.spent)   + ' spent' : '', false);
+
+  // ─── Section 3: Activity Over Time ─────────────────────
+  const dateMap = {};
+  txnData.forEach(r => {
+    const raw = (pick(r)('Date', 'Timestamp') || '').trim();
+    if (!raw) return;
+    const dt = new Date(raw);
+    if (isNaN(dt.getTime())) return;
+    const key = dt.getFullYear() + '-' +
+      String(dt.getMonth() + 1).padStart(2, '0') + '-' +
+      String(dt.getDate()).padStart(2, '0');
+    dateMap[key] = (dateMap[key] || 0) + 1;
+  });
+
+  const sortedDays = Object.entries(dateMap).sort((a, b) => a[0] < b[0] ? -1 : 1);
+  const days14 = sortedDays.slice(-14);
+  const chartEl = document.getElementById('analytics-chart');
+  const noteEl  = document.getElementById('analytics-chart-note');
+
+  if (days14.length < 3) {
+    chartEl.innerHTML = '<div class="chart-placeholder">Not enough data yet — check back after more transactions are logged.</div>';
+    noteEl.textContent = '';
+    return;
+  }
+
+  const maxC = Math.max(...days14.map(d => d[1]));
+  let barsHtml = '';
+  days14.forEach(([date, cnt]) => {
+    const h   = Math.max(3, Math.round((cnt / maxC) * 80));
+    const lbl = date.slice(5).replace('-', '/');
+    barsHtml +=
+      '<div class="bar-col">' +
+      '<div class="bar" style="height:' + h + 'px">' +
+        '<div class="bar-tooltip">' + escHtml(date) + ': ' + cnt + ' txns</div>' +
+      '</div>' +
+      '<span class="bar-label">' + escHtml(lbl) + '</span>' +
+      '</div>';
+  });
+
+  chartEl.innerHTML = '<div class="bar-chart-outer"><div class="bar-chart">' + barsHtml + '</div></div>';
+
+  const peak = days14.reduce((best, d) => d[1] > best[1] ? d : best, days14[0]);
+  noteEl.textContent = 'Most active day: ' + peak[0] + ' (' + peak[1] + ' transactions)';
 }
 
 function renderLeaderboard() {

@@ -1,22 +1,63 @@
-﻿Edit coins/index.html. Color code leaderboard cards by student section.
+﻿Edit coins/index.html. Add analytics features using data already fetched from the two CSV sources. No new data sources needed.
 
-In the renderLeaderboard() function, add this section color map in JavaScript:
+--- CHANGE 1: ECONOMY STATS BAR (always visible, above the tab bar) ---
 
-const SECTION_COLORS = {
-  'IDEA-113':   '#00FF41',
-  'IDEA-208-1': '#C8FF00',
-  'IDEA-208-2': '#00F0FF',
-  'IDEA-304.1': '#FF8C00',
-  'IDEA-403':   '#FF88CC',
-};
+Insert a stats bar between the .last-updated div and the .tab-bar div. Four stat tiles in a horizontal row:
 
-For each card:
-1. Look up the student's section in SECTION_COLORS. Default to #4A7A52 if not found.
-2. Apply a 3px solid left border to the card using that color at 60% opacity.
-3. Apply a subtle top gradient inside the card using that color at 4% opacity (like the existing ::before pseudo but using the section color instead of gold).
-4. Color the .coin-section text using that color at 80% opacity instead of var(--dim).
-5. On card hover, bring the left border to 100% opacity.
+1. "Coins in Circulation" - sum of Coin Balance for all students where Coin Balance > 0
+2. "Total Debt" - sum of Debt column across all students
+3. "Transactions Logged" - total count of rows in txnData
+4. "Award / Fine Ratio" - (sum of all Awarded) divided by (sum of all Fines), displayed as X.X:1. If no fines, show "No Fines".
 
-Do not change card background colors. The existing red tint on negative cards should be preserved - just also apply the left border color on those cards.
+Style: dark bg1 background, thin gold border, Orbitron labels, gold values with glow. Full width, responsive (2x2 grid on mobile). Stat values animate/update each time fetchData() runs.
 
-Commit with message "feat: color code leaderboard cards by section" and push.
+--- CHANGE 2: ANALYTICS TAB ---
+
+Add a third tab button "Analytics" to the tab bar and a corresponding tab panel #tab-analytics.
+
+Inside the analytics panel, three sections separated by dividers:
+
+SECTION 1 - TRANSACTION BREAKDOWN (Option C)
+
+Two subsections side by side (stack on mobile):
+
+Left: Type summary table. Four rows (Award, Fine, Purchase, Payout). Columns: Type badge | Count | Total Amount. Sorted by Count descending.
+
+Right: Two ranked lists:
+- Top 5 Fine Reasons (by frequency in txnData)
+- Top 5 Award Reasons (by frequency in txnData)
+Each entry shows the reason text and a count badge. Truncate reason text at 35 chars with ellipsis if needed.
+
+SECTION 2 - STUDENT SPOTLIGHTS (Option F)
+
+Six spotlight cards in a 3x2 grid (2x3 on mobile):
+1. Wealthiest - highest Coin Balance (from Summary)
+2. Biggest Debt - highest Debt value (from Summary)
+3. Most Awarded - highest Awarded total (from Summary)
+4. Most Fined - highest Fines total (from Summary)
+5. Most Active - student with most rows in txnData
+6. Top Spender - highest Spent total (from Summary)
+
+Each card: label (Orbitron, small, dim), student name (large, white), value below name (gold or red depending on context). If tied, show first match. If no data yet, show "No data".
+
+SECTION 3 - ACTIVITY OVER TIME (Option D)
+
+A bar chart built with plain HTML divs (no canvas, no library). Groups transactions by calendar date (YYYY-MM-DD, parsed from the Date/Time column). Shows the 14 most recent active days, oldest left to newest right.
+
+Each bar: height proportional to number of transactions that day (max bar height 80px). Bar color: gold. Hover shows a tooltip with the date and transaction count. X-axis shows date labels (MM/DD), rotated 45deg. Y-axis implied by bar height only - no axis lines needed.
+
+Below the chart, one line of text: "Most active day: [date] ([N] transactions)".
+
+If fewer than 3 days of data exist, show a dim placeholder message instead: "Not enough data yet - check back after more transactions are logged."
+
+--- GENERAL RULES ---
+
+All analytics compute inside renderAnalytics() which is called at the end of fetchData() alongside renderLeaderboard() and renderTransactions().
+
+renderAnalytics() only runs if the analytics tab panel exists in the DOM.
+
+Stats bar values update on every fetch cycle regardless of which tab is active.
+
+Match existing visual style: dark backgrounds, Orbitron for labels, Share Tech Mono for values, gold/green/red accents, no external dependencies.
+
+Commit with message "feat: add analytics tab with stats bar, breakdown, spotlights, and activity chart" and push.
