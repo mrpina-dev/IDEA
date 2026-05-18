@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MSET — Mold Body Design — Assignment 02</title>
+<title>IDEA — Mold Body Design — Assignment 02</title>
 <link rel="icon" type="image/png" sizes="512x512" href="/IDEA/md-android-chrome-512x512.png">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Exo+2:wght@300;400;500;600;700&display=swap');
@@ -335,7 +335,7 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
 <div id="title-block">
   <div class="tbl-top">
     <div class="tbl-main">
-      <div class="tbl-eyebrow">MSET / IDEA Q4 &nbsp;·&nbsp; 2025–26 &nbsp;·&nbsp; DOC: MSET-MOLD-02</div>
+      <div class="tbl-eyebrow">IDEA / MSET Q4 &nbsp;·&nbsp; 2025–26 &nbsp;·&nbsp; DOC: MSET-MOLD-02</div>
       <div class="tbl-title">MOLD BODY DESIGN</div>
       <div class="tbl-sub">ASSIGNMENT 02 — NEGATIVE MOLD CONSTRUCTION</div>
     </div>
@@ -714,7 +714,9 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
     <div class="section-div">Required Settings — Confirm Each Before Slicing</div>
     <div class="fg">
       <div class="ck" onclick="togCk('ck-m5a',event)"><input type="checkbox" id="ck-m5a" data-save="true" onchange="updateComp()"><label><strong style="color:var(--gold)">Nozzle:</strong> 0.6mm confirmed in printer profile</label></div>
-      <div class="ck" onclick="togCk('ck-m5b',event)"><input type="checkbox" id="ck-m5b" data-save="true" onchange="updateComp()"><label><strong style="color:var(--gold)">Variable Layer Height:</strong> enabled — cavity surfaces set to 0.10mm / 0.004", bulk sections set to 0.30mm / 0.012"</label></div>
+      <div class="fhint" style="margin-top:4px">Choose one. Variable layer height gives better cavity surface resolution but requires manual setup in the layer height editor. The 0.18mm preset is faster and still produces good results.</div>
+      <div class="ck" onclick="togCkME('ck-m5b-a','ck-m5b-b',event)"><input type="checkbox" id="ck-m5b-a" data-save="true" onchange="ckME('ck-m5b-a','ck-m5b-b');updateComp()"><label><strong style="color:var(--gold)">Layer Height:</strong> 0.18mm Balanced Quality preset — select from the layer height dropdown in Bambu Studio. Applies uniformly to the entire mold.</label></div>
+      <div class="ck" onclick="togCkME('ck-m5b-b','ck-m5b-a',event)"><input type="checkbox" id="ck-m5b-b" data-save="true" onchange="ckME('ck-m5b-b','ck-m5b-a');updateComp()"><label><strong style="color:var(--gold)">Variable Layer Height</strong> — cavity surfaces set to 0.10mm / 0.004", bulk sections set to 0.30mm / 0.012". More time-consuming to set up but produces finer cavity detail.</label></div>
       <div class="ck" onclick="togCk('ck-m5c',event)"><input type="checkbox" id="ck-m5c" data-save="true" onchange="updateComp()"><label><strong style="color:var(--gold)">Wall Count:</strong> 4 perimeters</label></div>
       <div class="ck" onclick="togCk('ck-m5d',event)"><input type="checkbox" id="ck-m5d" data-save="true" onchange="updateComp()"><label><strong style="color:var(--gold)">Infill:</strong> 20% Gyroid</label></div>
       <div class="ck" onclick="togCk('ck-m5e',event)"><input type="checkbox" id="ck-m5e" data-save="true" onchange="updateComp()"><label><strong style="color:var(--gold)">Top/Bottom Shell Layers:</strong> 5</label></div>
@@ -852,7 +854,7 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
 </div>
 <!-- FOOTER -->
 <div id="footer">
-  <span class="footer-id">MSET — MOLD BODY DESIGN | ASSIGNMENT 02</span>
+  <span class="footer-id">IDEA — MOLD BODY DESIGN | ASSIGNMENT 02</span>
   <span class="footer-school">Don Bosco Technical Institute</span>
   <span class="footer-pts">80 PTS</span>
   <span class="footer-ver"></span>
@@ -1202,6 +1204,8 @@ function togInst(){document.getElementById('inst-panel')?.classList.toggle('open
 
 /* ===== CHECKBOXES ===== */
 function togCk(id,e){if(e?.target?.tagName==='INPUT')return;const cb=document.getElementById(id);if(cb){cb.checked=!cb.checked;updateComp();saveData();}}
+function togCkME(id,otherId,e){if(e?.target?.tagName==='INPUT')return;const cb=document.getElementById(id);if(cb){cb.checked=!cb.checked;if(cb.checked){const other=document.getElementById(otherId);if(other)other.checked=false;}updateComp();saveData();}}
+function ckME(id,otherId){const cb=document.getElementById(id);const other=document.getElementById(otherId);if(cb&&cb.checked&&other)other.checked=false;saveData();}
 function getCk(id){return document.getElementById(id)?.checked||false;}
 function getV(id){return document.getElementById(id)?.value?.trim()||'';}
 function cntSf(id){const ta=document.getElementById(id);return ta?countS(ta.value):0;}
@@ -1346,7 +1350,7 @@ function m1ok(){return getV('student-name')!==''&&ctrOk('geom-confirm')&&allOffs
 function m2ok(){return ctrOk('combine-desc')&&getCk('ck-m2a')&&getCk('ck-m2b')&&getCk('ck-m2c')&&ctrOk('split-desc')&&getCk('ck-m2d')&&getCk('ck-m2e')&&imgStore.combine_split.length>=2;}
 function m3ok(){return getCk('ck-m3a')&&getCk('ck-m3b')&&getCk('ck-m3c')&&getCk('ck-m3d')&&getCk('ck-m3e')&&imgStore.align_view.length>=1;}
 function m4ok(){return ctrOk('pour-orient')&&ctrOk('high-point')&&ctrOk('flat-zone')&&spoutOk()&&getCk('ck-m4a')&&getCk('ck-m4b')&&getCk('ck-m4c')&&getCk('ck-m4d')&&getCk('ck-m4e')&&imgStore.spout_view.length>=1;}
-function m5ok(){return getV('machine-sel')!==''&&getCk('ck-m5a')&&getCk('ck-m5b')&&getCk('ck-m5c')&&getCk('ck-m5d')&&getCk('ck-m5e')&&getCk('ck-m5f')&&getCk('ck-m5g')&&getCk('ck-m5h')&&imgStore.bambu_ss.length>=1;}
+function m5ok(){return getV('machine-sel')!==''&&getCk('ck-m5a')&&(getCk('ck-m5b-a')||getCk('ck-m5b-b'))&&getCk('ck-m5c')&&getCk('ck-m5d')&&getCk('ck-m5e')&&getCk('ck-m5f')&&getCk('ck-m5g')&&getCk('ck-m5h')&&imgStore.bambu_ss.length>=1;}
 function m6ok(){return imgStore.print_halves.length>=1&&imgStore.print_assembled.length>=1&&measFilledCount()>=2&&ctrOk('surface-notes')&&getCk('ck-m6a')&&getCk('ck-m6b')&&getCk('ck-m6c');}
 const MFNS=[null,m1ok,m2ok,m3ok,m4ok,m5ok,m6ok];
 function m1partial(){return getV('student-name')!==''||ctrOk('geom-confirm')||allOffsetsOk();}
