@@ -899,6 +899,7 @@ function renderLeaderboard() {
     // Grab raw awards and fines from the sheet
     const awarded  = parseFloat(p('Awarded') || 0);
     const fines    = parseFloat(p('Fines') || 0);
+    const spent    = parseFloat(p('Spent') || 0);
     
     // Calculate new balance explicitly for the UI
     const coinBal  = awarded - fines;
@@ -928,6 +929,10 @@ function renderLeaderboard() {
         '<div class="coin-meta-item">' +
           '<span class="coin-meta-label">Net Fines</span>' +
           '<span class="coin-meta-value" style="color: var(--red)">-' + fmtNum(fines) + '</span>' +
+        '</div>' +
+        '<div class="coin-meta-item">' +
+          '<span class="coin-meta-label">Spent</span>' +
+          '<span class="coin-meta-value" style="color: var(--amber)">-' + fmtNum(spent) + '</span>' +
         '</div>' +
       '</div>';
 
