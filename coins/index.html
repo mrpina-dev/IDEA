@@ -519,9 +519,10 @@ async function fetchData() {
     summaryData = parseCSV(await sRes.text());
     txnData = parseCSV(await tRes.text());
 
-    summaryData.sort((a, b) => {
-      const p = r => parseFloat(pick(r)('Coin Balance', 'Coins', 'Balance') || 0);
-      return p(b) - p(a);
+   summaryData.sort((a, b) => {
+      // Custom sort: Net Awards minus Net Fines
+      const calcBal = r => (parseFloat(pick(r)('Awarded') || 0) - parseFloat(pick(r)('Fines') || 0));
+      return calcBal(b) - calcBal(a);
     });
 
     txnData.sort((a, b) => {
@@ -569,9 +570,13 @@ function renderLeaderboard() {
     const p = pick(row);
     const name     = p('Name', 'Student', 'Full Name') || '—';
     const section  = p('Section', 'Class', 'Course') || '—';
-    const coinBal  = parseFloat(p('Coin Balance', 'Coins', 'Balance') || 0);
-    const bankBal  = parseFloat(p('Bank Balance', 'Bank') || 0);
-    const debt     = parseFloat(p('Debt') || 0);
+    
+    // Grab raw awards and fines from the sheet
+    const awarded  = parseFloat(p('Awarded') || 0);
+    const fines    = parseFloat(p('Fines') || 0);
+    
+    // Calculate new balance explicitly for the UI
+    const coinBal  = awarded - fines;
     const isNeg    = coinBal < 0;
 
     const card = document.createElement('div');
@@ -582,19 +587,17 @@ function renderLeaderboard() {
       '<div class="coin-rank">#' + (i + 1) + '</div>' +
       '<div class="coin-name">' + escHtml(name) + '</div>' +
       '<div class="coin-section">' + escHtml(section) + '</div>' +
-      '<div class="coin-balance-label">Coin Balance</div>' +
+      '<div class="coin-balance-label">Net Balance</div>' +
       '<div class="coin-balance">' + fmtNum(coinBal) + '</div>' +
       '<div class="coin-meta">' +
         '<div class="coin-meta-item">' +
-          '<span class="coin-meta-label">Bank</span>' +
-          '<span class="coin-meta-value">' + fmtNum(bankBal) + '</span>' +
+          '<span class="coin-meta-label">Net Awards</span>' +
+          '<span class="coin-meta-value" style="color: var(--green)">+' + fmtNum(awarded) + '</span>' +
         '</div>' +
-        (debt > 0
-          ? '<div class="coin-meta-item">' +
-              '<span class="coin-meta-label">Debt</span>' +
-              '<span class="coin-meta-value coin-meta-debt">' + fmtNum(debt) + '</span>' +
-            '</div>'
-          : '') +
+        '<div class="coin-meta-item">' +
+          '<span class="coin-meta-label">Net Fines</span>' +
+          '<span class="coin-meta-value" style="color: var(--red)">-' + fmtNum(fines) + '</span>' +
+        '</div>' +
       '</div>';
 
     grid.appendChild(card);
