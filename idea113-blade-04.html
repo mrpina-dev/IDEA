@@ -646,6 +646,7 @@ tr.drag-over{border-top:2px solid var(--green)!important;background:rgba(0,255,6
   <div class="tool-panel-body">
     <p class="prompt">Use this tool to submit 3D print jobs. Fill out a card for each print request, then click <strong>Open in Mail</strong> or <strong>Copy Email</strong> to submit to Mr. Pina. Attach your .3mf file before sending.</p>
     <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--amber);letter-spacing:.5px;padding:8px 12px;border:1px solid rgba(255,140,0,.3);background:rgba(255,140,0,.04);">⚠ Email requests to <strong style="color:var(--gold)">apina@boscotech.edu</strong> — attach all required files before sending. Requests without attachments will not be processed.</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--amber);letter-spacing:.5px;padding:9px 13px;border:1px solid rgba(255,140,0,.35);border-left:3px solid var(--amber);background:rgba(255,140,0,.05);margin-top:8px;">⚠ This queue is for scheduling only when all printers are occupied. If a printer is available, you are expected to slice and run the print yourself.</div>
     <div id="pq-container"></div>
     <button class="tool-add-btn" onclick="addPrintRequest()">[ + Add Print Request ]</button>
   </div>
@@ -977,7 +978,7 @@ function buildPQEmail(card){
   const body=`Student: ${name}\nPart: ${part}\nPrinter: ${printer}\nMaterial: ${material}\nDate Needed: ${date}\nNotes: ${notes}\n\n*** Attach your .3mf Bambu Studio project file before sending. ***`;
   return{subject,body};
 }
-function openPQMail(btn){const card=btn.closest('.req-card');const{subject,body}=buildPQEmail(card);window.open(`mailto:${INSTRUCTOR_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);}
+function openPQMail(btn){const card=btn.closest('.req-card');const{subject,body}=buildPQEmail(card);window.open('https://mail.google.com/mail/?view=cm&to='+encodeURIComponent(INSTRUCTOR_EMAIL)+'&su='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body),'_blank');}
 function copyPQEmail(btn){
   const card=btn.closest('.req-card');const{subject,body}=buildPQEmail(card);const text=`To: ${INSTRUCTOR_EMAIL}\nSubject: ${subject}\n\n${body}`;
   navigator.clipboard.writeText(text).then(()=>{const f=btn.nextElementSibling;if(f&&f.classList.contains('copy-flash')){f.classList.add('show');setTimeout(()=>f.classList.remove('show'),2500);}}).catch(()=>alert('Copy failed. Text:\n\n'+text));
@@ -1007,7 +1008,7 @@ function buildWOEmail(card){
   const body=`Student: ${name}\nJob: ${job}\nOperation: ${op}\nMaterial: ${material}\nQuantity: ${qty} part(s)\nDate Needed: ${date}\nSpecifications: ${specs}\n\n*** Attach required files before sending. ***\nRequired for this operation: ${fileReq}`;
   return{subject,body};
 }
-function openWOMail(btn){const card=btn.closest('.wo-card');const{subject,body}=buildWOEmail(card);window.open(`mailto:${INSTRUCTOR_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);}
+function openWOMail(btn){const card=btn.closest('.wo-card');const{subject,body}=buildWOEmail(card);window.open('https://mail.google.com/mail/?view=cm&to='+encodeURIComponent(INSTRUCTOR_EMAIL)+'&su='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body),'_blank');}
 function copyWOEmail(btn){
   const card=btn.closest('.wo-card');const{subject,body}=buildWOEmail(card);const text=`To: ${INSTRUCTOR_EMAIL}\nSubject: ${subject}\n\n${body}`;
   navigator.clipboard.writeText(text).then(()=>{const f=btn.nextElementSibling;if(f&&f.classList.contains('copy-flash')){f.classList.add('show');setTimeout(()=>f.classList.remove('show'),2500);}}).catch(()=>alert('Copy failed. Text:\n\n'+text));

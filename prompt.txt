@@ -1,13 +1,9 @@
-﻿Open mset-mold-02.html and make the following changes to the Print Queue tool panel, then commit and push.
+Open /IDEA/idea113-blade-04.html and make the following two changes:
 
-1. AVAILABILITY WARNING: Replace the existing amber warning bar at the top of the print queue panel body with a more prominent message. New text: "USE THIS ONLY IF ALL 3D PRINTERS ARE UNAVAILABLE. If any printer is free, print directly. This queue is a last resort for when every machine in the room is occupied." Style it with a thicker left border and slightly larger font to make it stand out more than the current warning.
+1. GMAIL OPEN IN MAIL FIX - Students use Gmail in Chrome on Windows 10. The mailto: protocol does not open Gmail reliably in this setup. Replace the window.open mailto: calls in both openPQMail() and openWOMail() with direct Gmail compose URLs using this format:
+https://mail.google.com/mail/?view=cm&to=RECIPIENT&su=ENCODED_SUBJECT&body=ENCODED_BODY
+Use encodeURIComponent() for subject and body. The To field should pre-fill apina@boscotech.edu. Update both functions. Do not change the Copy Email logic.
 
-2. STUDENT NAME AUTO-POPULATE: In addPrintRequest(), set the Job Requester name field as follows: on card creation, read the current value of #student-name and pre-fill the name input with it. If the field is empty, leave it blank. Add a fhint-style note below the field that reads: "If multiple students are printing together (recommended - faster), list all names here." The field remains editable so students can add names.
+2. PRINT QUEUE SELF-SERVICE NOTE - In the Print Queue tool panel body, directly above the cards container div, add a clearly visible amber callout box stating that the print queue is for scheduling only when all printers are occupied. If a printer is available, students are expected to slice and run the print themselves. Keep it to two sentences. Style it as an amber bordered notice consistent with other amber callouts in the file.
 
-3. REMOVE PERIOD/BLOCK FIELD: Find and remove any period, block, or class period input field from the print request card if one was added. This assignment is Block 2 only - no selection needed.
-
-4. REMOVE H2D-1 AND H2D-2: From the printer select dropdown in addPrintRequest(), remove the options for "Bambu Lab H2D-1 (0.6mm nozzle)" and "Bambu Lab H2D-2 (0.6mm nozzle)". Leave H2D-3 and H2D-4 and all X1C options.
-
-5. FIX EMAIL BUTTON: Replace the openPQMail() function. Instead of using a mailto: link, open a Gmail compose window using the URL: "https://mail.google.com/mail/?view=cm&to=apina@boscotech.edu&su=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body). Open it with window.open(url, "_blank"). Rename the button label from "Open in Mail" to "Open in Gmail".
-
-Commit message: "fix: print queue availability warning, name autofill, remove H2D-1/2, gmail compose button"
+After all changes, commit with message "fix: Gmail compose links, print queue self-service note" and push to origin.
