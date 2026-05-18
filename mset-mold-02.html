@@ -1505,7 +1505,7 @@ function addPrintRequest(){
 <div class="card-body">
 <div class="card-grid">
 <div class="card-field"><label>Student Name</label><input type="text" id="pq-student-${n}" placeholder="Last, First" oninput="updateCardName(${n});saveData()"><div class="fhint">If multiple students are printing together (recommended - faster), list all names here.</div></div>
-<div class="card-field"><label>Printer</label><select id="pq-printer-${n}" onchange="saveData()"><option value="">— Select Printer —</option><option>X1C-1 (0.6mm nozzle)</option><option>X1C-2 (0.6mm nozzle)</option><option>X1C-3 (0.6mm nozzle)</option><option>X1C-4 (0.6mm nozzle)</option><option>H2D-3 (0.6mm nozzle)</option><option>H2D-4 (0.6mm nozzle)</option></select></div>
+<div class="card-field"><label>Printer</label><select id="pq-printer-${n}" onchange="saveData()"><option value="">— Select Printer —</option><option>X1C-1 (0.6mm nozzle)</option><option>X1C-2 (0.6mm nozzle)</option><option>X1C-3 (0.6mm nozzle)</option><option>X1C-4 (0.6mm nozzle)</option><option>H2D-3 (0.6mm High Flow nozzle)</option><option>H2D-4 (0.6mm High Flow nozzle)</option></select></div>
 <div class="card-field"><label>Material</label><select id="pq-material-${n}" disabled><option>HIPS (Generic ABS)</option></select></div>
 <div class="card-field"><label>Mold Half</label><select id="pq-half-${n}" onchange="saveData()"><option value="">— Select —</option><option>Half A (Cavity Side)</option><option>Half B (Core Side)</option><option>Both Halves</option></select></div>
 <div class="card-field"><label>Estimated Print Time</label><input type="text" id="pq-time-${n}" placeholder="e.g. 3h 20m" oninput="saveData()"></div>
