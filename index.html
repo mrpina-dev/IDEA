@@ -844,58 +844,6 @@ document.querySelectorAll('.course-header').forEach(header => {
   });
 });
 
-// Assignment search filter
-(function() {
-  const searchInput = document.getElementById('strip-search');
-  searchInput.addEventListener('input', () => {
-    const query = searchInput.value.trim().toLowerCase();
-    document.querySelectorAll('.course-card').forEach(card => {
-      const courseId = (card.querySelector('.course-id') || {}).textContent.toLowerCase() || '';
-      const list = card.querySelector('.assignment-list');
-      const items = card.querySelectorAll('.assignment-item');
-      let hasVisible = false;
-
-      if (!query) {
-        items.forEach(item => { item.style.display = ''; });
-        list.style.maxHeight = '';
-        list.style.opacity = '';
-        const nr = list.querySelector('.no-results');
-        if (nr) nr.remove();
-        delete card.dataset.collapsed;
-      } else {
-        if (!('collapsed' in card.dataset)) {
-          card.dataset.collapsed = card.classList.contains('collapsed') ? 'true' : 'false';
-        }
-        items.forEach(item => {
-          const name = (item.querySelector('.assignment-name') || {}).textContent || '';
-          if (name.toLowerCase().includes(query) || courseId.includes(query)) {
-            item.style.display = '';
-            hasVisible = true;
-          } else {
-            item.style.display = 'none';
-          }
-        });
-        let nr = list.querySelector('.no-results');
-        if (!hasVisible) {
-          if (!nr) {
-            nr = document.createElement('div');
-            nr.className = 'no-results';
-            nr.style.cssText = 'padding:0.8rem 1.5rem; font-size:0.72rem; color:var(--dim)';
-            nr.textContent = 'No matching assignments.';
-            list.appendChild(nr);
-          }
-          list.style.maxHeight = '';
-          list.style.opacity = '';
-        } else {
-          if (nr) nr.remove();
-          list.style.maxHeight = '800px';
-          list.style.opacity = '1';
-        }
-      }
-    });
-  });
-})();
-
 // Canvas particles
 const canvas = document.getElementById('bg-canvas');
 const ctx = canvas.getContext('2d');
