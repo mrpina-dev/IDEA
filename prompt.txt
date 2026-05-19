@@ -1,189 +1,46 @@
-﻿Edit coins/index.html. Replace the entire contents of the #tab-guide panel with the updated version below. Keep the tab button and panel structure intact.
+﻿Edit coins/index.html. Make the following two changes:
 
-BEHAVIOR:
-Each row is clickable and expands to show a description. Clicking again collapses it. Only one row open at a time per section. Expand arrow on far right rotates 90deg when open.
+--- CHANGE 1: i¢ GUIDE CALLOUT BUTTON ---
 
-ROW STRUCTURE:
-- Type badge (type-award / type-purchase / type-fine / type-other for inactive)
-- Item name (white, Share Tech Mono, flex-grow)
-- Rate (right-aligned; gold for awards, amber for purchases, red for fines, dim for inactive)
-- Expand arrow (dim chevron, far right)
-- Expanded description: slides open below, bg2 background, border-top 1px solid rgba(0,255,65,0.08), padding 0.75rem 1rem, font-size 0.72rem, color dim
+Remove the "i¢ Guide" tab from the tab bar entirely. Instead, add a dedicated callout button below the economy stats bar and above the tab bar. Style it similarly to the gold coin callout on the main portal index - a full-width banner with a distinct look that stands out from the rest of the page.
 
-LAYOUT: Single full-width column. Section headers in Orbitron 0.7rem uppercase with colored divider line. Awards = green, Purchases = amber, Fines = red, Inactive = dim.
+Button contents:
+- Left: "i¢" symbol in gold, large, glowing (same style as the main portal coin callout)
+- Center: Title "i¢ Guide" in gold Orbitron, subtitle in dim text: "Awards, purchases, fines, and everything in between."
+- Right: "VIEW GUIDE ▸" in a gold bordered pill
 
-=== AWARDS (color: var(--green)) ===
+On click, open the i¢ Guide as a full-screen modal overlay (not a tab panel). The modal slides up from the bottom or fades in. It has:
+- A sticky header inside the modal with the title "i¢ GUIDE" and a close button (X) on the right
+- The full guide content scrollable below
+- Backdrop: rgba(0,0,0,0.85)
+- Modal background: var(--bg1)
+- Max width 900px, centered, max height 90vh, overflow-y scroll
+- Close on backdrop click or X button
 
-Name: Legacy Wealth Declaration | Rate: Varies
-Description: A one-time entry logged by Mr. Pina to record coin balances earned before the digital system was implemented. Students cannot self-report.
+--- CHANGE 2: SORTING AND VISIBILITY OPTIONS INSIDE THE GUIDE MODAL ---
 
-Name: Contract Completion | Rate: 1i¢+
-Description: Refer to the Contracts page for details. Award depends on contract total plus any applicable bonus.
+At the top of the modal content area, below the sticky header and above the first section, add a control bar with:
 
-Name: Improve IDEA Coin Infrastructure | Rate: 1i¢+
-Description: Any suggestions that may lead to a better IDEA Coin system. Award depends on significance of improvement. Final value determined by Mr. Pina.
+1. SEARCH INPUT
+- Full width text input, placeholder "Search items..."
+- Filters all rows across all sections in real time by name or description text
+- Rows that do not match are hidden. If an entire section has no matches, hide the section header too.
+- Clear button (x) inside the input on the right when text is present
 
-Name: Donate Supplies | Rate: 2-6i¢
-Description: Donate shop towels, shop rags, nitrile gloves, protective masks, filament, or miscellaneous IDEA supplies. Larger rolls will be considered for higher payment. Final value determined by Mr. Pina. Limit: 1 donation per week.
+2. TYPE FILTER BUTTONS
+- Four toggle buttons: Awards | Purchases | Fines | Inactive
+- All active by default (all sections visible)
+- Clicking a button toggles that section's visibility
+- Active = gold border and text, inactive = dim
+- Buttons styled like existing .filter-btn
 
-Name: Donate Tissue Box | Rate: 1-2i¢
-Description: Rectangular tissue boxes net 2i¢. Square cube boxes are awarded 1i¢. Limit: 1 per week.
+3. SORT DROPDOWN
+- Options: Default Order | A - Z | Z - A | Rate (High to Low) | Rate (Low to High)
+- Default Order = the original hardcoded order within each section
+- A-Z and Z-A sort all visible rows alphabetically by name across all visible sections (sections stay grouped but rows within each section are sorted)
+- Rate High to Low and Low to High sort by numeric rate value within each section. For rates that are ranges (e.g. 2-6ic) use the midpoint. For "varies" use 0. For negative rates sort by absolute value.
+- Dropdown styled like existing .txn-type-select
 
-Name: Answer Questions Correctly During Class | Rate: 1i¢
-Description: Any question you answer correctly during lectures or discussions will be awarded. Limit: 1-2 per class.
+All three controls work together - search, type filter, and sort apply simultaneously.
 
-Name: Bounty Hunting / Fine Reporting / Policing | Rate: 1i¢
-Description: If you are a registered bounty hunter and witness a fineable offense, you may report it for compensation. Must provide evidence or compelling reasoning. Must be done professionally or your bounty hunter status will be revoked. Limit: 1 per week per hunter.
-
-Name: Exceptional Performance | Rate: 1i¢
-Description: Going above and beyond what is asked is highly valued in this class.
-
-Name: Perfect Assignment Score | Rate: 1i¢
-Description: A 100% score on any assignment worth 20 points or more will be awarded.
-
-Name: Weekly Wage | Rate: 1i¢ / week
-Description: Showing up to class on time is worth something. Paid weekly at your current wage rate.
-
-Name: 100% IDEA Grade or Highest Grade in Section | Rate: 1i¢ / week
-Description: Awarded weekly for maintaining a perfect IDEA grade or the highest grade in your section.
-
-Name: Quality IDEA Background | Rate: 1i¢
-Description: Email Mr. Pina a quality IDEA background. Must be aesthetically adequate. Subject line must include "background" or "IDEA background". Include the AI prompt if applicable. Limit: 1 per month.
-
-=== PURCHASES / EXPENSES (color: var(--amber)) ===
-
-Name: In-N-Out Combo | Rate: 250i¢
-Description: You will receive an In-N-Out meal. Limited to combo deals or single items only. Limit: 1 per month.
-
-Name: Executive Classroom Eating Pass | Rate: 100i¢
-Description: Eat in IDEA at any time, even during class. Includes a buddy pass for 1 other person.
-
-Name: Basic Classroom Eating Pass | Rate: 40i¢
-Description: Eat in IDEA outside of class hours - lunch, after school, early morning, etc. Can upgrade to Executive for an additional 60i¢.
-
-Name: Raise Weekly Wage | Rate: 100i¢ x raise number
-Description: Raise your weekly wage by 1i¢. First raise costs 100i¢ (wage goes from 1i¢ to 2i¢). Second raise costs 200i¢. Third costs 300i¢. Each raise is 100i¢ more than the last. Raises are permanent.
-
-Name: Bounty Hunter Application | Rate: 10i¢
-Description: Register to become an IDEA Coin Bounty Hunter. Application form will be sent once payment is made.
-
-Name: Weekly Bounty Limit Increase | Rate: 10i¢ x current limit
-Description: Increase your weekly bounty reporting limit by 1i¢.
-
-Name: Outside Time | Rate: 10i¢ / 30 min
-Description: Go outside only when the instructor is not actively teaching or informing the class. Limit: 1 hour per week.
-
-Name: B&W Paper Printing | Rate: 1i¢ / 2-sided page
-Description: Black and white double-sided printing service.
-
-Name: Paper Printing | Rate: 1i¢ / page
-Description: Standard single-page color or black and white printing.
-
-Name: Extra Credit | Rate: 1i¢ / point
-Description: Points added to your total score for any assignment. Up to 100% grade.
-
-Name: Games During Downtime | Rate: 1i¢ / class
-Description: Play games once all assignments are complete. Games are not allowed by default but study hall is permitted. Limit: 1 per class.
-
-Name: Mr. Pina Does Your Work | Rate: 1i¢ / min
-Description: Mr. Pina will work through your assignment with you at your computer, guiding you step by step. Max 5 min per student per class. Max 15 min total per class. Max 10 min per student per week. You must be present the entire time.
-
-Name: Song Request | Rate: 1i¢ / song
-Description: Email your song request to apina@boscotech.edu. Your song is placed next in queue. Song must not be highly disruptive or explicit. Playlists may only be selected when Mr. Pina allows and are subject to bidding - highest offer wins.
-
-Name: Turn On/Off Ceiling Lights | Rate: 1i¢ / change
-Description: Configure the classroom lighting however you want for the duration of the period. Subject to bidding - highest offer wins. Limit: 2 changes per class.
-
-Name: 3D Printing | Rate: 1i¢ / 10g
-Description: Standard rate is 1i¢ per 10g. You must complete 3D printer training to print yourself, or find someone who has completed training at no extra charge.
-
-=== FINES (color: #FF4444) ===
-
-Name: Failure to Clean Up in Shop | Rate: -1i¢ all
-Description: Everyone is fined if the shop is not properly cleaned up after use.
-
-Name: Tampering With IDEA Coin Mint (Unknown Suspect) | Rate: -1i¢ all
-Description: If an unknown individual has tampered with the IDEA Coin Minting Process, everyone will be equally fined 1 coin.
-
-Name: Feet on 2nd Chair | Rate: -1i¢
-Description: Keep your feet on the floor at all times.
-
-Name: Leaving Classroom Without Permission | Rate: -1i¢
-Description: Do not leave the classroom without explicit permission from the instructor.
-
-Name: Extended Bathroom Break | Rate: -1i¢
-Description: Staying in the bathroom for 15 or more minutes will result in a fine.
-
-Name: Out of Seat During Attendance | Rate: -1i¢
-Description: Attendance is taken at the very start of each period. Be in your seat or a fine will ensue. Limit: 1 per class.
-
-Name: Paper Printing Without Permission | Rate: -2i¢
-Description: Do not use the printer without permission. Rate applies per 2-sided page.
-
-Name: Brain Rot | Rate: -2i¢
-Description: Any distracting or annoying behavior deemed brain rot by the instructor. Limit: 1 per class.
-
-Name: Crashing Out | Rate: -2i¢
-Description: Falling asleep or completely checking out during class.
-
-Name: Gambling | Rate: -2i¢
-Description: Any form of gambling or wagering involving IDEA Coins or otherwise.
-
-Name: Failure to Tidy Up Before Leaving Class | Rate: -2i¢
-Description: Chair pushed in, work saved, tabs closed, peripherals neat, nothing left behind.
-
-Name: Failure to Return Flash Drive | Rate: -2i¢
-Description: Return any borrowed flash drive by the end of class or a penalty will be issued.
-
-Name: IDEA Coin Theft | Rate: -2x stolen
-Description: Stealing IDEA coins results in a fine of 2x the stolen amount. The amount logged in Transactions will reflect the actual 2x value, not a flat rate.
-
-Name: Inappropriate / Disruptive Behavior | Rate: -1 to -2i¢
-Description: Any communication or physical action that disrupts the class or is deemed inappropriate - including talking out of turn, touching others, being out of seat for no reason, sleeping, going off-topic, or profanity. Minor or first-time offenses may only result in -1i¢.
-
-Name: Arguing | Rate: -2i¢
-Description: Arguing with the instructor or peers in a disruptive or disrespectful manner.
-
-Name: Planting Evidence | Rate: -2i¢
-Description: Deliberately framing another student for a fine they did not commit.
-
-Name: Tampering With Another Student's Computer | Rate: -2i¢
-Description: Do not touch or interfere with another student's computer or work.
-
-Name: Non-IDEA / Inappropriate Computer Background | Rate: -2i¢
-Description: Your computer background must be IDEA-related and appropriate at all times.
-
-Name: Using Device for Non-School Purposes | Rate: -2i¢
-Description: Games, YouTube, and other non-school activity on any device during class is not allowed unless exempt or instructor permits. Includes inappropriate phone use during class.
-
-Name: Failure to Reset 3D Printer After Use | Rate: -2i¢
-Description: Reset the 3D printer to its default state after every use.
-
-Name: Leaving Mess in Classroom | Rate: -5i¢
-Description: Clean up after yourself before leaving.
-
-Name: Eating Without Eating Pass | Rate: -5i¢
-Description: Eating or drinking anything other than water during class without an eating pass will result in a fine. Applies after a warning.
-
-Name: Unsafe in Shop | Rate: -5i¢
-Description: Any hazardous behavior in the shop - not rolling up sleeves, not wearing safety glasses, messing around, etc. Fined per safety violation.
-
-Name: Sitting in Mr. Pina's Chair | Rate: -5i¢
-Description: Do not sit in Mr. Pina's chair. Ever. Fined per sit.
-
-Name: Tampering With IDEA Coin Mint (Known Suspect) | Rate: -10i¢
-Description: If a known person has evidently tampered with the IDEA Coin Minting Process, they will be fined 10 coins. Opening other students' coin boxes without stealing is -5i¢. Touching the vault in any way is -5 to -10i¢.
-
-=== INACTIVE (color: var(--dim)) ===
-Add a note in dim text below the header: "These awards are not currently active."
-
-Name: Helping Peers | Rate: 1i¢ / moment
-Description: Help your peers with problems they encounter. Both the helper and the helped must confirm, along with a brief overview of what was helped with. Guiding peers through the process counts - doing the work for them does not. Limit: 1 per day.
-
-Name: TA Helper Time | Rate: 1i¢ / 2 min
-Description: Assist Mr. Pina as a teaching assistant. Max 10 min per student per session. Max 30 min total per class.
-
-Name: Clean Spider Kill with Evidence | Rate: 1i¢ / spider
-Description: A clean spider kill with photographic evidence required. Limit: 2 per active day.
-
-Commit with message "feat: update i¢ guide with complete verified item list and descriptions" and push.
+Commit with message "feat: convert i¢ guide to modal with search, filter, and sort controls" and push.
