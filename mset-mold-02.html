@@ -203,11 +203,6 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
 .spec-block{background:rgba(8,18,9,.9);border:1px solid rgba(200,255,0,.22);border-left:2px solid var(--gold);padding:12px 16px;margin-bottom:14px;font-family:var(--font-u);font-size:12px;line-height:1.9}
 .spec-block strong{color:var(--gold)}
 .spec-val{font-family:var(--font-b);color:var(--white);animation:glowGreen 4s ease-in-out infinite}
-.pin-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:12px}
-.pin-card{border:1px solid rgba(0,255,65,.18);background:rgba(8,18,9,.85);padding:14px;transition:border-color .25s}
-.pin-card:hover{border-color:rgba(0,255,65,.4)}
-.pin-card-label{font-family:var(--font-u);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--teal);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid rgba(0,170,136,.15)}
-.pin-dim-label{font-family:var(--font-u);font-size:10px;color:var(--dim);margin-bottom:4px;letter-spacing:1px}
 .section-div{font-family:var(--font-u);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--teal);margin:18px 0 10px;padding-bottom:5px;border-bottom:1px solid rgba(0,170,136,.2)}
 .callout{font-family:var(--font-u);font-size:12px;color:var(--dim);line-height:1.75;padding:10px 14px;border:1px solid rgba(0,255,65,.12);background:rgba(0,255,65,.02);margin-bottom:16px}
 .callout strong{color:var(--green)}
@@ -324,7 +319,6 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
   .img-card{page-break-inside:avoid;break-inside:avoid}
   .img-card img{height:160px!important;object-fit:contain!important;background:#020A04}
   textarea,input[type="text"],input[type="number"],select{display:none!important}
-  .pin-grid{grid-template-columns:1fr 1fr!important}
 }
 </style>
 </head>
@@ -519,6 +513,7 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
     <div class="section-div">Split</div>
     <button class="info-btn" onclick="togInfo('inf-split')">SPLIT — HOW IT WORKS</button>
     <div class="info-box" id="inf-split">
+      <strong>IMPORTANT:</strong> Perform your bolt hole cuts (Module 03) before running the Split. The cut will pass through both resulting bodies automatically since the mold is still one body at this point.<br><br>
       <strong>Insert &gt; Features &gt; Split</strong><br><br>
       Trimming Surfaces: select the parting reference plane directly. Planes extend infinitely — no sketch is needed.<br>
       Click <em>Cut Bodies</em>. Two bodies appear under Resulting Bodies.<br>
@@ -554,62 +549,138 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
 <!-- ======= MODULE 03 ======= -->
 <div class="module" id="mod-3">
   <div class="mod-hdr" onclick="togMod(3)">
-    <div class="mod-num">MODULE 03</div><div class="mod-title">Alignment Features</div><div class="mod-pts">14 PTS</div>
+    <div class="mod-num">MODULE 03</div><div class="mod-title">Bolt Holes</div><div class="mod-pts">14 PTS</div>
     <div class="mod-dot" id="dot-3"></div><button class="rub-btn" onclick="togRub(event,'rub-3')">RUBRIC</button><span class="mod-chev">&#9660;</span>
   </div>
   <div class="rub-panel" id="rub-3"><table class="rub-table">
     <tr><th>PTS</th><th>DESCRIPTOR</th></tr>
-    <tr><td>14</td><td>Pins and sockets created in correct bodies via Feature Scope. All workflow confirmations checked. Image uploaded.</td></tr>
-    <tr><td>9</td><td>Features created but Feature Scope undocumented or pin positions missing.</td></tr>
-    <tr><td>5</td><td>Partial. Workflow incomplete or confirmations missing.</td></tr>
+    <tr><td>14</td><td>Bolt size selected and documented. Hole diameter and bolt length match calculator output. Placement rationale written. All confirmations checked. Image uploaded.</td></tr>
+    <tr><td>9</td><td>Bolt size and hole diameter documented but rationale missing or image absent.</td></tr>
+    <tr><td>5</td><td>Partial — bolt size selected but fields largely incomplete.</td></tr>
     <tr><td>0</td><td>Not submitted.</td></tr>
   </table></div>
   <div class="mod-body-wrap"><div class="mod-body">
-    <div class="spec-block">
-      <strong>ALIGNMENT PIN SPECS (all operations in single .SLDPRT)</strong><br>
-      Boss (pin) &nbsp;·&nbsp; Feature Scope: <span class="spec-val">top half only</span> &nbsp;·&nbsp; Diameter: <span class="spec-val">4.00mm / 0.157"</span> &nbsp;·&nbsp; Depth: <span class="spec-val">10.00mm / 0.394"</span><br>
-      Cut (socket) &nbsp;·&nbsp; Feature Scope: <span class="spec-val">bottom half only</span> &nbsp;·&nbsp; Diameter: <span class="spec-val">4.50mm / 0.177"</span> &nbsp;·&nbsp; Depth: <span class="spec-val">11.00mm / 0.433"</span><br>
-      Placement: <span class="spec-val">2 pins minimum</span>, placed diagonally &nbsp;·&nbsp; min <span class="spec-val">8.00mm / 0.315"</span> from any mold edge
-    </div>
-    <button class="info-btn" onclick="togInfo('inf-fscope')">WHAT IS FEATURE SCOPE?</button>
-    <div class="info-box" id="inf-fscope">
-      <strong>Feature Scope</strong> controls which body a boss or cut extrude affects in a multibody part. Without it, SolidWorks applies the feature to all intersecting bodies — putting pins in both halves simultaneously.<br><br>
-      To find it: in the Extruded Boss or Extruded Cut PropertyManager, scroll to the bottom of the panel. Uncheck <em>"All Bodies"</em> and manually select only the target body from the list.
-      <div class="info-rule">This is the critical step. Wrong Feature Scope = pins and holes in the wrong halves. Always verify by hiding one body and checking the other.</div>
-    </div>
-    <button class="info-btn" onclick="togInfo('inf-pin-steps')">STEP-BY-STEP — FULL PIN WORKFLOW</button>
-    <div class="info-box" id="inf-pin-steps">
-      All steps are performed inside the single multibody .SLDPRT. Do not save as separate files.<br><br>
+    <div class="callout">Bolts replace alignment pins entirely. A bolt through both mold halves is stronger than a printed pin, prevents misalignment, and compresses the halves together when tightened. Perform this cut extrude <strong>BEFORE the Split in Module 02</strong> — while the mold is still one body.</div>
+    <div class="section-div">Standard Close Fit Hole Diameters for 3D Printed HIPS</div>
+    <table class="dt">
+      <thead><tr><th>Bolt Size</th><th>Nominal Shank (in)</th><th>Nominal Shank (mm)</th><th>Design Hole (in)</th><th>Design Hole (mm)</th></tr></thead>
+      <tbody>
+        <tr><td style="font-family:var(--font-u);font-size:11px;color:var(--white)">6-32</td><td style="font-family:var(--font-b);font-size:11px">0.138"</td><td style="font-family:var(--font-b);font-size:11px">3.51mm</td><td style="font-family:var(--font-b);font-size:11px;color:var(--green)">0.150"</td><td style="font-family:var(--font-b);font-size:11px;color:var(--green)">3.81mm</td></tr>
+        <tr><td style="font-family:var(--font-u);font-size:11px;color:var(--white)">8-32</td><td style="font-family:var(--font-b);font-size:11px">0.164"</td><td style="font-family:var(--font-b);font-size:11px">4.17mm</td><td style="font-family:var(--font-b);font-size:11px;color:var(--green)">0.176"</td><td style="font-family:var(--font-b);font-size:11px;color:var(--green)">4.47mm</td></tr>
+        <tr><td style="font-family:var(--font-u);font-size:11px;color:var(--white)">10-32</td><td style="font-family:var(--font-b);font-size:11px">0.190"</td><td style="font-family:var(--font-b);font-size:11px">4.83mm</td><td style="font-family:var(--font-b);font-size:11px;color:var(--green)">0.202"</td><td style="font-family:var(--font-b);font-size:11px;color:var(--green)">5.13mm</td></tr>
+        <tr><td style="font-family:var(--font-u);font-size:11px;color:var(--white)">1/4-20</td><td style="font-family:var(--font-b);font-size:11px">0.250"</td><td style="font-family:var(--font-b);font-size:11px">6.35mm</td><td style="font-family:var(--font-b);font-size:11px;color:var(--green)">0.262"</td><td style="font-family:var(--font-b);font-size:11px;color:var(--green)">6.65mm</td></tr>
+      </tbody>
+    </table>
+    <div class="fhint">Design hole = measured shank + 0.012" / 0.3mm close fit compensation for 3D printed HIPS. Use the calculator below if your bolt measures differently.</div>
+    <button class="info-btn" onclick="togInfo('inf-bolt-wf')">BOLT HOLE CUT — SOLIDWORKS WORKFLOW</button>
+    <div class="info-box" id="inf-bolt-wf">
       <ol class="step-ol">
-        <li>Open a sketch on the parting reference plane.</li>
-        <li>Sketch two circles, <em>4.00mm / 0.157" diameter</em>, placed diagonally in areas with enough mold wall around them. Each circle center must be at least <em>8.00mm / 0.315"</em> from any mold edge. Note the distance from each center to two reference edges — you will need these exact measurements for the socket sketch.</li>
-        <li>Exit sketch.</li>
-        <li><strong>Insert &gt; Features &gt; Extruded Boss/Base.</strong> Select the sketch. Set the extrude direction toward the bottom half body. Depth: <em>10.00mm / 0.394"</em>. In Feature Scope, uncheck All Bodies and select the <em>top half body only</em>. Confirm. Two cylindrical pins now protrude from the parting face of the top half.</li>
-        <li>Open a <em>new sketch</em> on the same parting reference plane.</li>
-        <li>Open a new sketch on the same parting reference plane. Use Convert Entities or sketch the same circle positions — then apply a Concentric relation between each new circle and the corresponding pin boss circle edge. This guarantees exact position match. Resize the circles to <em>4.50mm / 0.177"</em>.</li>
-        <li>Exit sketch.</li>
-        <li><strong>Insert &gt; Features &gt; Extruded Cut.</strong> Set direction into the bottom half body interior. Depth: <em>11.00mm / 0.433"</em>. In Feature Scope, uncheck All Bodies and select the <em>bottom half body only</em>. Confirm. Two sockets appear in the parting face of the bottom half.</li>
-        <li>Verify: hide the top half in Solid Bodies. Confirm sockets are present and correctly positioned in the bottom half parting face.</li>
+        <li>Confirm you are working <strong>BEFORE</strong> the Split feature in Module 02. Roll back the end of history bar if needed.</li>
+        <li>Create a sketch on the top face of the mold block.</li>
+        <li>Place circles at your chosen bolt hole locations — minimum 2, positioned so bolts clear the cavity and parting features. Keep at least <em>0.315" / 8mm</em> from any outer mold wall edge.</li>
+        <li><strong>Extruded Cut</strong> — set direction to <em>Through All Both Directions</em> so the cut passes completely through the full mold height regardless of body count.</li>
+        <li><strong>Feature Scope</strong> — leave set to <em>All Bodies</em>. Both halves will receive the hole when the Split runs later.</li>
+        <li>After the Split, verify the hole aligns across both parting faces when the halves are mated.</li>
       </ol>
     </div>
+    <div class="spec-block">
+      <strong>BOLT HOLE CALCULATOR</strong>
+      <div style="margin-top:12px">
+        <div class="fg">
+          <div class="fl">MEASURED SHANK DIA (in)</div>
+          <input type="number" id="calc-shank" step="0.001" placeholder="0.000" oninput="calcBoltHole()" style="max-width:200px">
+        </div>
+        <div class="fg">
+          <div class="fl">TOTAL MOLD HEIGHT (in)</div>
+          <input type="number" id="calc-height" step="0.001" placeholder="0.000" oninput="calcBoltHole()" style="max-width:200px">
+        </div>
+        <div class="fg">
+          <div class="fl">BOLT SIZE</div>
+          <select id="calc-bolt-size" oninput="calcBoltHole()" style="max-width:200px">
+            <option value="">Select bolt size...</option>
+            <option value="6-32">6-32</option>
+            <option value="8-32">8-32</option>
+            <option value="10-32">10-32</option>
+            <option value="1/4-20">1/4-20</option>
+          </select>
+        </div>
+        <div id="calc-hole-out" class="stat-card empty" style="margin-bottom:8px">Recommended hole diameter: —</div>
+        <div id="calc-len-out" class="stat-card empty">Recommended bolt length: —</div>
+      </div>
+      <script>
+      function calcBoltHole(){
+        var shank=parseFloat(document.getElementById('calc-shank').value);
+        var height=parseFloat(document.getElementById('calc-height').value);
+        var boltSize=document.getElementById('calc-bolt-size').value;
+        var nutH={'6-32':0.094,'8-32':0.126,'10-32':0.142,'1/4-20':0.220};
+        var holeEl=document.getElementById('calc-hole-out');
+        var lenEl=document.getElementById('calc-len-out');
+        if(isNaN(shank)||isNaN(height)||!boltSize){
+          holeEl.textContent='Recommended hole diameter: —';holeEl.className='stat-card empty';
+          lenEl.textContent='Recommended bolt length: —';lenEl.className='stat-card empty';
+          return;
+        }
+        var holeDia=shank+0.012;
+        var boltLen=height+0.118+nutH[boltSize]+0.118;
+        var toMm=function(v){return (v*25.4).toFixed(2);};
+        holeEl.innerHTML='Recommended hole diameter: <strong>'+holeDia.toFixed(3)+'"</strong> <span style="color:var(--dim);font-size:10px">/ '+toMm(holeDia)+'mm</span>';
+        holeEl.className='stat-card ok';
+        lenEl.innerHTML='Recommended bolt length: <strong>'+boltLen.toFixed(3)+'"</strong> <span style="color:var(--dim);font-size:10px">/ '+toMm(boltLen)+'mm</span>';
+        lenEl.className='stat-card ok';
+      }
+      </script>
+    </div>
+    <div class="section-div">Documentation</div>
     <div class="fg">
-      <div class="fl">WORKFLOW CONFIRMATIONS</div>
-      <div class="ck" onclick="togCk('ck-m3a',event)"><input type="checkbox" id="ck-m3a" data-save="true" onchange="updateComp()"><label>Sketch 1 on parting plane — two 4.00mm / 0.157" circles, placed diagonally, minimum 8.00mm / 0.315" from any mold edge</label></div>
-      <div class="ck" onclick="togCk('ck-m3b',event)"><input type="checkbox" id="ck-m3b" data-save="true" onchange="updateComp()"><label>Extruded Boss: Feature Scope = top half body only — 10.00mm / 0.394" depth — pins protrude from top half parting face</label></div>
-      <div class="ck" onclick="togCk('ck-m3c',event)"><input type="checkbox" id="ck-m3c" data-save="true" onchange="updateComp()"><label>Sketch 2 on same parting plane — two 4.50mm / 0.177" circles at identical positions to Sketch 1</label></div>
-      <div class="ck" onclick="togCk('ck-m3d',event)"><input type="checkbox" id="ck-m3d" data-save="true" onchange="updateComp()"><label>Extruded Cut: Feature Scope = bottom half body only — 11.00mm / 0.433" depth — sockets in bottom half parting face</label></div>
-      <div class="ck" onclick="togCk('ck-m3e',event)"><input type="checkbox" id="ck-m3e" data-save="true" onchange="updateComp()"><label>Fit verified — top half hidden in Solid Bodies, sockets confirmed present and correctly positioned in bottom half</label></div>
+      <div class="fl">BOLT SIZE SELECTED <span class="req">REQUIRED</span></div>
+      <select id="bolt-size-sel" data-save="true" oninput="updateComp()" style="max-width:200px">
+        <option value="">Select bolt size...</option>
+        <option value="6-32">6-32</option>
+        <option value="8-32">8-32</option>
+        <option value="10-32">10-32</option>
+        <option value="1/4-20">1/4-20</option>
+      </select>
     </div>
     <div class="fg">
-      <div class="fl">ALIGNMENT FEATURE VIEW <span class="req">MIN 1 IMAGE</span></div>
-      <div class="fhint">Show the parting faces of both halves — pins visible on the top half, sockets visible on the bottom half. Separate images or a combined layout both acceptable.</div>
-      <div class="warn-bar">⚠ Screenshots must show internal geometry. Use wireframe mode (View > Display > Wireframe), set bodies to transparent (right-click body > Appearance > Transparency), or hide interfering bodies in the Solid Bodies folder before screenshotting.</div>
-      <div class="upload-zone" id="uz-align_view" data-key="align_view" data-min-images="1">
+      <div class="fl">DESIGNED HOLE DIAMETER <span class="req">REQUIRED</span></div>
+      <div class="du-row">
+        <div class="du-field"><label>IN</label><input type="number" id="hole-dia-in" step="0.001" placeholder="0.000" data-save="true" oninput="syncDU('hole-dia','in');updateComp()"></div>
+        <div class="du-sep">/</div>
+        <div class="du-field"><label>MM</label><input type="number" id="hole-dia-mm" step="0.01" placeholder="0.00" data-save="true" oninput="syncDU('hole-dia','mm');updateComp()"></div>
+      </div>
+    </div>
+    <div class="fg">
+      <div class="fl">DESIGNED BOLT LENGTH <span class="req">REQUIRED</span></div>
+      <div class="du-row">
+        <div class="du-field"><label>IN</label><input type="number" id="bolt-len-in" step="0.001" placeholder="0.000" data-save="true" oninput="syncDU('bolt-len','in');updateComp()"></div>
+        <div class="du-sep">/</div>
+        <div class="du-field"><label>MM</label><input type="number" id="bolt-len-mm" step="0.01" placeholder="0.00" data-save="true" oninput="syncDU('bolt-len','mm');updateComp()"></div>
+      </div>
+    </div>
+    <div class="fg">
+      <div class="fl">BOLT PLACEMENT RATIONALE <span class="req">REQUIRED</span></div>
+      <div class="fhint">Where are the bolts placed and why does this location clear the cavity and outer walls?</div>
+      <textarea id="bolt-rationale" rows="3" data-min="1" data-max="2" data-save="true" placeholder="Where are the bolts placed and why does this location clear the cavity and outer walls?"></textarea>
+      <div class="ctr-row"><div class="ctr s-dim" id="ctr-bolt-rationale">0 / 1–2 sentences</div></div>
+      <div class="print-mirror" data-mirror="bolt-rationale"></div>
+    </div>
+    <div class="fg">
+      <div class="fl">CONFIRMATIONS</div>
+      <div class="ck" onclick="togCk('ck-m3a',event)"><input type="checkbox" id="ck-m3a" data-save="true" onchange="updateComp()"><label>Bolt hole cut extrude performed BEFORE the Split feature in Module 02</label></div>
+      <div class="ck" onclick="togCk('ck-m3b',event)"><input type="checkbox" id="ck-m3b" data-save="true" onchange="updateComp()"><label>Minimum 2 bolt holes placed — each clears the mold cavity and sits at least 0.315" / 8mm from any outer wall</label></div>
+      <div class="ck" onclick="togCk('ck-m3c',event)"><input type="checkbox" id="ck-m3c" data-save="true" onchange="updateComp()"><label>Cut set to Through All Both Directions — hole passes through full mold height</label></div>
+      <div class="ck" onclick="togCk('ck-m3d',event)"><input type="checkbox" id="ck-m3d" data-save="true" onchange="updateComp()"><label>Feature Scope set to All Bodies</label></div>
+      <div class="ck" onclick="togCk('ck-m3e',event)"><input type="checkbox" id="ck-m3e" data-save="true" onchange="updateComp()"><label>Bolt length verified against calculator recommendation — nut and washers have clearance</label></div>
+    </div>
+    <div class="fg">
+      <div class="fl">BOLT HOLES VIEW <span class="req">MIN 1 IMAGE</span></div>
+      <div class="fhint">Use wireframe mode or set the mold body to transparent. Both the top face hole locations and a cross-section or side view showing the hole passing through the full mold height are recommended.</div>
+      <div class="upload-zone" id="uz-bolt_holes" data-key="bolt_holes" data-min-images="1">
         <div class="paste-badge">PASTE TARGET</div>
         <div class="uz-inner"><div class="uz-lbl">Drop, paste, or <span>click to upload</span></div></div>
-        <input type="file" id="file-align_view" accept="image/*" multiple>
-        <div class="img-cnt s-dim" id="cnt-align_view">0 images — minimum 1 required</div>
-        <div class="img-grid" id="grid-align_view"></div>
+        <input type="file" id="file-bolt_holes" accept="image/*" multiple>
+        <div class="img-cnt s-dim" id="cnt-bolt_holes">0 images — minimum 1 required</div>
+        <div class="img-grid" id="grid-bolt_holes"></div>
       </div>
     </div>
   </div></div>
@@ -877,7 +948,7 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
     <tbody>
       <tr><td style="border:1px solid rgba(0,255,65,.12);padding:6px 10px;font-size:12px;color:#E8FFE8">01 — Mold Block Creation</td><td style="border:1px solid rgba(0,255,65,.12);padding:6px 10px;text-align:center;color:#E8FFE8">12</td><td style="border:1px solid rgba(0,255,65,.12);padding:6px 10px;text-align:center">___</td><td style="border:1px solid rgba(0,255,65,.12);padding:6px 10px"></td></tr>
       <tr><td style="border:1px solid rgba(0,255,65,.12);padding:6px 10px;font-size:12px;color:#E8FFE8">02 — Subtractive Combine &amp; Split</td><td style="border:1px solid rgba(0,255,65,.12);padding:6px 10px;text-align:center;color:#E8FFE8">12</td><td style="border:1px solid rgba(0,255,65,.12);padding:6px 10px;text-align:center">___</td><td style="border:1px solid rgba(0,255,65,.12);padding:6px 10px"></td></tr>
-      <tr><td style="border:1px solid rgba(0,255,65,.12);padding:6px 10px;font-size:12px;color:#E8FFE8">03 — Alignment Features</td><td style="border:1px solid rgba(0,255,65,.12);padding:6px 10px;text-align:center;color:#E8FFE8">14</td><td style="border:1px solid rgba(0,255,65,.12);padding:6px 10px;text-align:center">___</td><td style="border:1px solid rgba(0,255,65,.12);padding:6px 10px"></td></tr>
+      <tr><td style="border:1px solid rgba(0,255,65,.12);padding:6px 10px;font-size:12px;color:#E8FFE8">03 — Bolt Holes</td><td style="border:1px solid rgba(0,255,65,.12);padding:6px 10px;text-align:center;color:#E8FFE8">14</td><td style="border:1px solid rgba(0,255,65,.12);padding:6px 10px;text-align:center">___</td><td style="border:1px solid rgba(0,255,65,.12);padding:6px 10px"></td></tr>
       <tr><td style="border:1px solid rgba(0,255,65,.12);padding:6px 10px;font-size:12px;color:#E8FFE8">04 — Pour Spout</td><td style="border:1px solid rgba(0,255,65,.12);padding:6px 10px;text-align:center;color:#E8FFE8">14</td><td style="border:1px solid rgba(0,255,65,.12);padding:6px 10px;text-align:center">___</td><td style="border:1px solid rgba(0,255,65,.12);padding:6px 10px"></td></tr>
       <tr><td style="border:1px solid rgba(0,255,65,.12);padding:6px 10px;font-size:12px;color:#E8FFE8">05 — Print Settings</td><td style="border:1px solid rgba(0,255,65,.12);padding:6px 10px;text-align:center;color:#E8FFE8">8</td><td style="border:1px solid rgba(0,255,65,.12);padding:6px 10px;text-align:center">___</td><td style="border:1px solid rgba(0,255,65,.12);padding:6px 10px"></td></tr>
       <tr><td style="border:1px solid rgba(0,255,65,.12);padding:6px 10px;font-size:12px;color:#E8FFE8">06 — Physical Print Result</td><td style="border:1px solid rgba(0,255,65,.12);padding:6px 10px;text-align:center;color:#E8FFE8">20</td><td style="border:1px solid rgba(0,255,65,.12);padding:6px 10px;text-align:center">___</td><td style="border:1px solid rgba(0,255,65,.12);padding:6px 10px"></td></tr>
@@ -914,12 +985,13 @@ const APPROVAL_HASH='ec929973e52a87f1896dac3036bf607051238d042fef08147b9a78ba6a3
 const FACES=['top','bottom','left','right','front','back'];
 const OFF_MIN_MM=5.0;
 const SPOUT_MIN_MM=10.0;
-const ZONES=['block_view','combine_split','align_view','spout_view','bambu_ss','print_halves','print_assembled'];
-const ZONE_MINS={block_view:1,combine_split:2,align_view:1,spout_view:1,bambu_ss:1,print_halves:1,print_assembled:1};
+const ZONES=['block_view','combine_split','bolt_holes','spout_view','bambu_ss','print_halves','print_assembled'];
+const ZONE_MINS={block_view:1,combine_split:2,bolt_holes:1,spout_view:1,bambu_ss:1,print_halves:1,print_assembled:1};
 const CTR_FIELDS=[
   {id:'geom-confirm',min:1,max:2},
   {id:'combine-desc',min:1,max:2},
   {id:'split-desc',min:1,max:2},
+  {id:'bolt-rationale',min:1,max:2},
   {id:'pour-orient',min:1,max:2},
   {id:'high-point',min:1,max:2},
   {id:'flat-zone',min:2,max:3},
@@ -1392,14 +1464,14 @@ function ctrOk(id){const cfg=CTR_FIELDS.find(c=>c.id===id);if(!cfg)return false;
 function spoutOk(){const d=parseFloat(document.getElementById('spout-dia-mm')?.value),dr=parseFloat(document.getElementById('spout-draft')?.value);return!isNaN(d)&&d>=SPOUT_MIN_MM&&!isNaN(dr)&&dr>=1&&dr<=2;}
 function m1ok(){return getV('student-name')!==''&&ctrOk('geom-confirm')&&allOffsetsOk()&&imgStore.block_view.length>=1&&getCk('ck-m1a')&&getCk('ck-m1b')&&getCk('ck-m1c');}
 function m2ok(){return ctrOk('combine-desc')&&getCk('ck-m2a')&&getCk('ck-m2b')&&getCk('ck-m2c')&&ctrOk('split-desc')&&getCk('ck-m2d')&&getCk('ck-m2e')&&imgStore.combine_split.length>=2;}
-function m3ok(){return getCk('ck-m3a')&&getCk('ck-m3b')&&getCk('ck-m3c')&&getCk('ck-m3d')&&getCk('ck-m3e')&&imgStore.align_view.length>=1;}
+function m3ok(){return getV('bolt-size-sel')!==''&&getV('hole-dia-in')!==''&&getV('bolt-len-in')!==''&&ctrOk('bolt-rationale')&&getCk('ck-m3a')&&getCk('ck-m3b')&&getCk('ck-m3c')&&getCk('ck-m3d')&&getCk('ck-m3e')&&imgStore.bolt_holes.length>=1;}
 function m4ok(){return ctrOk('pour-orient')&&ctrOk('high-point')&&ctrOk('flat-zone')&&spoutOk()&&getCk('ck-m4a')&&getCk('ck-m4b')&&getCk('ck-m4c')&&getCk('ck-m4d')&&getCk('ck-m4e')&&imgStore.spout_view.length>=1;}
 function m5ok(){return getV('machine-sel')!==''&&getCk('ck-m5a')&&(getCk('ck-m5b-a')||getCk('ck-m5b-b'))&&getCk('ck-m5c')&&getCk('ck-m5d')&&getCk('ck-m5e')&&getCk('ck-m5f')&&getCk('ck-m5g')&&getCk('ck-m5h')&&imgStore.bambu_ss.length>=1;}
 function m6ok(){return imgStore.print_halves.length>=1&&imgStore.print_assembled.length>=1&&measFilledCount()>=2&&ctrOk('surface-notes')&&getCk('ck-m6a')&&getCk('ck-m6b')&&getCk('ck-m6c');}
 const MFNS=[null,m1ok,m2ok,m3ok,m4ok,m5ok,m6ok];
 function m1partial(){return getV('student-name')!==''||ctrOk('geom-confirm')||allOffsetsOk();}
 function m2partial(){return ctrOk('combine-desc')||getCk('ck-m2a');}
-function m3partial(){return getCk('ck-m3a');}
+function m3partial(){return getV('bolt-size-sel')!==''||getV('hole-dia-in')!==''||getCk('ck-m3a');}
 function m4partial(){return ctrOk('pour-orient')||ctrOk('high-point');}
 function m5partial(){return getV('machine-sel')!==''||getCk('ck-m5a');}
 function m6partial(){return imgStore.print_halves.length>=1||imgStore.print_assembled.length>=1;}
