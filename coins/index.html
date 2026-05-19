@@ -920,7 +920,7 @@ body::after {
       <button class="filter-btn" data-section="IDEA-113">IDEA-113</button>
       <button class="filter-btn" data-section="IDEA-208-1">IDEA-208-1</button>
       <button class="filter-btn" data-section="IDEA-208-2">IDEA-208-2</button>
-      <button class="filter-btn" data-section="IDEA-304.1">IDEA-304.1</button>
+      <button class="filter-btn" data-section="IDEA-304">IDEA-304</button>
       <button class="filter-btn" data-section="IDEA-403">IDEA-403</button>
       <button class="print-lb-btn" onclick="window.print()">&#128438; Print Leaderboard</button>
     </div>
@@ -1021,7 +1021,7 @@ const SECTION_COLORS = {
   'IDEA-113':   '#00FF41',
   'IDEA-208-1': '#C8FF00',
   'IDEA-208-2': '#00F0FF',
-  'IDEA-304.1': '#FF8C00',
+  'IDEA-304':   '#FF8C00',
   'IDEA-403':   '#FF88CC',
 };
 const TXN_PAGE_SIZE = 50;
@@ -1188,7 +1188,6 @@ function renderLeaderboard() {
     const fines   = parseFloat(p('Fines') || 0);
     const spent   = parseFloat(p('Spent') || 0);
     const coinBal = awarded - fines;
-    const bankBal = parseFloat(p('Bank Balance', 'Bank Bal', 'Bank') || NaN);
     const isNeg   = coinBal < 0;
 
     const card = document.createElement('div');
@@ -1207,14 +1206,6 @@ function renderLeaderboard() {
     else if (i === 1) { rankLabel = '2ND PLACE';  card.classList.add('rank-silver'); }
     else if (i === 2) { rankLabel = '3RD PLACE';  card.classList.add('rank-bronze'); }
     else              { rankLabel = '#' + (i + 1); }
-
-    // Bank balance "OWED TO STUDENT"
-    const bankHtml = (!isNaN(bankBal) && bankBal > 0)
-      ? '<div class="coin-meta-item">' +
-          '<span class="coin-meta-label">Owed to Student</span>' +
-          '<span class="coin-meta-value" style="color:var(--cyan)">' + fmtNum(bankBal) + '</span>' +
-        '</div>'
-      : '';
 
     card.innerHTML =
       '<div class="coin-rank">' + escHtml(rankLabel) + '</div>' +
@@ -1235,7 +1226,6 @@ function renderLeaderboard() {
           '<span class="coin-meta-label">Spent</span>' +
           '<span class="coin-meta-value" style="color:var(--amber)">-' + fmtNum(spent) + '</span>' +
         '</div>' +
-        bankHtml +
       '</div>';
 
     card.addEventListener('click', () => openDrawer(row));
@@ -1406,12 +1396,13 @@ function renderTransactions() {
       const amount = parseFloat(p('Amount') || 0);
       const type   = p('Type', 'Transaction Type') || '—';
       const reason = p('Reason', 'Description', 'Note') || '—';
+      const isPositiveTxn = ['award', 'payout'].includes(type.toLowerCase());
       const tr = document.createElement('tr');
       tr.innerHTML =
         '<td class="txn-date">'  + escHtml(date)   + '</td>' +
         '<td class="txn-name">'  + escHtml(name)   + '</td>' +
-        '<td class="txn-amount ' + (amount >= 0 ? 'positive' : 'negative') + '">' +
-          (amount >= 0 ? '+' : '') + fmtNum(amount) + '</td>' +
+        '<td class="txn-amount ' + (isPositiveTxn ? 'positive' : 'negative') + '">' +
+          (isPositiveTxn ? '+' : '-') + fmtNum(Math.abs(amount)) + '</td>' +
         '<td><span class="type-badge ' + typeBadgeClass(type) + '">' + escHtml(type) + '</span></td>' +
         '<td class="txn-reason">' + escHtml(reason) + '</td>';
       tbody.appendChild(tr);
@@ -1602,7 +1593,7 @@ function renderAnalytics() {
     spotCard('Top Spender',  sp ? sp.name : null, sp ? fmtNum(sp.spent)   + ' spent' : '', false);
 
   // ── Section Standings ─────────────────────────────
-  const SECTIONS = ['IDEA-113', 'IDEA-208-1', 'IDEA-208-2', 'IDEA-304.1', 'IDEA-403'];
+  const SECTIONS = ['IDEA-113', 'IDEA-208-1', 'IDEA-208-2', 'IDEA-304', 'IDEA-403'];
   const sectionAvgs = SECTIONS.map(sec => {
     const students = summaryData.filter(r => (pick(r)('Section', 'Class') || '').trim() === sec);
     if (!students.length) return { sec, avg: 0 };
