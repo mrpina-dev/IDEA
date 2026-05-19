@@ -753,6 +753,28 @@ body::after {
 }
 
 /* ── Responsive ─────────────────────────────────────── */
+/* ── i¢ Guide Tab ───────────────────────────────────── */
+.guide-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+.guide-section-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+.guide-row {
+  display: flex; align-items: center; gap: 0.75rem;
+  background: var(--bg1); border-radius: 3px;
+  padding: 0.6rem 1rem; margin-bottom: 0.4rem;
+  font-size: 0.7rem;
+}
+.guide-row-award  { border: 1px solid rgba(0,255,65,0.15); }
+.guide-row-purchase { border: 1px solid rgba(255,140,0,0.15); }
+.guide-row-fine   { border: 1px solid rgba(255,68,68,0.15); }
+.guide-row-text { color: var(--white); letter-spacing: 0.02em; flex: 1; }
+
 @media (max-width: 768px) {
   header { height: auto; padding: 0.8rem 1rem; flex-wrap: wrap; }
   .logo { font-size: 1.1rem; }
@@ -768,6 +790,7 @@ body::after {
   .breakdown-wrap { grid-template-columns: 1fr; }
   .spotlight-grid { grid-template-columns: 1fr 1fr; }
   .weekly-wrap { grid-template-columns: 1fr; }
+  .guide-grid { grid-template-columns: 1fr; }
   .drawer { width: 100vw; border-left: none; }
   .drawer-stats { grid-template-columns: repeat(2, 1fr); }
   .standings-label { min-width: 80px; font-size: 0.44rem; }
@@ -925,6 +948,7 @@ body::after {
     <button class="tab-btn active" data-tab="leaderboard">Leaderboard</button>
     <button class="tab-btn" data-tab="transactions">Transaction Log</button>
     <button class="tab-btn" data-tab="analytics">Analytics</button>
+    <button class="tab-btn" data-tab="guide">i&cent; Guide</button>
   </div>
 
   <!-- ── Leaderboard Tab ─────────────────────────── -->
@@ -1027,6 +1051,70 @@ body::after {
     <hr class="analytics-divider">
     <div class="analytics-section-title">Recently Active</div>
     <div id="analytics-recently-active"></div>
+  </div>
+
+  <!-- ── i¢ Guide Tab ───────────────────────────────── -->
+  <div class="tab-panel" id="tab-guide">
+    <div class="guide-grid">
+
+      <!-- Awards -->
+      <div>
+        <div class="guide-section-title" style="color:var(--green)">Awards</div>
+        <div class="guide-row guide-row-award"><span class="type-badge type-award">Award</span><span class="guide-row-text">Legacy Wealth Declaration</span></div>
+        <div class="guide-row guide-row-award"><span class="type-badge type-award">Award</span><span class="guide-row-text">Contract Completion</span></div>
+        <div class="guide-row guide-row-award"><span class="type-badge type-award">Award</span><span class="guide-row-text">Improve IDEA Coin Infrastructure</span></div>
+        <div class="guide-row guide-row-award"><span class="type-badge type-award">Award</span><span class="guide-row-text">Donate Supplies (towels, gloves, filament, etc.)</span></div>
+        <div class="guide-row guide-row-award"><span class="type-badge type-award">Award</span><span class="guide-row-text">Donate Tissue Box</span></div>
+        <div class="guide-row guide-row-award"><span class="type-badge type-award">Award</span><span class="guide-row-text">Answer Questions Correctly During Class</span></div>
+        <div class="guide-row guide-row-award"><span class="type-badge type-award">Award</span><span class="guide-row-text">Bounty Hunting / Fine Reporting / Policing</span></div>
+        <div class="guide-row guide-row-award"><span class="type-badge type-award">Award</span><span class="guide-row-text">Exceptional Performance / Going Above and Beyond</span></div>
+        <div class="guide-row guide-row-award"><span class="type-badge type-award">Award</span><span class="guide-row-text">Perfect Assignment Score</span></div>
+        <div class="guide-row guide-row-award"><span class="type-badge type-award">Award</span><span class="guide-row-text">Weekly Wage</span></div>
+        <div class="guide-row guide-row-award"><span class="type-badge type-award">Award</span><span class="guide-row-text">100% IDEA Grade or Highest Grade in Section</span></div>
+        <div class="guide-row guide-row-award"><span class="type-badge type-award">Award</span><span class="guide-row-text">Quality IDEA Background</span></div>
+      </div>
+
+      <!-- Purchases -->
+      <div>
+        <div class="guide-section-title" style="color:var(--amber)">Purchases</div>
+        <div class="guide-row guide-row-purchase"><span class="type-badge type-purchase">Purchase</span><span class="guide-row-text">In-N-Out Combo</span></div>
+        <div class="guide-row guide-row-purchase"><span class="type-badge type-purchase">Purchase</span><span class="guide-row-text">Executive Classroom Eating Pass</span></div>
+        <div class="guide-row guide-row-purchase"><span class="type-badge type-purchase">Purchase</span><span class="guide-row-text">Basic Classroom Eating Pass</span></div>
+        <div class="guide-row guide-row-purchase"><span class="type-badge type-purchase">Purchase</span><span class="guide-row-text">Raise Weekly Wage</span></div>
+        <div class="guide-row guide-row-purchase"><span class="type-badge type-purchase">Purchase</span><span class="guide-row-text">Bounty Hunter Application</span></div>
+        <div class="guide-row guide-row-purchase"><span class="type-badge type-purchase">Purchase</span><span class="guide-row-text">Weekly Bounty Limit Increase</span></div>
+        <div class="guide-row guide-row-purchase"><span class="type-badge type-purchase">Purchase</span><span class="guide-row-text">Outside Time (per 30 min)</span></div>
+        <div class="guide-row guide-row-purchase"><span class="type-badge type-purchase">Purchase</span><span class="guide-row-text">B&amp;W Paper Printing (per 2-sided page)</span></div>
+        <div class="guide-row guide-row-purchase"><span class="type-badge type-purchase">Purchase</span><span class="guide-row-text">Extra Credit (per point)</span></div>
+        <div class="guide-row guide-row-purchase"><span class="type-badge type-purchase">Purchase</span><span class="guide-row-text">3D Printing (per 10g)</span></div>
+      </div>
+
+      <!-- Fines -->
+      <div>
+        <div class="guide-section-title" style="color:#FF4444">Fines</div>
+        <div class="guide-row guide-row-fine"><span class="type-badge type-fine">Fine</span><span class="guide-row-text">Unprofessional Conduct</span></div>
+        <div class="guide-row guide-row-fine"><span class="type-badge type-fine">Fine</span><span class="guide-row-text">Crashing Out</span></div>
+        <div class="guide-row guide-row-fine"><span class="type-badge type-fine">Fine</span><span class="guide-row-text">Brain Rot</span></div>
+        <div class="guide-row guide-row-fine"><span class="type-badge type-fine">Fine</span><span class="guide-row-text">Gambling</span></div>
+        <div class="guide-row guide-row-fine"><span class="type-badge type-fine">Fine</span><span class="guide-row-text">Inappropriate Phone Use</span></div>
+        <div class="guide-row guide-row-fine"><span class="type-badge type-fine">Fine</span><span class="guide-row-text">Using Device for Non-School Purposes</span></div>
+        <div class="guide-row guide-row-fine"><span class="type-badge type-fine">Fine</span><span class="guide-row-text">Inappropriate / Disruptive Talking</span></div>
+        <div class="guide-row guide-row-fine"><span class="type-badge type-fine">Fine</span><span class="guide-row-text">Arguing</span></div>
+        <div class="guide-row guide-row-fine"><span class="type-badge type-fine">Fine</span><span class="guide-row-text">Out of Seat During Attendance</span></div>
+        <div class="guide-row guide-row-fine"><span class="type-badge type-fine">Fine</span><span class="guide-row-text">Unsafe in Shop</span></div>
+        <div class="guide-row guide-row-fine"><span class="type-badge type-fine">Fine</span><span class="guide-row-text">Extended Bathroom Break</span></div>
+        <div class="guide-row guide-row-fine"><span class="type-badge type-fine">Fine</span><span class="guide-row-text">Failure to Return Flash Drive</span></div>
+        <div class="guide-row guide-row-fine"><span class="type-badge type-fine">Fine</span><span class="guide-row-text">Failure to Clean Up in Shop</span></div>
+        <div class="guide-row guide-row-fine"><span class="type-badge type-fine">Fine</span><span class="guide-row-text">Eating Without Eating Pass</span></div>
+        <div class="guide-row guide-row-fine"><span class="type-badge type-fine">Fine</span><span class="guide-row-text">Leaving Mess in Classroom</span></div>
+        <div class="guide-row guide-row-fine"><span class="type-badge type-fine">Fine</span><span class="guide-row-text">Non-IDEA / Inappropriate Computer Background</span></div>
+        <div class="guide-row guide-row-fine"><span class="type-badge type-fine">Fine</span><span class="guide-row-text">IDEA Coin Theft</span></div>
+        <div class="guide-row guide-row-fine"><span class="type-badge type-fine">Fine</span><span class="guide-row-text">Planting Evidence</span></div>
+        <div class="guide-row guide-row-fine"><span class="type-badge type-fine">Fine</span><span class="guide-row-text">Tampering With IDEA Coin Mint (Known Suspect)</span></div>
+        <div class="guide-row guide-row-fine"><span class="type-badge type-fine">Fine</span><span class="guide-row-text">Tampering With IDEA Coin Mint (Unknown Suspect)</span></div>
+      </div>
+
+    </div>
   </div>
 
 </div><!-- .page-wrap -->

@@ -1,10 +1,66 @@
-﻿Edit coins/index.html. In the renderLeaderboard() function, find the .coin-meta div inside each card. It currently shows two items: Net Awards and Net Fines. Add a third item: Net Spent.
+﻿Edit coins/index.html. Add a fourth tab to the existing tab bar labeled "i¢ Guide". Add a corresponding tab panel #tab-guide.
 
-- Label: "Spent"
-- Value: the Spent column from Summary CSV, read via pick(row)('Spent')
-- Color: var(--amber)
-- Format with fmtNum(), prefixed with a minus sign
+Inside the panel, display three sections side by side on desktop, stacked on mobile:
 
-Apply to all cards including negative balance cards.
+SECTION 1 - AWARDS
+Header: "Awards" in green (var(--green))
+List every item below as a row with a green Award badge on the left and the reason text on the right:
+- Legacy Wealth Declaration
+- Contract Completion
+- Improve IDEA Coin Infrastructure
+- Donate Supplies (towels, gloves, filament, etc.)
+- Donate Tissue Box
+- Answer Questions Correctly During Class
+- Bounty Hunting / Fine Reporting / Policing
+- Exceptional Performance / Going Above and Beyond
+- Perfect Assignment Score
+- Weekly Wage
+- 100% IDEA Grade or Highest Grade in Section
+- Quality IDEA Background
 
-Commit with message "feat: add net spent to leaderboard cards" and push.
+SECTION 2 - PURCHASES
+Header: "Purchases" in amber (var(--amber))
+List every item below as a row with an orange Purchase badge on the left and the reason text on the right:
+- In-N-Out Combo
+- Executive Classroom Eating Pass
+- Basic Classroom Eating Pass
+- Raise Weekly Wage
+- Bounty Hunter Application
+- Weekly Bounty Limit Increase
+- Outside Time (per 30 min)
+- B&W Paper Printing (per 2-sided page)
+- Extra Credit (per point)
+- 3D Printing (per 10g)
+
+SECTION 3 - FINES
+Header: "Fines" in red (#FF4444)
+List every item below as a row with a red Fine badge on the left and the reason text on the right:
+- Unprofessional Conduct
+- Crashing Out
+- Brain Rot
+- Gambling
+- Inappropriate Phone Use
+- Using Device for Non-School Purposes
+- Inappropriate / Disruptive Talking
+- Arguing
+- Out of Seat During Attendance
+- Unsafe in Shop
+- Extended Bathroom Break
+- Failure to Return Flash Drive
+- Failure to Clean Up in Shop
+- Eating Without Eating Pass
+- Leaving Mess in Classroom
+- Non-IDEA / Inappropriate Computer Background
+- IDEA Coin Theft
+- Planting Evidence
+- Tampering With IDEA Coin Mint (Known Suspect)
+- Tampering With IDEA Coin Mint (Unknown Suspect)
+
+STYLE:
+- Each row: bg1 background, 1px solid border matching section color at 15% opacity, border-radius 3px, padding 0.6rem 1rem, margin-bottom 0.4rem
+- Badge reuses existing .type-badge styles (type-award, type-purchase, type-fine)
+- Section headers: Orbitron, 0.7rem, letter-spacing 0.2em, uppercase, margin-bottom 1rem
+- Three columns use CSS grid: grid-template-columns repeat(3, 1fr), gap 1.5rem on desktop; single column on mobile
+- Tab persists to localStorage key idea-coins-tab alongside existing tab memory
+
+Commit with message "feat: add i¢ Guide tab with awards, purchases, and fines lists" and push.
