@@ -210,6 +210,20 @@ nav a.active { color: var(--gold); text-shadow: var(--glow-gold); }
 }
 .print-lb-btn:hover { color: var(--white); border-color: rgba(0,255,65,0.4); }
 
+#lb-sort-select {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(74,122,82,0.3); border-radius: 2px;
+  color: var(--white); font-family: 'Share Tech Mono', monospace;
+  font-size: 0.65rem; padding: 0.35rem 0.75rem; outline: none;
+  letter-spacing: 0.04em; transition: border-color 0.2s; cursor: pointer;
+  -webkit-appearance: none; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%234A7A52'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 0.6rem center;
+  padding-right: 1.8rem;
+}
+#lb-sort-select:focus { border-color: rgba(0,255,65,0.5); }
+#lb-sort-select option { background: #050F07; color: var(--white); }
+
 .leaderboard-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -922,6 +936,16 @@ body::after {
       <button class="filter-btn" data-section="IDEA-208-2">IDEA-208-2</button>
       <button class="filter-btn" data-section="IDEA-304">IDEA-304</button>
       <button class="filter-btn" data-section="IDEA-403">IDEA-403</button>
+      <select id="lb-sort-select">
+        <option value="bal-desc">Coin Balance ↓</option>
+        <option value="bal-asc">Coin Balance ↑</option>
+        <option value="awarded-desc">Most Awarded</option>
+        <option value="fined-desc">Most Fined</option>
+        <option value="spent-desc">Most Spent</option>
+        <option value="name-asc">Name (A – Z)</option>
+        <option value="name-desc">Name (Z – A)</option>
+        <option value="section-asc">Section</option>
+      </select>
       <button class="print-lb-btn" onclick="window.print()">&#128438; Print Leaderboard</button>
     </div>
     <div id="leaderboard-loading" class="loading-state">
@@ -1033,6 +1057,7 @@ let activeSection = 'All';
 let txnNameQ = '';
 let txnTypeQ = '';
 let globalSearchQ = '';
+let lbSort = 'bal-desc';
 let txnSortCol = 'date';
 let txnSortDir = 'desc';
 let txnPage = 1;
@@ -1172,6 +1197,34 @@ function renderLeaderboard() {
     const q = globalSearchQ.toLowerCase();
     data = data.filter(r => (pick(r)('Name', 'Student', 'Full Name') || '').toLowerCase().includes(q));
   }
+
+  data = data.slice().sort((a, b) => {
+    const pa = pick(a), pb = pick(b);
+    switch (lbSort) {
+      case 'bal-asc': {
+        const ba = parseFloat(pa('Awarded')||0) - parseFloat(pa('Fines')||0);
+        const bb = parseFloat(pb('Awarded')||0) - parseFloat(pb('Fines')||0);
+        return ba - bb;
+      }
+      case 'awarded-desc':
+        return parseFloat(pb('Awarded')||0) - parseFloat(pa('Awarded')||0);
+      case 'fined-desc':
+        return parseFloat(pb('Fines')||0) - parseFloat(pa('Fines')||0);
+      case 'spent-desc':
+        return parseFloat(pb('Spent')||0) - parseFloat(pa('Spent')||0);
+      case 'name-asc':
+        return (pa('Name','Student','Full Name')||'').localeCompare(pb('Name','Student','Full Name')||'');
+      case 'name-desc':
+        return (pb('Name','Student','Full Name')||'').localeCompare(pa('Name','Student','Full Name')||'');
+      case 'section-asc':
+        return (pa('Section','Class','Course')||'').localeCompare(pb('Section','Class','Course')||'');
+      default: { // bal-desc
+        const ba = parseFloat(pa('Awarded')||0) - parseFloat(pa('Fines')||0);
+        const bb = parseFloat(pb('Awarded')||0) - parseFloat(pb('Fines')||0);
+        return bb - ba;
+      }
+    }
+  });
 
   grid.innerHTML = '';
 
@@ -1721,6 +1774,13 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   });
 });
 
+// ── Leaderboard Sort ──────────────────────────────────
+document.getElementById('lb-sort-select').addEventListener('change', e => {
+  lbSort = e.target.value;
+  localStorage.setItem('idea-coins-sort', lbSort);
+  if (loaded) renderLeaderboard();
+});
+
 // ── Section Filters ───────────────────────────────────
 document.querySelectorAll('.filter-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -1874,6 +1934,12 @@ document.getElementById('print-header').textContent =
       secBtn.classList.add('active');
       activeSection = savedSection;
     }
+  }
+  const savedSort = localStorage.getItem('idea-coins-sort');
+  if (savedSort) {
+    lbSort = savedSort;
+    const sel = document.getElementById('lb-sort-select');
+    if (sel) sel.value = savedSort;
   }
 })();
 
