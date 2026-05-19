@@ -26,7 +26,7 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; scroll-padding-top: 108px; }
+html { scroll-behavior: smooth; scroll-padding-top: 72px; }
 body {
   background: var(--bg0);
   color: var(--white);
@@ -350,9 +350,6 @@ body::after {
   .assignment-item.linked:hover { padding-left: 1.2rem; }
   .assignment-code { display: none; }
 
-  #materials-strip { padding: 0 1rem; gap: 1rem; }
-  #strip-label, #strip-sep { display: none; }
-
   .changelog-wrap { padding: 0 1rem 3rem; }
   footer { padding: 1.5rem 1rem; }
 }
@@ -360,9 +357,6 @@ body::after {
 @media (max-width: 480px) {
   nav a { font-size: 0.5rem; letter-spacing: 0.05em; }
   .assignment-due { display: none; }
-  .strip-link { font-size: 0.6rem; }
-  #strip-soon { display: none; }
-  #strip-search { width: 100px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -383,32 +377,6 @@ body::after {
 .course-collapse-arrow { font-family: 'Orbitron', sans-serif; font-size: 0.7rem; color: var(--dim); transition: transform 0.3s; flex-shrink: 0; }
 .course-card.collapsed .course-collapse-arrow { transform: rotate(180deg); }
 .badge-instructor { color: var(--ice); border: 1px solid rgba(136,221,255,0.3); background: rgba(136,221,255,0.05); }
-#materials-strip {
-  position: sticky; top: 64px; z-index: 99; width: 100%;
-  background: rgba(2,10,4,0.92);
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(200,255,0,0.12);
-  padding: 0 2rem; height: 36px;
-  display: flex; align-items: center; gap: 2rem;
-}
-#strip-label {
-  font-family: 'Orbitron', sans-serif; font-size: 0.52rem;
-  letter-spacing: 0.2em; color: var(--dim); text-transform: uppercase; white-space: nowrap;
-}
-#strip-sep { width: 1px; height: 14px; background: rgba(74,122,82,0.25); flex-shrink: 0; }
-.strip-link {
-  font-family: 'Share Tech Mono', monospace; font-size: 0.68rem;
-  color: var(--gold); text-decoration: none; letter-spacing: 0.05em;
-  transition: color 0.2s; white-space: nowrap;
-}
-.strip-link:hover { color: var(--white); }
-.strip-link .strip-glyph { color: var(--dim); }
-#strip-soon {
-  font-family: 'Orbitron', sans-serif; font-size: 0.48rem;
-  color: var(--amber); letter-spacing: 0.15em;
-  border: 1px solid rgba(255,140,0,0.25); padding: 0.15rem 0.4rem;
-  border-radius: 2px; margin-left: auto; white-space: nowrap;
-}
 #submit-toggle {
   font-family: 'Orbitron', sans-serif; font-size: 0.58rem;
   width: 100%; display: flex; justify-content: space-between;
@@ -418,18 +386,6 @@ body::after {
 }
 #submit-chevron { transition: transform 0.3s; }
 #submit-toggle.open #submit-chevron { transform: rotate(180deg); }
-#strip-search {
-  background: rgba(0,0,0,0.4);
-  border: 1px solid rgba(74,122,82,0.3);
-  border-radius: 2px; color: var(--white);
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.65rem; padding: 0.2rem 0.6rem;
-  width: 160px; outline: none;
-  letter-spacing: 0.04em;
-  transition: border-color 0.2s;
-}
-#strip-search::placeholder { color: var(--dim); }
-#strip-search:focus { border-color: rgba(0,255,65,0.5); }
 </style>
 </head>
 <body>
@@ -449,15 +405,6 @@ body::after {
     <div class="header-year">2025 - 2026</div>
   </div>
 </header>
-
-<div id="materials-strip">
-  <span id="strip-label">SHARED MATERIALS</span>
-  <span id="strip-sep"></span>
-  <a class="strip-link" href="/IDEA/coins/index.html" target="_blank" rel="noopener"><span class="strip-glyph">▸ </span>IDEA Coin Database</a>
-  <a class="strip-link" href="#" target="_blank" rel="noopener"><span class="strip-glyph">▸ </span>Class Materials List</a>
-  <input type="text" id="strip-search" placeholder="filter assignments...">
-  <span id="strip-soon">COMING SOON</span>
-</div>
 
 <section class="hero">
   <div class="hero-eyebrow">Don Bosco Technical Institute - Technology Pathway</div>
