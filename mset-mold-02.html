@@ -513,7 +513,6 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
     <div class="section-div">Split</div>
     <button class="info-btn" onclick="togInfo('inf-split')">SPLIT — HOW IT WORKS</button>
     <div class="info-box" id="inf-split">
-      <strong>IMPORTANT:</strong> Perform your bolt hole cuts (Module 03) before running the Split. The cut will pass through both resulting bodies automatically since the mold is still one body at this point.<br><br>
       <strong>Insert &gt; Features &gt; Split</strong><br><br>
       Trimming Surfaces: select the parting reference plane directly. Planes extend infinitely — no sketch is needed.<br>
       Click <em>Cut Bodies</em>. Two bodies appear under Resulting Bodies.<br>
@@ -560,7 +559,7 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
     <tr><td>0</td><td>Not submitted.</td></tr>
   </table></div>
   <div class="mod-body-wrap"><div class="mod-body">
-    <div class="callout">Bolts replace alignment pins entirely. A bolt through both mold halves is stronger than a printed pin, prevents misalignment, and compresses the halves together when tightened. Perform this cut extrude <strong>BEFORE the Split in Module 02</strong> — while the mold is still one body.</div>
+    <div class="callout">The bolt hole cut can be performed before or after the Split — both work. If done before, set Feature Scope to All Bodies so both halves receive the hole. If done after the Split, run the cut twice using Feature Scope to target each half body separately. Either way the hole must pierce both bodies completely.</div>
     <div class="section-div">Standard Close Fit Hole Diameters for 3D Printed HIPS</div>
     <table class="dt">
       <thead><tr><th>Bolt Size</th><th>Nominal Shank (in)</th><th>Nominal Shank (mm)</th><th>Design Hole (in)</th><th>Design Hole (mm)</th></tr></thead>
@@ -585,47 +584,37 @@ input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-in
     </div>
     <div class="spec-block">
       <strong>BOLT HOLE CALCULATOR</strong>
-      <div style="margin-top:12px">
-        <div class="fg">
-          <div class="fl">MEASURED SHANK DIA (in)</div>
-          <input type="number" id="calc-shank" step="0.001" placeholder="0.000" oninput="calcBoltHole()" style="max-width:200px">
+      <div style="margin-top:10px;display:flex;gap:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:140px">
+          <div class="fl" style="margin-bottom:4px">MEASURED SHANK DIA (in)</div>
+          <input type="number" id="calc-shank" step="0.001" placeholder="0.000" oninput="calcBoltHole()" style="width:100%">
         </div>
-        <div class="fg">
-          <div class="fl">TOTAL MOLD HEIGHT (in)</div>
-          <input type="number" id="calc-height" step="0.001" placeholder="0.000" oninput="calcBoltHole()" style="max-width:200px">
+        <div style="flex:1;min-width:140px">
+          <div class="fl" style="margin-bottom:4px">TOTAL MOLD HEIGHT (in)</div>
+          <input type="number" id="calc-height" step="0.001" placeholder="0.000" oninput="calcBoltHole()" style="width:100%">
         </div>
-        <div class="fg">
-          <div class="fl">BOLT SIZE</div>
-          <select id="calc-bolt-size" oninput="calcBoltHole()" style="max-width:200px">
-            <option value="">Select bolt size...</option>
-            <option value="6-32">6-32</option>
-            <option value="8-32">8-32</option>
-            <option value="10-32">10-32</option>
-            <option value="1/4-20">1/4-20</option>
-          </select>
-        </div>
-        <div id="calc-hole-out" class="stat-card empty" style="margin-bottom:8px">Recommended hole diameter: —</div>
-        <div id="calc-len-out" class="stat-card empty">Recommended bolt length: —</div>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:12px;flex-wrap:wrap">
+        <div id="calc-hole-out" class="stat-card empty" style="flex:1;min-width:140px">Hole dia: —</div>
+        <div id="calc-len-out" class="stat-card empty" style="flex:1;min-width:140px">Bolt length: —</div>
       </div>
       <script>
       function calcBoltHole(){
         var shank=parseFloat(document.getElementById('calc-shank').value);
         var height=parseFloat(document.getElementById('calc-height').value);
-        var boltSize=document.getElementById('calc-bolt-size').value;
-        var nutH={'6-32':0.094,'8-32':0.126,'10-32':0.142,'1/4-20':0.220};
         var holeEl=document.getElementById('calc-hole-out');
         var lenEl=document.getElementById('calc-len-out');
-        if(isNaN(shank)||isNaN(height)||!boltSize){
-          holeEl.textContent='Recommended hole diameter: —';holeEl.className='stat-card empty';
-          lenEl.textContent='Recommended bolt length: —';lenEl.className='stat-card empty';
+        if(isNaN(shank)||isNaN(height)){
+          holeEl.textContent='Hole dia: —';holeEl.className='stat-card empty';
+          lenEl.textContent='Bolt length: —';lenEl.className='stat-card empty';
           return;
         }
         var holeDia=shank+0.012;
-        var boltLen=height+0.118+nutH[boltSize]+0.118;
+        var boltLen=height+0.118+0.126+0.118;
         var toMm=function(v){return (v*25.4).toFixed(2);};
-        holeEl.innerHTML='Recommended hole diameter: <strong>'+holeDia.toFixed(3)+'"</strong> <span style="color:var(--dim);font-size:10px">/ '+toMm(holeDia)+'mm</span>';
+        holeEl.innerHTML='Hole dia: <strong>'+holeDia.toFixed(3)+'"</strong> <span style="color:var(--dim);font-size:10px">/ '+toMm(holeDia)+'mm</span>';
         holeEl.className='stat-card ok';
-        lenEl.innerHTML='Recommended bolt length: <strong>'+boltLen.toFixed(3)+'"</strong> <span style="color:var(--dim);font-size:10px">/ '+toMm(boltLen)+'mm</span>';
+        lenEl.innerHTML='Bolt length: <strong>'+boltLen.toFixed(3)+'"</strong> <span style="color:var(--dim);font-size:10px">/ '+toMm(boltLen)+'mm</span>';
         lenEl.className='stat-card ok';
       }
       </script>
