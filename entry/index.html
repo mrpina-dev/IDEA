@@ -848,7 +848,7 @@ body::after {
     </div>
     <div class="field-group">
       <label class="field-label">Base Payout (i&#162;)</label>
-      <input type="number" class="field-input" id="detail-payout" min="0" step="1">
+      <input type="text" inputmode="numeric" pattern="[0-9]*" class="field-input" id="detail-payout">
     </div>
     <div class="field-group">
       <label class="field-label">Rate Label</label>
@@ -856,7 +856,7 @@ body::after {
     </div>
     <div class="field-group">
       <label class="field-label">Quantity</label>
-      <input type="number" class="field-input" id="detail-quantity" min="1" step="1" value="1">
+      <input type="text" inputmode="numeric" pattern="[0-9]*" class="field-input" id="detail-quantity" value="1">
       <div class="field-note" id="detail-total">Total: &mdash;</div>
     </div>
     <div class="field-group">
@@ -908,7 +908,7 @@ body::after {
     </div>
     <div class="field-group">
       <label class="field-label">Base Payout in i&#162; <span style="color:var(--red)">*</span></label>
-      <input type="number" class="field-input" id="new-payout" min="0" step="1">
+      <input type="text" inputmode="numeric" pattern="[0-9]*" class="field-input" id="new-payout">
     </div>
     <div class="field-group">
       <label class="field-label">Rate Label</label>
@@ -916,7 +916,7 @@ body::after {
     </div>
     <div class="field-group">
       <label class="field-label">Quantity</label>
-      <input type="number" class="field-input" id="new-quantity" min="1" step="1" value="1">
+      <input type="text" inputmode="numeric" pattern="[0-9]*" class="field-input" id="new-quantity" value="1">
     </div>
     <div class="field-group">
       <label class="field-label">Notes</label>
@@ -1897,8 +1897,8 @@ function openContractDetail(c) {
 }
 
 function updateDetailTotal() {
-  const base = parseFloat(document.getElementById('detail-payout').value) || 0;
-  const qty  = parseFloat(document.getElementById('detail-quantity').value) || 1;
+  const base = parseFloat((document.getElementById('detail-payout').value || '').replace(/[^0-9.]/g, '')) || 0;
+  const qty  = parseFloat((document.getElementById('detail-quantity').value || '').replace(/[^0-9.]/g, '')) || 1;
   document.getElementById('detail-total').textContent = 'Total: ' + (base * qty) + ' i¢';
 }
 
@@ -1995,9 +1995,9 @@ document.getElementById('detail-quantity').addEventListener('input', updateDetai
 // Detail action buttons
 document.getElementById('detail-save-btn').addEventListener('click', async () => {
   const name        = document.getElementById('detail-name').value.trim();
-  const payout      = document.getElementById('detail-payout').value;
+  const payout      = (document.getElementById('detail-payout').value || '').replace(/[^0-9.]/g, '');
   const rateLabel   = document.getElementById('detail-rate-label').value.trim();
-  const quantity    = document.getElementById('detail-quantity').value || '1';
+  const quantity    = (document.getElementById('detail-quantity').value || '').replace(/[^0-9.]/g, '') || '1';
   const status      = document.getElementById('detail-status').value;
   const notes       = document.getElementById('detail-notes').value.trim();
   const contractors = detailContractors.join(', ');
@@ -2097,9 +2097,9 @@ document.getElementById('detail-delete-btn').addEventListener('click', () => {
 // ── Add Contract ──────────────────────────────────────
 document.getElementById('new-contract-submit').addEventListener('click', async () => {
   const name      = document.getElementById('new-name').value.trim();
-  const payout    = document.getElementById('new-payout').value;
+  const payout    = (document.getElementById('new-payout').value || '').replace(/[^0-9.]/g, '');
   const rateLabel = document.getElementById('new-rate-label').value.trim();
-  const quantity  = document.getElementById('new-quantity').value || '1';
+  const quantity  = (document.getElementById('new-quantity').value || '').replace(/[^0-9.]/g, '') || '1';
   const notes     = document.getElementById('new-notes').value.trim();
   if (!name)   { toast('Contract name is required', 'error'); return; }
   if (!payout) { toast('Base payout is required', 'error'); return; }

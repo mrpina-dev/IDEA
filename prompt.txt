@@ -1,115 +1,25 @@
-﻿Edit entry/index.html. Add a full Contracts management system to the app.
+﻿Edit entry/index.html. Make the following two fixes:
 
---- DATA ---
-Add at the top of the script:
-let contractsData = [];
-let contractsLoaded = false;
+FIX 1 - CONTRACTOR SEARCH REQUIRES STUDENTS LOADED
+Find the btn-contracts click event listener. Near the top of the handler, before the fetchContracts call, add:
+if (!studentsLoaded) initStudentsData();
 
-Add function fetchContracts() that fetches API + "?action=contracts&_=" + Date.now() with cache no-store, parses JSON, stores in contractsData, sets contractsLoaded = true. Cache result in localStorage key "idea-entry-contracts" with timestamp "idea-entry-contracts-ts", TTL 5 minutes. Load from cache immediately if fresh, then background refresh.
+FIX 2 - BASE PAYOUT AND QUANTITY INPUTS BROKEN ON ANDROID
+Find these four input elements by ID: new-payout, new-quantity, detail-payout, detail-quantity.
+On each one, change type="number" to type="text" and add inputmode="numeric" pattern="[0-9]*".
 
---- HOME SCREEN ---
-Add a fourth home button after the Weekly Payout Check button:
-- Border: rgba(200,255,0,0.35) gold
-- Icon: ◎
-- Label: "Contracts" in gold
-- Sub: "View, assign, and complete contracts"
-- On tap: fetch contracts if not loaded, then show s-contracts screen
+Find the updateDetailTotal function and replace the parseFloat lines with:
+const base = parseFloat((document.getElementById('detail-payout').value || '').replace(/[^0-9.]/g, '')) || 0;
+const qty = parseFloat((document.getElementById('detail-quantity').value || '').replace(/[^0-9.]/g, '')) || 1;
 
---- SCREEN: s-contracts (Contract List) ---
-Header with back button returning to home.
-A green "+" button in the header right side to add a new contract.
+Find the detail-save-btn click handler. Before the apiUrl call, add cleanup:
+const payout = (document.getElementById('detail-payout').value || '').replace(/[^0-9.]/g, '');
+const quantity = (document.getElementById('detail-quantity').value || '').replace(/[^0-9.]/g, '') || '1';
+Use these cleaned variables in the apiUrl call instead of reading .value directly.
 
-Contract list divided into sections: IN PROGRESS, OPEN, COMPLETED, CANCELLED.
-Only show sections that have contracts. Hide CANCELLED section by default with a dim "Show Cancelled" toggle at the bottom.
+Find the new-contract-submit click handler. Before the apiUrl call, add cleanup:
+const payout = (document.getElementById('new-payout').value || '').replace(/[^0-9.]/g, '');
+const quantity = (document.getElementById('new-quantity').value || '').replace(/[^0-9.]/g, '') || '1';
+Use these cleaned variables in the apiUrl call instead of reading .value directly.
 
-Each contract row (min-height 64px, bg1, border-bottom):
-- Left: contract name (white, 0.88rem) + status badge below name (small, colored)
-- Right: total payout in gold Orbitron + rate label in dim text below if applicable
-- Tap anywhere on row to open s-contract-detail for that contract
-
-Status badge colors:
-- Open: dim border, dim text
-- In Progress: gold border, gold text
-- Completed: green border, green text
-- Cancelled: red border, red text
-
-Show a dim placeholder if no contracts exist yet.
-
---- SCREEN: s-contract-detail (Contract Detail and Edit) ---
-Header: contract name truncated + back button to s-contracts.
-
-Show all fields in editable inputs:
-
-1. Contract Name (text input, full width)
-2. Base Payout (number input)
-3. Rate Label (text input, placeholder "e.g. per chair — leave blank if flat rate")
-4. Quantity (number input, min 1, default 1) - show "Total: X i¢" live below as Base Payout × Quantity updates
-5. Status (dropdown: Open / In Progress / Completed / Cancelled)
-6. Notes (textarea, 3 rows)
-
-CONTRACTORS section (only shown when status is In Progress or Completed):
-- List of assigned contractors as removable chips (name + X button)
-- Search input below to add contractors from allStudents roster
-  - As user types, show matching students from allStudents
-  - If a student is already assigned to another active contract (check contractsData where status is Open or In Progress and contractors field contains their name), show a warning chip: "Already on: [Contract Name]" in amber - still allow adding
-- If no contractors assigned, show dim "No contractors assigned"
-
-ACTION BUTTONS at bottom (full width, stacked):
-
-SAVE CHANGES button (gold border) - calls updateContract API with all current field values. Always visible.
-
-COMPLETE CONTRACT button (green border) - only visible when status is In Progress or Completed and at least one contractor is assigned. Opens s-contract-complete flow.
-
-RESET TO OPEN button (cyan border, small) - only visible when status is Completed. Shows confirm dialog "This will move the completion record to history and reset the contract to Open." On confirm calls resetContract API then refreshes.
-
-CANCEL CONTRACT button (amber border, small) - not visible when status is already Cancelled or Completed. Shows a prompt for cancellation reason (text input in a confirm dialog). On confirm calls cancelContract API.
-
-DELETE CONTRACT button (red border, small) - always visible. Shows confirm dialog "This will permanently delete the contract with no record. This cannot be undone." Two buttons: Delete / Keep. On Delete calls deleteContract API then returns to s-contracts.
-
-After any successful API action, refresh contractsData and re-render s-contracts.
-
---- SCREEN: s-contract-new (Add Contract) ---
-Opened by tapping + on s-contracts header. Simple form:
-
-1. Contract Name (required)
-2. Base Payout in i¢ (required, number)
-3. Rate Label (optional, placeholder "e.g. per chair")
-4. Quantity (number, default 1)
-5. Notes (optional, textarea)
-
-CREATE CONTRACT button (gold border, full width) - calls addContract API, then returns to s-contracts and opens the new contract detail screen.
-
---- SCREEN: s-contract-complete (Complete Contract Flow) ---
-Opened from the Complete Contract button on s-contract-detail. Full screen overlay styled like other screens.
-
-Header: "Complete Contract" + back button returning to s-contract-detail.
-
-Show contract name and total payout at top.
-
-PHYSICAL COIN GIVEN checkbox (same style as Award physical checkbox):
-- Checked = Award type (coins given in person)
-- Unchecked = Award - Held type (coins to be given later)
-
-CONTRACTORS AND SPLIT section:
-- List each assigned contractor with an amount input field next to their name
-- Default: evenly split (floor division, any remainder added to first contractor)
-- Each amount field is editable (number, min 0)
-- Below the list: "Allocated: X i¢ / Total: Y i¢" running total
-  - Green when allocated exactly equals total
-  - Red when over or under
-- COMPLETE button (gold border, full width) is DISABLED unless allocated total equals contract total payout exactly
-
-On COMPLETE tap:
-1. Call completeContract API with row, contractors as comma-separated string, split as comma-separated amounts, physical flag
-2. Show success toast "Contract completed - transactions logged"
-3. Return to s-contracts
-4. Refresh contractsData
-
---- GENERAL ---
-All new screens follow the same pattern as existing screens: position fixed, opacity/pointer-events transition, screen-body with overflow-y auto and padding.
-
-All API calls use the existing apiUrl() helper function.
-
-Show loading overlay during all API calls.
-
-Commit with message "feat: add full contracts management to entry app" and push.
+Commit with message "fix: contractor search students load, Android number input compatibility" and push.
