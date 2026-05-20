@@ -284,12 +284,12 @@ nav a.active { color: var(--gold); text-shadow: var(--glow-gold); }
 .coin-card.rank-1 {
   background: linear-gradient(135deg, #08090a 0%, #0a0a08 100%);
   border: 2px solid transparent;
-  animation: rank1-glow 4s ease-in-out infinite;
+  animation: rank1-glow 3s ease-in-out infinite;
   overflow: visible;
 }
 .coin-card.rank-1::before {
   content: ''; position: absolute; inset: -2px; border-radius: 7px;
-  background: linear-gradient(45deg, #C8FF00, #00F0FF, #00FF41, #FF8C00, #C8FF00);
+  background: linear-gradient(45deg, #C8FF00, rgba(200,255,0,0.3), #C8FF00, rgba(200,255,0,0.5), #C8FF00);
   background-size: 300% 300%;
   animation: legendary-border 4s ease infinite;
   z-index: -1;
@@ -300,9 +300,8 @@ nav a.active { color: var(--gold); text-shadow: var(--glow-gold); }
   z-index: -1;
 }
 @keyframes rank1-glow {
-  0%,100% { box-shadow: 0 0 30px rgba(200,255,0,0.2), 0 0 60px rgba(0,240,255,0.1); }
-  33%     { box-shadow: 0 0 40px rgba(0,240,255,0.25), 0 0 70px rgba(0,255,65,0.12); }
-  66%     { box-shadow: 0 0 35px rgba(255,140,0,0.18), 0 0 65px rgba(200,255,0,0.12); }
+  0%,100% { box-shadow: 0 0 20px rgba(200,255,0,0.2), 0 0 40px rgba(200,255,0,0.08); }
+  50%      { box-shadow: 0 0 32px rgba(200,255,0,0.35), 0 0 60px rgba(200,255,0,0.15); }
 }
 .coin-card.rank-1 .shimmer-sweep {
   position: absolute; inset: 0; border-radius: 6px; pointer-events: none; overflow: hidden; z-index: 0;
@@ -317,66 +316,29 @@ nav a.active { color: var(--gold); text-shadow: var(--glow-gold); }
 .coin-card.rank-1 .coin-rank::before { content: '👑 '; }
 
 .coin-card.rank-2 {
-  background: linear-gradient(135deg, #080a0b 0%, #0a0c0d 100%);
-  border: 2px solid transparent;
-  animation: rank2-glow 4s ease-in-out infinite;
-  overflow: visible;
-}
-.coin-card.rank-2::before {
-  content: ''; position: absolute; inset: -2px; border-radius: 7px;
-  background: linear-gradient(45deg, #C0C0C0, #88DDFF, #ffffff, #88DDFF, #C0C0C0);
-  background-size: 300% 300%;
-  animation: legendary-border 5s ease infinite;
-  z-index: -1;
-}
-.coin-card.rank-2::after {
-  content: ''; position: absolute; inset: 2px; border-radius: 5px;
-  background: linear-gradient(135deg, #080a0b 0%, #0a0c0d 100%);
-  z-index: -1;
-}
-@keyframes rank2-glow {
-  0%,100% { box-shadow: 0 0 20px rgba(192,192,192,0.15), 0 0 40px rgba(136,221,255,0.08); }
-  50%     { box-shadow: 0 0 30px rgba(192,192,192,0.25), 0 0 50px rgba(136,221,255,0.15); }
+  border: 1px solid rgba(0,255,65,0.5);
+  box-shadow: 0 0 16px rgba(0,255,65,0.12);
 }
 
 .coin-card.rank-3 {
-  background: linear-gradient(135deg, #0b0804 0%, #0d0a05 100%);
-  border: 2px solid transparent;
-  animation: rank3-glow 4s ease-in-out infinite;
-  overflow: visible;
-}
-.coin-card.rank-3::before {
-  content: ''; position: absolute; inset: -2px; border-radius: 7px;
-  background: linear-gradient(45deg, #CD7F32, #FF8C00, #FFD700, #FF8C00, #CD7F32);
-  background-size: 300% 300%;
-  animation: legendary-border 5s ease infinite;
-  z-index: -1;
-}
-.coin-card.rank-3::after {
-  content: ''; position: absolute; inset: 2px; border-radius: 5px;
-  background: linear-gradient(135deg, #0b0804 0%, #0d0a05 100%);
-  z-index: -1;
-}
-@keyframes rank3-glow {
-  0%,100% { box-shadow: 0 0 20px rgba(205,127,50,0.18), 0 0 40px rgba(255,140,0,0.08); }
-  50%     { box-shadow: 0 0 28px rgba(205,127,50,0.28), 0 0 50px rgba(255,140,0,0.15); }
+  border: 1px solid rgba(0,255,65,0.25);
+  box-shadow: 0 0 10px rgba(0,255,65,0.07);
 }
 
 .coin-card.rank-1 .coin-balance {
-  background: linear-gradient(90deg, #C8FF00, #00F0FF, #00FF41, #C8FF00);
+  background: linear-gradient(90deg, #C8FF00, #ffffff, #C8FF00);
   background-size: 200% auto;
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   animation: legendary-text 3s linear infinite;
   filter: drop-shadow(0 0 8px rgba(200,255,0,0.6));
 }
 .coin-card.rank-2 .coin-balance {
-  color: #E8E8E8;
-  text-shadow: 0 0 12px rgba(192,192,192,0.8), 0 0 24px rgba(136,221,255,0.4);
+  color: var(--green);
+  text-shadow: var(--glow-green);
   animation: none;
 }
 .coin-card.rank-3 .coin-balance {
-  color: #CD7F32;
-  text-shadow: 0 0 12px rgba(205,127,50,0.8), 0 0 24px rgba(255,140,0,0.4);
+  color: var(--green);
   animation: none;
 }
 
@@ -2178,8 +2140,8 @@ function renderLeaderboard() {
     const fines          = parseFloat(p('Fines') || 0);
     const spent          = parseFloat(p('Spent') || 0);
     const lifetimeEarned = awarded - fines;
-    const coinBal        = awarded - fines;
-    const isNeg          = coinBal < 0;
+    const coinBal        = lifetimeEarned - spent;
+    const isNeg          = lifetimeEarned < 0;
 
     const card = document.createElement('div');
     card.className = 'coin-card' + (isNeg ? ' negative' : '');
@@ -2202,26 +2164,18 @@ function renderLeaderboard() {
       (i === 0 ? '<div class="shimmer-sweep"></div>' : '') +
       '<div class="coin-rank">' + escHtml(rankLabel) + '</div>' +
       '<div class="coin-name">' + escHtml(name) + '</div>' +
-      '<div class="coin-section" style="color:rgba(' + r + ',' + g + ',' + b + ',0.85)">' + escHtml(section) + '</div>' +
-      '<div class="coin-balance-label">Net Balance</div>' +
-      '<div class="coin-balance">' + fmtNum(coinBal) + '</div>' +
+      '<div class="coin-section">' + escHtml(section) + '</div>' +
+      '<div class="coin-balance-label">Lifetime Earned</div>' +
+      '<div class="coin-balance">' + fmtNum(lifetimeEarned) + '</div>' +
       '<div class="coin-meta">' +
         '<div class="coin-meta-item">' +
           '<span class="coin-meta-label">Lifetime</span>' +
           '<span class="coin-meta-value" style="color:var(--green)">' + (lifetimeEarned >= 0 ? '+' : '') + fmtNum(lifetimeEarned) + '</span>' +
         '</div>' +
-        '<div class="coin-meta-item">' +
-          '<span class="coin-meta-label">Net Awards</span>' +
-          '<span class="coin-meta-value" style="color:var(--green)">+' + fmtNum(awarded) + '</span>' +
-        '</div>' +
-        '<div class="coin-meta-item">' +
-          '<span class="coin-meta-label">Net Fines</span>' +
-          '<span class="coin-meta-value" style="color:var(--red)">-' + fmtNum(fines) + '</span>' +
-        '</div>' +
-        '<div class="coin-meta-item">' +
-          '<span class="coin-meta-label">Spent</span>' +
-          '<span class="coin-meta-value" style="color:var(--amber)">-' + fmtNum(spent) + '</span>' +
-        '</div>' +
+        (spent > 0 ? '<div class="coin-meta-item"><span class="coin-meta-label">Balance</span><span class="coin-meta-value" style="color:' + (coinBal >= 0 ? 'var(--gold)' : 'var(--red)') + '">' + fmtNum(coinBal) + '</span></div>' : '') +
+        (fines > 0 ? '<div class="coin-meta-item"><span class="coin-meta-label">Net Awards</span><span class="coin-meta-value" style="color:var(--green)">+' + fmtNum(awarded) + '</span></div>' : '') +
+        (fines > 0 ? '<div class="coin-meta-item"><span class="coin-meta-label">Net Fines</span><span class="coin-meta-value" style="color:var(--red)">-' + fmtNum(fines) + '</span></div>' : '') +
+        (spent > 0 ? '<div class="coin-meta-item"><span class="coin-meta-label">Net Spent</span><span class="coin-meta-value" style="color:var(--amber)">-' + fmtNum(spent) + '</span></div>' : '') +
       '</div>';
 
     card.addEventListener('click', () => openDrawer(row));
