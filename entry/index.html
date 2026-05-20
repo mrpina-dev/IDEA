@@ -286,15 +286,6 @@ body::after {
 .amount-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .amount-input:focus { border-color: rgba(200,255,0,0.6); }
 
-/* ── Dup warning ─────────────────────────── */
-.dup-banner {
-  background: rgba(255,140,0,0.09); border: 1px solid rgba(255,140,0,0.4);
-  border-radius: 3px; padding: 0.7rem 0.85rem; margin-bottom: 0.75rem;
-  font-size: 0.7rem; color: var(--amber); letter-spacing: 0.04em;
-  display: none; line-height: 1.5;
-}
-.dup-banner.show { display: block; }
-
 /* ── Submit button ───────────────────────── */
 .submit-btn {
   width: 100%; min-height: 56px;
@@ -626,10 +617,6 @@ body::after {
       <input type="number" class="amount-input" id="amount-input" placeholder="0" min="1" step="1">
     </div>
 
-    <!-- Dup warning + Submit -->
-    <div class="dup-banner" id="dup-banner">
-      Similar transaction logged today &mdash; tap Submit again to confirm.
-    </div>
     <button class="submit-btn" id="submit-btn" disabled>Submit Transaction</button>
 
   </div>
@@ -658,14 +645,19 @@ body::after {
 const API = 'https://script.google.com/macros/s/AKfycby_p-lI7I5i4Rl1KZKgtWEhePnUmyrC9HBrS485JBWvcwWfpIWC_397P7yrcrmvIql9/exec';
 
 // ── Data ──────────────────────────────────────────────
-let allStudents = [];
+let allStudents    = [];
+let studentsLoaded = false;
+let _studentsFetch = null; // in-flight fetch promise
+
+const STUDENTS_KEY    = 'idea-entry-students';
+const STUDENTS_TS_KEY = 'idea-entry-students-ts';
+const STUDENTS_TTL    = 10 * 60 * 1000; // 10 min
 
 // ── Transaction state ─────────────────────────────────
 let selStudent = null;   // { name, section, balance }
 let selType    = null;
 let selReason  = null;
 let selAmount  = null;
-let dupFlag    = false;
 
 // ── Reason / preset lists ─────────────────────────────
 const REASONS = {
@@ -806,24 +798,58 @@ function studentBal(s) {
   return awarded - fines;
 }
 
-// ── Fetch students on load ─────────────────────────────
-async function loadStudents() {
+// ── Student fetch / cache ─────────────────────────────
+async function fetchStudentsAPI() {
+  const res  = await fetch(apiUrl({ action: 'students' }));
+  const data = await res.json();
+  let list = [];
+  if (Array.isArray(data))                        list = data;
+  else if (data && Array.isArray(data.students))  list = data.students;
+  else if (data && Array.isArray(data.data))      list = data.data;
+  allStudents    = list;
+  studentsLoaded = true;
+  try {
+    localStorage.setItem(STUDENTS_KEY,    JSON.stringify(list));
+    localStorage.setItem(STUDENTS_TS_KEY, String(Date.now()));
+  } catch (_) {}
+}
+
+function initStudentsData() {
+  // Load from cache immediately if fresh
+  try {
+    const ts  = localStorage.getItem(STUDENTS_TS_KEY);
+    const raw = localStorage.getItem(STUDENTS_KEY);
+    if (ts && raw && Date.now() - parseInt(ts, 10) < STUDENTS_TTL) {
+      allStudents    = JSON.parse(raw);
+      studentsLoaded = true;
+    }
+  } catch (_) {}
+
+  // Always kick a background refresh; on cold start this IS the primary load
+  _studentsFetch = fetchStudentsAPI()
+    .then(() => { _studentsFetch = null; })
+    .catch(() => { _studentsFetch = null; });
+}
+
+// Call before entering the log screen; returns true if ready
+async function requireStudents() {
+  if (studentsLoaded) return true;
   showLoading('Loading students…');
   try {
-    const res  = await fetch(apiUrl({ action: 'students' }));
-    const data = await res.json();
-    if (Array.isArray(data)) allStudents = data;
-    else if (data && Array.isArray(data.students)) allStudents = data.students;
-    else if (data && Array.isArray(data.data)) allStudents = data.data;
-  } catch (e) {
-    toast('Failed to load students', 'error');
-  } finally {
+    if (_studentsFetch) await _studentsFetch;
+    else await fetchStudentsAPI();
     hideLoading();
+    return true;
+  } catch (e) {
+    hideLoading();
+    toast('Failed to load students', 'error');
+    return false;
   }
 }
 
 // ── Screen navigation ─────────────────────────────────
-document.getElementById('btn-log-txn').addEventListener('click', () => {
+document.getElementById('btn-log-txn').addEventListener('click', async () => {
+  if (!await requireStudents()) return;
   showScreen('s-log');
   document.getElementById('student-search').focus();
 });
@@ -1057,8 +1083,6 @@ function clearReasonDown() {
   document.getElementById('lbl-amount').style.display = 'none';
   document.getElementById('amount-wrap').classList.remove('show');
   document.getElementById('submit-btn').classList.remove('show');
-  document.getElementById('dup-banner').classList.remove('show');
-  dupFlag = false;
 }
 
 // ── Amount ────────────────────────────────────────────
@@ -1111,70 +1135,48 @@ function refreshSubmit() {
     !(selStudent && selType && selReason && selAmount);
 }
 
-// ── Submit ────────────────────────────────────────────
-document.getElementById('submit-btn').addEventListener('click', async () => {
+// ── Submit (optimistic) ───────────────────────────────
+document.getElementById('submit-btn').addEventListener('click', () => {
   if (!selStudent || !selType || !selReason || !selAmount) return;
   const { name } = selStudent;
   const type   = selType;
   const reason = selReason;
   const amount = selAmount;
 
-  if (!dupFlag) {
-    showLoading('Checking for duplicates…');
-    try {
-      const res  = await fetch(apiUrl({ action: 'checkDuplicate', name, type, reason, amount }));
-      const data = await res.json();
-      hideLoading();
-      if (data && data.isDuplicate) {
-        dupFlag = true;
-        document.getElementById('dup-banner').classList.add('show');
-        return;
-      }
-    } catch (e) {
-      hideLoading();
-      toast('Network error — please try again', 'error');
-      return;
+  // 1. Update local balance immediately
+  const raw = allStudents.find(s =>
+    (getField(s,'name','Name','Full Name','Student') || '').toLowerCase() === name.toLowerCase()
+  );
+  if (raw) {
+    const tl = type.toLowerCase();
+    if (tl === 'award' || tl === 'payout') {
+      const k = raw.awarded !== undefined ? 'awarded' : 'Awarded';
+      raw[k] = (parseFloat(raw[k]) || 0) + amount;
+    } else {
+      const k = raw.fines !== undefined ? 'fines' : 'Fines';
+      raw[k] = (parseFloat(raw[k]) || 0) + amount;
     }
   }
 
-  document.getElementById('dup-banner').classList.remove('show');
-  dupFlag = false;
-  showLoading('Logging transaction…');
-  try {
-    const res  = await fetch(apiUrl({ action: 'logTransaction', name, type, reason, amount }));
-    const data = await res.json();
-    hideLoading();
-    if (data && (data.success || data.status === 'ok' || data.result === 'success')) {
-      // Update local balance estimate
-      const raw = allStudents.find(s =>
-        (getField(s,'name','Name','Full Name','Student') || '').toLowerCase() === name.toLowerCase()
-      );
-      if (raw) {
-        const tl = type.toLowerCase();
-        if (tl === 'award' || tl === 'payout') {
-          const k = raw.awarded !== undefined ? 'awarded' : 'Awarded';
-          raw[k] = (parseFloat(raw[k]) || 0) + amount;
-        } else {
-          const k = raw.fines !== undefined ? 'fines' : 'Fines';
-          raw[k] = (parseFloat(raw[k]) || 0) + amount;
-        }
+  // 2. Show success and return to home immediately
+  toast('Transaction logged ✓', 'success');
+  resetLog();
+  showScreen('s-home');
+
+  // 3. Fire API in background — no loading overlay
+  fetch(apiUrl({ action: 'logTransaction', name, type, reason, amount }))
+    .then(r => r.json())
+    .then(data => {
+      if (!data || !(data.success || data.status === 'ok' || data.result === 'success')) {
+        toast('Sync failed — check sheet', 'error');
       }
-      toast('Transaction logged ✓', 'success');
-      resetLog();
-      showScreen('s-home');
-    } else {
-      toast('Error — please try again', 'error');
-    }
-  } catch (e) {
-    hideLoading();
-    toast('Network error — please try again', 'error');
-  }
+    })
+    .catch(() => toast('Sync failed — check sheet', 'error'));
 });
 
 // ── Reset log screen ──────────────────────────────────
 function resetLog() {
   selStudent = selType = selReason = selAmount = null;
-  dupFlag = false;
 
   searchInput.value = '';
   searchResults.style.display = 'none';
@@ -1196,7 +1198,6 @@ function resetLog() {
 
   document.getElementById('submit-btn').classList.remove('show');
   document.getElementById('submit-btn').disabled = true;
-  document.getElementById('dup-banner').classList.remove('show');
 
   // Scroll log body to top
   document.getElementById('log-body').scrollTop = 0;
@@ -1224,6 +1225,9 @@ function updatePinDots() {
 }
 
 function launchApp(withAnimation) {
+  // Start pre-loading students immediately — before any animation
+  initStudentsData();
+
   const pinEl = document.getElementById('pin-screen');
   if (withAnimation) {
     document.querySelectorAll('.pin-dot').forEach(d => {
@@ -1235,13 +1239,11 @@ function launchApp(withAnimation) {
       setTimeout(() => {
         pinEl.style.display = 'none';
         document.getElementById('s-home').classList.add('active');
-        loadStudents();
       }, 400);
     }, 550);
   } else {
     pinEl.style.display = 'none';
     document.getElementById('s-home').classList.add('active');
-    loadStudents();
   }
 }
 
