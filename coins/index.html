@@ -1366,14 +1366,16 @@ body::after {
       <button class="filter-btn" data-section="IDEA-304">IDEA-304</button>
       <button class="filter-btn" data-section="IDEA-403">IDEA-403</button>
       <select id="lb-sort-select">
-        <option value="bal-desc">Coin Balance ↓</option>
-        <option value="bal-asc">Coin Balance ↑</option>
+        <option value="lifetime-desc">Lifetime Earned (High to Low)</option>
+        <option value="lifetime-asc">Lifetime Earned (Low to High)</option>
+        <option value="balance-desc">Coin Balance (High to Low)</option>
+        <option value="balance-asc">Coin Balance (Low to High)</option>
         <option value="awarded-desc">Most Awarded</option>
         <option value="fined-desc">Most Fined</option>
         <option value="spent-desc">Most Spent</option>
-        <option value="name-asc">Name (A – Z)</option>
-        <option value="name-desc">Name (Z – A)</option>
-        <option value="section-asc">Section</option>
+        <option value="name-asc">Name (A - Z)</option>
+        <option value="name-desc">Name (Z - A)</option>
+        <option value="section">Section</option>
       </select>
       <button class="print-lb-btn" onclick="window.print()">&#128438; Print Leaderboard</button>
     </div>
@@ -1802,7 +1804,7 @@ let activeSection = 'All';
 let txnNameQ = '';
 let txnTypeQ = '';
 let globalSearchQ = '';
-let lbSort = 'bal-desc';
+let lbSort = 'lifetime-desc';
 let txnSortCol = 'date';
 let txnSortDir = 'desc';
 let txnPage = 1;
@@ -2073,7 +2075,17 @@ function renderLeaderboard() {
   data = data.slice().sort((a, b) => {
     const pa = pick(a), pb = pick(b);
     switch (lbSort) {
-      case 'bal-asc': {
+      case 'lifetime-asc': {
+        const la = parseFloat(pa('Awarded')||0) - parseFloat(pa('Fines')||0);
+        const lb = parseFloat(pb('Awarded')||0) - parseFloat(pb('Fines')||0);
+        return la - lb;
+      }
+      case 'balance-desc': {
+        const ba = parseFloat(pa('Awarded')||0) - parseFloat(pa('Fines')||0);
+        const bb = parseFloat(pb('Awarded')||0) - parseFloat(pb('Fines')||0);
+        return bb - ba;
+      }
+      case 'balance-asc': {
         const ba = parseFloat(pa('Awarded')||0) - parseFloat(pa('Fines')||0);
         const bb = parseFloat(pb('Awarded')||0) - parseFloat(pb('Fines')||0);
         return ba - bb;
@@ -2088,12 +2100,12 @@ function renderLeaderboard() {
         return (pa('Name','Student','Full Name')||'').localeCompare(pb('Name','Student','Full Name')||'');
       case 'name-desc':
         return (pb('Name','Student','Full Name')||'').localeCompare(pa('Name','Student','Full Name')||'');
-      case 'section-asc':
+      case 'section':
         return (pa('Section','Class','Course')||'').localeCompare(pb('Section','Class','Course')||'');
-      default: { // bal-desc
-        const ba = parseFloat(pa('Awarded')||0) - parseFloat(pa('Fines')||0);
-        const bb = parseFloat(pb('Awarded')||0) - parseFloat(pb('Fines')||0);
-        return bb - ba;
+      default: { // lifetime-desc
+        const la = parseFloat(pa('Awarded')||0) - parseFloat(pa('Fines')||0);
+        const lb = parseFloat(pb('Awarded')||0) - parseFloat(pb('Fines')||0);
+        return lb - la;
       }
     }
   });
@@ -2109,11 +2121,12 @@ function renderLeaderboard() {
     const p = pick(row);
     const name    = p('Name', 'Student', 'Full Name') || '—';
     const section = p('Section', 'Class', 'Course') || '—';
-    const awarded = parseFloat(p('Awarded') || 0);
-    const fines   = parseFloat(p('Fines') || 0);
-    const spent   = parseFloat(p('Spent') || 0);
-    const coinBal = awarded - fines;
-    const isNeg   = coinBal < 0;
+    const awarded        = parseFloat(p('Awarded') || 0);
+    const fines          = parseFloat(p('Fines') || 0);
+    const spent          = parseFloat(p('Spent') || 0);
+    const lifetimeEarned = awarded - fines;
+    const coinBal        = awarded - fines;
+    const isNeg          = coinBal < 0;
 
     const card = document.createElement('div');
     card.className = 'coin-card' + (isNeg ? ' negative' : '');
@@ -2140,6 +2153,10 @@ function renderLeaderboard() {
       '<div class="coin-balance-label">Net Balance</div>' +
       '<div class="coin-balance">' + fmtNum(coinBal) + '</div>' +
       '<div class="coin-meta">' +
+        '<div class="coin-meta-item">' +
+          '<span class="coin-meta-label">Lifetime</span>' +
+          '<span class="coin-meta-value" style="color:var(--green)">' + (lifetimeEarned >= 0 ? '+' : '') + fmtNum(lifetimeEarned) + '</span>' +
+        '</div>' +
         '<div class="coin-meta-item">' +
           '<span class="coin-meta-label">Net Awards</span>' +
           '<span class="coin-meta-value" style="color:var(--green)">+' + fmtNum(awarded) + '</span>' +

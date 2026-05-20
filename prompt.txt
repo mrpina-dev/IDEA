@@ -1,116 +1,36 @@
-﻿Edit coins/index.html. Apply special visual treatment to the top 3 leaderboard cards similar to the legendary contract card. This applies after section filtering and after sorting - ranks 1, 2, 3 of whatever is currently displayed.
+﻿Edit coins/index.html. Make the following changes to the leaderboard:
 
---- ADD CSS ---
+CHANGE 1 - LIFETIME EARNED CALCULATION
+In renderLeaderboard(), for each student row, calculate:
+const lifetimeEarned = awarded - fines;
+where awarded = parseFloat(p('Awarded') || 0) and fines = parseFloat(p('Fines') || 0) already read from Summary CSV.
 
-Add this CSS block to the existing style tag:
+CHANGE 2 - SORT DROPDOWN
+Find the sort dropdown (select element for leaderboard sorting). Replace its options entirely with:
+- Lifetime Earned (High to Low) [value: "lifetime-desc"] — this is the new default
+- Lifetime Earned (Low to High) [value: "lifetime-asc"]
+- Coin Balance (High to Low) [value: "balance-desc"]
+- Coin Balance (Low to High) [value: "balance-asc"]
+- Most Awarded [value: "awarded-desc"]
+- Most Fined [value: "fined-desc"]
+- Most Spent [value: "spent-desc"]
+- Name (A - Z) [value: "name-asc"]
+- Name (Z - A) [value: "name-desc"]
+- Section [value: "section"]
 
-.coin-card.rank-1 {
-  background: linear-gradient(135deg, #08090a 0%, #0a0a08 100%);
-  border: 2px solid transparent;
-  animation: rank1-glow 4s ease-in-out infinite;
-  overflow: visible;
-}
-.coin-card.rank-1::before {
-  content: ''; position: absolute; inset: -2px; border-radius: 7px;
-  background: linear-gradient(45deg, #C8FF00, #00F0FF, #00FF41, #FF8C00, #C8FF00);
-  background-size: 300% 300%;
-  animation: legendary-border 4s ease infinite;
-  z-index: -1;
-}
-.coin-card.rank-1::after {
-  content: ''; position: absolute; inset: 2px; border-radius: 5px;
-  background: linear-gradient(135deg, #08090a 0%, #0a0a08 100%);
-  z-index: -1;
-}
-@keyframes rank1-glow {
-  0%,100% { box-shadow: 0 0 30px rgba(200,255,0,0.2), 0 0 60px rgba(0,240,255,0.1); }
-  33%     { box-shadow: 0 0 40px rgba(0,240,255,0.25), 0 0 70px rgba(0,255,65,0.12); }
-  66%     { box-shadow: 0 0 35px rgba(255,140,0,0.18), 0 0 65px rgba(200,255,0,0.12); }
-}
-.coin-card.rank-1 .shimmer-sweep {
-  position: absolute; inset: 0; border-radius: 6px; pointer-events: none; overflow: hidden; z-index: 0;
-}
-.coin-card.rank-1 .shimmer-sweep::after {
-  content: ''; position: absolute; top: -50%; left: -75%;
-  width: 50%; height: 200%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
-  transform: skewX(-20deg);
-  animation: shimmer-sweep 5s ease-in-out infinite;
-}
-.coin-card.rank-1 .coin-rank::before { content: '👑 '; }
+Update the sort logic in renderLeaderboard() to handle all options including the two new lifetime-desc and lifetime-asc cases which sort by lifetimeEarned.
 
-.coin-card.rank-2 {
-  background: linear-gradient(135deg, #080a0b 0%, #0a0c0d 100%);
-  border: 2px solid transparent;
-  animation: rank2-glow 4s ease-in-out infinite;
-  overflow: visible;
-}
-.coin-card.rank-2::before {
-  content: ''; position: absolute; inset: -2px; border-radius: 7px;
-  background: linear-gradient(45deg, #C0C0C0, #88DDFF, #ffffff, #88DDFF, #C0C0C0);
-  background-size: 300% 300%;
-  animation: legendary-border 5s ease infinite;
-  z-index: -1;
-}
-.coin-card.rank-2::after {
-  content: ''; position: absolute; inset: 2px; border-radius: 5px;
-  background: linear-gradient(135deg, #080a0b 0%, #0a0c0d 100%);
-  z-index: -1;
-}
-@keyframes rank2-glow {
-  0%,100% { box-shadow: 0 0 20px rgba(192,192,192,0.15), 0 0 40px rgba(136,221,255,0.08); }
-  50%     { box-shadow: 0 0 30px rgba(192,192,192,0.25), 0 0 50px rgba(136,221,255,0.15); }
-}
+CHANGE 3 - DEFAULT SORT
+Change the default sort value from whatever it currently is to "lifetime-desc". Update the localStorage key idea-coins-sort default to "lifetime-desc" as well.
 
-.coin-card.rank-3 {
-  background: linear-gradient(135deg, #0b0804 0%, #0d0a05 100%);
-  border: 2px solid transparent;
-  animation: rank3-glow 4s ease-in-out infinite;
-  overflow: visible;
-}
-.coin-card.rank-3::before {
-  content: ''; position: absolute; inset: -2px; border-radius: 7px;
-  background: linear-gradient(45deg, #CD7F32, #FF8C00, #FFD700, #FF8C00, #CD7F32);
-  background-size: 300% 300%;
-  animation: legendary-border 5s ease infinite;
-  z-index: -1;
-}
-.coin-card.rank-3::after {
-  content: ''; position: absolute; inset: 2px; border-radius: 5px;
-  background: linear-gradient(135deg, #0b0804 0%, #0d0a05 100%);
-  z-index: -1;
-}
-@keyframes rank3-glow {
-  0%,100% { box-shadow: 0 0 20px rgba(205,127,50,0.18), 0 0 40px rgba(255,140,0,0.08); }
-  50%     { box-shadow: 0 0 28px rgba(205,127,50,0.28), 0 0 50px rgba(255,140,0,0.15); }
-}
+CHANGE 4 - LIFETIME EARNED ON CARDS
+In the coin-meta section of each leaderboard card, add Lifetime Earned as the first meta item before the existing items:
+- Label: LIFETIME (Orbitron, dim, uppercase)
+- Value: fmtNum(lifetimeEarned) with + prefix if positive, in var(--green)
 
-.coin-card.rank-1 .coin-balance { 
-  background: linear-gradient(90deg, #C8FF00, #00F0FF, #00FF41, #C8FF00);
-  background-size: 200% auto;
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-  animation: legendary-text 3s linear infinite;
-  filter: drop-shadow(0 0 8px rgba(200,255,0,0.6));
-}
-.coin-card.rank-2 .coin-balance {
-  color: #E8E8E8;
-  text-shadow: 0 0 12px rgba(192,192,192,0.8), 0 0 24px rgba(136,221,255,0.4);
-  animation: none;
-}
-.coin-card.rank-3 .coin-balance {
-  color: #CD7F32;
-  text-shadow: 0 0 12px rgba(205,127,50,0.8), 0 0 24px rgba(255,140,0,0.4);
-  animation: none;
-}
+Keep all existing meta items (Net Awards, Net Fines, Net Spent) after it.
 
---- APPLY IN renderLeaderboard ---
+CHANGE 5 - COIN BALANCE ON CARDS
+Keep Coin Balance displayed on the card as the large central number (existing .coin-balance element) since it still represents the student's actual economic standing. Do not remove or replace it.
 
-In the renderLeaderboard() function, after the card element is created and after the existing rank treatment (gold/silver/bronze left border), add the rank class:
-
-- i === 0 (rank 1): add class rank-1 to the card, also add a shimmer sweep div as first child of the card: <div class="shimmer-sweep"></div>
-- i === 1 (rank 2): add class rank-2 to the card
-- i === 2 (rank 3): add class rank-3 to the card
-
-Remove the existing left border inline styles for ranks 1-3 since the new ::before pseudo-element handles the border. Keep the rank label text changes (CHAMPION, 2ND PLACE, 3RD PLACE).
-
-Commit with message "feat: legendary-style animated borders for top 3 leaderboard cards" and push.
+Commit with message "feat: lifetime earned sort default, card meta, leaderboard ranking by lifetime earned" and push.
