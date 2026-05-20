@@ -1,51 +1,115 @@
-﻿Edit coins/index.html. Add a Contracts tab to the existing tab bar.
+﻿Edit entry/index.html. Add a full Contracts management system to the app.
 
---- TAB BUTTON ---
-Add a fourth tab button labeled "Contracts" to the existing .tab-bar div after the Analytics tab button.
+--- DATA ---
+Add at the top of the script:
+let contractsData = [];
+let contractsLoaded = false;
 
---- DATA FETCHING ---
-Add two new CSV-style fetches inside fetchData() using the existing API base URL pattern. These are JSON fetches not CSV:
+Add function fetchContracts() that fetches API + "?action=contracts&_=" + Date.now() with cache no-store, parses JSON, stores in contractsData, sets contractsLoaded = true. Cache result in localStorage key "idea-entry-contracts" with timestamp "idea-entry-contracts-ts", TTL 5 minutes. Load from cache immediately if fresh, then background refresh.
 
-const CONTRACTS_API = "https://script.google.com/macros/s/AKfycby_p-lI7I5i4Rl1KZKgtWEhePnUmyrC9HBrS485JBWvcwWfpIWC_397P7yrcrmvIql9/exec";
+--- HOME SCREEN ---
+Add a fourth home button after the Weekly Payout Check button:
+- Border: rgba(200,255,0,0.35) gold
+- Icon: ◎
+- Label: "Contracts" in gold
+- Sub: "View, assign, and complete contracts"
+- On tap: fetch contracts if not loaded, then show s-contracts screen
 
-Fetch contracts: CONTRACTS_API + "?action=contracts&_=" + Date.now()
-Fetch contract history: CONTRACTS_API + "?action=contractHistory&_=" + Date.now()
+--- SCREEN: s-contracts (Contract List) ---
+Header with back button returning to home.
+A green "+" button in the header right side to add a new contract.
 
-Store results in let contractsData = [] and let contractHistoryData = []. Fetch both with cache: 'no-store'. Call renderContracts() after both resolve.
+Contract list divided into sections: IN PROGRESS, OPEN, COMPLETED, CANCELLED.
+Only show sections that have contracts. Hide CANCELLED section by default with a dim "Show Cancelled" toggle at the bottom.
 
---- TAB PANEL ---
-Add a tab panel #tab-contracts. Inside it, three sub-tab buttons: Active | Completed | History. Style sub-tabs similarly to the main tab bar but smaller - Orbitron, 0.58rem, gold underline on active.
+Each contract row (min-height 64px, bg1, border-bottom):
+- Left: contract name (white, 0.88rem) + status badge below name (small, colored)
+- Right: total payout in gold Orbitron + rate label in dim text below if applicable
+- Tap anywhere on row to open s-contract-detail for that contract
 
-SUB-TAB 1: ACTIVE
-Shows contracts with status Open or In Progress, sorted: In Progress first then Open, alphabetical within each group.
+Status badge colors:
+- Open: dim border, dim text
+- In Progress: gold border, gold text
+- Completed: green border, green text
+- Cancelled: red border, red text
 
-Each contract is a card (bg1 background, border radius 4px, padding 1.2rem 1.4rem, margin-bottom 0.8rem):
-- Top row: Contract name (Orbitron, 0.88rem, white) + status badge right-aligned
-  - Open badge: dim border, dim text
-  - In Progress badge: gold border, gold text
-- Payout row: Total payout in gold Orbitron (large, 1.4rem) + rate label in dim small text if rateLabel is not empty (e.g. "× 3 chairs")
-- Contractors row (only if contractors field is not empty): dim label "ASSIGNED TO" + contractor names in white, comma separated
-- Notes row (only if notes not empty): dim italic text, 0.72rem
+Show a dim placeholder if no contracts exist yet.
 
-SUB-TAB 2: COMPLETED
-Same card layout as Active but for status = Completed. Show dateCompleted in dim text below the name. Sort newest completed first.
+--- SCREEN: s-contract-detail (Contract Detail and Edit) ---
+Header: contract name truncated + back button to s-contracts.
 
-SUB-TAB 3: HISTORY
-Shows Contract History entries. Each entry is a simpler row:
-- Contract name (white) + event type badge (Completion Reset = cyan, Cancelled = red)
-- Date in dim text
-- Contractors and payout if present
-- Notes in dim italic
-Sort newest first.
+Show all fields in editable inputs:
 
-If any sub-tab has no data, show a dim placeholder message.
+1. Contract Name (text input, full width)
+2. Base Payout (number input)
+3. Rate Label (text input, placeholder "e.g. per chair — leave blank if flat rate")
+4. Quantity (number input, min 1, default 1) - show "Total: X i¢" live below as Base Payout × Quantity updates
+5. Status (dropdown: Open / In Progress / Completed / Cancelled)
+6. Notes (textarea, 3 rows)
 
---- RENDERING ---
-Add function renderContracts() that populates all three sub-tabs. Call it whenever contractsData or contractHistoryData updates.
+CONTRACTORS section (only shown when status is In Progress or Completed):
+- List of assigned contractors as removable chips (name + X button)
+- Search input below to add contractors from allStudents roster
+  - As user types, show matching students from allStudents
+  - If a student is already assigned to another active contract (check contractsData where status is Open or In Progress and contractors field contains their name), show a warning chip: "Already on: [Contract Name]" in amber - still allow adding
+- If no contractors assigned, show dim "No contractors assigned"
 
-Wire sub-tab buttons to show/hide sub-tab panels.
+ACTION BUTTONS at bottom (full width, stacked):
+
+SAVE CHANGES button (gold border) - calls updateContract API with all current field values. Always visible.
+
+COMPLETE CONTRACT button (green border) - only visible when status is In Progress or Completed and at least one contractor is assigned. Opens s-contract-complete flow.
+
+RESET TO OPEN button (cyan border, small) - only visible when status is Completed. Shows confirm dialog "This will move the completion record to history and reset the contract to Open." On confirm calls resetContract API then refreshes.
+
+CANCEL CONTRACT button (amber border, small) - not visible when status is already Cancelled or Completed. Shows a prompt for cancellation reason (text input in a confirm dialog). On confirm calls cancelContract API.
+
+DELETE CONTRACT button (red border, small) - always visible. Shows confirm dialog "This will permanently delete the contract with no record. This cannot be undone." Two buttons: Delete / Keep. On Delete calls deleteContract API then returns to s-contracts.
+
+After any successful API action, refresh contractsData and re-render s-contracts.
+
+--- SCREEN: s-contract-new (Add Contract) ---
+Opened by tapping + on s-contracts header. Simple form:
+
+1. Contract Name (required)
+2. Base Payout in i¢ (required, number)
+3. Rate Label (optional, placeholder "e.g. per chair")
+4. Quantity (number, default 1)
+5. Notes (optional, textarea)
+
+CREATE CONTRACT button (gold border, full width) - calls addContract API, then returns to s-contracts and opens the new contract detail screen.
+
+--- SCREEN: s-contract-complete (Complete Contract Flow) ---
+Opened from the Complete Contract button on s-contract-detail. Full screen overlay styled like other screens.
+
+Header: "Complete Contract" + back button returning to s-contract-detail.
+
+Show contract name and total payout at top.
+
+PHYSICAL COIN GIVEN checkbox (same style as Award physical checkbox):
+- Checked = Award type (coins given in person)
+- Unchecked = Award - Held type (coins to be given later)
+
+CONTRACTORS AND SPLIT section:
+- List each assigned contractor with an amount input field next to their name
+- Default: evenly split (floor division, any remainder added to first contractor)
+- Each amount field is editable (number, min 0)
+- Below the list: "Allocated: X i¢ / Total: Y i¢" running total
+  - Green when allocated exactly equals total
+  - Red when over or under
+- COMPLETE button (gold border, full width) is DISABLED unless allocated total equals contract total payout exactly
+
+On COMPLETE tap:
+1. Call completeContract API with row, contractors as comma-separated string, split as comma-separated amounts, physical flag
+2. Show success toast "Contract completed - transactions logged"
+3. Return to s-contracts
+4. Refresh contractsData
 
 --- GENERAL ---
-Match existing visual style throughout. No external dependencies.
+All new screens follow the same pattern as existing screens: position fixed, opacity/pointer-events transition, screen-body with overflow-y auto and padding.
 
-Commit with message "feat: add Contracts tab to coins leaderboard page" and push.
+All API calls use the existing apiUrl() helper function.
+
+Show loading overlay during all API calls.
+
+Commit with message "feat: add full contracts management to entry app" and push.

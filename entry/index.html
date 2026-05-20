@@ -474,6 +474,152 @@ body::after {
 .pin-key.pin-back { color: var(--dim); font-size: 1.4rem; }
 .pin-key.pin-back:hover { color: var(--white); border-color: rgba(255,68,68,0.3); background: rgba(255,68,68,0.05); }
 .pin-empty { min-height: 72px; background: none; border: none; pointer-events: none; }
+
+/* ── Contracts ──────────────────────────────────────── */
+.contract-section-head {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.46rem; letter-spacing: 0.25em; text-transform: uppercase;
+  color: var(--dim); padding: 0.7rem 0 0.35rem;
+  border-bottom: 1px solid rgba(0,255,65,0.06);
+}
+.contract-row {
+  display: flex; align-items: center; gap: 0.75rem;
+  min-height: 64px; background: var(--bg1);
+  border-bottom: 1px solid rgba(0,255,65,0.07);
+  padding: 0.75rem 1rem; cursor: pointer; transition: background 0.15s;
+}
+.contract-row:hover, .contract-row:active { background: rgba(0,255,65,0.04); }
+.contract-row-left { flex: 1; min-width: 0; }
+.contract-row-name {
+  font-size: 0.88rem; color: var(--white);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 0.25rem;
+}
+.contract-row-badge {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.42rem; letter-spacing: 0.14em; text-transform: uppercase;
+  padding: 0.12rem 0.42rem; border-radius: 2px; display: inline-block;
+}
+.badge-open       { color: var(--dim);   border: 1px solid rgba(74,122,82,0.4);  }
+.badge-inprogress { color: var(--gold);  border: 1px solid rgba(200,255,0,0.5);  }
+.badge-completed  { color: var(--green); border: 1px solid rgba(0,255,65,0.4);   }
+.badge-cancelled  { color: var(--red);   border: 1px solid rgba(255,68,68,0.4);  }
+.contract-row-right { text-align: right; flex-shrink: 0; }
+.contract-row-payout {
+  font-family: 'Orbitron', sans-serif; font-weight: 700;
+  font-size: 1.05rem; color: var(--gold);
+}
+.contract-row-rate { font-size: 0.54rem; color: var(--dim); margin-top: 0.1rem; }
+.contract-empty {
+  font-size: 0.72rem; color: var(--dim); padding: 2.5rem 0;
+  letter-spacing: 0.04em; text-align: center;
+}
+.show-cancelled-btn {
+  font-family: 'Orbitron', sans-serif; font-size: 0.46rem; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--dim);
+  background: none; border: 1px solid rgba(74,122,82,0.3); border-radius: 2px;
+  padding: 0.4rem 1rem; cursor: pointer; transition: color 0.2s, border-color 0.2s;
+}
+.show-cancelled-btn:hover { color: var(--white); border-color: rgba(74,122,82,0.6); }
+.field-group { margin-bottom: 0.95rem; }
+.field-label {
+  font-family: 'Orbitron', sans-serif; font-size: 0.46rem;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--dim); margin-bottom: 0.42rem; display: block;
+}
+.field-input, .field-select, .field-textarea {
+  width: 100%; min-height: 48px;
+  background: rgba(0,0,0,0.4); border: 1px solid rgba(74,122,82,0.35);
+  border-radius: 2px; color: var(--white);
+  font-family: 'Share Tech Mono', monospace; font-size: 16px;
+  padding: 0.55rem 0.85rem; outline: none; letter-spacing: 0.04em;
+  transition: border-color 0.2s; -webkit-appearance: none; appearance: none;
+}
+.field-input:focus, .field-select:focus, .field-textarea:focus { border-color: rgba(0,255,65,0.5); }
+.field-textarea { min-height: 76px; resize: vertical; }
+.field-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%234A7A52'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 0.7rem center;
+  padding-right: 1.8rem; cursor: pointer;
+}
+.field-select option { background: #050F07; color: var(--white); }
+.field-note { font-size: 0.6rem; color: var(--dim); margin-top: 0.35rem; letter-spacing: 0.04em; }
+.chip-wrap { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.6rem; min-height: 28px; }
+.chip {
+  display: flex; align-items: center; gap: 0.4rem;
+  background: rgba(0,255,65,0.06); border: 1px solid rgba(0,255,65,0.25);
+  border-radius: 2px; padding: 0.28rem 0.55rem; font-size: 0.72rem; color: var(--green);
+}
+.chip-x {
+  background: none; border: none; color: var(--dim); cursor: pointer;
+  font-size: 0.9rem; padding: 0; line-height: 1; transition: color 0.15s;
+}
+.chip-x:hover { color: var(--red); }
+.chip-none { font-size: 0.66rem; color: var(--dim); font-style: italic; }
+.contractor-results {
+  border: 1px solid rgba(0,255,65,0.1); border-radius: 2px;
+  background: var(--bg1); margin-top: 0.4rem; display: none;
+}
+.contractor-result-item {
+  padding: 0.6rem 0.85rem; min-height: 48px; cursor: pointer;
+  border-bottom: 1px solid rgba(0,255,65,0.05); transition: background 0.15s;
+}
+.contractor-result-item:last-child { border-bottom: none; }
+.contractor-result-item:hover, .contractor-result-item:active { background: rgba(0,255,65,0.05); }
+.contractor-result-name { font-size: 0.82rem; color: var(--white); }
+.contractor-result-warning { font-size: 0.57rem; color: var(--amber); margin-top: 0.1rem; }
+.action-btn {
+  width: 100%; min-height: 52px; border-radius: 3px;
+  font-family: 'Orbitron', sans-serif; font-size: 0.7rem;
+  font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+  background: none; cursor: pointer; margin-bottom: 0.55rem;
+  transition: background 0.15s, border-color 0.15s;
+}
+.action-btn:disabled { opacity: 0.28; cursor: not-allowed; }
+.action-btn.gold  { border: 2px solid rgba(200,255,0,0.4);  color: var(--gold);  }
+.action-btn.gold:not(:disabled):hover  { background: rgba(200,255,0,0.07); border-color: rgba(200,255,0,0.7); }
+.action-btn.green { border: 2px solid rgba(0,255,65,0.4);   color: var(--green); }
+.action-btn.green:not(:disabled):hover { background: rgba(0,255,65,0.07); border-color: rgba(0,255,65,0.7); }
+.action-btn.cyan  { border: 1px solid rgba(0,240,255,0.4);  color: var(--cyan);  font-size: 0.6rem; min-height: 44px; }
+.action-btn.cyan:not(:disabled):hover  { background: rgba(0,240,255,0.05); }
+.action-btn.amber { border: 1px solid rgba(255,140,0,0.4);  color: var(--amber); font-size: 0.6rem; min-height: 44px; }
+.action-btn.amber:not(:disabled):hover { background: rgba(255,140,0,0.05); }
+.action-btn.red   { border: 1px solid rgba(255,68,68,0.4);  color: var(--red);   font-size: 0.6rem; min-height: 44px; }
+.action-btn.red:not(:disabled):hover   { background: rgba(255,68,68,0.05); }
+.action-btns-spacer { border-top: 1px solid rgba(0,255,65,0.07); margin: 0.3rem 0 0.55rem; }
+.complete-contract-info {
+  background: var(--bg1); border: 1px solid rgba(200,255,0,0.15);
+  border-radius: 4px; padding: 0.9rem 1rem; margin-bottom: 1.25rem;
+}
+.complete-contract-name {
+  font-family: 'Orbitron', sans-serif; font-size: 0.82rem; font-weight: 700;
+  color: var(--white); letter-spacing: 0.04em; margin-bottom: 0.3rem;
+}
+.complete-contract-total {
+  font-family: 'Orbitron', sans-serif; font-size: 1.5rem; font-weight: 700;
+  color: var(--gold); text-shadow: var(--glow-gold);
+}
+.split-row {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.6rem 0; border-bottom: 1px solid rgba(0,255,65,0.05);
+}
+.split-row:last-child { border-bottom: none; }
+.split-name { flex: 1; font-size: 0.82rem; color: var(--white); }
+.split-input {
+  width: 80px; font-family: 'Orbitron', sans-serif; font-size: 0.95rem;
+  font-weight: 700; text-align: center;
+  background: rgba(0,0,0,0.4); border: 1px solid rgba(74,122,82,0.35);
+  border-radius: 2px; color: var(--gold); padding: 0.4rem 0.5rem; outline: none;
+  -moz-appearance: textfield; transition: border-color 0.2s;
+}
+.split-input::-webkit-outer-spin-button,
+.split-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.split-input:focus { border-color: rgba(200,255,0,0.6); }
+.alloc-total {
+  margin-top: 0.85rem; font-family: 'Orbitron', sans-serif;
+  font-size: 0.65rem; letter-spacing: 0.1em; text-align: right;
+}
+.alloc-total.ok  { color: var(--green); }
+.alloc-total.bad { color: var(--red); }
 </style>
 </head>
 <body>
@@ -522,6 +668,7 @@ body::after {
   <div class="confirm-box">
     <div class="confirm-title" id="confirm-title"></div>
     <div class="confirm-msg" id="confirm-msg"></div>
+    <input type="text" class="field-input" id="confirm-input" style="display:none;margin-bottom:1rem;">
     <div class="confirm-row">
       <button class="confirm-btn cancel" id="confirm-cancel">Cancel</button>
       <button class="confirm-btn ok" id="confirm-ok">Confirm</button>
@@ -560,6 +707,13 @@ body::after {
       <div class="home-btn-content">
         <span class="home-btn-label">Weekly Payout Check</span>
         <span class="home-btn-sub">See who gets a coin this week</span>
+      </div>
+    </button>
+    <button class="home-btn gold" id="btn-contracts">
+      <span class="home-btn-icon">&#9678;</span>
+      <div class="home-btn-content">
+        <span class="home-btn-label">Contracts</span>
+        <span class="home-btn-sub">View, assign, and complete contracts</span>
       </div>
     </button>
   </div>
@@ -652,6 +806,155 @@ body::after {
     <div class="step-label">Weekly Payout Check</div>
     <div class="payout-summary" id="payout-summary">Loading&hellip;</div>
     <div id="payout-content"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 4 — CONTRACT LIST
+════════════════════════════════════════ -->
+<div class="screen" id="s-contracts">
+  <div class="app-header">
+    <div class="logo-wrap">
+      <span class="logo">IDEA.</span>
+      <span class="logo-sub">Contracts</span>
+    </div>
+    <div style="display:flex;gap:0.5rem;align-items:center;">
+      <button class="back-btn" id="contracts-back">&#8592; Back</button>
+      <button class="back-btn" id="contracts-add-btn" style="color:var(--green);border-color:rgba(0,255,65,0.4);font-size:1.4rem;padding:0;min-width:48px;min-height:48px;display:flex;align-items:center;justify-content:center;">+</button>
+    </div>
+  </div>
+  <div class="screen-body">
+    <div id="contracts-list-content"><div class="contract-empty">Loading&hellip;</div></div>
+    <div id="contracts-show-cancelled-wrap" style="display:none;margin-top:1rem;text-align:center;">
+      <button class="show-cancelled-btn" id="show-cancelled-btn">Show Cancelled</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 5 — CONTRACT DETAIL
+════════════════════════════════════════ -->
+<div class="screen" id="s-contract-detail">
+  <div class="app-header">
+    <div class="logo-wrap" style="min-width:0;flex:1;overflow:hidden;margin-right:0.5rem;">
+      <span class="logo" id="detail-header-name" style="font-size:0.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;letter-spacing:0.06em;">Contract</span>
+    </div>
+    <button class="back-btn" id="detail-back">&#8592; Back</button>
+  </div>
+  <div class="screen-body" id="detail-body">
+    <div class="field-group">
+      <label class="field-label">Contract Name</label>
+      <input type="text" class="field-input" id="detail-name" autocomplete="off">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Base Payout (i&#162;)</label>
+      <input type="number" class="field-input" id="detail-payout" min="0" step="1">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Rate Label</label>
+      <input type="text" class="field-input" id="detail-rate-label" placeholder="e.g. per chair &mdash; leave blank if flat rate" autocomplete="off">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Quantity</label>
+      <input type="number" class="field-input" id="detail-quantity" min="1" step="1" value="1">
+      <div class="field-note" id="detail-total">Total: &mdash;</div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Status</label>
+      <select class="field-select" id="detail-status">
+        <option value="Open">Open</option>
+        <option value="In Progress">In Progress</option>
+        <option value="Completed">Completed</option>
+        <option value="Cancelled">Cancelled</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Notes</label>
+      <textarea class="field-textarea" id="detail-notes" rows="3"></textarea>
+    </div>
+    <div id="detail-contractors-section" style="display:none;">
+      <div class="step-label" style="margin-top:0.25rem;margin-bottom:0.55rem;">Contractors</div>
+      <div class="chip-wrap" id="detail-chips"></div>
+      <input type="search" class="search-input" id="detail-contractor-search"
+             placeholder="Search to add contractor&hellip;" autocomplete="off" autocorrect="off" spellcheck="false">
+      <div class="contractor-results" id="detail-contractor-results"></div>
+    </div>
+    <div style="margin-top:1.5rem;">
+      <button class="action-btn gold"  id="detail-save-btn">Save Changes</button>
+      <button class="action-btn green" id="detail-complete-btn" style="display:none;">Complete Contract</button>
+      <div class="action-btns-spacer"></div>
+      <button class="action-btn cyan"  id="detail-reset-btn"  style="display:none;">Reset to Open</button>
+      <button class="action-btn amber" id="detail-cancel-btn" style="display:none;">Cancel Contract</button>
+      <button class="action-btn red"   id="detail-delete-btn">Delete Contract</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 6 — ADD CONTRACT
+════════════════════════════════════════ -->
+<div class="screen" id="s-contract-new">
+  <div class="app-header">
+    <div class="logo-wrap">
+      <span class="logo">IDEA.</span>
+      <span class="logo-sub">New Contract</span>
+    </div>
+    <button class="back-btn" id="new-contract-back">&#8592; Back</button>
+  </div>
+  <div class="screen-body">
+    <div class="field-group">
+      <label class="field-label">Contract Name <span style="color:var(--red)">*</span></label>
+      <input type="text" class="field-input" id="new-name" autocomplete="off">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Base Payout in i&#162; <span style="color:var(--red)">*</span></label>
+      <input type="number" class="field-input" id="new-payout" min="0" step="1">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Rate Label</label>
+      <input type="text" class="field-input" id="new-rate-label" placeholder="e.g. per chair" autocomplete="off">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Quantity</label>
+      <input type="number" class="field-input" id="new-quantity" min="1" step="1" value="1">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Notes</label>
+      <textarea class="field-textarea" id="new-notes" rows="3"></textarea>
+    </div>
+    <button class="action-btn gold" id="new-contract-submit" style="margin-top:0.5rem;">Create Contract</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 7 — COMPLETE CONTRACT
+════════════════════════════════════════ -->
+<div class="screen" id="s-contract-complete">
+  <div class="app-header">
+    <div class="logo-wrap">
+      <span class="logo">IDEA.</span>
+      <span class="logo-sub">Complete Contract</span>
+    </div>
+    <button class="back-btn" id="complete-back">&#8592; Back</button>
+  </div>
+  <div class="screen-body">
+    <div class="complete-contract-info">
+      <div class="complete-contract-name" id="complete-contract-name"></div>
+      <div class="complete-contract-total" id="complete-contract-total">&mdash; i&#162;</div>
+    </div>
+    <div style="margin-bottom:1.25rem;">
+      <label style="display:flex;align-items:center;gap:0.75rem;cursor:pointer;min-height:48px;padding:0.6rem 0.85rem;background:var(--bg1);border:1px solid rgba(0,255,65,0.15);border-radius:3px;">
+        <input type="checkbox" id="complete-physical" checked style="width:22px;height:22px;accent-color:var(--green);cursor:pointer;flex-shrink:0;">
+        <div>
+          <div style="font-family:'Orbitron',sans-serif;font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--green);">Physical coin given?</div>
+          <div style="font-size:0.58rem;color:var(--dim);margin-top:0.15rem;letter-spacing:0.04em;">Uncheck if you cannot give the coin right now</div>
+        </div>
+      </label>
+    </div>
+    <div class="step-label" style="margin-bottom:0.55rem;">Contractors &amp; Split</div>
+    <div id="complete-split-list"></div>
+    <div class="alloc-total bad" id="complete-alloc"></div>
+    <button class="action-btn gold" id="complete-submit-btn" style="margin-top:1rem;" disabled>Complete</button>
   </div>
 </div>
 
@@ -1399,6 +1702,543 @@ function pinPress(k) {
 
 document.querySelectorAll('.pin-key[data-k]').forEach(btn => {
   btn.addEventListener('click', () => pinPress(btn.dataset.k));
+});
+
+// ── promptConfirm ─────────────────────────────────────
+function promptConfirm(title, msg, placeholder, onOk) {
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-msg').textContent = msg;
+  const inputEl = document.getElementById('confirm-input');
+  inputEl.placeholder = placeholder || '';
+  inputEl.value = '';
+  inputEl.style.display = '';
+  const overlay = document.getElementById('confirm-overlay');
+  overlay.classList.add('show');
+  const okBtn     = document.getElementById('confirm-ok');
+  const cancelBtn = document.getElementById('confirm-cancel');
+  function done(proceed) {
+    overlay.classList.remove('show');
+    inputEl.style.display = 'none';
+    okBtn.removeEventListener('click', yes);
+    cancelBtn.removeEventListener('click', no);
+    if (proceed) onOk(inputEl.value.trim());
+  }
+  function yes() { done(true);  }
+  function no()  { done(false); }
+  okBtn.addEventListener('click', yes);
+  cancelBtn.addEventListener('click', no);
+}
+
+// ── Contracts state ───────────────────────────────────
+let contractsData    = [];
+let contractsLoaded  = false;
+let _contractsFetch  = null;
+let activeContractRow = null;
+let detailContractors = [];
+let completeSplits    = [];
+let completeTotalPayout = 0;
+let showCancelled     = false;
+
+const CONTRACTS_KEY    = 'idea-entry-contracts';
+const CONTRACTS_TS_KEY = 'idea-entry-contracts-ts';
+const CONTRACTS_TTL    = 5 * 60 * 1000;
+
+// ── fetchContracts ────────────────────────────────────
+function fetchContracts() {
+  try {
+    const ts  = localStorage.getItem(CONTRACTS_TS_KEY);
+    const raw = localStorage.getItem(CONTRACTS_KEY);
+    if (ts && raw && Date.now() - parseInt(ts, 10) < CONTRACTS_TTL) {
+      contractsData   = JSON.parse(raw);
+      contractsLoaded = true;
+    }
+  } catch (_) {}
+  _contractsFetch = fetch(API + '?action=contracts&_=' + Date.now(), { cache: 'no-store' })
+    .then(r => r.json())
+    .then(data => {
+      if (Array.isArray(data)) {
+        contractsData   = data;
+        contractsLoaded = true;
+        try {
+          localStorage.setItem(CONTRACTS_KEY,    JSON.stringify(data));
+          localStorage.setItem(CONTRACTS_TS_KEY, String(Date.now()));
+        } catch (_) {}
+      }
+      _contractsFetch = null;
+    })
+    .catch(() => { _contractsFetch = null; });
+  return _contractsFetch;
+}
+
+async function refreshContractsData() {
+  try {
+    const res  = await fetch(API + '?action=contracts&_=' + Date.now(), { cache: 'no-store' });
+    const data = await res.json();
+    if (Array.isArray(data)) {
+      contractsData   = data;
+      contractsLoaded = true;
+      try {
+        localStorage.setItem(CONTRACTS_KEY,    JSON.stringify(data));
+        localStorage.setItem(CONTRACTS_TS_KEY, String(Date.now()));
+      } catch (_) {}
+    }
+  } catch (_) {}
+}
+
+// ── Contract helpers ──────────────────────────────────
+function cStatusKey(status) {
+  return (status || '').toLowerCase().replace(/[\s\-]/g, '');
+}
+function cBadgeClass(status) {
+  const k = cStatusKey(status);
+  if (k === 'inprogress') return 'badge-inprogress';
+  if (k === 'completed')  return 'badge-completed';
+  if (k === 'cancelled')  return 'badge-cancelled';
+  return 'badge-open';
+}
+function cPayout(c) {
+  const total = parseFloat(getField(c, 'totalPayout', 'total_payout', 'TotalPayout') || 0);
+  if (total) return total;
+  const base = parseFloat(getField(c, 'basePayout', 'base_payout', 'BasePayout', 'payout', 'Payout') || 0);
+  const qty  = parseFloat(getField(c, 'quantity', 'Quantity') || 1);
+  return base * qty;
+}
+function cRow(c) {
+  return getField(c, 'row', 'Row', 'id', 'ID', '_row', 'rowIndex', 'index');
+}
+
+// ── Contract List ─────────────────────────────────────
+function renderContractsList() {
+  const groups = {
+    'In Progress': contractsData.filter(c => cStatusKey(getField(c,'status','Status')) === 'inprogress'),
+    'Open':        contractsData.filter(c => cStatusKey(getField(c,'status','Status')) === 'open'),
+    'Completed':   contractsData.filter(c => cStatusKey(getField(c,'status','Status')) === 'completed'),
+    'Cancelled':   contractsData.filter(c => cStatusKey(getField(c,'status','Status')) === 'cancelled'),
+  };
+  const hasCancelled = groups['Cancelled'].length > 0;
+  let html = '';
+  for (const [sec, list] of Object.entries(groups)) {
+    if (sec === 'Cancelled') continue;
+    if (!list.length) continue;
+    const sorted = [...list].sort((a,b) =>
+      (getField(a,'name','Name')||'').localeCompare(getField(b,'name','Name')||''));
+    html += `<div class="contract-section-head">${sec}</div>`;
+    html += sorted.map(contractRowHTML).join('');
+  }
+  if (showCancelled && hasCancelled) {
+    const sorted = [...groups['Cancelled']].sort((a,b) =>
+      (getField(a,'name','Name')||'').localeCompare(getField(b,'name','Name')||''));
+    html += '<div class="contract-section-head">Cancelled</div>';
+    html += sorted.map(contractRowHTML).join('');
+  }
+  if (!html) html = '<div class="contract-empty">No contracts yet.</div>';
+  document.getElementById('contracts-list-content').innerHTML = html;
+  document.querySelectorAll('.contract-row[data-row]').forEach(el => {
+    el.addEventListener('click', () => {
+      const r = el.dataset.row;
+      const c = contractsData.find(x => String(cRow(x)) === String(r));
+      if (c) openContractDetail(c);
+    });
+  });
+  const cw = document.getElementById('contracts-show-cancelled-wrap');
+  cw.style.display = hasCancelled ? 'block' : 'none';
+  if (hasCancelled) {
+    document.getElementById('show-cancelled-btn').textContent =
+      showCancelled ? 'Hide Cancelled' : 'Show Cancelled';
+  }
+}
+
+function contractRowHTML(c) {
+  const name   = getField(c, 'name', 'Name') || 'Unnamed Contract';
+  const status = getField(c, 'status', 'Status') || 'Open';
+  const payout = cPayout(c);
+  const rate   = getField(c, 'rateLabel', 'rate_label', 'RateLabel', 'rate', 'Rate') || '';
+  const row    = cRow(c);
+  return `<div class="contract-row" data-row="${esc(String(row))}">
+    <div class="contract-row-left">
+      <div class="contract-row-name">${esc(name)}</div>
+      <span class="contract-row-badge ${cBadgeClass(status)}">${esc(status)}</span>
+    </div>
+    <div class="contract-row-right">
+      <div class="contract-row-payout">${payout} i&#162;</div>
+      ${rate ? `<div class="contract-row-rate">${esc(rate)}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+// ── Contract Detail ───────────────────────────────────
+function openContractDetail(c) {
+  activeContractRow = cRow(c);
+  detailContractors = (getField(c,'contractors','Contractors')||'')
+    .split(',').map(s=>s.trim()).filter(Boolean);
+
+  document.getElementById('detail-header-name').textContent =
+    getField(c,'name','Name') || 'Contract';
+  document.getElementById('detail-name').value =
+    getField(c,'name','Name') || '';
+  document.getElementById('detail-payout').value =
+    getField(c,'basePayout','base_payout','BasePayout','payout','Payout') || '';
+  document.getElementById('detail-rate-label').value =
+    getField(c,'rateLabel','rate_label','RateLabel') || '';
+  document.getElementById('detail-quantity').value =
+    getField(c,'quantity','Quantity') || '1';
+  document.getElementById('detail-status').value =
+    getField(c,'status','Status') || 'Open';
+  document.getElementById('detail-notes').value =
+    getField(c,'notes','Notes') || '';
+  document.getElementById('detail-contractor-search').value = '';
+  document.getElementById('detail-contractor-results').style.display = 'none';
+
+  updateDetailTotal();
+  updateDetailContractors();
+  updateDetailButtons();
+  document.getElementById('detail-body').scrollTop = 0;
+  showScreen('s-contract-detail');
+}
+
+function updateDetailTotal() {
+  const base = parseFloat(document.getElementById('detail-payout').value) || 0;
+  const qty  = parseFloat(document.getElementById('detail-quantity').value) || 1;
+  document.getElementById('detail-total').textContent = 'Total: ' + (base * qty) + ' i¢';
+}
+
+function updateDetailContractors() {
+  const status = document.getElementById('detail-status').value;
+  const show = status === 'In Progress' || status === 'Completed';
+  document.getElementById('detail-contractors-section').style.display = show ? '' : 'none';
+  if (show) renderContractorChips();
+}
+
+function renderContractorChips() {
+  const wrap = document.getElementById('detail-chips');
+  if (!detailContractors.length) {
+    wrap.innerHTML = '<span class="chip-none">No contractors assigned</span>';
+    return;
+  }
+  wrap.innerHTML = detailContractors.map(name =>
+    `<div class="chip"><span>${esc(name)}</span><button class="chip-x" data-name="${esc(name)}">&times;</button></div>`
+  ).join('');
+  wrap.querySelectorAll('.chip-x').forEach(btn => {
+    btn.addEventListener('click', () => {
+      detailContractors = detailContractors.filter(n => n !== btn.dataset.name);
+      renderContractorChips();
+      updateDetailButtons();
+    });
+  });
+}
+
+function updateDetailButtons() {
+  const status = document.getElementById('detail-status').value;
+  const hasC   = detailContractors.length > 0;
+  const canComplete = (status === 'In Progress' || status === 'Completed') && hasC;
+  document.getElementById('detail-complete-btn').style.display = canComplete ? '' : 'none';
+  document.getElementById('detail-reset-btn').style.display    = status === 'Completed' ? '' : 'none';
+  document.getElementById('detail-cancel-btn').style.display   =
+    (status !== 'Cancelled' && status !== 'Completed') ? '' : 'none';
+}
+
+// Contractor search
+document.getElementById('detail-contractor-search').addEventListener('input', function() {
+  const q = this.value.trim().toLowerCase();
+  const resultsEl = document.getElementById('detail-contractor-results');
+  if (!q) { resultsEl.style.display = 'none'; return; }
+
+  const assigned = detailContractors.map(n => n.toLowerCase());
+  const matches = allStudents.filter(s => {
+    const n = (getField(s,'name','Name','Full Name','Student')||'').toLowerCase();
+    return n.includes(q) && !assigned.includes(n);
+  }).slice(0, 8);
+
+  if (!matches.length) { resultsEl.style.display = 'none'; return; }
+
+  const activeC = contractsData.filter(c => {
+    const sk = cStatusKey(getField(c,'status','Status'));
+    return sk === 'open' || sk === 'inprogress';
+  });
+
+  resultsEl.innerHTML = matches.map(s => {
+    const name = getField(s,'name','Name','Full Name','Student') || '—';
+    const conflict = activeC.find(c => {
+      if (String(cRow(c)) === String(activeContractRow)) return false;
+      const cs = (getField(c,'contractors','Contractors')||'')
+        .split(',').map(x=>x.trim().toLowerCase());
+      return cs.includes(name.toLowerCase());
+    });
+    return `<div class="contractor-result-item" data-name="${esc(name)}">
+      <div class="contractor-result-name">${esc(name)}</div>
+      ${conflict ? `<div class="contractor-result-warning">Already on: ${esc(getField(conflict,'name','Name')||'another contract')}</div>` : ''}
+    </div>`;
+  }).join('');
+  resultsEl.style.display = '';
+
+  resultsEl.querySelectorAll('.contractor-result-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const name = el.dataset.name;
+      if (!detailContractors.includes(name)) {
+        detailContractors.push(name);
+        renderContractorChips();
+        updateDetailButtons();
+      }
+      document.getElementById('detail-contractor-search').value = '';
+      resultsEl.style.display = 'none';
+    });
+  });
+});
+
+document.getElementById('detail-status').addEventListener('change', () => {
+  updateDetailContractors();
+  updateDetailButtons();
+});
+document.getElementById('detail-payout').addEventListener('input', updateDetailTotal);
+document.getElementById('detail-quantity').addEventListener('input', updateDetailTotal);
+
+// Detail action buttons
+document.getElementById('detail-save-btn').addEventListener('click', async () => {
+  const name        = document.getElementById('detail-name').value.trim();
+  const payout      = document.getElementById('detail-payout').value;
+  const rateLabel   = document.getElementById('detail-rate-label').value.trim();
+  const quantity    = document.getElementById('detail-quantity').value || '1';
+  const status      = document.getElementById('detail-status').value;
+  const notes       = document.getElementById('detail-notes').value.trim();
+  const contractors = detailContractors.join(', ');
+  if (!name) { toast('Contract name is required', 'error'); return; }
+  showLoading('Saving…');
+  try {
+    const res  = await fetch(apiUrl({ action:'updateContract', row:activeContractRow, name, payout, rateLabel, quantity, status, notes, contractors }));
+    const data = await res.json();
+    if (data && (data.success || data.status === 'ok' || data.result === 'success')) {
+      toast('Contract updated ✓', 'success');
+      await refreshContractsData();
+      renderContractsList();
+      const updated = contractsData.find(c => String(cRow(c)) === String(activeContractRow));
+      if (updated) openContractDetail(updated);
+    } else { toast('Error saving — try again', 'error'); }
+  } catch (e) { toast('Network error', 'error'); }
+  finally { hideLoading(); }
+});
+
+document.getElementById('detail-complete-btn').addEventListener('click', () => {
+  openContractComplete();
+});
+
+document.getElementById('detail-reset-btn').addEventListener('click', () => {
+  confirm(
+    'Reset Contract',
+    'This will move the completion record to history and reset the contract to Open.',
+    async () => {
+      showLoading('Resetting…');
+      try {
+        const res  = await fetch(apiUrl({ action:'resetContract', row:activeContractRow }));
+        const data = await res.json();
+        if (data && (data.success || data.status === 'ok' || data.result === 'success')) {
+          toast('Reset to Open ✓', 'success');
+          await refreshContractsData();
+          renderContractsList();
+          const updated = contractsData.find(c => String(cRow(c)) === String(activeContractRow));
+          if (updated) openContractDetail(updated); else showScreen('s-contracts');
+        } else { toast('Error — try again', 'error'); }
+      } catch (e) { toast('Network error', 'error'); }
+      finally { hideLoading(); }
+    }
+  );
+});
+
+document.getElementById('detail-cancel-btn').addEventListener('click', () => {
+  promptConfirm(
+    'Cancel Contract',
+    'Enter a reason for cancellation (optional):',
+    'Reason…',
+    async (reason) => {
+      showLoading('Cancelling…');
+      try {
+        const res  = await fetch(apiUrl({ action:'cancelContract', row:activeContractRow, reason }));
+        const data = await res.json();
+        if (data && (data.success || data.status === 'ok' || data.result === 'success')) {
+          toast('Contract cancelled', 'success');
+          await refreshContractsData();
+          renderContractsList();
+          const updated = contractsData.find(c => String(cRow(c)) === String(activeContractRow));
+          if (updated) openContractDetail(updated); else showScreen('s-contracts');
+        } else { toast('Error — try again', 'error'); }
+      } catch (e) { toast('Network error', 'error'); }
+      finally { hideLoading(); }
+    }
+  );
+});
+
+document.getElementById('detail-delete-btn').addEventListener('click', () => {
+  const okBtn = document.getElementById('confirm-ok');
+  confirm(
+    'Delete Contract',
+    'This will permanently delete the contract with no record. This cannot be undone.',
+    async () => {
+      okBtn.textContent   = 'Confirm';
+      okBtn.style.color   = '';
+      okBtn.style.borderColor = '';
+      showLoading('Deleting…');
+      try {
+        const res  = await fetch(apiUrl({ action:'deleteContract', row:activeContractRow }));
+        const data = await res.json();
+        if (data && (data.success || data.status === 'ok' || data.result === 'success')) {
+          toast('Contract deleted', 'success');
+          await refreshContractsData();
+          showScreen('s-contracts');
+          renderContractsList();
+        } else { toast('Error — try again', 'error'); }
+      } catch (e) { toast('Network error', 'error'); }
+      finally { hideLoading(); }
+    }
+  );
+  okBtn.textContent   = 'Delete';
+  okBtn.style.color   = 'var(--red)';
+  okBtn.style.borderColor = 'rgba(255,68,68,0.5)';
+});
+
+// ── Add Contract ──────────────────────────────────────
+document.getElementById('new-contract-submit').addEventListener('click', async () => {
+  const name      = document.getElementById('new-name').value.trim();
+  const payout    = document.getElementById('new-payout').value;
+  const rateLabel = document.getElementById('new-rate-label').value.trim();
+  const quantity  = document.getElementById('new-quantity').value || '1';
+  const notes     = document.getElementById('new-notes').value.trim();
+  if (!name)   { toast('Contract name is required', 'error'); return; }
+  if (!payout) { toast('Base payout is required', 'error'); return; }
+  showLoading('Creating…');
+  try {
+    const res  = await fetch(apiUrl({ action:'addContract', name, payout, rateLabel, quantity, notes }));
+    const data = await res.json();
+    if (data && (data.success || data.status === 'ok' || data.result === 'success')) {
+      toast('Contract created ✓', 'success');
+      await refreshContractsData();
+      document.getElementById('new-name').value      = '';
+      document.getElementById('new-payout').value    = '';
+      document.getElementById('new-rate-label').value = '';
+      document.getElementById('new-quantity').value  = '1';
+      document.getElementById('new-notes').value     = '';
+      showScreen('s-contracts');
+      renderContractsList();
+      // Try opening the newly created contract
+      const newC = [...contractsData].reverse()
+        .find(c => (getField(c,'name','Name')||'') === name);
+      if (newC) setTimeout(() => openContractDetail(newC), 200);
+    } else { toast('Error creating — try again', 'error'); }
+  } catch (e) { toast('Network error', 'error'); }
+  finally { hideLoading(); }
+});
+
+// ── Complete Contract ─────────────────────────────────
+function openContractComplete() {
+  const name  = document.getElementById('detail-name').value;
+  const base  = parseFloat(document.getElementById('detail-payout').value) || 0;
+  const qty   = parseFloat(document.getElementById('detail-quantity').value) || 1;
+  const total = base * qty;
+  completeTotalPayout = total;
+
+  const n = detailContractors.length;
+  const baseAmt = Math.floor(total / n);
+  completeSplits = detailContractors.map((_, i) =>
+    i === 0 ? total - baseAmt * (n - 1) : baseAmt
+  );
+
+  document.getElementById('complete-contract-name').textContent = name;
+  document.getElementById('complete-contract-total').textContent = total + ' i¢';
+  document.getElementById('complete-physical').checked = true;
+
+  renderCompleteSplit();
+  document.getElementById('detail-body').scrollTop = 0;
+  showScreen('s-contract-complete');
+}
+
+function renderCompleteSplit() {
+  const list = document.getElementById('complete-split-list');
+  list.innerHTML = detailContractors.map((name, i) =>
+    `<div class="split-row">
+      <span class="split-name">${esc(name)}</span>
+      <input type="number" class="split-input" min="0" step="1" value="${completeSplits[i]}" data-idx="${i}">
+    </div>`
+  ).join('');
+  list.querySelectorAll('.split-input').forEach(inp => {
+    inp.addEventListener('input', () => {
+      completeSplits[parseInt(inp.dataset.idx, 10)] = parseInt(inp.value, 10) || 0;
+      updateAllocTotal();
+    });
+  });
+  updateAllocTotal();
+}
+
+function updateAllocTotal() {
+  const allocated = completeSplits.reduce((s, v) => s + (parseInt(v) || 0), 0);
+  const el = document.getElementById('complete-alloc');
+  el.textContent = 'Allocated: ' + allocated + ' i¢ / Total: ' + completeTotalPayout + ' i¢';
+  const ok = allocated === completeTotalPayout;
+  el.className = 'alloc-total ' + (ok ? 'ok' : 'bad');
+  document.getElementById('complete-submit-btn').disabled = !ok;
+}
+
+document.getElementById('complete-submit-btn').addEventListener('click', async () => {
+  const physical    = document.getElementById('complete-physical').checked;
+  const contractors = detailContractors.join(',');
+  const split       = completeSplits.join(',');
+  showLoading('Completing contract…');
+  try {
+    const res  = await fetch(apiUrl({
+      action: 'completeContract', row: activeContractRow,
+      contractors, split, physical: physical ? '1' : '0'
+    }));
+    const data = await res.json();
+    if (data && (data.success || data.status === 'ok' || data.result === 'success')) {
+      toast('Contract completed — transactions logged', 'success');
+      await refreshContractsData();
+      showScreen('s-contracts');
+      renderContractsList();
+    } else { toast('Error — please try again', 'error'); }
+  } catch (e) { toast('Network error', 'error'); }
+  finally { hideLoading(); }
+});
+
+// ── Contracts Navigation ──────────────────────────────
+document.getElementById('btn-contracts').addEventListener('click', async () => {
+  if (!contractsLoaded) {
+    showLoading('Loading contracts…');
+    try {
+      await fetchContracts();
+    } catch (e) {
+      hideLoading();
+      toast('Failed to load contracts', 'error');
+      return;
+    }
+    hideLoading();
+  } else {
+    fetchContracts(); // background refresh
+  }
+  showCancelled = false;
+  showScreen('s-contracts');
+  renderContractsList();
+});
+
+document.getElementById('contracts-back').addEventListener('click', () => showScreen('s-home'));
+
+document.getElementById('contracts-add-btn').addEventListener('click', () => {
+  document.getElementById('new-name').value      = '';
+  document.getElementById('new-payout').value    = '';
+  document.getElementById('new-rate-label').value = '';
+  document.getElementById('new-quantity').value  = '1';
+  document.getElementById('new-notes').value     = '';
+  showScreen('s-contract-new');
+});
+
+document.getElementById('detail-back').addEventListener('click', () => {
+  showScreen('s-contracts');
+  renderContractsList();
+});
+
+document.getElementById('new-contract-back').addEventListener('click', () => showScreen('s-contracts'));
+
+document.getElementById('complete-back').addEventListener('click', () => showScreen('s-contract-detail'));
+
+document.getElementById('show-cancelled-btn').addEventListener('click', () => {
+  showCancelled = !showCancelled;
+  renderContractsList();
 });
 
 // ── Boot ──────────────────────────────────────────────
