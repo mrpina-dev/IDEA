@@ -945,6 +945,73 @@ body::after {
   * { transition-duration: 0.01ms !important; }
 }
 
+/* ── Contracts Tab ──────────────────────────────────── */
+.contracts-sub-bar {
+  display: flex; gap: 0; margin-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(0,255,65,0.1);
+}
+.contracts-sub-btn {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.58rem; font-weight: 600; letter-spacing: 0.13em;
+  text-transform: uppercase; color: var(--dim);
+  background: none; border: none; border-bottom: 2px solid transparent;
+  padding: 0.5rem 1.1rem; cursor: pointer; margin-bottom: -1px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.contracts-sub-btn:hover { color: var(--white); }
+.contracts-sub-btn.active { color: var(--gold); border-bottom-color: var(--gold); text-shadow: var(--glow-gold); }
+.contracts-sub-panel { display: none; }
+.contracts-sub-panel.active { display: block; }
+.contract-card {
+  background: var(--bg1);
+  border: 1px solid rgba(0,255,65,0.1);
+  border-radius: 4px; padding: 1.2rem 1.4rem; margin-bottom: 0.8rem;
+}
+.contract-card-top {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 0.6rem; gap: 0.75rem;
+}
+.contract-name {
+  font-family: 'Orbitron', sans-serif; font-size: 0.88rem; font-weight: 700;
+  color: var(--white); letter-spacing: 0.03em;
+}
+.contract-status-badge {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.46rem; letter-spacing: 0.15em; text-transform: uppercase;
+  padding: 0.2rem 0.55rem; border-radius: 2px; white-space: nowrap; flex-shrink: 0;
+}
+.contract-status-open       { color: var(--dim);  border: 1px solid rgba(74,122,82,0.4); }
+.contract-status-inprogress { color: var(--gold); border: 1px solid rgba(200,255,0,0.5); }
+.contract-status-completed  { color: var(--green); border: 1px solid rgba(0,255,65,0.4); }
+.contract-payout-row {
+  display: flex; align-items: baseline; gap: 0.65rem; margin-bottom: 0.5rem;
+}
+.contract-payout {
+  font-family: 'Orbitron', sans-serif; font-weight: 700;
+  font-size: 1.4rem; line-height: 1; color: var(--gold); text-shadow: var(--glow-gold);
+}
+.contract-rate-label { font-size: 0.62rem; color: var(--dim); letter-spacing: 0.04em; }
+.contract-date-completed { font-size: 0.62rem; color: var(--dim); margin-bottom: 0.5rem; }
+.contract-contractors-row { font-size: 0.68rem; margin-bottom: 0.4rem; }
+.contract-contractors-label { color: var(--dim); font-family: 'Orbitron', sans-serif; font-size: 0.48rem; letter-spacing: 0.15em; text-transform: uppercase; margin-right: 0.4rem; }
+.contract-contractors-names { color: var(--white); }
+.contract-notes { font-size: 0.72rem; color: var(--dim); font-style: italic; margin-top: 0.25rem; }
+.contracts-empty { color: var(--dim); font-size: 0.72rem; padding: 2rem 0; letter-spacing: 0.04em; }
+.contract-history-row {
+  display: flex; flex-direction: column; gap: 0.3rem;
+  padding: 0.75rem 1rem; margin-bottom: 0.5rem;
+  background: var(--bg1); border: 1px solid rgba(0,255,65,0.08); border-radius: 3px;
+}
+.contract-history-top {
+  display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+}
+.contract-history-name { color: var(--white); font-size: 0.72rem; }
+.history-badge-reset    { font-family: 'Orbitron', sans-serif; font-size: 0.44rem; letter-spacing: 0.14em; text-transform: uppercase; padding: 0.15rem 0.45rem; border-radius: 2px; color: var(--cyan); border: 1px solid rgba(0,240,255,0.4); }
+.history-badge-cancelled{ font-family: 'Orbitron', sans-serif; font-size: 0.44rem; letter-spacing: 0.14em; text-transform: uppercase; padding: 0.15rem 0.45rem; border-radius: 2px; color: var(--red);  border: 1px solid rgba(255,68,68,0.4); }
+.contract-history-date { font-size: 0.6rem; color: var(--dim); }
+.contract-history-meta { font-size: 0.65rem; color: var(--dim); }
+.contract-history-notes { font-size: 0.65rem; color: var(--dim); font-style: italic; }
+
 /* ── Print styles ───────────────────────────────────── */
 @media print {
   *, *::before, *::after {
@@ -1087,6 +1154,7 @@ body::after {
     <button class="tab-btn active" data-tab="leaderboard">Leaderboard</button>
     <button class="tab-btn" data-tab="transactions">Transaction Log</button>
     <button class="tab-btn" data-tab="analytics">Analytics</button>
+    <button class="tab-btn" data-tab="contracts">Contracts</button>
   </div>
 
   <!-- ── Leaderboard Tab ─────────────────────────── -->
@@ -1189,6 +1257,30 @@ body::after {
     <hr class="analytics-divider">
     <div class="analytics-section-title">Recently Active</div>
     <div id="analytics-recently-active"></div>
+  </div>
+
+  <!-- ── Contracts Tab ────────────────────────────── -->
+  <div class="tab-panel" id="tab-contracts">
+    <div class="contracts-sub-bar">
+      <button class="contracts-sub-btn active" data-sub="active">Active</button>
+      <button class="contracts-sub-btn" data-sub="completed">Completed</button>
+      <button class="contracts-sub-btn" data-sub="history">History</button>
+    </div>
+    <div class="contracts-sub-panel active" id="contracts-sub-active">
+      <div class="loading-state" id="contracts-loading">
+        <div class="loading-dot"></div>
+        <div class="loading-dot"></div>
+        <div class="loading-dot"></div>
+        <span>Loading contracts&hellip;</span>
+      </div>
+      <div id="contracts-active-list"></div>
+    </div>
+    <div class="contracts-sub-panel" id="contracts-sub-completed">
+      <div id="contracts-completed-list"></div>
+    </div>
+    <div class="contracts-sub-panel" id="contracts-sub-history">
+      <div id="contracts-history-list"></div>
+    </div>
   </div>
 
   <!-- ── i¢ Guide Tab ───────────────────────────────── -->
@@ -1491,6 +1583,7 @@ body::after {
 const SUMMARY_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTHVkr4mLhBYvO6tDjQxC-nFoc5rKG0CRySci77ac2a1bM4oDSGJef5McBYlhI6nXE2dlfgCy7UuRbn/pub?gid=631308186&single=true&output=csv";
 const TRANSACTIONS_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTHVkr4mLhBYvO6tDjQxC-nFoc5rKG0CRySci77ac2a1bM4oDSGJef5McBYlhI6nXE2dlfgCy7UuRbn/pub?gid=1105564658&single=true&output=csv";
 const LEADERBOARD_URL = 'https://mrpina-dev.github.io/IDEA/coins/';
+const CONTRACTS_API = "https://script.google.com/macros/s/AKfycby_p-lI7I5i4Rl1KZKgtWEhePnUmyrC9HBrS485JBWvcwWfpIWC_397P7yrcrmvIql9/exec";
 
 const SECTION_COLORS = {
   'IDEA-113':   '#00FF41',
@@ -1504,6 +1597,8 @@ const TXN_PAGE_SIZE = 50;
 // ── State ────────────────────────────────────────────
 let summaryData = [];
 let txnData = [];
+let contractsData = [];
+let contractHistoryData = [];
 let activeSection = 'All';
 let txnNameQ = '';
 let txnTypeQ = '';
@@ -1580,12 +1675,18 @@ function typeBadgeClass(type) {
 // ── Fetch ────────────────────────────────────────────
 async function fetchData() {
   try {
-    const [sRes, tRes] = await Promise.all([
-      fetch(SUMMARY_CSV + '&_=' + Date.now(), { cache: 'no-store' }),
-      fetch(TRANSACTIONS_CSV + '&_=' + Date.now(), { cache: 'no-store' })
+    const ts = Date.now();
+    const [sRes, tRes, cRes, chRes] = await Promise.all([
+      fetch(SUMMARY_CSV + '&_=' + ts, { cache: 'no-store' }),
+      fetch(TRANSACTIONS_CSV + '&_=' + ts, { cache: 'no-store' }),
+      fetch(CONTRACTS_API + '?action=contracts&_=' + ts, { cache: 'no-store' }),
+      fetch(CONTRACTS_API + '?action=contractHistory&_=' + ts, { cache: 'no-store' })
     ]);
     summaryData = parseCSV(await sRes.text());
     txnData = parseCSV(await tRes.text());
+    try { contractsData = await cRes.json(); } catch(e) { contractsData = []; }
+    try { contractHistoryData = await chRes.json(); } catch(e) { contractHistoryData = []; }
+    renderContracts();
 
     summaryData.sort((a, b) => {
       const calcBal = r => (parseFloat(pick(r)('Awarded') || 0) - parseFloat(pick(r)('Fines') || 0));
@@ -1614,6 +1715,7 @@ async function fetchData() {
       document.getElementById('leaderboard-grid').style.display = 'grid';
       document.getElementById('txn-loading').style.display = 'none';
       document.getElementById('txn-table-wrap').style.display = 'block';
+      document.getElementById('contracts-loading').style.display = 'none';
     }
   } catch (err) {
     const el = document.getElementById('last-updated');
@@ -1635,6 +1737,120 @@ function updateStatsBar() {
   document.getElementById('stat-debt').textContent = fmtNum(totalDebt);
   document.getElementById('stat-txns').textContent = txnData.length.toLocaleString();
   document.getElementById('stat-ratio').textContent = ratio;
+}
+
+// ── Contracts ────────────────────────────────────────
+function renderContracts() {
+  const g = v => (v || '').toString().trim();
+
+  // Active sub-tab
+  const activeEl = document.getElementById('contracts-active-list');
+  const activeContracts = contractsData.filter(r => {
+    const s = g(r.status || r.Status);
+    return s === 'Open' || s === 'In Progress';
+  }).sort((a, b) => {
+    const order = s => s === 'In Progress' ? 0 : 1;
+    const sa = g(a.status || a.Status), sb = g(b.status || b.Status);
+    if (order(sa) !== order(sb)) return order(sa) - order(sb);
+    return g(a.name || a.Name || a.contract || a.Contract).localeCompare(g(b.name || b.Name || b.contract || b.Contract));
+  });
+  if (!activeContracts.length) {
+    activeEl.innerHTML = '<div class="contracts-empty">No active contracts.</div>';
+  } else {
+    activeEl.innerHTML = activeContracts.map(r => contractCard(r)).join('');
+  }
+
+  // Completed sub-tab
+  const completedEl = document.getElementById('contracts-completed-list');
+  const completedContracts = contractsData.filter(r => {
+    const s = g(r.status || r.Status);
+    return s === 'Completed';
+  }).sort((a, b) => {
+    const da = new Date(g(a.dateCompleted || a.DateCompleted || a.date_completed || 0));
+    const db = new Date(g(b.dateCompleted || b.DateCompleted || b.date_completed || 0));
+    return db - da;
+  });
+  if (!completedContracts.length) {
+    completedEl.innerHTML = '<div class="contracts-empty">No completed contracts.</div>';
+  } else {
+    completedEl.innerHTML = completedContracts.map(r => contractCard(r, true)).join('');
+  }
+
+  // History sub-tab
+  const historyEl = document.getElementById('contracts-history-list');
+  const sortedHistory = [...contractHistoryData].sort((a, b) => {
+    const da = new Date(g(a.date || a.Date || 0));
+    const db = new Date(g(b.date || b.Date || 0));
+    return db - da;
+  });
+  if (!sortedHistory.length) {
+    historyEl.innerHTML = '<div class="contracts-empty">No contract history entries.</div>';
+  } else {
+    historyEl.innerHTML = sortedHistory.map(r => {
+      const name = g(r.name || r.Name || r.contract || r.Contract);
+      const eventType = g(r.eventType || r.event_type || r.EventType || r.type || r.Type);
+      const date = g(r.date || r.Date);
+      const contractors = g(r.contractors || r.Contractors);
+      const payout = g(r.payout || r.Payout);
+      const notes = g(r.notes || r.Notes);
+      const isCancelled = /cancel/i.test(eventType);
+      const badgeClass = isCancelled ? 'history-badge-cancelled' : 'history-badge-reset';
+      const badgeLabel = isCancelled ? 'Cancelled' : 'Completion Reset';
+      let html = `<div class="contract-history-row">
+        <div class="contract-history-top">
+          <span class="contract-history-name">${escHtml(name)}</span>
+          <span class="${badgeClass}">${badgeLabel}</span>
+        </div>`;
+      if (date) html += `<div class="contract-history-date">${escHtml(date)}</div>`;
+      let meta = [];
+      if (contractors) meta.push('Contractors: ' + escHtml(contractors));
+      if (payout) meta.push('Payout: ' + escHtml(payout));
+      if (meta.length) html += `<div class="contract-history-meta">${meta.join(' &mdash; ')}</div>`;
+      if (notes) html += `<div class="contract-history-notes">${escHtml(notes)}</div>`;
+      html += '</div>';
+      return html;
+    }).join('');
+  }
+}
+
+function contractCard(r, showDate) {
+  const g = v => (v || '').toString().trim();
+  const name = g(r.name || r.Name || r.contract || r.Contract);
+  const status = g(r.status || r.Status);
+  const payout = g(r.payout || r.Payout || r.totalPayout || r.TotalPayout);
+  const rateLabel = g(r.rateLabel || r.rate_label || r.RateLabel || r.rate || r.Rate);
+  const contractors = g(r.contractors || r.Contractors);
+  const notes = g(r.notes || r.Notes);
+  const dateCompleted = g(r.dateCompleted || r.DateCompleted || r.date_completed);
+
+  const statusKey = status.toLowerCase().replace(/\s+/g, '');
+  const badgeClass = statusKey === 'inprogress' ? 'contract-status-inprogress'
+    : statusKey === 'completed' ? 'contract-status-completed'
+    : 'contract-status-open';
+
+  let html = `<div class="contract-card">
+    <div class="contract-card-top">
+      <span class="contract-name">${escHtml(name)}</span>
+      <span class="contract-status-badge ${badgeClass}">${escHtml(status)}</span>
+    </div>`;
+  if (showDate && dateCompleted) {
+    html += `<div class="contract-date-completed">${escHtml(dateCompleted)}</div>`;
+  }
+  html += `<div class="contract-payout-row">
+    <span class="contract-payout">${escHtml(payout || '—')} i¢</span>
+    ${rateLabel ? `<span class="contract-rate-label">${escHtml(rateLabel)}</span>` : ''}
+  </div>`;
+  if (contractors) {
+    html += `<div class="contract-contractors-row">
+      <span class="contract-contractors-label">Assigned To</span>
+      <span class="contract-contractors-names">${escHtml(contractors)}</span>
+    </div>`;
+  }
+  if (notes) {
+    html += `<div class="contract-notes">${escHtml(notes)}</div>`;
+  }
+  html += '</div>';
+  return html;
 }
 
 // ── Leaderboard ──────────────────────────────────────
@@ -2229,7 +2445,18 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
       if (tabId === 'leaderboard') renderLeaderboard();
       else if (tabId === 'transactions') { txnPage = 1; renderTransactions(); }
       else if (tabId === 'analytics') renderAnalytics();
+      else if (tabId === 'contracts') renderContracts();
     }
+  });
+});
+
+// ── Contracts Sub-Tab Switching ───────────────────────
+document.querySelectorAll('.contracts-sub-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.contracts-sub-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.contracts-sub-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('contracts-sub-' + btn.dataset.sub).classList.add('active');
   });
 });
 

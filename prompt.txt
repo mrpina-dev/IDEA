@@ -1,35 +1,51 @@
-﻿Edit entry/index.html. Add a "Physical coin given?" checkbox to the Award flow.
+﻿Edit coins/index.html. Add a Contracts tab to the existing tab bar.
 
-CHANGE 1 - HTML
-In the type-grid section, after the closing div of the type-grid, add:
-<div id="physical-toggle" style="display:none; margin-top:0.75rem;">
-  <label style="display:flex; align-items:center; gap:0.75rem; cursor:pointer; min-height:48px; padding:0.6rem 0.85rem; background:var(--bg1); border:1px solid rgba(0,255,65,0.15); border-radius:3px;">
-    <input type="checkbox" id="physical-check" checked style="width:22px; height:22px; accent-color:var(--green); cursor:pointer; flex-shrink:0;">
-    <div>
-      <div style="font-family:'Orbitron',sans-serif; font-size:0.65rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--green);">Physical coin given?</div>
-      <div style="font-size:0.58rem; color:var(--dim); margin-top:0.15rem; letter-spacing:0.04em;">Uncheck if you cannot give the coin right now</div>
-    </div>
-  </label>
-</div>
+--- TAB BUTTON ---
+Add a fourth tab button labeled "Contracts" to the existing .tab-bar div after the Analytics tab button.
 
-CHANGE 2 - SHOW/HIDE TOGGLE
-In selectType(), show #physical-toggle only when type === 'Award'. For all other types hide it and reset the checkbox to checked.
+--- DATA FETCHING ---
+Add two new CSV-style fetches inside fetchData() using the existing API base URL pattern. These are JSON fetches not CSV:
 
-CHANGE 3 - SUBMISSION LOGIC
-In the submit handler, when the type is 'Award', check if #physical-check is checked:
-- Checked: log as type "Award" (physical coin given, no Bank Balance change)
-- Unchecked: log as type "Award - Held" (coin not yet given, Bank Balance goes up)
+const CONTRACTS_API = "https://script.google.com/macros/s/AKfycby_p-lI7I5i4Rl1KZKgtWEhePnUmyrC9HBrS485JBWvcwWfpIWC_397P7yrcrmvIql9/exec";
 
-For all other types, submit as-is with no change.
+Fetch contracts: CONTRACTS_API + "?action=contracts&_=" + Date.now()
+Fetch contract history: CONTRACTS_API + "?action=contractHistory&_=" + Date.now()
 
-CHANGE 4 - REASONS FOR AWARD - HELD
-In the REASONS object, add:
-"Award - Held": same array as Award reasons
+Store results in let contractsData = [] and let contractHistoryData = []. Fetch both with cache: 'no-store'. Call renderContracts() after both resolve.
 
-In the PRESETS object, add:
-"Award - Held": same array as Award presets
+--- TAB PANEL ---
+Add a tab panel #tab-contracts. Inside it, three sub-tab buttons: Active | Completed | History. Style sub-tabs similarly to the main tab bar but smaller - Orbitron, 0.58rem, gold underline on active.
 
-CHANGE 5 - RESET
-In resetLog(), reset #physical-check to checked and hide #physical-toggle.
+SUB-TAB 1: ACTIVE
+Shows contracts with status Open or In Progress, sorted: In Progress first then Open, alphabetical within each group.
 
-Commit with message "feat: physical coin checkbox on Award, Award - Held type support" and push.
+Each contract is a card (bg1 background, border radius 4px, padding 1.2rem 1.4rem, margin-bottom 0.8rem):
+- Top row: Contract name (Orbitron, 0.88rem, white) + status badge right-aligned
+  - Open badge: dim border, dim text
+  - In Progress badge: gold border, gold text
+- Payout row: Total payout in gold Orbitron (large, 1.4rem) + rate label in dim small text if rateLabel is not empty (e.g. "× 3 chairs")
+- Contractors row (only if contractors field is not empty): dim label "ASSIGNED TO" + contractor names in white, comma separated
+- Notes row (only if notes not empty): dim italic text, 0.72rem
+
+SUB-TAB 2: COMPLETED
+Same card layout as Active but for status = Completed. Show dateCompleted in dim text below the name. Sort newest completed first.
+
+SUB-TAB 3: HISTORY
+Shows Contract History entries. Each entry is a simpler row:
+- Contract name (white) + event type badge (Completion Reset = cyan, Cancelled = red)
+- Date in dim text
+- Contractors and payout if present
+- Notes in dim italic
+Sort newest first.
+
+If any sub-tab has no data, show a dim placeholder message.
+
+--- RENDERING ---
+Add function renderContracts() that populates all three sub-tabs. Call it whenever contractsData or contractHistoryData updates.
+
+Wire sub-tab buttons to show/hide sub-tab panels.
+
+--- GENERAL ---
+Match existing visual style throughout. No external dependencies.
+
+Commit with message "feat: add Contracts tab to coins leaderboard page" and push.
