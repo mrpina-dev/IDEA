@@ -1,36 +1,49 @@
-﻿Edit coins/index.html. Make the following changes to the leaderboard:
+﻿Edit coins/index.html. Add an info tooltip system to the leaderboard tab that explains the stats shown on each card.
 
-CHANGE 1 - LIFETIME EARNED CALCULATION
-In renderLeaderboard(), for each student row, calculate:
-const lifetimeEarned = awarded - fines;
-where awarded = parseFloat(p('Awarded') || 0) and fines = parseFloat(p('Fines') || 0) already read from Summary CSV.
+CHANGE 1 - INFO BUTTON
+Add a small circular "?" button next to the leaderboard sort dropdown. Place it on the same row as the sort dropdown, right-aligned. Style:
+- font-family Orbitron, font-size 0.55rem, font-weight 700
+- width 28px, height 28px, border-radius 50%
+- background none, border 1px solid rgba(74,122,82,0.4), color var(--dim)
+- cursor pointer, flex-shrink 0
+- transition color 0.2s, border-color 0.2s
+- On hover: color var(--green), border-color rgba(0,255,65,0.5)
+- id: stats-info-btn
 
-CHANGE 2 - SORT DROPDOWN
-Find the sort dropdown (select element for leaderboard sorting). Replace its options entirely with:
-- Lifetime Earned (High to Low) [value: "lifetime-desc"] — this is the new default
-- Lifetime Earned (Low to High) [value: "lifetime-asc"]
-- Coin Balance (High to Low) [value: "balance-desc"]
-- Coin Balance (Low to High) [value: "balance-asc"]
-- Most Awarded [value: "awarded-desc"]
-- Most Fined [value: "fined-desc"]
-- Most Spent [value: "spent-desc"]
-- Name (A - Z) [value: "name-asc"]
-- Name (Z - A) [value: "name-desc"]
-- Section [value: "section"]
+CHANGE 2 - POPOVER PANEL
+Add a popover div with id stats-info-popover positioned absolute below the ? button. Default display none.
 
-Update the sort logic in renderLeaderboard() to handle all options including the two new lifetime-desc and lifetime-asc cases which sort by lifetimeEarned.
+Style:
+- position absolute, z-index 200
+- background var(--bg1), border 1px solid rgba(0,255,65,0.25), border-radius 4px
+- padding 1.2rem 1.4rem, width 300px, max-width calc(100vw - 2.2rem)
+- box-shadow 0 8px 32px rgba(0,0,0,0.5)
 
-CHANGE 3 - DEFAULT SORT
-Change the default sort value from whatever it currently is to "lifetime-desc". Update the localStorage key idea-coins-sort default to "lifetime-desc" as well.
+Inside the popover:
+- Header row: "LEADERBOARD STATS" in gold Orbitron 0.6rem letter-spacing 0.2em, and an X close button right-aligned (background none, border none, color var(--dim), font-size 1rem, cursor pointer, min 28px tap target)
+- Divider line rgba(0,255,65,0.1) 1px margin 0.75rem 0
+- Five stat blocks, each with:
+  - Stat name in Orbitron 0.58rem uppercase letter-spacing 0.15em margin-bottom 0.25rem
+  - Description in Share Tech Mono 0.7rem color var(--dim) line-height 1.6
 
-CHANGE 4 - LIFETIME EARNED ON CARDS
-In the coin-meta section of each leaderboard card, add Lifetime Earned as the first meta item before the existing items:
-- Label: LIFETIME (Orbitron, dim, uppercase)
-- Value: fmtNum(lifetimeEarned) with + prefix if positive, in var(--green)
+Stat blocks in order:
 
-Keep all existing meta items (Net Awards, Net Fines, Net Spent) after it.
+Name: LIFETIME EARNED | Color: var(--green)
+Description: Awarded coins minus fines. Determines your leaderboard rank. Spending coins does not affect this number.
 
-CHANGE 5 - COIN BALANCE ON CARDS
-Keep Coin Balance displayed on the card as the large central number (existing .coin-balance element) since it still represents the student's actual economic standing. Do not remove or replace it.
+Name: COIN BALANCE | Color: var(--gold)
+Description: Your current economic standing. Awarded minus fines minus spent. Reflects how many coins you effectively own right now.
 
-Commit with message "feat: lifetime earned sort default, card meta, leaderboard ranking by lifetime earned" and push.
+Name: NET AWARDS | Color: var(--green)
+Description: Total coins awarded to you across all time before any deductions.
+
+Name: NET FINES | Color: var(--red)
+Description: Total coins fined from you across all time.
+
+Name: NET SPENT | Color: var(--amber)
+Description: Total coins spent on purchases across all time.
+
+CHANGE 3 - TOGGLE BEHAVIOR
+In the JavaScript, wire the stats-info-btn to toggle the popover visibility. Clicking outside the popover or clicking the X button closes it. Clicking the ? button again also toggles it closed.
+
+Commit with message "feat: add stat info popover to leaderboard" and push.

@@ -223,6 +223,29 @@ nav a.active { color: var(--gold); text-shadow: var(--glow-gold); }
 }
 #lb-sort-select:focus { border-color: rgba(0,255,65,0.5); }
 #lb-sort-select option { background: #050F07; color: var(--white); }
+#stats-info-btn {
+  font-family: 'Orbitron', sans-serif; font-size: 0.55rem; font-weight: 700;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: none; border: 1px solid rgba(74,122,82,0.4); color: var(--dim);
+  cursor: pointer; flex-shrink: 0;
+  transition: color 0.2s, border-color 0.2s;
+  display: flex; align-items: center; justify-content: center;
+}
+#stats-info-btn:hover { color: var(--green); border-color: rgba(0,255,65,0.5); }
+#stats-info-popover {
+  position: absolute; z-index: 200; top: calc(100% + 0.5rem); right: 0;
+  background: var(--bg1); border: 1px solid rgba(0,255,65,0.25); border-radius: 4px;
+  padding: 1.2rem 1.4rem; width: 300px; max-width: calc(100vw - 2.2rem);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+.stats-info-header { display: flex; align-items: center; justify-content: space-between; }
+.stats-info-title { font-family: 'Orbitron', sans-serif; font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); }
+.stats-info-close { background: none; border: none; color: var(--dim); font-size: 1rem; cursor: pointer; min-width: 28px; min-height: 28px; display: flex; align-items: center; justify-content: center; }
+.stats-info-divider { border: none; border-top: 1px solid rgba(0,255,65,0.1); margin: 0.75rem 0; }
+.stats-info-block { margin-bottom: 0.9rem; }
+.stats-info-block:last-child { margin-bottom: 0; }
+.stats-info-name { font-family: 'Orbitron', sans-serif; font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 0.25rem; }
+.stats-info-desc { font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; color: var(--dim); line-height: 1.6; }
 
 .leaderboard-grid {
   display: grid;
@@ -1377,6 +1400,36 @@ body::after {
         <option value="name-desc">Name (Z - A)</option>
         <option value="section">Section</option>
       </select>
+      <div style="position:relative;display:flex;align-items:center;">
+        <button id="stats-info-btn">?</button>
+        <div id="stats-info-popover" style="display:none;">
+          <div class="stats-info-header">
+            <span class="stats-info-title">Leaderboard Stats</span>
+            <button class="stats-info-close" id="stats-info-close">&#x2715;</button>
+          </div>
+          <hr class="stats-info-divider">
+          <div class="stats-info-block">
+            <div class="stats-info-name" style="color:var(--green)">Lifetime Earned</div>
+            <div class="stats-info-desc">Awarded coins minus fines. Determines your leaderboard rank. Spending coins does not affect this number.</div>
+          </div>
+          <div class="stats-info-block">
+            <div class="stats-info-name" style="color:var(--gold)">Coin Balance</div>
+            <div class="stats-info-desc">Your current economic standing. Awarded minus fines minus spent. Reflects how many coins you effectively own right now.</div>
+          </div>
+          <div class="stats-info-block">
+            <div class="stats-info-name" style="color:var(--green)">Net Awards</div>
+            <div class="stats-info-desc">Total coins awarded to you across all time before any deductions.</div>
+          </div>
+          <div class="stats-info-block">
+            <div class="stats-info-name" style="color:var(--red)">Net Fines</div>
+            <div class="stats-info-desc">Total coins fined from you across all time.</div>
+          </div>
+          <div class="stats-info-block">
+            <div class="stats-info-name" style="color:var(--amber)">Net Spent</div>
+            <div class="stats-info-desc">Total coins spent on purchases across all time.</div>
+          </div>
+        </div>
+      </div>
       <button class="print-lb-btn" onclick="window.print()">&#128438; Print Leaderboard</button>
     </div>
     <div id="leaderboard-loading" class="loading-state">
@@ -2689,6 +2742,21 @@ document.getElementById('lb-sort-select').addEventListener('change', e => {
   localStorage.setItem('idea-coins-sort', lbSort);
   if (loaded) renderLeaderboard();
 });
+
+// ── Stats Info Popover ────────────────────────────────
+(function() {
+  const btn      = document.getElementById('stats-info-btn');
+  const pop      = document.getElementById('stats-info-popover');
+  const closeBtn = document.getElementById('stats-info-close');
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    pop.style.display = pop.style.display === 'none' ? 'block' : 'none';
+  });
+  closeBtn.addEventListener('click', () => { pop.style.display = 'none'; });
+  document.addEventListener('click', e => {
+    if (!pop.contains(e.target) && e.target !== btn) pop.style.display = 'none';
+  });
+})();
 
 // ── Section Filters ───────────────────────────────────
 document.querySelectorAll('#section-filters .filter-btn').forEach(btn => {
