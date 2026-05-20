@@ -1871,7 +1871,7 @@ function openContractDetail(c) {
   if (!studentsLoaded) initStudentsData();
   activeContractRow = cRow(c);
   detailContractors = (getField(c,'contractors','Contractors')||'')
-    .split(',').map(s=>s.trim()).filter(Boolean);
+    .split('|').map(s=>s.trim()).filter(Boolean);
 
   document.getElementById('detail-header-name').textContent =
     getField(c,'name','Name') || 'Contract';
@@ -1967,7 +1967,7 @@ document.getElementById('detail-contractor-search').addEventListener('input', fu
     const conflict = activeC.find(c => {
       if (String(cRow(c)) === String(activeContractRow)) return false;
       const cs = (getField(c,'contractors','Contractors')||'')
-        .split(',').map(x=>x.trim().toLowerCase());
+        .split('|').map(x=>x.trim().toLowerCase());
       return cs.includes(name.toLowerCase());
     });
     return `<div class="contractor-result-item" data-name="${esc(name)}">
@@ -2006,7 +2006,7 @@ document.getElementById('detail-save-btn').addEventListener('click', async () =>
   const quantity    = (document.getElementById('detail-quantity').value || '').replace(/[^0-9.]/g, '') || '1';
   const status      = document.getElementById('detail-status').value;
   const notes       = document.getElementById('detail-notes').value.trim();
-  const contractors = detailContractors.join(', ');
+  const contractors = detailContractors.join('|');
   if (!name) { toast('Contract name is required', 'error'); return; }
   showLoading('Saving…');
   try {
@@ -2183,7 +2183,7 @@ function updateAllocTotal() {
 
 document.getElementById('complete-submit-btn').addEventListener('click', async () => {
   const physical    = document.getElementById('complete-physical').checked;
-  const contractors = detailContractors.join(',');
+  const contractors = detailContractors.join('|');
   const split       = completeSplits.join(',');
   showLoading('Completing contract…');
   try {

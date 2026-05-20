@@ -1,7 +1,18 @@
-﻿Edit entry/index.html. Find every place where document.getElementById('detail-contractor-results').style.display is set to an empty string ''. Replace every instance with 'block'.
+﻿Edit entry/index.html. Contractor names are in "Last, First" format containing commas. The current comma delimiter for joining/splitting contractor lists conflicts with the commas in names. Replace all contractor list delimiters with pipe | character.
 
-Also find where resultsEl.style.display is set to '' inside the detail-contractor-search input event listener and replace those with 'block' as well.
+Find every place where detailContractors is joined into a string and change the delimiter from ', ' or ',' to '|':
+- detailContractors.join(', ') → detailContractors.join('|')
+- detailContractors.join(',') → detailContractors.join('|')
 
-There should be no remaining instances of contractor-results display being set to empty string after this fix.
+Find every place where a contractors string is split back into an array and change the delimiter from ',' to '|':
+- .split(',') on contractors strings → .split('|')
 
-Commit with message "fix: contractor results display none fallback, set explicit block" and push.
+This includes:
+- openContractDetail where detailContractors is initialized from the contract data
+- detail-save-btn handler where contractors string is built for the API
+- complete-submit-btn handler where contractors string is built for the API
+- renderPayout or any other place that splits contractor strings
+
+Do not change the split for the split amounts (completeSplits) since those are numbers with no commas in their values.
+
+Commit with message "fix: use pipe delimiter for contractor names to avoid comma conflict with Last, First format" and push.
