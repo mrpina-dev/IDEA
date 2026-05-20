@@ -496,6 +496,7 @@ nav a.active { color: var(--gold); text-shadow: var(--glow-gold); }
   padding: 0.2rem 0.5rem; border-radius: 2px; white-space: nowrap;
 }
 .type-award  { color: var(--green); border: 1px solid rgba(0,255,65,0.35); background: rgba(0,255,65,0.07); }
+.type-award-held { color: #C8FF00; border: 1px solid rgba(200,255,0,0.35); background: rgba(200,255,0,0.07); }
 .type-fine   { color: var(--red);   border: 1px solid rgba(255,68,68,0.35); background: rgba(255,68,68,0.07); }
 .type-purchase { color: var(--amber); border: 1px solid rgba(255,140,0,0.35); background: rgba(255,140,0,0.07); }
 .type-payout { color: var(--blue);  border: 1px solid rgba(68,136,255,0.35); background: rgba(68,136,255,0.07); }
@@ -1862,9 +1863,10 @@ function pick(row) {
 }
 function typeBadgeClass(type) {
   switch ((type || '').toLowerCase()) {
-    case 'award':    return 'type-award';
-    case 'fine':     return 'type-fine';
-    case 'purchase': return 'type-purchase';
+    case 'award':         return 'type-award';
+    case 'award - held':  return 'type-award-held';
+    case 'fine':          return 'type-fine';
+    case 'purchase':      return 'type-purchase';
     case 'payout':   return 'type-payout';
     default:         return 'type-other';
   }
@@ -2215,7 +2217,7 @@ function openDrawer(row) {
       const type   = rp('Type', 'Transaction Type') || '—';
       const reason = rp('Reason', 'Description', 'Note') || '—';
       const typeLower = type.toLowerCase();
-      const isPositiveTxn = ['award', 'payout'].includes(typeLower);
+      const isPositiveTxn = ['award', 'award - held', 'payout'].includes(typeLower);
       const amtClass  = isPositiveTxn ? 'positive' : typeLower === 'purchase' ? 'purchase' : 'negative';
       const amtPrefix = isPositiveTxn ? '+' : '-';
       txnHtml += '<tr>' +
@@ -2326,7 +2328,7 @@ function renderTransactions() {
       const type   = p('Type', 'Transaction Type') || '—';
       const reason = p('Reason', 'Description', 'Note') || '—';
       const typeLower = type.toLowerCase();
-      const isPositiveTxn = ['award', 'payout'].includes(typeLower);
+      const isPositiveTxn = ['award', 'award - held', 'payout'].includes(typeLower);
       const amtClass  = isPositiveTxn ? 'positive' : typeLower === 'purchase' ? 'purchase' : 'negative';
       const amtPrefix = isPositiveTxn ? '+' : '-';
       const tr = document.createElement('tr');
