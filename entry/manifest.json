@@ -1,9 +1,3 @@
-﻿Make two changes to the entry app:
-
-CHANGE 1 - Edit entry/index.html. In the <head>, add this line after the existing icon link tags:
-<link rel="manifest" href="/IDEA/entry/manifest.json">
-
-CHANGE 2 - Create a new file at entry/manifest.json with this exact content:
 {
   "name": "IDEA i¢ Entry",
   "short_name": "i¢ Entry",
@@ -21,5 +15,3 @@ CHANGE 2 - Create a new file at entry/manifest.json with this exact content:
     }
   ]
 }
-
-Commit with message "feat: add web app manifest for Android home screen icon" and push.
