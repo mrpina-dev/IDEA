@@ -1,26 +1,21 @@
-﻿Edit entry/index.html. Fix two issues:
+﻿Edit entry/index.html. Make the following targeted fixes to the Log Transaction screen:
 
---- FIX 1: OVERLAYS BLOCKING TOUCH EVENTS ---
+1. SCROLL INTO VIEW
+At the end of the selectType() function, after showing reason-section and amount-section, add:
+document.getElementById('reason-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-Find every overlay element in the file - the PIN screen and the loading overlay. For each:
+2. VISUAL CONFIRMATION ON TYPE BUTTON TAP
+At the start of selectType(), before anything else, add a brief background flash to the tapped button so Mr. Pina can confirm the tap registered:
+- Set the button background to rgba(200,255,0,0.2) for 200ms then revert
 
-1. In the CSS, add pointer-events:none by default to both overlays.
-2. When showing an overlay (adding active class or setting display), also set pointer-events to auto.
-3. When hiding an overlay, set all three: opacity to 0, display to none, pointer-events to none. Do not rely on opacity alone to hide - always also set display:none so the element is fully removed from the interaction layer.
-4. Audit every setTimeout or transition callback that hides either overlay and make sure display:none is set at the end of the transition, not skipped.
+3. SIMPLIFY SECTION VISIBILITY
+Replace all style.display manipulations for reason-section and amount-section with a class-based approach:
+- Add CSS: .hidden { display: none !important; }
+- Give both sections class="hidden" in the HTML by default
+- In selectType(), remove the hidden class from both sections instead of setting style.display
+- This avoids any inline style specificity conflicts
 
---- FIX 2: TYPE BUTTON ONCLICK HANDLERS ---
+4. ACTIVE STATE ON TYPE BUTTONS
+In selectType(), after removing active from all buttons, use querySelector to find the correct button by its data type and add active class. Change each button HTML to add data-type="Award" / "Fine" / "Purchase" / "Payout" attributes. Then in selectType(type): document.querySelector('[data-type="'+type+'"]').classList.add('active');
 
-Find the four type buttons (Award, Fine, Purchase, Payout). Verify each has a working onclick that calls selectType() with the correct argument. If any use addEventListener instead of onclick, keep them. Verify the selectType() function:
-- Removes active class from all type buttons
-- Adds active class to the selected button
-- Sets selectedType variable
-- Populates the reason list
-- Shows reason-section and amount-section by setting their style.display to block with !important applied via setAttribute style
-- Scrolls the page down slightly so the reason list is visible
-
---- FIX 3: REASON AND AMOUNT SECTION VISIBILITY ---
-
-Find reason-section and amount-section divs. Make sure no CSS rule is hiding them with higher specificity than the inline style. Add a CSS rule: #reason-section, #amount-section { display: block; } that only applies when they have a data-visible="true" attribute, and set that attribute in selectType() instead of relying solely on style.display.
-
-Commit with message "fix: overlay pointer-events blocking type button interaction" and push.
+Commit with message "fix: scroll into view after type select, class-based visibility, button data attributes" and push.

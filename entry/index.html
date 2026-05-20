@@ -230,25 +230,25 @@ body::after {
 }
 .type-btn.award   { border-color: rgba(0,255,65,0.3); }
 .type-btn.award   .type-btn-label { color: var(--green); }
-.type-btn.award.sel   { background: rgba(0,255,65,0.1);  border-color: rgba(0,255,65,0.7);  }
+.type-btn.award.active   { background: rgba(0,255,65,0.1);  border-color: rgba(0,255,65,0.7);  }
 .type-btn.fine    { border-color: rgba(255,68,68,0.3); }
 .type-btn.fine    .type-btn-label { color: var(--red); }
-.type-btn.fine.sel    { background: rgba(255,68,68,0.1); border-color: rgba(255,68,68,0.7);  }
+.type-btn.fine.active    { background: rgba(255,68,68,0.1); border-color: rgba(255,68,68,0.7);  }
 .type-btn.purchase { border-color: rgba(255,140,0,0.3); }
 .type-btn.purchase .type-btn-label { color: var(--amber); }
-.type-btn.purchase.sel { background: rgba(255,140,0,0.1); border-color: rgba(255,140,0,0.7); }
+.type-btn.purchase.active { background: rgba(255,140,0,0.1); border-color: rgba(255,140,0,0.7); }
 .type-btn.purchase.blocked { opacity: 0.35; pointer-events: none; }
 .type-btn.payout  { border-color: rgba(68,136,255,0.3); }
 .type-btn.payout  .type-btn-label { color: var(--blue); }
-.type-btn.payout.sel  { background: rgba(68,136,255,0.1); border-color: rgba(68,136,255,0.7); }
+.type-btn.payout.active  { background: rgba(68,136,255,0.1); border-color: rgba(68,136,255,0.7); }
 .blocked-msg {
   grid-column: 1 / -1; font-size: 0.58rem; letter-spacing: 0.07em;
   color: var(--amber); text-align: center; display: none; padding: 0.2rem 0;
 }
 
 /* ── Reason list ─────────────────────────── */
-.reason-wrap { display: none; margin-bottom: 0.25rem; }
-.reason-wrap.show { display: block; }
+.hidden { display: none !important; }
+.reason-wrap { margin-bottom: 0.25rem; }
 .reason-list {
   max-height: 260px; overflow-y: auto;
   border: 1px solid rgba(0,255,65,0.1); border-radius: 2px;
@@ -265,9 +265,7 @@ body::after {
 .reason-item.sel { background: rgba(0,255,65,0.09); border-left: 3px solid var(--green); padding-left: calc(0.85rem - 3px); }
 
 /* ── Amount ──────────────────────────────── */
-.amount-wrap { display: none; margin-bottom: 0.25rem; }
-.amount-wrap.show { display: block; }
-#reason-section[data-visible="true"], #amount-section[data-visible="true"] { display: block; }
+.amount-wrap { margin-bottom: 0.25rem; }
 .presets { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-bottom: 0.75rem; }
 .preset-btn {
   font-family: 'Orbitron', sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em;
@@ -610,13 +608,13 @@ body::after {
 
     <!-- Step 3: Reason -->
     <div class="step-label" id="lbl-reason" style="display:none">03 &mdash; Reason</div>
-    <div class="reason-wrap" id="reason-section">
+    <div class="reason-wrap hidden" id="reason-section">
       <div class="reason-list" id="reason-list"></div>
     </div>
 
     <!-- Step 4: Amount -->
     <div class="step-label" id="lbl-amount" style="display:none">04 &mdash; Amount</div>
-    <div class="amount-wrap" id="amount-section">
+    <div class="amount-wrap hidden" id="amount-section">
       <div class="presets" id="presets"></div>
       <input type="number" class="amount-input" id="amount-input" placeholder="0" min="1" step="1">
     </div>
@@ -1053,18 +1051,20 @@ document.getElementById('change-student').addEventListener('click', () => {
 
 // ── Type ──────────────────────────────────────────────
 function selectType(type) {
-  const btn = document.querySelector('.type-btn[data-type="' + type + '"]');
+  const btn = document.querySelector('[data-type="' + type + '"]');
+  if (btn) {
+    btn.style.background = 'rgba(200,255,0,0.2)';
+    setTimeout(() => { btn.style.background = ''; }, 200);
+  }
   if (btn && btn.classList.contains('blocked')) return;
-  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('sel'));
-  if (btn) btn.classList.add('sel');
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
   selType = type;
   clearReasonDown();
   buildReasonList();
-  const rs = document.getElementById('reason-section');
-  rs.setAttribute('data-visible', 'true');
-  rs.setAttribute('style', 'display: block !important;');
+  document.getElementById('reason-section').classList.remove('hidden');
   setTimeout(() => {
-    document.getElementById('log-body').scrollBy({ top: 120, behavior: 'smooth' });
+    document.getElementById('reason-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 50);
 }
 
@@ -1074,13 +1074,10 @@ document.querySelectorAll('.type-btn').forEach(btn => {
 
 function clearTypeDown() {
   selType = null;
-  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('sel'));
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
   clearReasonDown();
   document.getElementById('lbl-reason').style.display = 'none';
-  const rs = document.getElementById('reason-section');
-  rs.classList.remove('show');
-  rs.removeAttribute('data-visible');
-  rs.removeAttribute('style');
+  document.getElementById('reason-section').classList.add('hidden');
 }
 
 // ── Reason ────────────────────────────────────────────
@@ -1100,10 +1097,7 @@ function buildReasonList() {
     });
   });
   document.getElementById('lbl-reason').style.display = '';
-  const rs = document.getElementById('reason-section');
-  rs.classList.add('show');
-  rs.setAttribute('data-visible', 'true');
-  rs.setAttribute('style', 'display: block !important;');
+  document.getElementById('reason-section').classList.remove('hidden');
   clearAmountDown();
 }
 
@@ -1112,10 +1106,7 @@ function clearReasonDown() {
   document.getElementById('reason-list').innerHTML = '';
   clearAmountDown();
   document.getElementById('lbl-amount').style.display = 'none';
-  const as = document.getElementById('amount-section');
-  as.classList.remove('show');
-  as.removeAttribute('data-visible');
-  as.removeAttribute('style');
+  document.getElementById('amount-section').classList.add('hidden');
   document.getElementById('submit-btn').classList.remove('show');
 }
 
@@ -1140,10 +1131,7 @@ function buildPresets() {
   amountInput.value = '';
   selAmount = null;
   document.getElementById('lbl-amount').style.display = '';
-  const as = document.getElementById('amount-section');
-  as.classList.add('show');
-  as.setAttribute('data-visible', 'true');
-  as.setAttribute('style', 'display: block !important;');
+  document.getElementById('amount-section').classList.remove('hidden');
   document.getElementById('submit-btn').classList.add('show');
   refreshSubmit();
 }
@@ -1222,20 +1210,14 @@ function resetLog() {
 
   document.getElementById('lbl-type').style.display = 'none';
   document.getElementById('type-grid').classList.remove('show');
-  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('sel'));
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
 
   document.getElementById('lbl-reason').style.display = 'none';
-  const rs2 = document.getElementById('reason-section');
-  rs2.classList.remove('show');
-  rs2.removeAttribute('data-visible');
-  rs2.removeAttribute('style');
+  document.getElementById('reason-section').classList.add('hidden');
   document.getElementById('reason-list').innerHTML = '';
 
   document.getElementById('lbl-amount').style.display = 'none';
-  const as2 = document.getElementById('amount-section');
-  as2.classList.remove('show');
-  as2.removeAttribute('data-visible');
-  as2.removeAttribute('style');
+  document.getElementById('amount-section').classList.add('hidden');
   document.getElementById('presets').innerHTML = '';
   amountInput.value = '';
 
