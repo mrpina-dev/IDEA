@@ -1790,14 +1790,18 @@ function openDrawer(row) {
       '</tr></thead><tbody>';
     studentTxns.forEach(r => {
       const rp = pick(r);
-      const date   = rp('Date', 'Timestamp') || '—';
+      const date   = rp('Date / Time', 'Date/Time', 'Date', 'Timestamp') || '—';
       const amount = parseFloat(rp('Amount') || 0);
       const type   = rp('Type', 'Transaction Type') || '—';
       const reason = rp('Reason', 'Description', 'Note') || '—';
+      const typeLower = type.toLowerCase();
+      const isPositiveTxn = ['award', 'payout'].includes(typeLower);
+      const amtClass  = isPositiveTxn ? 'positive' : typeLower === 'purchase' ? 'purchase' : 'negative';
+      const amtPrefix = isPositiveTxn ? '+' : '-';
       txnHtml += '<tr>' +
         '<td class="txn-date">' + escHtml(date) + '</td>' +
-        '<td class="txn-amount ' + (amount >= 0 ? 'positive' : 'negative') + '">' +
-          (amount >= 0 ? '+' : '') + fmtNum(amount) + '</td>' +
+        '<td class="txn-amount ' + amtClass + '">' +
+          amtPrefix + fmtNum(Math.abs(amount)) + '</td>' +
         '<td><span class="type-badge ' + typeBadgeClass(type) + '">' + escHtml(type) + '</span></td>' +
         '<td class="txn-reason" style="display:table-cell;white-space:normal;font-size:0.58rem">' + escHtml(reason) + '</td>' +
         '</tr>';
@@ -2237,9 +2241,9 @@ document.getElementById('lb-sort-select').addEventListener('change', e => {
 });
 
 // ── Section Filters ───────────────────────────────────
-document.querySelectorAll('.filter-btn').forEach(btn => {
+document.querySelectorAll('#section-filters .filter-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('#section-filters .filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     activeSection = btn.dataset.section;
     localStorage.setItem('idea-coins-section', activeSection);
@@ -2383,9 +2387,9 @@ document.getElementById('print-header').textContent =
   }
   const savedSection = localStorage.getItem('idea-coins-section');
   if (savedSection) {
-    const secBtn = document.querySelector('[data-section="' + savedSection + '"]');
+    const secBtn = document.querySelector('#section-filters [data-section="' + savedSection + '"]');
     if (secBtn) {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#section-filters .filter-btn').forEach(b => b.classList.remove('active'));
       secBtn.classList.add('active');
       activeSection = savedSection;
     }
@@ -2462,6 +2466,9 @@ else canvas.style.display = 'none';
     backdrop.classList.add('open');
     document.body.style.overflow = 'hidden';
     searchInput.focus();
+    filterBtns.forEach(btn => {
+      btn.classList.toggle('active', activeFilters.has(btn.dataset.guideFilter));
+    });
   }
   function closeModal() {
     backdrop.classList.remove('open');
