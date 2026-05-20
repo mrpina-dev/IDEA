@@ -1,189 +1,116 @@
-﻿Edit coins/index.html. Redesign the contract cards in the Contracts tab with visual tiers based on total payout. Make the following changes:
+﻿Edit coins/index.html. Apply special visual treatment to the top 3 leaderboard cards similar to the legendary contract card. This applies after section filtering and after sorting - ranks 1, 2, 3 of whatever is currently displayed.
 
---- STEP 1: ADD TIER CSS ---
+--- ADD CSS ---
 
-Add this entire CSS block inside the existing <style> tag:
+Add this CSS block to the existing style tag:
 
-.contract-card {
-  position: relative; border-radius: 6px; padding: 1.4rem 1.6rem;
-  margin-bottom: 1rem; overflow: hidden;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-.contract-card:hover { transform: translateY(-3px); }
-.contract-card.standard { background: var(--bg1); border: 1px solid rgba(0,255,65,0.2); }
-.contract-card.standard:hover { box-shadow: 0 6px 24px rgba(0,255,65,0.1); }
-.contract-card.rare {
-  background: linear-gradient(135deg, #050F07 0%, #060d12 100%);
-  border: 1px solid rgba(0,240,255,0.4);
-  box-shadow: 0 0 12px rgba(0,240,255,0.08), inset 0 0 30px rgba(0,240,255,0.03);
-}
-.contract-card.rare:hover { box-shadow: 0 6px 28px rgba(0,240,255,0.2), inset 0 0 30px rgba(0,240,255,0.05); }
-.contract-card.rare::before {
-  content: ''; position: absolute; inset: 0; border-radius: 6px;
-  background: linear-gradient(135deg, rgba(0,240,255,0.04) 0%, transparent 60%);
-  pointer-events: none;
-}
-.contract-card.epic {
-  background: linear-gradient(135deg, #080e02 0%, #0a0c02 100%);
-  border: 1px solid rgba(200,255,0,0.5);
-  box-shadow: 0 0 18px rgba(200,255,0,0.12), inset 0 0 40px rgba(200,255,0,0.04);
-  animation: epic-pulse 3s ease-in-out infinite;
-}
-.contract-card.epic:hover { box-shadow: 0 8px 36px rgba(200,255,0,0.25), inset 0 0 40px rgba(200,255,0,0.07); }
-.contract-card.epic::before {
-  content: ''; position: absolute; inset: 0; border-radius: 6px;
-  background: linear-gradient(135deg, rgba(200,255,0,0.06) 0%, transparent 55%);
-  pointer-events: none;
-}
-@keyframes epic-pulse {
-  0%,100% { box-shadow: 0 0 18px rgba(200,255,0,0.12), inset 0 0 40px rgba(200,255,0,0.04); }
-  50%      { box-shadow: 0 0 32px rgba(200,255,0,0.22), inset 0 0 40px rgba(200,255,0,0.07); }
-}
-.contract-card.legendary {
-  background: linear-gradient(135deg, #08090a 0%, #0a0808 100%);
+.coin-card.rank-1 {
+  background: linear-gradient(135deg, #08090a 0%, #0a0a08 100%);
   border: 2px solid transparent;
-  box-shadow: 0 0 30px rgba(200,255,0,0.15), 0 0 60px rgba(0,240,255,0.08);
-  animation: legendary-glow 4s ease-in-out infinite;
+  animation: rank1-glow 4s ease-in-out infinite;
+  overflow: visible;
 }
-.contract-card.legendary::before {
+.coin-card.rank-1::before {
   content: ''; position: absolute; inset: -2px; border-radius: 7px;
   background: linear-gradient(45deg, #C8FF00, #00F0FF, #00FF41, #FF8C00, #C8FF00);
   background-size: 300% 300%;
   animation: legendary-border 4s ease infinite;
   z-index: -1;
 }
-.contract-card.legendary::after {
+.coin-card.rank-1::after {
   content: ''; position: absolute; inset: 2px; border-radius: 5px;
-  background: linear-gradient(135deg, #08090a 0%, #0a0808 100%);
+  background: linear-gradient(135deg, #08090a 0%, #0a0a08 100%);
   z-index: -1;
 }
-@keyframes legendary-border {
-  0%   { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+@keyframes rank1-glow {
+  0%,100% { box-shadow: 0 0 30px rgba(200,255,0,0.2), 0 0 60px rgba(0,240,255,0.1); }
+  33%     { box-shadow: 0 0 40px rgba(0,240,255,0.25), 0 0 70px rgba(0,255,65,0.12); }
+  66%     { box-shadow: 0 0 35px rgba(255,140,0,0.18), 0 0 65px rgba(200,255,0,0.12); }
 }
-@keyframes legendary-glow {
-  0%,100% { box-shadow: 0 0 30px rgba(200,255,0,0.15), 0 0 60px rgba(0,240,255,0.08); }
-  33%     { box-shadow: 0 0 40px rgba(0,240,255,0.2),  0 0 70px rgba(0,255,65,0.1); }
-  66%     { box-shadow: 0 0 35px rgba(255,140,0,0.15), 0 0 65px rgba(200,255,0,0.1); }
+.coin-card.rank-1 .shimmer-sweep {
+  position: absolute; inset: 0; border-radius: 6px; pointer-events: none; overflow: hidden; z-index: 0;
 }
-.contract-card.legendary:hover { transform: translateY(-4px); }
-.tier-badge {
-  display: inline-block; font-family: 'Orbitron', sans-serif;
-  font-size: 0.44rem; font-weight: 700; letter-spacing: 0.22em;
-  text-transform: uppercase; padding: 0.18rem 0.55rem;
-  border-radius: 2px; margin-bottom: 0.5rem;
+.coin-card.rank-1 .shimmer-sweep::after {
+  content: ''; position: absolute; top: -50%; left: -75%;
+  width: 50%; height: 200%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+  transform: skewX(-20deg);
+  animation: shimmer-sweep 5s ease-in-out infinite;
 }
-.tier-badge.standard { display: none; }
-.tier-badge.rare      { color: var(--cyan); border: 1px solid rgba(0,240,255,0.5); background: rgba(0,240,255,0.06); }
-.tier-badge.epic      { color: var(--gold); border: 1px solid rgba(200,255,0,0.5); background: rgba(200,255,0,0.07); text-shadow: 0 0 8px rgba(200,255,0,0.5); }
-.tier-badge.legendary {
-  color: #fff; border: 1px solid rgba(200,255,0,0.6);
-  background: linear-gradient(90deg, rgba(200,255,0,0.15), rgba(0,240,255,0.15), rgba(200,255,0,0.15));
-  background-size: 200% 100%;
-  animation: legendary-badge 2s linear infinite;
-  text-shadow: 0 0 10px rgba(200,255,0,0.8);
+.coin-card.rank-1 .coin-rank::before { content: '👑 '; }
+
+.coin-card.rank-2 {
+  background: linear-gradient(135deg, #080a0b 0%, #0a0c0d 100%);
+  border: 2px solid transparent;
+  animation: rank2-glow 4s ease-in-out infinite;
+  overflow: visible;
 }
-@keyframes legendary-badge {
-  0%   { background-position: 0% 50%; }
-  100% { background-position: 200% 50%; }
+.coin-card.rank-2::before {
+  content: ''; position: absolute; inset: -2px; border-radius: 7px;
+  background: linear-gradient(45deg, #C0C0C0, #88DDFF, #ffffff, #88DDFF, #C0C0C0);
+  background-size: 300% 300%;
+  animation: legendary-border 5s ease infinite;
+  z-index: -1;
 }
-.contract-payout-display {
-  font-family: 'Orbitron', sans-serif; font-weight: 900; line-height: 1; margin-bottom: 0.3rem;
+.coin-card.rank-2::after {
+  content: ''; position: absolute; inset: 2px; border-radius: 5px;
+  background: linear-gradient(135deg, #080a0b 0%, #0a0c0d 100%);
+  z-index: -1;
 }
-.contract-payout-display.standard { font-size: 1.6rem; color: var(--green); }
-.contract-payout-display.rare     { font-size: 1.8rem; color: var(--cyan);  text-shadow: 0 0 12px rgba(0,240,255,0.7); }
-.contract-payout-display.epic     { font-size: 2rem;   color: var(--gold);  text-shadow: 0 0 16px rgba(200,255,0,0.8); animation: breathe-gold 3s ease-in-out infinite; }
-.contract-payout-display.legendary {
-  font-size: 2.4rem;
+@keyframes rank2-glow {
+  0%,100% { box-shadow: 0 0 20px rgba(192,192,192,0.15), 0 0 40px rgba(136,221,255,0.08); }
+  50%     { box-shadow: 0 0 30px rgba(192,192,192,0.25), 0 0 50px rgba(136,221,255,0.15); }
+}
+
+.coin-card.rank-3 {
+  background: linear-gradient(135deg, #0b0804 0%, #0d0a05 100%);
+  border: 2px solid transparent;
+  animation: rank3-glow 4s ease-in-out infinite;
+  overflow: visible;
+}
+.coin-card.rank-3::before {
+  content: ''; position: absolute; inset: -2px; border-radius: 7px;
+  background: linear-gradient(45deg, #CD7F32, #FF8C00, #FFD700, #FF8C00, #CD7F32);
+  background-size: 300% 300%;
+  animation: legendary-border 5s ease infinite;
+  z-index: -1;
+}
+.coin-card.rank-3::after {
+  content: ''; position: absolute; inset: 2px; border-radius: 5px;
+  background: linear-gradient(135deg, #0b0804 0%, #0d0a05 100%);
+  z-index: -1;
+}
+@keyframes rank3-glow {
+  0%,100% { box-shadow: 0 0 20px rgba(205,127,50,0.18), 0 0 40px rgba(255,140,0,0.08); }
+  50%     { box-shadow: 0 0 28px rgba(205,127,50,0.28), 0 0 50px rgba(255,140,0,0.15); }
+}
+
+.coin-card.rank-1 .coin-balance { 
   background: linear-gradient(90deg, #C8FF00, #00F0FF, #00FF41, #C8FF00);
   background-size: 200% auto;
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   animation: legendary-text 3s linear infinite;
   filter: drop-shadow(0 0 8px rgba(200,255,0,0.6));
 }
-@keyframes legendary-text {
-  0%   { background-position: 0% center; }
-  100% { background-position: 200% center; }
+.coin-card.rank-2 .coin-balance {
+  color: #E8E8E8;
+  text-shadow: 0 0 12px rgba(192,192,192,0.8), 0 0 24px rgba(136,221,255,0.4);
+  animation: none;
 }
-@keyframes breathe-gold {
-  0%,100% { text-shadow: 0 0 10px rgba(200,255,0,0.6), 0 0 20px rgba(200,255,0,0.2); }
-  50%      { text-shadow: 0 0 20px rgba(200,255,0,1),   0 0 40px rgba(200,255,0,0.5); }
-}
-.contract-name-display {
-  font-family: 'Orbitron', sans-serif; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 0.5rem;
-}
-.contract-name-display.standard  { font-size: 0.88rem; color: var(--white); }
-.contract-name-display.rare      { font-size: 0.92rem; color: var(--white); }
-.contract-name-display.epic      { font-size: 0.96rem; color: var(--white); }
-.contract-name-display.legendary { font-size: 1rem;    color: var(--white); letter-spacing: 0.08em; }
-.contract-meta-row { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.6rem; }
-.contract-status-badge {
-  font-family: 'Orbitron', sans-serif; font-size: 0.44rem;
-  letter-spacing: 0.16em; text-transform: uppercase; padding: 0.18rem 0.5rem; border-radius: 2px;
-}
-.contract-contractors { font-size: 0.68rem; color: var(--dim); letter-spacing: 0.04em; }
-.contract-notes-text  { font-size: 0.65rem; color: var(--dim); margin-top: 0.5rem; font-style: italic; line-height: 1.5; }
-.contract-rate-label  { font-size: 0.6rem; color: var(--dim); margin-top: 0.15rem; }
-.shimmer-overlay { position: absolute; inset: 0; border-radius: 6px; pointer-events: none; overflow: hidden; z-index: 0; }
-.shimmer-overlay::after {
-  content: ''; position: absolute; top: -50%; left: -75%;
-  width: 50%; height: 200%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
-  transform: skewX(-20deg);
-  animation: shimmer-sweep 5s ease-in-out infinite;
-}
-@keyframes shimmer-sweep {
-  0%   { left: -75%; }
-  100% { left: 175%; }
+.coin-card.rank-3 .coin-balance {
+  color: #CD7F32;
+  text-shadow: 0 0 12px rgba(205,127,50,0.8), 0 0 24px rgba(255,140,0,0.4);
+  animation: none;
 }
 
---- STEP 2: ADD getTier FUNCTION ---
+--- APPLY IN renderLeaderboard ---
 
-Add this function in the JavaScript section near the top of the renderContracts function or just before it:
+In the renderLeaderboard() function, after the card element is created and after the existing rank treatment (gold/silver/bronze left border), add the rank class:
 
-function getTier(payout) {
-  const p = parseFloat(payout) || 0;
-  if (p >= 50) return 'legendary';
-  if (p >= 25) return 'epic';
-  if (p >= 10) return 'rare';
-  return 'standard';
-}
+- i === 0 (rank 1): add class rank-1 to the card, also add a shimmer sweep div as first child of the card: <div class="shimmer-sweep"></div>
+- i === 1 (rank 2): add class rank-2 to the card
+- i === 2 (rank 3): add class rank-3 to the card
 
-const TIER_LABELS = { standard: 'Standard', rare: 'Rare', epic: 'Epic', legendary: 'Legendary' };
+Remove the existing left border inline styles for ranks 1-3 since the new ::before pseudo-element handles the border. Keep the rank label text changes (CHAMPION, 2ND PLACE, 3RD PLACE).
 
---- STEP 3: REWRITE CONTRACT CARD HTML IN renderContracts ---
-
-In renderContracts(), for each contract displayed in the Active and Completed sub-tabs, replace the existing card HTML with this structure:
-
-function contractCardHTML(c) {
-  const name = c.name || 'Unnamed Contract';
-  const payout = parseFloat(c.totalPayout) || (parseFloat(c.basePayout || 0) * parseFloat(c.quantity || 1));
-  const tier = getTier(payout);
-  const label = TIER_LABELS[tier];
-  const status = c.status || 'Open';
-  const rateLabel = c.rateLabel || '';
-  const contractors = formatContractors(c.contractors);
-  const notes = c.notes || '';
-  const statusBadgeClass = status === 'In Progress' ? 'badge-inprogress' : status === 'Completed' ? 'badge-completed' : status === 'Cancelled' ? 'badge-cancelled' : 'badge-open';
-  const shimmer = tier === 'legendary' ? '<div class="shimmer-overlay"></div>' : '';
-  return `<div class="contract-card ${tier}">
-    ${shimmer}
-    <div style="position:relative;z-index:1;">
-      <div class="tier-badge ${tier}">${escHtml(label)}</div>
-      <div class="contract-payout-display ${tier}">${payout} i&#162;${rateLabel ? `<span class="contract-rate-label"> ${escHtml(rateLabel)}</span>` : ''}</div>
-      <div class="contract-name-display ${tier}">${escHtml(name)}</div>
-      <div class="contract-meta-row">
-        <span class="contract-status-badge ${statusBadgeClass}">${escHtml(status)}</span>
-        ${contractors ? `<span class="contract-contractors">&#9672; ${escHtml(contractors)}</span>` : ''}
-      </div>
-      ${notes ? `<div class="contract-notes-text">${escHtml(notes)}</div>` : ''}
-    </div>
-  </div>`;
-}
-
-Use contractCardHTML(c) when rendering cards in the Active and Completed sub-tabs. Keep the History sub-tab as simple rows without tier styling.
-
-The existing status badge classes (badge-open, badge-inprogress, badge-completed, badge-cancelled) already defined in the CSS should be reused for the contract-status-badge element.
-
-Commit with message "feat: tiered contract cards with animations - Standard, Rare, Epic, Legendary" and push.
+Commit with message "feat: legendary-style animated borders for top 3 leaderboard cards" and push.
