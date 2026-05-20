@@ -1747,6 +1747,8 @@ function updateStatsBar() {
 }
 
 // ── Contracts ────────────────────────────────────────
+const formatContractors = (str) => (str || '').split('|').map(s => s.trim()).filter(Boolean).join(' · ');
+
 function renderContracts() {
   const g = v => (v || '').toString().trim();
 
@@ -1810,7 +1812,7 @@ function renderContracts() {
         </div>`;
       if (date) html += `<div class="contract-history-date">${escHtml(date)}</div>`;
       let meta = [];
-      if (contractors) meta.push('Contractors: ' + escHtml(contractors));
+      if (contractors) meta.push('Contractors: ' + escHtml(formatContractors(contractors)));
       if (payout) meta.push('Payout: ' + escHtml(payout));
       if (meta.length) html += `<div class="contract-history-meta">${meta.join(' &mdash; ')}</div>`;
       if (notes) html += `<div class="contract-history-notes">${escHtml(notes)}</div>`;
@@ -1850,7 +1852,7 @@ function contractCard(r, showDate) {
   if (contractors) {
     html += `<div class="contract-contractors-row">
       <span class="contract-contractors-label">Assigned To</span>
-      <span class="contract-contractors-names">${escHtml(contractors)}</span>
+      <span class="contract-contractors-names">${escHtml(formatContractors(contractors))}</span>
     </div>`;
   }
   if (notes) {
