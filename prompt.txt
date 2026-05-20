@@ -1,25 +1,26 @@
-﻿Edit entry/index.html. Make the following two fixes:
+﻿Edit entry/index.html. Make two targeted fixes:
 
-FIX 1 - CONTRACTOR SEARCH REQUIRES STUDENTS LOADED
-Find the btn-contracts click event listener. Near the top of the handler, before the fetchContracts call, add:
+FIX 1 - BASE PAYOUT PARAMETER NAME MISMATCH
+Find the new-contract-submit click handler. In the apiUrl call that sends action=addContract, change the parameter name from payout to basePayout so it reads:
+apiUrl({ action:'addContract', name, basePayout: payout, rateLabel, quantity, notes })
+
+Find the detail-save-btn click handler. In the apiUrl call that sends action=updateContract, change the parameter name from payout to basePayout so it reads:
+apiUrl({ action:'updateContract', row:activeContractRow, name, basePayout: payout, rateLabel, quantity, status, notes, contractors })
+
+FIX 2 - CONTRACTOR SEARCH REQUIRES STUDENTS TO BE LOADED
+Find the detail-contractor-search input event listener. At the very start of the handler, before filtering allStudents, add:
+
+if (!studentsLoaded) {
+  document.getElementById('detail-contractor-results').innerHTML = '<div class="result-empty">Loading students...</div>';
+  document.getElementById('detail-contractor-results').style.display = '';
+  return;
+}
+
+This gives immediate feedback instead of silently showing nothing when students are still loading.
+
+Also find the openContractDetail function. At the start of it, add:
 if (!studentsLoaded) initStudentsData();
 
-FIX 2 - BASE PAYOUT AND QUANTITY INPUTS BROKEN ON ANDROID
-Find these four input elements by ID: new-payout, new-quantity, detail-payout, detail-quantity.
-On each one, change type="number" to type="text" and add inputmode="numeric" pattern="[0-9]*".
+This ensures students start loading as soon as any contract detail is opened, so they are ready by the time the user starts typing in the contractor search.
 
-Find the updateDetailTotal function and replace the parseFloat lines with:
-const base = parseFloat((document.getElementById('detail-payout').value || '').replace(/[^0-9.]/g, '')) || 0;
-const qty = parseFloat((document.getElementById('detail-quantity').value || '').replace(/[^0-9.]/g, '')) || 1;
-
-Find the detail-save-btn click handler. Before the apiUrl call, add cleanup:
-const payout = (document.getElementById('detail-payout').value || '').replace(/[^0-9.]/g, '');
-const quantity = (document.getElementById('detail-quantity').value || '').replace(/[^0-9.]/g, '') || '1';
-Use these cleaned variables in the apiUrl call instead of reading .value directly.
-
-Find the new-contract-submit click handler. Before the apiUrl call, add cleanup:
-const payout = (document.getElementById('new-payout').value || '').replace(/[^0-9.]/g, '');
-const quantity = (document.getElementById('new-quantity').value || '').replace(/[^0-9.]/g, '') || '1';
-Use these cleaned variables in the apiUrl call instead of reading .value directly.
-
-Commit with message "fix: contractor search students load, Android number input compatibility" and push.
+Commit with message "fix: basePayout param name, contractor search loading state" and push.

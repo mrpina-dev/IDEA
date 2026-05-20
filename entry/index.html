@@ -1868,6 +1868,7 @@ function contractRowHTML(c) {
 
 // ── Contract Detail ───────────────────────────────────
 function openContractDetail(c) {
+  if (!studentsLoaded) initStudentsData();
   activeContractRow = cRow(c);
   detailContractors = (getField(c,'contractors','Contractors')||'')
     .split(',').map(s=>s.trim()).filter(Boolean);
@@ -1942,6 +1943,11 @@ document.getElementById('detail-contractor-search').addEventListener('input', fu
   const q = this.value.trim().toLowerCase();
   const resultsEl = document.getElementById('detail-contractor-results');
   if (!q) { resultsEl.style.display = 'none'; return; }
+  if (!studentsLoaded) {
+    resultsEl.innerHTML = '<div class="result-empty">Loading students...</div>';
+    resultsEl.style.display = '';
+    return;
+  }
 
   const assigned = detailContractors.map(n => n.toLowerCase());
   const matches = allStudents.filter(s => {
@@ -2004,7 +2010,7 @@ document.getElementById('detail-save-btn').addEventListener('click', async () =>
   if (!name) { toast('Contract name is required', 'error'); return; }
   showLoading('Saving…');
   try {
-    const res  = await fetch(apiUrl({ action:'updateContract', row:activeContractRow, name, payout, rateLabel, quantity, status, notes, contractors }));
+    const res  = await fetch(apiUrl({ action:'updateContract', row:activeContractRow, name, basePayout: payout, rateLabel, quantity, status, notes, contractors }));
     const data = await res.json();
     if (data && (data.success || data.status === 'ok' || data.result === 'success')) {
       toast('Contract updated ✓', 'success');
@@ -2105,7 +2111,7 @@ document.getElementById('new-contract-submit').addEventListener('click', async (
   if (!payout) { toast('Base payout is required', 'error'); return; }
   showLoading('Creating…');
   try {
-    const res  = await fetch(apiUrl({ action:'addContract', name, payout, rateLabel, quantity, notes }));
+    const res  = await fetch(apiUrl({ action:'addContract', name, basePayout: payout, rateLabel, quantity, notes }));
     const data = await res.json();
     if (data && (data.success || data.status === 'ok' || data.result === 'success')) {
       toast('Contract created ✓', 'success');
