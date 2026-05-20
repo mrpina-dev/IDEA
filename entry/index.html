@@ -2198,6 +2198,7 @@ document.getElementById('complete-submit-btn').addEventListener('click', async (
 
 // ── Contracts Navigation ──────────────────────────────
 document.getElementById('btn-contracts').addEventListener('click', async () => {
+  if (!studentsLoaded) initStudentsData();
   if (!contractsLoaded) {
     showLoading('Loading contracts…');
     try {
