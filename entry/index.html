@@ -267,6 +267,7 @@ body::after {
 /* ── Amount ──────────────────────────────── */
 .amount-wrap { display: none; margin-bottom: 0.25rem; }
 .amount-wrap.show { display: block; }
+#reason-section[data-visible="true"], #amount-section[data-visible="true"] { display: block; }
 .presets { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-bottom: 0.75rem; }
 .preset-btn {
   font-family: 'Orbitron', sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em;
@@ -408,9 +409,9 @@ body::after {
   background: var(--bg0);
   display: none; flex-direction: column;
   align-items: center; justify-content: center;
-  gap: 0;
+  gap: 0; pointer-events: none;
 }
-.pin-screen.show { display: flex; }
+.pin-screen.show { display: flex; pointer-events: auto; }
 .pin-screen.fade-out { animation: pin-fade 0.4s ease forwards; }
 @keyframes pin-fade { to { opacity: 0; } }
 
@@ -609,13 +610,13 @@ body::after {
 
     <!-- Step 3: Reason -->
     <div class="step-label" id="lbl-reason" style="display:none">03 &mdash; Reason</div>
-    <div class="reason-wrap" id="reason-wrap">
+    <div class="reason-wrap" id="reason-section">
       <div class="reason-list" id="reason-list"></div>
     </div>
 
     <!-- Step 4: Amount -->
     <div class="step-label" id="lbl-amount" style="display:none">04 &mdash; Amount</div>
-    <div class="amount-wrap" id="amount-wrap">
+    <div class="amount-wrap" id="amount-section">
       <div class="presets" id="presets"></div>
       <input type="number" class="amount-input" id="amount-input" placeholder="0" min="1" step="1">
     </div>
@@ -746,12 +747,24 @@ function apiUrl(params) {
     .join('&');
 }
 
+let _hideLoadingTimer = null;
 function showLoading(txt) {
+  clearTimeout(_hideLoadingTimer);
   document.getElementById('overlay-text').textContent = txt || 'Loading…';
-  document.getElementById('overlay').classList.add('show');
+  const el = document.getElementById('overlay');
+  el.style.display = 'flex';
+  el.style.pointerEvents = 'auto';
+  el.classList.add('show');
 }
 function hideLoading() {
-  document.getElementById('overlay').classList.remove('show');
+  const el = document.getElementById('overlay');
+  el.classList.remove('show');
+  el.style.pointerEvents = 'none';
+  clearTimeout(_hideLoadingTimer);
+  _hideLoadingTimer = setTimeout(() => {
+    el.style.display = 'none';
+    el.style.pointerEvents = 'none';
+  }, 200);
 }
 
 let toastTimer = null;
@@ -1039,15 +1052,24 @@ document.getElementById('change-student').addEventListener('click', () => {
 });
 
 // ── Type ──────────────────────────────────────────────
+function selectType(type) {
+  const btn = document.querySelector('.type-btn[data-type="' + type + '"]');
+  if (btn && btn.classList.contains('blocked')) return;
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('sel'));
+  if (btn) btn.classList.add('sel');
+  selType = type;
+  clearReasonDown();
+  buildReasonList();
+  const rs = document.getElementById('reason-section');
+  rs.setAttribute('data-visible', 'true');
+  rs.setAttribute('style', 'display: block !important;');
+  setTimeout(() => {
+    document.getElementById('log-body').scrollBy({ top: 120, behavior: 'smooth' });
+  }, 50);
+}
+
 document.querySelectorAll('.type-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    if (btn.classList.contains('blocked')) return;
-    document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('sel'));
-    btn.classList.add('sel');
-    selType = btn.dataset.type;
-    clearReasonDown();
-    buildReasonList();
-  });
+  btn.addEventListener('click', () => selectType(btn.dataset.type));
 });
 
 function clearTypeDown() {
@@ -1055,7 +1077,10 @@ function clearTypeDown() {
   document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('sel'));
   clearReasonDown();
   document.getElementById('lbl-reason').style.display = 'none';
-  document.getElementById('reason-wrap').classList.remove('show');
+  const rs = document.getElementById('reason-section');
+  rs.classList.remove('show');
+  rs.removeAttribute('data-visible');
+  rs.removeAttribute('style');
 }
 
 // ── Reason ────────────────────────────────────────────
@@ -1075,7 +1100,10 @@ function buildReasonList() {
     });
   });
   document.getElementById('lbl-reason').style.display = '';
-  document.getElementById('reason-wrap').classList.add('show');
+  const rs = document.getElementById('reason-section');
+  rs.classList.add('show');
+  rs.setAttribute('data-visible', 'true');
+  rs.setAttribute('style', 'display: block !important;');
   clearAmountDown();
 }
 
@@ -1084,7 +1112,10 @@ function clearReasonDown() {
   document.getElementById('reason-list').innerHTML = '';
   clearAmountDown();
   document.getElementById('lbl-amount').style.display = 'none';
-  document.getElementById('amount-wrap').classList.remove('show');
+  const as = document.getElementById('amount-section');
+  as.classList.remove('show');
+  as.removeAttribute('data-visible');
+  as.removeAttribute('style');
   document.getElementById('submit-btn').classList.remove('show');
 }
 
@@ -1109,7 +1140,10 @@ function buildPresets() {
   amountInput.value = '';
   selAmount = null;
   document.getElementById('lbl-amount').style.display = '';
-  document.getElementById('amount-wrap').classList.add('show');
+  const as = document.getElementById('amount-section');
+  as.classList.add('show');
+  as.setAttribute('data-visible', 'true');
+  as.setAttribute('style', 'display: block !important;');
   document.getElementById('submit-btn').classList.add('show');
   refreshSubmit();
 }
@@ -1191,11 +1225,17 @@ function resetLog() {
   document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('sel'));
 
   document.getElementById('lbl-reason').style.display = 'none';
-  document.getElementById('reason-wrap').classList.remove('show');
+  const rs2 = document.getElementById('reason-section');
+  rs2.classList.remove('show');
+  rs2.removeAttribute('data-visible');
+  rs2.removeAttribute('style');
   document.getElementById('reason-list').innerHTML = '';
 
   document.getElementById('lbl-amount').style.display = 'none';
-  document.getElementById('amount-wrap').classList.remove('show');
+  const as2 = document.getElementById('amount-section');
+  as2.classList.remove('show');
+  as2.removeAttribute('data-visible');
+  as2.removeAttribute('style');
   document.getElementById('presets').innerHTML = '';
   amountInput.value = '';
 
@@ -1241,11 +1281,13 @@ function launchApp(withAnimation) {
       pinEl.classList.add('fade-out');
       setTimeout(() => {
         pinEl.style.display = 'none';
+        pinEl.style.pointerEvents = 'none';
         document.getElementById('s-home').classList.add('active');
       }, 400);
     }, 550);
   } else {
     pinEl.style.display = 'none';
+    pinEl.style.pointerEvents = 'none';
     document.getElementById('s-home').classList.add('active');
   }
 }

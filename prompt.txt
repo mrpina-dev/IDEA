@@ -1,46 +1,26 @@
-﻿Edit coins/index.html. Make the following two changes:
+﻿Edit entry/index.html. Fix two issues:
 
---- CHANGE 1: i¢ GUIDE CALLOUT BUTTON ---
+--- FIX 1: OVERLAYS BLOCKING TOUCH EVENTS ---
 
-Remove the "i¢ Guide" tab from the tab bar entirely. Instead, add a dedicated callout button below the economy stats bar and above the tab bar. Style it similarly to the gold coin callout on the main portal index - a full-width banner with a distinct look that stands out from the rest of the page.
+Find every overlay element in the file - the PIN screen and the loading overlay. For each:
 
-Button contents:
-- Left: "i¢" symbol in gold, large, glowing (same style as the main portal coin callout)
-- Center: Title "i¢ Guide" in gold Orbitron, subtitle in dim text: "Awards, purchases, fines, and everything in between."
-- Right: "VIEW GUIDE ▸" in a gold bordered pill
+1. In the CSS, add pointer-events:none by default to both overlays.
+2. When showing an overlay (adding active class or setting display), also set pointer-events to auto.
+3. When hiding an overlay, set all three: opacity to 0, display to none, pointer-events to none. Do not rely on opacity alone to hide - always also set display:none so the element is fully removed from the interaction layer.
+4. Audit every setTimeout or transition callback that hides either overlay and make sure display:none is set at the end of the transition, not skipped.
 
-On click, open the i¢ Guide as a full-screen modal overlay (not a tab panel). The modal slides up from the bottom or fades in. It has:
-- A sticky header inside the modal with the title "i¢ GUIDE" and a close button (X) on the right
-- The full guide content scrollable below
-- Backdrop: rgba(0,0,0,0.85)
-- Modal background: var(--bg1)
-- Max width 900px, centered, max height 90vh, overflow-y scroll
-- Close on backdrop click or X button
+--- FIX 2: TYPE BUTTON ONCLICK HANDLERS ---
 
---- CHANGE 2: SORTING AND VISIBILITY OPTIONS INSIDE THE GUIDE MODAL ---
+Find the four type buttons (Award, Fine, Purchase, Payout). Verify each has a working onclick that calls selectType() with the correct argument. If any use addEventListener instead of onclick, keep them. Verify the selectType() function:
+- Removes active class from all type buttons
+- Adds active class to the selected button
+- Sets selectedType variable
+- Populates the reason list
+- Shows reason-section and amount-section by setting their style.display to block with !important applied via setAttribute style
+- Scrolls the page down slightly so the reason list is visible
 
-At the top of the modal content area, below the sticky header and above the first section, add a control bar with:
+--- FIX 3: REASON AND AMOUNT SECTION VISIBILITY ---
 
-1. SEARCH INPUT
-- Full width text input, placeholder "Search items..."
-- Filters all rows across all sections in real time by name or description text
-- Rows that do not match are hidden. If an entire section has no matches, hide the section header too.
-- Clear button (x) inside the input on the right when text is present
+Find reason-section and amount-section divs. Make sure no CSS rule is hiding them with higher specificity than the inline style. Add a CSS rule: #reason-section, #amount-section { display: block; } that only applies when they have a data-visible="true" attribute, and set that attribute in selectType() instead of relying solely on style.display.
 
-2. TYPE FILTER BUTTONS
-- Four toggle buttons: Awards | Purchases | Fines | Inactive
-- All active by default (all sections visible)
-- Clicking a button toggles that section's visibility
-- Active = gold border and text, inactive = dim
-- Buttons styled like existing .filter-btn
-
-3. SORT DROPDOWN
-- Options: Default Order | A - Z | Z - A | Rate (High to Low) | Rate (Low to High)
-- Default Order = the original hardcoded order within each section
-- A-Z and Z-A sort all visible rows alphabetically by name across all visible sections (sections stay grouped but rows within each section are sorted)
-- Rate High to Low and Low to High sort by numeric rate value within each section. For rates that are ranges (e.g. 2-6ic) use the midpoint. For "varies" use 0. For negative rates sort by absolute value.
-- Dropdown styled like existing .txn-type-select
-
-All three controls work together - search, type filter, and sort apply simultaneously.
-
-Commit with message "feat: convert i¢ guide to modal with search, filter, and sort controls" and push.
+Commit with message "fix: overlay pointer-events blocking type button interaction" and push.
