@@ -1675,18 +1675,12 @@ function typeBadgeClass(type) {
 // ── Fetch ────────────────────────────────────────────
 async function fetchData() {
   try {
-    const ts = Date.now();
-    const [sRes, tRes, cRes, chRes] = await Promise.all([
-      fetch(SUMMARY_CSV + '&_=' + ts, { cache: 'no-store' }),
-      fetch(TRANSACTIONS_CSV + '&_=' + ts, { cache: 'no-store' }),
-      fetch(CONTRACTS_API + '?action=contracts&_=' + ts, { cache: 'no-store' }),
-      fetch(CONTRACTS_API + '?action=contractHistory&_=' + ts, { cache: 'no-store' })
+    const [sRes, tRes] = await Promise.all([
+      fetch(SUMMARY_CSV + '&_=' + Date.now(), { cache: 'no-store' }),
+      fetch(TRANSACTIONS_CSV + '&_=' + Date.now(), { cache: 'no-store' })
     ]);
     summaryData = parseCSV(await sRes.text());
     txnData = parseCSV(await tRes.text());
-    try { contractsData = await cRes.json(); } catch(e) { contractsData = []; }
-    try { contractHistoryData = await chRes.json(); } catch(e) { contractHistoryData = []; }
-    renderContracts();
 
     summaryData.sort((a, b) => {
       const calcBal = r => (parseFloat(pick(r)('Awarded') || 0) - parseFloat(pick(r)('Fines') || 0));
@@ -1715,12 +1709,25 @@ async function fetchData() {
       document.getElementById('leaderboard-grid').style.display = 'grid';
       document.getElementById('txn-loading').style.display = 'none';
       document.getElementById('txn-table-wrap').style.display = 'block';
-      document.getElementById('contracts-loading').style.display = 'none';
     }
   } catch (err) {
     const el = document.getElementById('last-updated');
     el.textContent = 'Fetch error — retrying in 60s';
   }
+}
+
+async function fetchContractsData() {
+  try {
+    const ts = Date.now();
+    const [cRes, chRes] = await Promise.all([
+      fetch(CONTRACTS_API + '?action=contracts&_=' + ts, { cache: 'no-store' }),
+      fetch(CONTRACTS_API + '?action=contractHistory&_=' + ts, { cache: 'no-store' })
+    ]);
+    try { contractsData = await cRes.json(); } catch(e) { contractsData = []; }
+    try { contractHistoryData = await chRes.json(); } catch(e) { contractHistoryData = []; }
+    renderContracts();
+    document.getElementById('contracts-loading').style.display = 'none';
+  } catch (err) { /* fail silently — contracts tab shows stale or empty */ }
 }
 
 // ── Stats Bar ────────────────────────────────────────
@@ -2632,6 +2639,8 @@ document.getElementById('print-header').textContent =
 // ── Fetch on load + auto-refresh ──────────────────────
 fetchData();
 setInterval(fetchData, 60000);
+fetchContractsData();
+setInterval(fetchContractsData, 60000);
 
 // ── Background Particles ──────────────────────────────
 const canvas = document.getElementById('bg-canvas');
