@@ -1945,7 +1945,7 @@ document.getElementById('detail-contractor-search').addEventListener('input', fu
   if (!q) { resultsEl.style.display = 'none'; return; }
   if (!studentsLoaded) {
     resultsEl.innerHTML = '<div class="result-empty">Loading students...</div>';
-    resultsEl.style.display = '';
+    resultsEl.style.display = 'block';
     return;
   }
 
@@ -1975,7 +1975,7 @@ document.getElementById('detail-contractor-search').addEventListener('input', fu
       ${conflict ? `<div class="contractor-result-warning">Already on: ${esc(getField(conflict,'name','Name')||'another contract')}</div>` : ''}
     </div>`;
   }).join('');
-  resultsEl.style.display = '';
+  resultsEl.style.display = 'block';
 
   resultsEl.querySelectorAll('.contractor-result-item').forEach(el => {
     el.addEventListener('click', () => {

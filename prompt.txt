@@ -1,11 +1,7 @@
-﻿Edit entry/index.html. Find the updateDetailContractors function. Change the condition for showing the contractors section from:
+﻿Edit entry/index.html. Find every place where document.getElementById('detail-contractor-results').style.display is set to an empty string ''. Replace every instance with 'block'.
 
-const show = status === 'In Progress' || status === 'Completed';
+Also find where resultsEl.style.display is set to '' inside the detail-contractor-search input event listener and replace those with 'block' as well.
 
-To:
+There should be no remaining instances of contractor-results display being set to empty string after this fix.
 
-const show = status !== 'Cancelled';
-
-This makes the contractor section visible for Open, In Progress, and Completed contracts. Only Cancelled contracts hide it.
-
-Commit with message "fix: show contractor section for Open and Completed contracts" and push.
+Commit with message "fix: contractor results display none fallback, set explicit block" and push.
