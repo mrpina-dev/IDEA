@@ -1,26 +1,35 @@
-﻿Edit entry/index.html. Make the following changes to the reason selection step:
+﻿Edit entry/index.html. Add a "Physical coin given?" checkbox to the Award flow.
 
-CHANGE 1 - FETCH REASON FREQUENCIES ON LOG SCREEN OPEN
+CHANGE 1 - HTML
+In the type-grid section, after the closing div of the type-grid, add:
+<div id="physical-toggle" style="display:none; margin-top:0.75rem;">
+  <label style="display:flex; align-items:center; gap:0.75rem; cursor:pointer; min-height:48px; padding:0.6rem 0.85rem; background:var(--bg1); border:1px solid rgba(0,255,65,0.15); border-radius:3px;">
+    <input type="checkbox" id="physical-check" checked style="width:22px; height:22px; accent-color:var(--green); cursor:pointer; flex-shrink:0;">
+    <div>
+      <div style="font-family:'Orbitron',sans-serif; font-size:0.65rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--green);">Physical coin given?</div>
+      <div style="font-size:0.58rem; color:var(--dim); margin-top:0.15rem; letter-spacing:0.04em;">Uncheck if you cannot give the coin right now</div>
+    </div>
+  </label>
+</div>
 
-Add a variable at the top of the script: let reasonFreqs = {};
+CHANGE 2 - SHOW/HIDE TOGGLE
+In selectType(), show #physical-toggle only when type === 'Award'. For all other types hide it and reset the checkbox to checked.
 
-When the Log Transaction button is tapped (inside the btn-log-txn click handler, after requireStudents resolves), fire a background fetch to API + "?action=frequencies" and store the result in reasonFreqs. Do not await it or block the UI - fire and forget. If it fails, reasonFreqs stays empty and reasons fall back to default order.
+CHANGE 3 - SUBMISSION LOGIC
+In the submit handler, when the type is 'Award', check if #physical-check is checked:
+- Checked: log as type "Award" (physical coin given, no Bank Balance change)
+- Unchecked: log as type "Award - Held" (coin not yet given, Bank Balance goes up)
 
-Also cache the result in localStorage under key "idea-entry-freqs" with timestamp "idea-entry-freqs-ts". TTL: 5 minutes. On log screen open, load from cache if fresh before firing the background refresh.
+For all other types, submit as-is with no change.
 
-CHANGE 2 - SORT REASONS BY FREQUENCY
+CHANGE 4 - REASONS FOR AWARD - HELD
+In the REASONS object, add:
+"Award - Held": same array as Award reasons
 
-In buildReasonList(), before rendering the reason items, sort the reasons array for the selected type by frequency descending. Use reasonFreqs[type + '::' + reason] as the sort key. Reasons with no recorded frequency sort to the bottom but maintain their original relative order among themselves.
+In the PRESETS object, add:
+"Award - Held": same array as Award presets
 
-CHANGE 3 - ADD SEARCH FILTER ABOVE REASON LIST
+CHANGE 5 - RESET
+In resetLog(), reset #physical-check to checked and hide #physical-toggle.
 
-In the HTML, inside reason-section and above the reason-list div, add:
-<input type="search" class="reason-search" id="reason-search" placeholder="Filter reasons..." autocomplete="off">
-
-Style .reason-search identically to .search-input (same dark bg, same border, same font-size 16px, same focus color, full width, min-height 48px). Add margin-bottom 0.4rem.
-
-In buildReasonList(), after populating the reason list, add an input event listener to reason-search that filters visible .reason-item elements in real time - hide items whose text does not include the query (case-insensitive). If no items match, show a dim "No matches" message inside the list.
-
-Clear the reason-search input value every time buildReasonList() is called.
-
-Commit with message "feat: frequency-sorted reasons with live search filter" and push.
+Commit with message "feat: physical coin checkbox on Award, Award - Held type support" and push.

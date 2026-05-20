@@ -608,6 +608,15 @@ body::after {
       <button class="type-btn payout"   data-type="Payout">  <span class="type-btn-label">Payout</span></button>
       <div class="blocked-msg" id="purchase-blocked">PURCHASE BLOCKED &mdash; Student must be debt-free</div>
     </div>
+    <div id="physical-toggle" style="display:none; margin-top:0.75rem;">
+      <label style="display:flex; align-items:center; gap:0.75rem; cursor:pointer; min-height:48px; padding:0.6rem 0.85rem; background:var(--bg1); border:1px solid rgba(0,255,65,0.15); border-radius:3px;">
+        <input type="checkbox" id="physical-check" checked style="width:22px; height:22px; accent-color:var(--green); cursor:pointer; flex-shrink:0;">
+        <div>
+          <div style="font-family:'Orbitron',sans-serif; font-size:0.65rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--green);">Physical coin given?</div>
+          <div style="font-size:0.58rem; color:var(--dim); margin-top:0.15rem; letter-spacing:0.04em;">Uncheck if you cannot give the coin right now</div>
+        </div>
+      </label>
+    </div>
 
     <!-- Step 3: Reason -->
     <div class="step-label" id="lbl-reason" style="display:none">03 &mdash; Reason</div>
@@ -759,6 +768,7 @@ const REASONS = {
   ],
   Payout: ['Coin Payout to Student']
 };
+REASONS['Award - Held'] = REASONS.Award;
 
 const PRESETS = {
   Award:    [1, 2, 3, 5, 10],
@@ -766,6 +776,7 @@ const PRESETS = {
   Purchase: [1, 2, 5, 10, 40, 100, 250],
   Payout:   [1, 2, 3, 5, 10]
 };
+PRESETS['Award - Held'] = PRESETS.Award;
 
 // ── Helpers ───────────────────────────────────────────
 function esc(s) {
@@ -1097,6 +1108,13 @@ function selectType(type) {
   document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
   selType = type;
+  const physToggle = document.getElementById('physical-toggle');
+  if (type === 'Award') {
+    physToggle.style.display = '';
+  } else {
+    physToggle.style.display = 'none';
+    document.getElementById('physical-check').checked = true;
+  }
   clearReasonDown();
   buildReasonList();
   document.getElementById('reason-section').classList.remove('hidden');
@@ -1230,7 +1248,8 @@ function refreshSubmit() {
 document.getElementById('submit-btn').addEventListener('click', () => {
   if (!selStudent || !selType || !selReason || !selAmount) return;
   const { name } = selStudent;
-  const type   = selType;
+  const physicalGiven = selType !== 'Award' || document.getElementById('physical-check').checked;
+  const type   = (selType === 'Award' && !physicalGiven) ? 'Award - Held' : selType;
   const reason = selReason;
   const amount = selAmount;
 
@@ -1289,6 +1308,9 @@ function resetLog() {
 
   document.getElementById('submit-btn').classList.remove('show');
   document.getElementById('submit-btn').disabled = true;
+
+  document.getElementById('physical-check').checked = true;
+  document.getElementById('physical-toggle').style.display = 'none';
 
   // Scroll log body to top
   document.getElementById('log-body').scrollTop = 0;
