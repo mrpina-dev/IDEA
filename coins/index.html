@@ -1581,8 +1581,8 @@ function typeBadgeClass(type) {
 async function fetchData() {
   try {
     const [sRes, tRes] = await Promise.all([
-      fetch(SUMMARY_CSV + '&_=' + Date.now()),
-      fetch(TRANSACTIONS_CSV + '&_=' + Date.now())
+      fetch(SUMMARY_CSV + '&_=' + Date.now(), { cache: 'no-store' }),
+      fetch(TRANSACTIONS_CSV + '&_=' + Date.now(), { cache: 'no-store' })
     ]);
     summaryData = parseCSV(await sRes.text());
     txnData = parseCSV(await tRes.text());
