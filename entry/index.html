@@ -146,7 +146,7 @@ body::after {
 .step-label:first-child { margin-top: 0; }
 
 /* ── Student search ──────────────────────── */
-.search-input {
+.search-input, .reason-search {
   width: 100%; min-height: 48px;
   background: rgba(0,0,0,0.4);
   border: 1px solid rgba(74,122,82,0.35); border-radius: 2px;
@@ -155,8 +155,10 @@ body::after {
   letter-spacing: 0.04em; transition: border-color 0.2s;
   -webkit-appearance: none; appearance: none;
 }
-.search-input::placeholder { color: var(--dim); }
-.search-input:focus { border-color: rgba(0,255,65,0.5); }
+.search-input::placeholder, .reason-search::placeholder { color: var(--dim); }
+.search-input:focus, .reason-search:focus { border-color: rgba(0,255,65,0.5); }
+.reason-search { margin-bottom: 0.4rem; }
+.reason-no-match { padding: 0.85rem; font-size: 0.72rem; color: var(--dim); }
 
 .search-results {
   margin-top: 0.4rem;
@@ -610,6 +612,7 @@ body::after {
     <!-- Step 3: Reason -->
     <div class="step-label" id="lbl-reason" style="display:none">03 &mdash; Reason</div>
     <div class="reason-wrap hidden" id="reason-section">
+      <input type="search" class="reason-search" id="reason-search" placeholder="Filter reasons..." autocomplete="off">
       <div class="reason-list" id="reason-list"></div>
     </div>
 
@@ -655,6 +658,37 @@ let _studentsFetch = null; // in-flight fetch promise
 const STUDENTS_KEY    = 'idea-entry-students';
 const STUDENTS_TS_KEY = 'idea-entry-students-ts';
 const STUDENTS_TTL    = 10 * 60 * 1000; // 10 min
+
+const FREQS_KEY    = 'idea-entry-freqs';
+const FREQS_TS_KEY = 'idea-entry-freqs-ts';
+const FREQS_TTL    = 5 * 60 * 1000; // 5 min
+
+let reasonFreqs = {};
+
+function loadFreqsCache() {
+  try {
+    const ts  = localStorage.getItem(FREQS_TS_KEY);
+    const raw = localStorage.getItem(FREQS_KEY);
+    if (ts && raw && Date.now() - parseInt(ts, 10) < FREQS_TTL) {
+      reasonFreqs = JSON.parse(raw);
+    }
+  } catch (_) {}
+}
+
+function fetchFreqs() {
+  fetch(apiUrl({ action: 'frequencies' }))
+    .then(r => r.json())
+    .then(data => {
+      if (data && typeof data === 'object') {
+        reasonFreqs = data;
+        try {
+          localStorage.setItem(FREQS_KEY,    JSON.stringify(data));
+          localStorage.setItem(FREQS_TS_KEY, String(Date.now()));
+        } catch (_) {}
+      }
+    })
+    .catch(() => {});
+}
 
 // ── Transaction state ─────────────────────────────────
 let selStudent = null;   // { name, section, balance }
@@ -865,6 +899,8 @@ async function requireStudents() {
 // ── Screen navigation ─────────────────────────────────
 document.getElementById('btn-log-txn').addEventListener('click', async () => {
   if (!await requireStudents()) return;
+  loadFreqsCache();
+  fetchFreqs();
   showScreen('s-log');
   document.getElementById('student-search').focus();
 });
@@ -1083,7 +1119,13 @@ function clearTypeDown() {
 
 // ── Reason ────────────────────────────────────────────
 function buildReasonList() {
-  const reasons = REASONS[selType] || [];
+  const base = REASONS[selType] || [];
+  const reasons = [...base].sort((a, b) => {
+    const fa = reasonFreqs[selType + '::' + a] || 0;
+    const fb = reasonFreqs[selType + '::' + b] || 0;
+    return fb - fa;
+  });
+
   const list = document.getElementById('reason-list');
   list.innerHTML = reasons.map(r =>
     `<div class="reason-item" data-r="${esc(r)}">${esc(r)}</div>`
@@ -1097,6 +1139,31 @@ function buildReasonList() {
       buildPresets();
     });
   });
+
+  const searchEl = document.getElementById('reason-search');
+  searchEl.value = '';
+  searchEl.oninput = () => {
+    const q = searchEl.value.trim().toLowerCase();
+    let any = false;
+    list.querySelectorAll('.reason-item').forEach(el => {
+      const show = !q || el.textContent.toLowerCase().includes(q);
+      el.style.display = show ? '' : 'none';
+      if (show) any = true;
+    });
+    let noMatch = list.querySelector('.reason-no-match');
+    if (!any) {
+      if (!noMatch) {
+        noMatch = document.createElement('div');
+        noMatch.className = 'reason-no-match';
+        noMatch.textContent = 'No matches';
+        list.appendChild(noMatch);
+      }
+      noMatch.style.display = '';
+    } else if (noMatch) {
+      noMatch.style.display = 'none';
+    }
+  };
+
   document.getElementById('lbl-reason').style.display = '';
   document.getElementById('reason-section').classList.remove('hidden');
   clearAmountDown();

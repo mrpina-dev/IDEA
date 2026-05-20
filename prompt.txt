@@ -1,25 +1,26 @@
-﻿Make two changes to the entry app:
+﻿Edit entry/index.html. Make the following changes to the reason selection step:
 
-CHANGE 1 - Edit entry/index.html. In the <head>, add this line after the existing icon link tags:
-<link rel="manifest" href="/IDEA/entry/manifest.json">
+CHANGE 1 - FETCH REASON FREQUENCIES ON LOG SCREEN OPEN
 
-CHANGE 2 - Create a new file at entry/manifest.json with this exact content:
-{
-  "name": "IDEA i¢ Entry",
-  "short_name": "i¢ Entry",
-  "description": "IDEA Coin transaction entry for instructors",
-  "start_url": "/IDEA/entry/",
-  "display": "standalone",
-  "background_color": "#020A04",
-  "theme_color": "#020A04",
-  "icons": [
-    {
-      "src": "/IDEA/entry/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ]
-}
+Add a variable at the top of the script: let reasonFreqs = {};
 
-Commit with message "feat: add web app manifest for Android home screen icon" and push.
+When the Log Transaction button is tapped (inside the btn-log-txn click handler, after requireStudents resolves), fire a background fetch to API + "?action=frequencies" and store the result in reasonFreqs. Do not await it or block the UI - fire and forget. If it fails, reasonFreqs stays empty and reasons fall back to default order.
+
+Also cache the result in localStorage under key "idea-entry-freqs" with timestamp "idea-entry-freqs-ts". TTL: 5 minutes. On log screen open, load from cache if fresh before firing the background refresh.
+
+CHANGE 2 - SORT REASONS BY FREQUENCY
+
+In buildReasonList(), before rendering the reason items, sort the reasons array for the selected type by frequency descending. Use reasonFreqs[type + '::' + reason] as the sort key. Reasons with no recorded frequency sort to the bottom but maintain their original relative order among themselves.
+
+CHANGE 3 - ADD SEARCH FILTER ABOVE REASON LIST
+
+In the HTML, inside reason-section and above the reason-list div, add:
+<input type="search" class="reason-search" id="reason-search" placeholder="Filter reasons..." autocomplete="off">
+
+Style .reason-search identically to .search-input (same dark bg, same border, same font-size 16px, same focus color, full width, min-height 48px). Add margin-bottom 0.4rem.
+
+In buildReasonList(), after populating the reason list, add an input event listener to reason-search that filters visible .reason-item elements in real time - hide items whose text does not include the query (case-insensitive). If no items match, show a dim "No matches" message inside the list.
+
+Clear the reason-search input value every time buildReasonList() is called.
+
+Commit with message "feat: frequency-sorted reasons with live search filter" and push.
