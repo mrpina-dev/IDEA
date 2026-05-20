@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" sizes="512x512" href="/IDEA/android-chrome-512x512.png">
+<title>IDEA i&#162; Entry</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+html { font-size: 16px; box-sizing: border-box; }
+*, *::before, *::after { box-sizing: inherit; margin: 0; padding: 0; }
+
+:root {
+  --bg0: #020A04;
+  --bg1: #050F07;
+  --bg2: #081209;
+  --green:  #00FF41;
+  --gold:   #C8FF00;
+  --amber:  #FF8C00;
+  --red:    #FF4444;
+  --cyan:   #00F0FF;
+  --blue:   #4488FF;
+  --dim:    #4A7A52;
+  --white:  #E8FFE8;
+  --glow-green: 0 0 10px rgba(0,255,65,0.8), 0 0 28px rgba(0,255,65,0.3);
+  --glow-gold:  0 0 10px rgba(200,255,0,0.8), 0 0 28px rgba(200,255,0,0.3);
+  --glow-cyan:  0 0 10px rgba(0,240,255,0.8), 0 0 28px rgba(0,240,255,0.3);
+}
+
+body {
+  background: var(--bg0);
+  color: var(--white);
+  font-family: 'Share Tech Mono', monospace;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px);
+  pointer-events: none; z-index: 9000;
+}
+
+/* ── Screens ─────────────────────────────── */
+.screen {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column;
+  opacity: 0; pointer-events: none;
+  transform: translateY(18px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  overflow: hidden;
+}
+.screen.active {
+  opacity: 1; pointer-events: auto;
+  transform: translateY(0);
+}
+
+/* ── Header ──────────────────────────────── */
+.app-header {
+  background: rgba(2,10,4,0.97);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0,255,65,0.15);
+  padding: 0 1.25rem;
+  height: 60px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0; z-index: 10;
+}
+.logo-wrap { display: flex; flex-direction: column; gap: 0.05rem; }
+.logo {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 900; font-size: 1.35rem;
+  color: var(--green); text-shadow: var(--glow-green);
+  letter-spacing: 0.12em; line-height: 1;
+}
+.logo-sub {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.48rem; letter-spacing: 0.22em;
+  color: var(--gold); text-transform: uppercase;
+}
+.back-btn {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.52rem; letter-spacing: 0.14em; text-transform: uppercase;
+  background: none; border: 1px solid rgba(74,122,82,0.4); border-radius: 2px;
+  color: var(--dim); padding: 0 0.9rem; cursor: pointer;
+  min-height: 48px; min-width: 72px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.back-btn:hover, .back-btn:active { color: var(--green); border-color: rgba(0,255,65,0.5); }
+
+/* ── Screen body ─────────────────────────── */
+.screen-body {
+  flex: 1; overflow-y: auto; padding: 1.1rem 1.1rem 5rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Home ────────────────────────────────── */
+.home-eyebrow {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.48rem; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--dim); margin-bottom: 1rem; margin-top: 0.1rem;
+}
+.home-btn {
+  display: flex; align-items: center; gap: 1rem;
+  width: 100%; min-height: 72px;
+  background: rgba(0,0,0,0.3); border-radius: 4px;
+  padding: 1rem 1.1rem; cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  margin-bottom: 0.75rem; border: 1px solid;
+  font-family: inherit; color: inherit; text-align: left;
+}
+.home-btn:active { transform: scale(0.99); }
+.home-btn-icon { font-size: 1.4rem; line-height: 1; flex-shrink: 0; width: 2rem; text-align: center; }
+.home-btn-content { display: flex; flex-direction: column; gap: 0.15rem; }
+.home-btn-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.82rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+}
+.home-btn-sub { font-size: 0.58rem; color: var(--dim); letter-spacing: 0.04em; }
+
+.home-btn.gold  { border-color: rgba(200,255,0,0.35); }
+.home-btn.gold  .home-btn-label { color: var(--gold); }
+.home-btn.gold:hover  { background: rgba(200,255,0,0.05); border-color: rgba(200,255,0,0.65); }
+
+.home-btn.green { border-color: rgba(0,255,65,0.35); }
+.home-btn.green .home-btn-label { color: var(--green); }
+.home-btn.green:hover { background: rgba(0,255,65,0.05); border-color: rgba(0,255,65,0.65); }
+
+.home-btn.cyan  { border-color: rgba(0,240,255,0.35); }
+.home-btn.cyan  .home-btn-label { color: var(--cyan); }
+.home-btn.cyan:hover  { background: rgba(0,240,255,0.05); border-color: rgba(0,240,255,0.65); }
+
+/* ── Step label ──────────────────────────── */
+.step-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.48rem; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--dim); margin-bottom: 0.6rem; margin-top: 1rem;
+}
+.step-label:first-child { margin-top: 0; }
+
+/* ── Student search ──────────────────────── */
+.search-input {
+  width: 100%; min-height: 48px;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(74,122,82,0.35); border-radius: 2px;
+  color: var(--white); font-family: 'Share Tech Mono', monospace;
+  font-size: 16px; padding: 0.55rem 0.85rem; outline: none;
+  letter-spacing: 0.04em; transition: border-color 0.2s;
+  -webkit-appearance: none; appearance: none;
+}
+.search-input::placeholder { color: var(--dim); }
+.search-input:focus { border-color: rgba(0,255,65,0.5); }
+
+.search-results {
+  margin-top: 0.4rem;
+  border: 1px solid rgba(0,255,65,0.1); border-radius: 2px;
+  overflow: hidden; display: none; background: var(--bg1);
+}
+.result-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.7rem 0.85rem; min-height: 52px;
+  border-bottom: 1px solid rgba(0,255,65,0.05);
+  cursor: pointer; gap: 0.65rem;
+  transition: background 0.15s;
+}
+.result-item:last-child { border-bottom: none; }
+.result-item:hover, .result-item:active { background: rgba(0,255,65,0.06); }
+.result-info { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
+.result-name { font-size: 0.88rem; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.result-section { font-size: 0.56rem; color: var(--dim); letter-spacing: 0.07em; }
+.result-bal { font-family: 'Orbitron', sans-serif; font-size: 0.72rem; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
+.result-bal.pos { color: var(--gold); }
+.result-bal.neg { color: var(--red); }
+.result-empty { padding: 0.85rem; font-size: 0.72rem; color: var(--dim); }
+
+/* ── Selected student card ───────────────── */
+.student-card {
+  background: var(--bg1); border: 1px solid rgba(0,255,65,0.15);
+  border-radius: 4px; padding: 0.9rem 1rem; margin-bottom: 0.25rem;
+  display: none;
+}
+.student-card.show { display: block; }
+.student-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; }
+.student-card-name {
+  font-family: 'Orbitron', sans-serif; font-size: 0.95rem; font-weight: 700;
+  color: var(--gold); text-shadow: var(--glow-gold); letter-spacing: 0.04em;
+}
+.student-card-section { font-size: 0.6rem; color: var(--dim); letter-spacing: 0.08em; margin-top: 0.2rem; }
+.change-btn {
+  font-family: 'Orbitron', sans-serif; font-size: 0.42rem; letter-spacing: 0.14em; text-transform: uppercase;
+  background: none; border: 1px solid rgba(74,122,82,0.35); border-radius: 2px;
+  color: var(--dim); padding: 0.3rem 0.6rem; cursor: pointer; flex-shrink: 0; min-height: 32px;
+  transition: color 0.2s;
+}
+.change-btn:hover { color: var(--white); border-color: rgba(74,122,82,0.7); }
+.student-card-meta { display: flex; align-items: center; gap: 0.65rem; margin-top: 0.65rem; }
+.elig-badge {
+  font-family: 'Orbitron', sans-serif; font-size: 0.42rem; letter-spacing: 0.14em;
+  text-transform: uppercase; padding: 0.2rem 0.5rem; border-radius: 2px;
+}
+.elig-badge.ok  { color: var(--green); border: 1px solid rgba(0,255,65,0.4);  background: rgba(0,255,65,0.07);  }
+.elig-badge.bad { color: var(--red);   border: 1px solid rgba(255,68,68,0.4); background: rgba(255,68,68,0.07); }
+.student-card-bal { font-family: 'Orbitron', sans-serif; font-size: 0.78rem; font-weight: 700; }
+.student-card-bal.pos { color: var(--gold); }
+.student-card-bal.neg { color: var(--red); }
+
+/* ── Type grid ───────────────────────────── */
+.type-grid {
+  display: none; grid-template-columns: 1fr 1fr;
+  gap: 0.6rem; margin-bottom: 0.25rem;
+}
+.type-grid.show { display: grid; }
+.type-btn {
+  min-height: 64px; border-radius: 3px; border: 1px solid;
+  background: rgba(0,0,0,0.3); cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.2rem; font-family: inherit;
+  transition: background 0.15s, border-color 0.15s;
+}
+.type-btn:active { transform: scale(0.98); }
+.type-btn-label {
+  font-family: 'Orbitron', sans-serif; font-size: 0.72rem;
+  font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+}
+.type-btn.award   { border-color: rgba(0,255,65,0.3); }
+.type-btn.award   .type-btn-label { color: var(--green); }
+.type-btn.award.sel   { background: rgba(0,255,65,0.1);  border-color: rgba(0,255,65,0.7);  }
+.type-btn.fine    { border-color: rgba(255,68,68,0.3); }
+.type-btn.fine    .type-btn-label { color: var(--red); }
+.type-btn.fine.sel    { background: rgba(255,68,68,0.1); border-color: rgba(255,68,68,0.7);  }
+.type-btn.purchase { border-color: rgba(255,140,0,0.3); }
+.type-btn.purchase .type-btn-label { color: var(--amber); }
+.type-btn.purchase.sel { background: rgba(255,140,0,0.1); border-color: rgba(255,140,0,0.7); }
+.type-btn.purchase.blocked { opacity: 0.35; pointer-events: none; }
+.type-btn.payout  { border-color: rgba(68,136,255,0.3); }
+.type-btn.payout  .type-btn-label { color: var(--blue); }
+.type-btn.payout.sel  { background: rgba(68,136,255,0.1); border-color: rgba(68,136,255,0.7); }
+.blocked-msg {
+  grid-column: 1 / -1; font-size: 0.58rem; letter-spacing: 0.07em;
+  color: var(--amber); text-align: center; display: none; padding: 0.2rem 0;
+}
+
+/* ── Reason list ─────────────────────────── */
+.reason-wrap { display: none; margin-bottom: 0.25rem; }
+.reason-wrap.show { display: block; }
+.reason-list {
+  max-height: 260px; overflow-y: auto;
+  border: 1px solid rgba(0,255,65,0.1); border-radius: 2px;
+  background: var(--bg1); -webkit-overflow-scrolling: touch;
+}
+.reason-item {
+  min-height: 52px; display: flex; align-items: center;
+  padding: 0.65rem 0.85rem; cursor: pointer; font-size: 0.78rem;
+  border-bottom: 1px solid rgba(0,255,65,0.05); letter-spacing: 0.02em;
+  transition: background 0.15s;
+}
+.reason-item:last-child { border-bottom: none; }
+.reason-item:hover, .reason-item:active { background: rgba(0,255,65,0.05); }
+.reason-item.sel { background: rgba(0,255,65,0.09); border-left: 3px solid var(--green); padding-left: calc(0.85rem - 3px); }
+
+/* ── Amount ──────────────────────────────── */
+.amount-wrap { display: none; margin-bottom: 0.25rem; }
+.amount-wrap.show { display: block; }
+.presets { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-bottom: 0.75rem; }
+.preset-btn {
+  font-family: 'Orbitron', sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em;
+  background: rgba(0,0,0,0.3); border: 1px solid rgba(74,122,82,0.35); border-radius: 2px;
+  color: var(--dim); padding: 0 0.9rem; cursor: pointer; min-height: 48px;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.preset-btn:hover { color: var(--white); border-color: rgba(200,255,0,0.4); }
+.preset-btn.sel { color: var(--gold); border-color: rgba(200,255,0,0.65); background: rgba(200,255,0,0.07); }
+.amount-input {
+  width: 100%; font-family: 'Orbitron', sans-serif; font-size: 1.8rem;
+  font-weight: 700; text-align: center; letter-spacing: 0.06em;
+  background: rgba(0,0,0,0.4); color: var(--gold);
+  border: 1px solid rgba(74,122,82,0.35); border-radius: 2px;
+  padding: 0.6rem 1rem; outline: none; min-height: 64px;
+  transition: border-color 0.2s;
+  -moz-appearance: textfield;
+}
+.amount-input::-webkit-outer-spin-button,
+.amount-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.amount-input:focus { border-color: rgba(200,255,0,0.6); }
+
+/* ── Dup warning ─────────────────────────── */
+.dup-banner {
+  background: rgba(255,140,0,0.09); border: 1px solid rgba(255,140,0,0.4);
+  border-radius: 3px; padding: 0.7rem 0.85rem; margin-bottom: 0.75rem;
+  font-size: 0.7rem; color: var(--amber); letter-spacing: 0.04em;
+  display: none; line-height: 1.5;
+}
+.dup-banner.show { display: block; }
+
+/* ── Submit button ───────────────────────── */
+.submit-btn {
+  width: 100%; min-height: 56px;
+  font-family: 'Orbitron', sans-serif; font-size: 0.78rem;
+  font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+  background: none; border: 2px solid rgba(200,255,0,0.4); border-radius: 4px;
+  color: var(--gold); cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  text-shadow: var(--glow-gold); display: none; margin-top: 0.75rem;
+}
+.submit-btn.show { display: block; }
+.submit-btn:not(:disabled):hover {
+  background: rgba(200,255,0,0.07); border-color: rgba(200,255,0,0.7); box-shadow: var(--glow-gold);
+}
+.submit-btn:not(:disabled):active { transform: scale(0.99); }
+.submit-btn:disabled { opacity: 0.28; cursor: not-allowed; }
+
+/* ── Payout screen ───────────────────────── */
+.payout-summary {
+  background: var(--bg1); border: 1px solid rgba(0,255,65,0.1);
+  border-radius: 4px; padding: 0.85rem 1rem; margin-bottom: 1rem;
+  font-size: 0.75rem; color: var(--dim); line-height: 1.9; letter-spacing: 0.03em;
+}
+.payout-sec-head {
+  font-family: 'Orbitron', sans-serif; font-size: 0.54rem;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  padding-bottom: 0.4rem; margin-bottom: 0.3rem; border-bottom: 1px solid;
+  display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;
+}
+.payout-sec-head.give { color: var(--green); border-color: rgba(0,255,65,0.2); }
+.payout-sec-head.debt { color: var(--red); border-color: rgba(255,68,68,0.2); }
+.payout-sec-count { font-size: 0.5rem; opacity: 0.65; font-weight: normal; }
+.payout-row {
+  display: flex; align-items: center; justify-content: space-between;
+  min-height: 48px; padding: 0.4rem 0;
+  border-bottom: 1px solid rgba(0,255,65,0.04); font-size: 0.8rem;
+}
+.payout-row:last-child { border-bottom: none; }
+.payout-bal { font-family: 'Orbitron', sans-serif; font-size: 0.68rem; font-weight: 700; white-space: nowrap; }
+.payout-bal.pos { color: var(--gold); }
+.payout-bal.neg { color: var(--red); }
+.payout-none { font-size: 0.68rem; color: var(--dim); padding: 0.65rem 0; letter-spacing: 0.04em; }
+.payout-divider { border: none; border-top: 1px solid rgba(0,255,65,0.07); margin: 0.75rem 0; }
+
+/* ── Loading overlay ─────────────────────── */
+.loading-overlay {
+  position: fixed; inset: 0; z-index: 800;
+  background: rgba(2,10,4,0.93);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.1rem;
+  opacity: 0; pointer-events: none; transition: opacity 0.15s;
+}
+.loading-overlay.show { opacity: 1; pointer-events: auto; }
+.loading-dots { display: flex; gap: 0.5rem; }
+.loading-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--gold); box-shadow: var(--glow-gold);
+  animation: blink 1s ease-in-out infinite;
+}
+.loading-dot:nth-child(2) { animation-delay: 0.2s; }
+.loading-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink { 0%,100% { opacity: 0.15; } 50% { opacity: 1; } }
+.loading-text {
+  font-family: 'Orbitron', sans-serif; font-size: 0.6rem;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--gold); text-shadow: var(--glow-gold);
+}
+
+/* ── Toast ───────────────────────────────── */
+.toast {
+  position: fixed; bottom: 1.75rem; left: 1.1rem; right: 1.1rem; z-index: 900;
+  border-radius: 4px; padding: 0.85rem 1rem;
+  font-family: 'Orbitron', sans-serif; font-size: 0.6rem;
+  letter-spacing: 0.18em; text-transform: uppercase; text-align: center;
+  opacity: 0; transform: translateY(10px); pointer-events: none;
+  transition: opacity 0.22s, transform 0.22s;
+}
+.toast.success { background: rgba(0,255,65,0.1);  border: 1px solid rgba(0,255,65,0.4);  color: var(--green); }
+.toast.error   { background: rgba(255,68,68,0.1); border: 1px solid rgba(255,68,68,0.4); color: var(--red);   }
+.toast.show    { opacity: 1; transform: translateY(0); }
+
+/* ── Confirm dialog ──────────────────────── */
+.confirm-overlay {
+  position: fixed; inset: 0; z-index: 700;
+  background: rgba(0,0,0,0.75);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem; opacity: 0; pointer-events: none;
+  transition: opacity 0.2s;
+}
+.confirm-overlay.show { opacity: 1; pointer-events: auto; }
+.confirm-box {
+  background: var(--bg1); border: 1px solid rgba(0,255,65,0.25);
+  border-radius: 4px; padding: 1.4rem; width: 100%; max-width: 360px;
+}
+.confirm-title {
+  font-family: 'Orbitron', sans-serif; font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.15em; color: var(--gold); text-shadow: var(--glow-gold); margin-bottom: 0.8rem;
+}
+.confirm-msg {
+  font-size: 0.78rem; color: var(--white); line-height: 1.6;
+  letter-spacing: 0.02em; margin-bottom: 1.2rem;
+}
+.confirm-row { display: flex; gap: 0.6rem; }
+.confirm-btn {
+  flex: 1; min-height: 48px; border-radius: 2px; cursor: pointer;
+  font-family: 'Orbitron', sans-serif; font-size: 0.58rem;
+  font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;
+  background: none; transition: background 0.15s, border-color 0.15s;
+}
+.confirm-btn.cancel { border: 1px solid rgba(74,122,82,0.4); color: var(--dim); }
+.confirm-btn.cancel:hover { color: var(--white); border-color: rgba(74,122,82,0.7); }
+.confirm-btn.ok { border: 2px solid rgba(0,255,65,0.5); color: var(--green); }
+.confirm-btn.ok:hover { background: rgba(0,255,65,0.08); }
+</style>
+</head>
+<body>
+
+<!-- ── Loading Overlay ─────────────────── -->
+<div class="loading-overlay" id="overlay">
+  <div class="loading-dots">
+    <div class="loading-dot"></div>
+    <div class="loading-dot"></div>
+    <div class="loading-dot"></div>
+  </div>
+  <div class="loading-text" id="overlay-text">Loading&hellip;</div>
+</div>
+
+<!-- ── Toast ──────────────────────────── -->
+<div class="toast" id="toast"></div>
+
+<!-- ── Confirm Dialog ─────────────────── -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <div class="confirm-title" id="confirm-title"></div>
+    <div class="confirm-msg" id="confirm-msg"></div>
+    <div class="confirm-row">
+      <button class="confirm-btn cancel" id="confirm-cancel">Cancel</button>
+      <button class="confirm-btn ok" id="confirm-ok">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 1 — HOME
+════════════════════════════════════════ -->
+<div class="screen active" id="s-home">
+  <div class="app-header">
+    <div class="logo-wrap">
+      <span class="logo">IDEA.</span>
+      <span class="logo-sub">i&#162; Entry</span>
+    </div>
+  </div>
+  <div class="screen-body">
+    <div class="home-eyebrow">IDEA Coins &mdash; Transaction Entry</div>
+    <button class="home-btn gold" id="btn-log-txn">
+      <span class="home-btn-icon">i&#162;</span>
+      <div class="home-btn-content">
+        <span class="home-btn-label">Log Transaction</span>
+        <span class="home-btn-sub">Award, fine, purchase, or payout</span>
+      </div>
+    </button>
+    <button class="home-btn green" id="btn-wage">
+      <span class="home-btn-icon">&#10227;</span>
+      <div class="home-btn-content">
+        <span class="home-btn-label">Weekly Wage</span>
+        <span class="home-btn-sub">Pay all students their weekly wage</span>
+      </div>
+    </button>
+    <button class="home-btn cyan" id="btn-payout">
+      <span class="home-btn-icon">&#9672;</span>
+      <div class="home-btn-content">
+        <span class="home-btn-label">Weekly Payout Check</span>
+        <span class="home-btn-sub">See who gets a coin this week</span>
+      </div>
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 2 — LOG TRANSACTION
+════════════════════════════════════════ -->
+<div class="screen" id="s-log">
+  <div class="app-header">
+    <div class="logo-wrap">
+      <span class="logo">IDEA.</span>
+      <span class="logo-sub">i&#162; Entry</span>
+    </div>
+    <button class="back-btn" id="log-back">&#8592; Back</button>
+  </div>
+  <div class="screen-body" id="log-body">
+
+    <!-- Step 1: Student -->
+    <div class="step-label">01 &mdash; Select Student</div>
+    <div id="search-wrap">
+      <input type="search" class="search-input" id="student-search"
+             placeholder="Search by name or section&hellip;" autocomplete="off" autocorrect="off" spellcheck="false">
+      <div class="search-results" id="search-results"></div>
+    </div>
+    <div class="student-card" id="student-card">
+      <div class="student-card-top">
+        <div>
+          <div class="student-card-name" id="card-name"></div>
+          <div class="student-card-section" id="card-section"></div>
+        </div>
+        <button class="change-btn" id="change-student">Change</button>
+      </div>
+      <div class="student-card-meta">
+        <span class="elig-badge" id="card-elig"></span>
+        <span class="student-card-bal" id="card-bal"></span>
+      </div>
+    </div>
+
+    <!-- Step 2: Type -->
+    <div class="step-label" id="lbl-type" style="display:none">02 &mdash; Transaction Type</div>
+    <div class="type-grid" id="type-grid">
+      <button class="type-btn award"    data-type="Award">   <span class="type-btn-label">Award</span></button>
+      <button class="type-btn fine"     data-type="Fine">    <span class="type-btn-label">Fine</span></button>
+      <button class="type-btn purchase" data-type="Purchase"><span class="type-btn-label">Purchase</span></button>
+      <button class="type-btn payout"   data-type="Payout">  <span class="type-btn-label">Payout</span></button>
+      <div class="blocked-msg" id="purchase-blocked">PURCHASE BLOCKED &mdash; Student must be debt-free</div>
+    </div>
+
+    <!-- Step 3: Reason -->
+    <div class="step-label" id="lbl-reason" style="display:none">03 &mdash; Reason</div>
+    <div class="reason-wrap" id="reason-wrap">
+      <div class="reason-list" id="reason-list"></div>
+    </div>
+
+    <!-- Step 4: Amount -->
+    <div class="step-label" id="lbl-amount" style="display:none">04 &mdash; Amount</div>
+    <div class="amount-wrap" id="amount-wrap">
+      <div class="presets" id="presets"></div>
+      <input type="number" class="amount-input" id="amount-input" placeholder="0" min="1" step="1">
+    </div>
+
+    <!-- Dup warning + Submit -->
+    <div class="dup-banner" id="dup-banner">
+      Similar transaction logged today &mdash; tap Submit again to confirm.
+    </div>
+    <button class="submit-btn" id="submit-btn" disabled>Submit Transaction</button>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 3 — WEEKLY PAYOUT CHECK
+════════════════════════════════════════ -->
+<div class="screen" id="s-payout">
+  <div class="app-header">
+    <div class="logo-wrap">
+      <span class="logo">IDEA.</span>
+      <span class="logo-sub">i&#162; Entry</span>
+    </div>
+    <button class="back-btn" id="payout-back">&#8592; Back</button>
+  </div>
+  <div class="screen-body">
+    <div class="step-label">Weekly Payout Check</div>
+    <div class="payout-summary" id="payout-summary">Loading&hellip;</div>
+    <div id="payout-content"></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const API = 'https://script.google.com/macros/s/AKfycby_p-lI7I5i4Rl1KZKgtWEhePnUmyrC9HBrS485JBWvcwWfpIWC_397P7yrcrmvIql9/exec';
+
+// ── Data ──────────────────────────────────────────────
+let allStudents = [];
+
+// ── Transaction state ─────────────────────────────────
+let selStudent = null;   // { name, section, balance }
+let selType    = null;
+let selReason  = null;
+let selAmount  = null;
+let dupFlag    = false;
+
+// ── Reason / preset lists ─────────────────────────────
+const REASONS = {
+  Award: [
+    'Legacy Wealth Declaration',
+    'Contract Completion',
+    'Improve IDEA Coin Infrastructure',
+    'Donate Supplies (towels, gloves, filament, etc.)',
+    'Donate Tissue Box',
+    'Answer Questions Correctly During Class',
+    'Bounty Hunting / Fine Reporting / Policing',
+    'Exceptional Performance / Going Above and Beyond',
+    'Helping Peers',
+    'Perfect Assignment Score',
+    'Weekly Wage',
+    '100% IDEA Grade or Highest Grade in Section',
+    'Quality IDEA Background'
+  ],
+  Fine: [
+    'Brain Rot',
+    'Crashing Out',
+    'Gambling',
+    'Using Device for Non-School Purposes',
+    'Inappropriate / Disruptive Behavior',
+    'Arguing',
+    'Planting Evidence',
+    "Tampering With Another Student's Computer",
+    'Out of Seat During Attendance',
+    'Feet on 2nd Chair',
+    'Leaving Classroom Without Permission',
+    'Extended Bathroom Break',
+    'Failure to Return Flash Drive',
+    'Failure to Clean Up in Shop',
+    'Failure to Tidy Up Before Leaving Class',
+    'Failure to Reset 3D Printer After Use',
+    'Paper Printing Without Permission',
+    'Eating Without Eating Pass',
+    'Leaving Mess in Classroom',
+    'Non-IDEA / Inappropriate Computer Background',
+    'IDEA Coin Theft',
+    'Unsafe in Shop',
+    "Sitting in Mr. Pina's Chair",
+    'Tampering With IDEA Coin Mint (Known Suspect)',
+    'Tampering With IDEA Coin Mint (Unknown Suspect)'
+  ],
+  Purchase: [
+    'In-N-Out Combo',
+    'Executive Classroom Eating Pass',
+    'Basic Classroom Eating Pass',
+    'Raise Weekly Wage',
+    'Bounty Hunter Application',
+    'Weekly Bounty Limit Increase',
+    'Outside Time (per 30 min)',
+    'B&W Paper Printing (per 2-sided page)',
+    'Paper Printing (per page)',
+    'Extra Credit (per point)',
+    'Games During Downtime (per class)',
+    'Mr. Pina Does Your Work (per min)',
+    'Song Request',
+    'Turn On/Off Ceiling Lights',
+    '3D Printing (per 10g)'
+  ],
+  Payout: ['Coin Payout to Student']
+};
+
+const PRESETS = {
+  Award:    [1, 2, 3, 5, 10],
+  Fine:     [1, 2, 5, 10],
+  Purchase: [1, 2, 5, 10, 40, 100, 250],
+  Payout:   [1, 2, 3, 5, 10]
+};
+
+// ── Helpers ───────────────────────────────────────────
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function apiUrl(params) {
+  return API + '?' + Object.entries(params)
+    .map(([k,v]) => encodeURIComponent(k) + '=' + encodeURIComponent(v))
+    .join('&');
+}
+
+function showLoading(txt) {
+  document.getElementById('overlay-text').textContent = txt || 'Loading…';
+  document.getElementById('overlay').classList.add('show');
+}
+function hideLoading() {
+  document.getElementById('overlay').classList.remove('show');
+}
+
+let toastTimer = null;
+function toast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast ' + (type || 'success');
+  clearTimeout(toastTimer);
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+function confirm(title, msg, onOk) {
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-msg').textContent = msg;
+  const overlay = document.getElementById('confirm-overlay');
+  overlay.classList.add('show');
+  const okBtn = document.getElementById('confirm-ok');
+  const cancelBtn = document.getElementById('confirm-cancel');
+  function done(proceed) {
+    overlay.classList.remove('show');
+    okBtn.removeEventListener('click', yes);
+    cancelBtn.removeEventListener('click', no);
+    if (proceed) onOk();
+  }
+  function yes() { done(true); }
+  function no()  { done(false); }
+  okBtn.addEventListener('click', yes);
+  cancelBtn.addEventListener('click', no);
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function getField(obj, ...keys) {
+  for (const k of keys) {
+    if (obj[k] !== undefined && obj[k] !== null && obj[k] !== '') return obj[k];
+  }
+  return '';
+}
+
+function studentBal(s) {
+  const awarded = parseFloat(getField(s, 'awarded','Awarded') || 0);
+  const fines   = parseFloat(getField(s, 'fines','Fines') || 0);
+  return awarded - fines;
+}
+
+// ── Fetch students on load ─────────────────────────────
+async function loadStudents() {
+  showLoading('Loading students…');
+  try {
+    const res  = await fetch(apiUrl({ action: 'students' }));
+    const data = await res.json();
+    if (Array.isArray(data)) allStudents = data;
+    else if (data && Array.isArray(data.students)) allStudents = data.students;
+    else if (data && Array.isArray(data.data)) allStudents = data.data;
+  } catch (e) {
+    toast('Failed to load students', 'error');
+  } finally {
+    hideLoading();
+  }
+}
+
+// ── Screen navigation ─────────────────────────────────
+document.getElementById('btn-log-txn').addEventListener('click', () => {
+  showScreen('s-log');
+  document.getElementById('student-search').focus();
+});
+document.getElementById('log-back').addEventListener('click', () => {
+  resetLog();
+  showScreen('s-home');
+});
+
+// ── Weekly Wage ───────────────────────────────────────
+document.getElementById('btn-wage').addEventListener('click', () => {
+  const n = allStudents.length;
+  confirm(
+    'Pay Weekly Wage',
+    `Pay weekly wage to all ${n} student${n !== 1 ? 's' : ''}? This will log wages automatically.`,
+    async () => {
+      showLoading('Paying wages…');
+      try {
+        const res  = await fetch(apiUrl({ action: 'weeklyWage' }));
+        const data = await res.json();
+        if (data && (data.success || data.status === 'ok' || data.result === 'success')) {
+          toast('Weekly wage paid ✓', 'success');
+        } else {
+          toast('Error — please try again', 'error');
+        }
+      } catch (e) {
+        toast('Network error', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+  );
+});
+
+// ── Payout Check ──────────────────────────────────────
+document.getElementById('btn-payout').addEventListener('click', openPayoutScreen);
+document.getElementById('payout-back').addEventListener('click', () => showScreen('s-home'));
+
+async function openPayoutScreen() {
+  showScreen('s-payout');
+  document.getElementById('payout-summary').textContent = 'Loading…';
+  document.getElementById('payout-content').innerHTML = '';
+  showLoading('Fetching payout list…');
+  try {
+    const res  = await fetch(apiUrl({ action: 'payout' }));
+    const data = await res.json();
+    renderPayout(data);
+  } catch (e) {
+    document.getElementById('payout-summary').textContent = 'Error loading data.';
+    toast('Failed to load payout data', 'error');
+  } finally {
+    hideLoading();
+  }
+}
+
+function renderPayout(data) {
+  let give = [], wage = [];
+
+  if (Array.isArray(data)) {
+    data.forEach(s => {
+      const name = getField(s,'name','Name','Full Name','Student') || '—';
+      const bal  = parseFloat(getField(s,'balance','Balance','coinBalance','coin_balance') || 0);
+      (bal < 0 ? wage : give).push({ name, bal });
+    });
+  } else {
+    const raw = {
+      give: data.eligible || data.give || data.giveCoin || data.give_coin || [],
+      wage: data.debt || data.wageOnly || data.inDebt || data.wage_only || []
+    };
+    ['give','wage'].forEach(k => {
+      raw[k].forEach(s => {
+        const name = getField(s,'name','Name','Full Name','Student') || '—';
+        const bal  = parseFloat(getField(s,'balance','Balance','coinBalance') || 0);
+        (k === 'give' ? give : wage).push({ name, bal });
+      });
+    });
+  }
+
+  give.sort((a,b) => a.name.localeCompare(b.name));
+  wage.sort((a,b) => a.name.localeCompare(b.name));
+
+  document.getElementById('payout-summary').innerHTML =
+    `<span style="color:var(--green)">${give.length} student${give.length!==1?'s':''} get a coin.</span><br>` +
+    `<span style="color:var(--red)">${wage.length} student${wage.length!==1?'s':''} in debt &mdash; wage only.</span>`;
+
+  const rows = list => list.length
+    ? list.map(s => `<div class="payout-row"><span>${esc(s.name)}</span><span class="payout-bal ${s.bal>=0?'pos':'neg'}">${Math.round(s.bal)} i&#162;</span></div>`).join('')
+    : '<div class="payout-none">None</div>';
+
+  document.getElementById('payout-content').innerHTML =
+    `<div class="payout-sec-head give">Give Coin <span class="payout-sec-count">(${give.length})</span></div>` +
+    rows(give) +
+    `<hr class="payout-divider">` +
+    `<div class="payout-sec-head debt">Wage Only <span class="payout-sec-count">(${wage.length})</span></div>` +
+    rows(wage);
+}
+
+// ── Student Search ────────────────────────────────────
+const searchInput   = document.getElementById('student-search');
+const searchResults = document.getElementById('search-results');
+const studentCard   = document.getElementById('student-card');
+
+searchInput.addEventListener('input', () => {
+  const q = searchInput.value.trim().toLowerCase();
+  if (!q) { searchResults.style.display = 'none'; return; }
+
+  const matches = allStudents.filter(s => {
+    const name = (getField(s,'name','Name','Full Name','Student') || '').toLowerCase();
+    const sec  = (getField(s,'section','Section','Class') || '').toLowerCase();
+    return name.includes(q) || sec.includes(q);
+  }).slice(0, 10);
+
+  if (!matches.length) {
+    searchResults.innerHTML = '<div class="result-empty">No students found.</div>';
+    searchResults.style.display = 'block';
+    return;
+  }
+
+  searchResults.innerHTML = matches.map(s => {
+    const name = getField(s,'name','Name','Full Name','Student') || '—';
+    const sec  = getField(s,'section','Section','Class') || '—';
+    const bal  = studentBal(s);
+    return `<div class="result-item" tabindex="0"
+                 data-name="${esc(name)}" data-sec="${esc(sec)}" data-bal="${bal}">
+      <div class="result-info">
+        <span class="result-name">${esc(name)}</span>
+        <span class="result-section">${esc(sec)}</span>
+      </div>
+      <span class="result-bal ${bal>=0?'pos':'neg'}">${Math.round(bal)} i&#162;</span>
+    </div>`;
+  }).join('');
+
+  searchResults.style.display = 'block';
+  searchResults.querySelectorAll('.result-item').forEach(el => {
+    el.addEventListener('click', () => pickStudent(el.dataset.name, el.dataset.sec, parseFloat(el.dataset.bal)));
+  });
+});
+
+function pickStudent(name, section, balance) {
+  selStudent = { name, section, balance };
+  searchInput.value = '';
+  searchResults.style.display = 'none';
+  document.getElementById('search-wrap').style.display = 'none';
+
+  document.getElementById('card-name').textContent = name;
+  document.getElementById('card-section').textContent = section;
+
+  const elig = document.getElementById('card-elig');
+  elig.textContent = balance < 0 ? 'IN DEBT' : 'ELIGIBLE';
+  elig.className   = 'elig-badge ' + (balance < 0 ? 'bad' : 'ok');
+
+  const balEl = document.getElementById('card-bal');
+  balEl.textContent = Math.round(balance) + ' i¢';
+  balEl.className   = 'student-card-bal ' + (balance >= 0 ? 'pos' : 'neg');
+
+  studentCard.classList.add('show');
+
+  // Show type step
+  document.getElementById('lbl-type').style.display = '';
+  const grid = document.getElementById('type-grid');
+  grid.classList.add('show');
+
+  const purchaseBtn = grid.querySelector('.type-btn.purchase');
+  const blockedMsg  = document.getElementById('purchase-blocked');
+  if (balance < 0) {
+    purchaseBtn.classList.add('blocked');
+    blockedMsg.style.display = 'block';
+  } else {
+    purchaseBtn.classList.remove('blocked');
+    blockedMsg.style.display = 'none';
+  }
+
+  clearTypeDown();
+}
+
+document.getElementById('change-student').addEventListener('click', () => {
+  selStudent = null;
+  studentCard.classList.remove('show');
+  document.getElementById('search-wrap').style.display = '';
+  searchInput.value = '';
+  searchInput.focus();
+  document.getElementById('lbl-type').style.display = 'none';
+  document.getElementById('type-grid').classList.remove('show');
+  clearTypeDown();
+});
+
+// ── Type ──────────────────────────────────────────────
+document.querySelectorAll('.type-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (btn.classList.contains('blocked')) return;
+    document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('sel'));
+    btn.classList.add('sel');
+    selType = btn.dataset.type;
+    clearReasonDown();
+    buildReasonList();
+  });
+});
+
+function clearTypeDown() {
+  selType = null;
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('sel'));
+  clearReasonDown();
+  document.getElementById('lbl-reason').style.display = 'none';
+  document.getElementById('reason-wrap').classList.remove('show');
+}
+
+// ── Reason ────────────────────────────────────────────
+function buildReasonList() {
+  const reasons = REASONS[selType] || [];
+  const list = document.getElementById('reason-list');
+  list.innerHTML = reasons.map(r =>
+    `<div class="reason-item" data-r="${esc(r)}">${esc(r)}</div>`
+  ).join('');
+  list.querySelectorAll('.reason-item').forEach(el => {
+    el.addEventListener('click', () => {
+      list.querySelectorAll('.reason-item').forEach(i => i.classList.remove('sel'));
+      el.classList.add('sel');
+      selReason = el.dataset.r;
+      clearAmountDown();
+      buildPresets();
+    });
+  });
+  document.getElementById('lbl-reason').style.display = '';
+  document.getElementById('reason-wrap').classList.add('show');
+  clearAmountDown();
+}
+
+function clearReasonDown() {
+  selReason = null;
+  document.getElementById('reason-list').innerHTML = '';
+  clearAmountDown();
+  document.getElementById('lbl-amount').style.display = 'none';
+  document.getElementById('amount-wrap').classList.remove('show');
+  document.getElementById('submit-btn').classList.remove('show');
+  document.getElementById('dup-banner').classList.remove('show');
+  dupFlag = false;
+}
+
+// ── Amount ────────────────────────────────────────────
+const amountInput = document.getElementById('amount-input');
+
+function buildPresets() {
+  const vals = PRESETS[selType] || [];
+  const presetsEl = document.getElementById('presets');
+  presetsEl.innerHTML = vals.map(v =>
+    `<button class="preset-btn" data-v="${v}">${v}</button>`
+  ).join('');
+  presetsEl.querySelectorAll('.preset-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      presetsEl.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('sel'));
+      btn.classList.add('sel');
+      amountInput.value = btn.dataset.v;
+      selAmount = parseInt(btn.dataset.v, 10);
+      refreshSubmit();
+    });
+  });
+  amountInput.value = '';
+  selAmount = null;
+  document.getElementById('lbl-amount').style.display = '';
+  document.getElementById('amount-wrap').classList.add('show');
+  document.getElementById('submit-btn').classList.add('show');
+  refreshSubmit();
+}
+
+amountInput.addEventListener('input', () => {
+  const v = parseInt(amountInput.value, 10);
+  selAmount = (isNaN(v) || v <= 0) ? null : v;
+  const presetsEl = document.getElementById('presets');
+  presetsEl.querySelectorAll('.preset-btn').forEach(b => {
+    b.classList.toggle('sel', parseInt(b.dataset.v,10) === selAmount);
+  });
+  refreshSubmit();
+});
+
+function clearAmountDown() {
+  selAmount = null;
+  amountInput.value = '';
+  document.getElementById('presets').innerHTML = '';
+  dupFlag = false;
+  document.getElementById('dup-banner').classList.remove('show');
+  refreshSubmit();
+}
+
+function refreshSubmit() {
+  document.getElementById('submit-btn').disabled =
+    !(selStudent && selType && selReason && selAmount);
+}
+
+// ── Submit ────────────────────────────────────────────
+document.getElementById('submit-btn').addEventListener('click', async () => {
+  if (!selStudent || !selType || !selReason || !selAmount) return;
+  const { name } = selStudent;
+  const type   = selType;
+  const reason = selReason;
+  const amount = selAmount;
+
+  if (!dupFlag) {
+    showLoading('Checking for duplicates…');
+    try {
+      const res  = await fetch(apiUrl({ action: 'checkDuplicate', name, type, reason, amount }));
+      const data = await res.json();
+      hideLoading();
+      if (data && data.isDuplicate) {
+        dupFlag = true;
+        document.getElementById('dup-banner').classList.add('show');
+        return;
+      }
+    } catch (e) {
+      hideLoading();
+      toast('Network error — please try again', 'error');
+      return;
+    }
+  }
+
+  document.getElementById('dup-banner').classList.remove('show');
+  dupFlag = false;
+  showLoading('Logging transaction…');
+  try {
+    const res  = await fetch(apiUrl({ action: 'logTransaction', name, type, reason, amount }));
+    const data = await res.json();
+    hideLoading();
+    if (data && (data.success || data.status === 'ok' || data.result === 'success')) {
+      // Update local balance estimate
+      const raw = allStudents.find(s =>
+        (getField(s,'name','Name','Full Name','Student') || '').toLowerCase() === name.toLowerCase()
+      );
+      if (raw) {
+        const tl = type.toLowerCase();
+        if (tl === 'award' || tl === 'payout') {
+          const k = raw.awarded !== undefined ? 'awarded' : 'Awarded';
+          raw[k] = (parseFloat(raw[k]) || 0) + amount;
+        } else {
+          const k = raw.fines !== undefined ? 'fines' : 'Fines';
+          raw[k] = (parseFloat(raw[k]) || 0) + amount;
+        }
+      }
+      toast('Transaction logged ✓', 'success');
+      resetLog();
+      showScreen('s-home');
+    } else {
+      toast('Error — please try again', 'error');
+    }
+  } catch (e) {
+    hideLoading();
+    toast('Network error — please try again', 'error');
+  }
+});
+
+// ── Reset log screen ──────────────────────────────────
+function resetLog() {
+  selStudent = selType = selReason = selAmount = null;
+  dupFlag = false;
+
+  searchInput.value = '';
+  searchResults.style.display = 'none';
+  document.getElementById('search-wrap').style.display = '';
+  studentCard.classList.remove('show');
+
+  document.getElementById('lbl-type').style.display = 'none';
+  document.getElementById('type-grid').classList.remove('show');
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('sel'));
+
+  document.getElementById('lbl-reason').style.display = 'none';
+  document.getElementById('reason-wrap').classList.remove('show');
+  document.getElementById('reason-list').innerHTML = '';
+
+  document.getElementById('lbl-amount').style.display = 'none';
+  document.getElementById('amount-wrap').classList.remove('show');
+  document.getElementById('presets').innerHTML = '';
+  amountInput.value = '';
+
+  document.getElementById('submit-btn').classList.remove('show');
+  document.getElementById('submit-btn').disabled = true;
+  document.getElementById('dup-banner').classList.remove('show');
+
+  // Scroll log body to top
+  document.getElementById('log-body').scrollTop = 0;
+}
+
+// ── Boot ──────────────────────────────────────────────
+loadStudents();
+</script>
+</body>
+</html>
