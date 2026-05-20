@@ -1905,7 +1905,7 @@ function updateDetailTotal() {
 
 function updateDetailContractors() {
   const status = document.getElementById('detail-status').value;
-  const show = status === 'In Progress' || status === 'Completed';
+  const show = status !== 'Cancelled';
   document.getElementById('detail-contractors-section').style.display = show ? '' : 'none';
   if (show) renderContractorChips();
 }

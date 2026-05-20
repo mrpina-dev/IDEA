@@ -1,26 +1,11 @@
-﻿Edit entry/index.html. Make two targeted fixes:
+﻿Edit entry/index.html. Find the updateDetailContractors function. Change the condition for showing the contractors section from:
 
-FIX 1 - BASE PAYOUT PARAMETER NAME MISMATCH
-Find the new-contract-submit click handler. In the apiUrl call that sends action=addContract, change the parameter name from payout to basePayout so it reads:
-apiUrl({ action:'addContract', name, basePayout: payout, rateLabel, quantity, notes })
+const show = status === 'In Progress' || status === 'Completed';
 
-Find the detail-save-btn click handler. In the apiUrl call that sends action=updateContract, change the parameter name from payout to basePayout so it reads:
-apiUrl({ action:'updateContract', row:activeContractRow, name, basePayout: payout, rateLabel, quantity, status, notes, contractors })
+To:
 
-FIX 2 - CONTRACTOR SEARCH REQUIRES STUDENTS TO BE LOADED
-Find the detail-contractor-search input event listener. At the very start of the handler, before filtering allStudents, add:
+const show = status !== 'Cancelled';
 
-if (!studentsLoaded) {
-  document.getElementById('detail-contractor-results').innerHTML = '<div class="result-empty">Loading students...</div>';
-  document.getElementById('detail-contractor-results').style.display = '';
-  return;
-}
+This makes the contractor section visible for Open, In Progress, and Completed contracts. Only Cancelled contracts hide it.
 
-This gives immediate feedback instead of silently showing nothing when students are still loading.
-
-Also find the openContractDetail function. At the start of it, add:
-if (!studentsLoaded) initStudentsData();
-
-This ensures students start loading as soon as any contract detail is opened, so they are ready by the time the user starts typing in the contractor search.
-
-Commit with message "fix: basePayout param name, contractor search loading state" and push.
+Commit with message "fix: show contractor section for Open and Completed contracts" and push.
