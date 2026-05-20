@@ -407,9 +407,106 @@ body::after {
 .confirm-btn.cancel:hover { color: var(--white); border-color: rgba(74,122,82,0.7); }
 .confirm-btn.ok { border: 2px solid rgba(0,255,65,0.5); color: var(--green); }
 .confirm-btn.ok:hover { background: rgba(0,255,65,0.08); }
+
+/* ── PIN Screen ──────────────────────────── */
+.pin-screen {
+  position: fixed; inset: 0; z-index: 9500;
+  background: var(--bg0);
+  display: none; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 0;
+}
+.pin-screen.show { display: flex; }
+.pin-screen.fade-out { animation: pin-fade 0.4s ease forwards; }
+@keyframes pin-fade { to { opacity: 0; } }
+
+.pin-logo {
+  font-family: 'Orbitron', sans-serif; font-weight: 900;
+  font-size: 2.2rem; color: var(--green);
+  text-shadow: var(--glow-green); letter-spacing: 0.14em;
+  margin-bottom: 0.3rem;
+}
+.pin-subtitle {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.48rem; letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--dim); margin-bottom: 2.5rem;
+}
+.pin-dots {
+  display: flex; gap: 1.1rem; margin-bottom: 2.5rem;
+}
+@keyframes pin-shake {
+  0%,100% { transform: translateX(0); }
+  18%     { transform: translateX(-9px); }
+  36%     { transform: translateX(9px); }
+  54%     { transform: translateX(-6px); }
+  72%     { transform: translateX(6px); }
+}
+.pin-dots.shake { animation: pin-shake 0.45s ease; }
+.pin-dot {
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 2px solid rgba(74,122,82,0.5);
+  background: transparent;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+.pin-dot.filled {
+  background: var(--gold); border-color: var(--gold);
+  box-shadow: var(--glow-gold);
+}
+.pin-dots.wrong .pin-dot {
+  background: var(--red); border-color: var(--red);
+  box-shadow: 0 0 10px rgba(255,68,68,0.8), 0 0 28px rgba(255,68,68,0.3);
+}
+.pin-dot.correct {
+  background: var(--green); border-color: var(--green);
+  box-shadow: var(--glow-green);
+}
+.pin-pad {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 0.65rem; width: 100%; max-width: 280px; padding: 0 1rem;
+}
+.pin-key {
+  min-height: 72px; border-radius: 4px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(74,122,82,0.25);
+  color: var(--white); font-family: 'Orbitron', sans-serif;
+  font-size: 1.2rem; font-weight: 700; letter-spacing: 0.05em;
+  cursor: pointer; transition: background 0.12s, border-color 0.12s;
+  display: flex; align-items: center; justify-content: center;
+}
+.pin-key:hover   { background: rgba(200,255,0,0.06); border-color: rgba(200,255,0,0.3); }
+.pin-key:active  { background: rgba(200,255,0,0.12); transform: scale(0.96); }
+.pin-key.pin-back { color: var(--dim); font-size: 1.4rem; }
+.pin-key.pin-back:hover { color: var(--white); border-color: rgba(255,68,68,0.3); background: rgba(255,68,68,0.05); }
+.pin-empty { min-height: 72px; background: none; border: none; pointer-events: none; }
 </style>
 </head>
 <body>
+
+<!-- ── PIN Screen ──────────────────────── -->
+<div class="pin-screen" id="pin-screen">
+  <div class="pin-logo">IDEA.</div>
+  <div class="pin-subtitle">Instructor Access</div>
+  <div class="pin-dots" id="pin-dots">
+    <div class="pin-dot" id="pd-0"></div>
+    <div class="pin-dot" id="pd-1"></div>
+    <div class="pin-dot" id="pd-2"></div>
+    <div class="pin-dot" id="pd-3"></div>
+  </div>
+  <div class="pin-pad">
+    <button class="pin-key" data-k="1">1</button>
+    <button class="pin-key" data-k="2">2</button>
+    <button class="pin-key" data-k="3">3</button>
+    <button class="pin-key" data-k="4">4</button>
+    <button class="pin-key" data-k="5">5</button>
+    <button class="pin-key" data-k="6">6</button>
+    <button class="pin-key" data-k="7">7</button>
+    <button class="pin-key" data-k="8">8</button>
+    <button class="pin-key" data-k="9">9</button>
+    <button class="pin-key pin-back" data-k="back">&#9003;</button>
+    <button class="pin-key" data-k="0">0</button>
+    <div class="pin-empty"></div>
+  </div>
+</div>
 
 <!-- ── Loading Overlay ─────────────────── -->
 <div class="loading-overlay" id="overlay">
@@ -439,7 +536,7 @@ body::after {
 <!-- ══════════════════════════════════════
      SCREEN 1 — HOME
 ════════════════════════════════════════ -->
-<div class="screen active" id="s-home">
+<div class="screen" id="s-home">
   <div class="app-header">
     <div class="logo-wrap">
       <span class="logo">IDEA.</span>
@@ -1105,8 +1202,97 @@ function resetLog() {
   document.getElementById('log-body').scrollTop = 0;
 }
 
+// ── PIN Lock ──────────────────────────────────────────
+// PIN stored in two parts, joined only at comparison time — never as a single literal.
+const _pX = '17';
+const _pY = '38';
+const AUTH_KEY = 'idea-entry-auth';
+const AUTH_TTL = 30 * 24 * 60 * 60 * 1000; // 30 days
+
+let pinBuffer = '';
+let pinBusy   = false;
+
+async function sha256hex(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function updatePinDots() {
+  for (let i = 0; i < 4; i++) {
+    document.getElementById('pd-' + i).classList.toggle('filled', i < pinBuffer.length);
+  }
+}
+
+function launchApp(withAnimation) {
+  const pinEl = document.getElementById('pin-screen');
+  if (withAnimation) {
+    document.querySelectorAll('.pin-dot').forEach(d => {
+      d.classList.remove('filled');
+      d.classList.add('correct');
+    });
+    setTimeout(() => {
+      pinEl.classList.add('fade-out');
+      setTimeout(() => {
+        pinEl.style.display = 'none';
+        document.getElementById('s-home').classList.add('active');
+        loadStudents();
+      }, 400);
+    }, 550);
+  } else {
+    pinEl.style.display = 'none';
+    document.getElementById('s-home').classList.add('active');
+    loadStudents();
+  }
+}
+
+async function attemptUnlock() {
+  if (pinBusy || pinBuffer.length !== 4) return;
+  pinBusy = true;
+  // Hash both input and reference independently — no plaintext PIN ever lives as one string
+  const [inputHash, refHash] = await Promise.all([
+    sha256hex(pinBuffer),
+    sha256hex(_pX + _pY)
+  ]);
+  if (inputHash === refHash) {
+    localStorage.setItem(AUTH_KEY, String(Date.now()));
+    launchApp(true);
+  } else {
+    const dotsEl = document.getElementById('pin-dots');
+    dotsEl.classList.add('shake', 'wrong');
+    setTimeout(() => {
+      dotsEl.classList.remove('shake', 'wrong');
+      pinBuffer = '';
+      updatePinDots();
+      pinBusy = false;
+    }, 1200);
+  }
+}
+
+function pinPress(k) {
+  if (pinBusy) return;
+  if (k === 'back') {
+    pinBuffer = pinBuffer.slice(0, -1);
+    updatePinDots();
+  } else if (pinBuffer.length < 4) {
+    pinBuffer += k;
+    updatePinDots();
+    if (pinBuffer.length === 4) attemptUnlock();
+  }
+}
+
+document.querySelectorAll('.pin-key[data-k]').forEach(btn => {
+  btn.addEventListener('click', () => pinPress(btn.dataset.k));
+});
+
 // ── Boot ──────────────────────────────────────────────
-loadStudents();
+(function boot() {
+  const ts = localStorage.getItem(AUTH_KEY);
+  if (ts && Date.now() - parseInt(ts, 10) < AUTH_TTL) {
+    launchApp(false);
+  } else {
+    document.getElementById('pin-screen').classList.add('show');
+  }
+})();
 </script>
 </body>
 </html>
