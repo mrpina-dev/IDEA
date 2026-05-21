@@ -1,53 +1,17 @@
-﻿Edit coins/index.html. Apply a cohesion pass to the leaderboard. Make the following targeted fixes:
+﻿Make changes to two files:
 
---- FIX 1: RENAME NET BALANCE LABEL ---
-Find every instance of "NET BALANCE" or "Net Balance" text used as a label on leaderboard cards and replace with "LIFETIME EARNED".
+FILE 1 - entry/index.html
+Find the REASONS.Award array in the JavaScript. Add these two entries at the very beginning of the array before 'Legacy Wealth Declaration':
+'Physical Coin Submission',
+'Balance Correction',
 
---- FIX 2: HIDE REDUNDANT NET AWARDS ---
-In renderLeaderboard(), when building each card's meta row, only show the NET AWARDS meta item if it differs from lifetimeEarned (i.e. the student has fines > 0). If fines === 0, lifetimeEarned === awarded, so NET AWARDS is redundant - hide it.
+FILE 2 - coins/index.html
+In the i¢ Guide modal, find the Awards section. Add these two entries after the existing "Legacy Wealth Declaration" entry and before "Contract Completion". Use the same expandable row format as other award items:
 
---- FIX 3: HIDE ZERO META STATS ---
-In the card meta row, do not render any meta item whose value is 0 or -0. Specifically:
-- Hide NET FINES if fines === 0
-- Hide NET SPENT if spent === 0
-- Hide NET AWARDS if redundant per Fix 2
-Always show LIFETIME EARNED regardless.
+Name: Physical Coin Submission | Rate: Varies
+Description: Used when a student physically brings coins to Mr. Pina to pay off debt or add to their balance. Mr. Pina counts the coins, takes possession of them, and logs this transaction for the submitted amount. Creates an audit trail for physical coin repayments.
 
---- FIX 4: SIMPLIFY TOP 3 CARD BORDERS ---
-Replace the current rainbow rotating gradient borders on rank-1, rank-2, rank-3 cards with cleaner terminal-consistent versions:
+Name: Balance Correction | Rate: Varies
+Description: A manual adjustment logged by Mr. Pina to reconcile the digital record with physical reality. Used when the digital balance does not accurately reflect a student's true holdings due to untracked transactions, student-to-student trades, or coins earned before the digital system existed.
 
-rank-1: animated gold border only
-Replace the existing rank-1 ::before gradient with:
-background: linear-gradient(45deg, #C8FF00, rgba(200,255,0,0.3), #C8FF00, rgba(200,255,0,0.5), #C8FF00);
-background-size: 300% 300%;
-Keep the animation. Keep the glow but gold only:
-animation: rank1-glow 3s ease-in-out infinite;
-@keyframes rank1-glow {
-  0%,100% { box-shadow: 0 0 20px rgba(200,255,0,0.2), 0 0 40px rgba(200,255,0,0.08); }
-  50%      { box-shadow: 0 0 32px rgba(200,255,0,0.35), 0 0 60px rgba(200,255,0,0.15); }
-}
-Keep the coin-balance gradient text animation on rank-1 but change colors to gold only:
-background: linear-gradient(90deg, #C8FF00, #ffffff, #C8FF00);
-
-rank-2: green border at medium intensity, no animation
-Replace rank-2 ::before with a static border:
-border: 1px solid rgba(0,255,65,0.5);
-Remove the ::before pseudo-element entirely for rank-2.
-Remove animation. Box shadow: 0 0 16px rgba(0,255,65,0.12).
-coin-balance color: var(--green), text-shadow: var(--glow-green), no animation.
-
-rank-3: dim green border, subtle glow, no animation
-border: 1px solid rgba(0,255,65,0.25);
-Remove ::before pseudo-element for rank-3.
-Remove animation. Box shadow: 0 0 10px rgba(0,255,65,0.07).
-coin-balance color: var(--green), no special text-shadow, no animation.
-
-Remove all silver, bronze, cyan, and orange color references from rank-2 and rank-3 styles entirely.
-
---- FIX 5: SECTION BADGE COLOR ---
-On leaderboard cards, the section label (e.g. IDEA-113, IDEA-208-1) currently uses per-section colors. Change the section text on all cards to use var(--dim) consistently, regardless of section. The section filter buttons at the top can keep their styling. Only the section label text inside each card should be dim.
-
---- FIX 6: COIN BALANCE IN META ---
-Since the large center number is now Lifetime Earned, add Coin Balance as a meta item so students can still see their economic standing. Label: "BALANCE", value in gold (var(--gold)) if positive, red if negative. Show it only if it differs from Lifetime Earned (i.e. student has spent > 0). This avoids redundancy for students who have never spent.
-
-Commit with message "fix: leaderboard cohesion pass - labels, redundant stats, border simplification, color consistency" and push.
+Commit with message "feat: add Physical Coin Submission and Balance Correction award reasons" and push.
