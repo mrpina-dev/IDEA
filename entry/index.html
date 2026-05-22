@@ -661,6 +661,37 @@ body::after {
 .section-select-option:last-child { border-bottom: none; }
 .section-select-option:hover, .section-select-option:active { background: rgba(0,255,65,0.06); }
 .section-select-option.add-new { color: var(--cyan); font-family: 'Orbitron', sans-serif; font-size: 0.65rem; letter-spacing: 0.1em; }
+
+/* ── Transaction log ─────────────────────────────────── */
+.txn-filter-bar { flex-shrink: 0; background: rgba(2,10,4,0.97); border-bottom: 1px solid rgba(0,255,65,0.1); padding: 0.55rem 1.1rem; display: flex; gap: 0.5rem; z-index: 5; }
+.txn-filter-input { flex: 1; min-height: 40px; background: rgba(0,0,0,0.4); border: 1px solid rgba(74,122,82,0.35); border-radius: 2px; color: var(--white); font-family: 'Share Tech Mono', monospace; font-size: 14px; padding: 0.4rem 0.75rem; outline: none; letter-spacing: 0.04em; transition: border-color 0.2s; -webkit-appearance: none; appearance: none; }
+.txn-filter-input::placeholder { color: var(--dim); }
+.txn-filter-input:focus { border-color: rgba(0,255,65,0.5); }
+.txn-filter-select { min-height: 40px; background: rgba(0,0,0,0.4); border: 1px solid rgba(74,122,82,0.35); border-radius: 2px; color: var(--white); font-family: 'Share Tech Mono', monospace; font-size: 13px; padding: 0 1.6rem 0 0.6rem; outline: none; cursor: pointer; -webkit-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%234A7A52'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.5rem center; letter-spacing: 0.03em; }
+.txn-filter-select option { background: #050F07; color: var(--white); }
+.txn-row { display: flex; align-items: center; gap: 0.75rem; min-height: 64px; background: var(--bg1); border-bottom: 1px solid rgba(0,255,65,0.05); padding: 0.65rem 1rem; cursor: pointer; transition: background 0.15s; }
+.txn-row:hover, .txn-row:active { background: rgba(0,255,65,0.04); }
+.txn-row-left { flex: 1; min-width: 0; }
+.txn-row-name   { font-size: 0.85rem; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.txn-row-reason { font-size: 0.65rem; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 0.1rem; letter-spacing: 0.02em; }
+.txn-row-date   { font-size: 0.6rem; color: var(--dim); margin-top: 0.12rem; letter-spacing: 0.04em; }
+.txn-row-center { flex-shrink: 0; }
+.txn-row-right  { text-align: right; flex-shrink: 0; white-space: nowrap; }
+.txn-amount { font-family: 'Orbitron', sans-serif; font-size: 0.78rem; font-weight: 700; }
+.txn-amount.pos { color: var(--green); }
+.txn-amount.neg { color: var(--red); }
+.type-badge { font-family: 'Orbitron', sans-serif; font-size: 0.38rem; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.18rem 0.45rem; border-radius: 2px; display: inline-block; white-space: nowrap; }
+.type-badge.award    { color: var(--green); border: 1px solid rgba(0,255,65,0.4);   background: rgba(0,255,65,0.07);   }
+.type-badge.held     { color: var(--dim);   border: 1px solid rgba(74,122,82,0.4);  background: rgba(74,122,82,0.07);  }
+.type-badge.fine     { color: var(--red);   border: 1px solid rgba(255,68,68,0.4);  background: rgba(255,68,68,0.07);  }
+.type-badge.purchase { color: var(--amber); border: 1px solid rgba(255,140,0,0.4);  background: rgba(255,140,0,0.07);  }
+.type-badge.payout   { color: var(--blue);  border: 1px solid rgba(68,136,255,0.4); background: rgba(68,136,255,0.07); }
+.txn-count { font-size: 0.6rem; color: var(--dim); letter-spacing: 0.06em; padding: 0.5rem 0 0.25rem; }
+.txn-empty { font-size: 0.72rem; color: var(--dim); padding: 2rem 0; letter-spacing: 0.04em; text-align: center; }
+.txn-summary-card { background: var(--bg1); border: 1px solid rgba(0,255,65,0.12); border-radius: 4px; padding: 0.9rem 1rem; margin-bottom: 1.25rem; }
+.txn-summary-name { font-family: 'Orbitron', sans-serif; font-size: 0.9rem; font-weight: 700; color: var(--gold); text-shadow: var(--glow-gold); margin-bottom: 0.5rem; }
+.txn-summary-meta { display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.35rem; }
+.txn-summary-reason { font-size: 0.7rem; color: var(--dim); letter-spacing: 0.03em; }
 </style>
 </head>
 <body>
@@ -785,6 +816,13 @@ body::after {
       <div class="home-btn-content">
         <span class="home-btn-label">Students</span>
         <span class="home-btn-sub">Add, edit, and manage students and sections</span>
+      </div>
+    </button>
+    <button class="home-btn green" id="btn-txn-log">
+      <span class="home-btn-icon">&#8801;</span>
+      <div class="home-btn-content">
+        <span class="home-btn-label">Transaction Log</span>
+        <span class="home-btn-sub">View, edit, and delete transactions</span>
       </div>
     </button>
   </div>
@@ -1088,6 +1126,15 @@ body::after {
       <button class="action-btn red"   id="sd-deactivate-btn" style="display:none;">Deactivate Student</button>
       <button class="action-btn green" id="sd-reactivate-btn" style="display:none;">Reactivate Student</button>
     </div>
+
+    <!-- Transaction History -->
+    <div style="border-top:1px solid rgba(0,255,65,0.1);margin-top:1.5rem;padding-top:1rem;">
+      <div class="step-label" style="margin-top:0;margin-bottom:0.65rem;">Transaction History</div>
+      <div id="sd-txn-list"><div class="txn-empty" style="padding:1rem 0;">Loading transactions&hellip;</div></div>
+      <div id="sd-txn-viewall-wrap" style="display:none;margin-top:0.5rem;">
+        <button class="toggle-inactive-btn" id="sd-txn-viewall-btn">View All Transactions</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1201,7 +1248,81 @@ body::after {
 </div>
 
 <!-- ══════════════════════════════════════
-     SCREEN 14 — RECONCILE BALANCE
+     SCREEN 14 — TRANSACTION LOG
+════════════════════════════════════════ -->
+<div class="screen" id="s-txn-log">
+  <div class="app-header">
+    <div class="logo-wrap">
+      <span class="logo">IDEA.</span>
+      <span class="logo-sub">Transaction Log</span>
+    </div>
+    <div style="display:flex;gap:0.5rem;align-items:center;">
+      <button class="back-btn" id="txnlog-refresh" style="font-size:1.1rem;padding:0;min-width:48px;min-height:48px;display:flex;align-items:center;justify-content:center;">&#8635;</button>
+      <button class="back-btn" id="txnlog-back">&#8592; Back</button>
+    </div>
+  </div>
+  <div class="txn-filter-bar">
+    <input type="search" class="txn-filter-input" id="txnlog-name-filter" placeholder="Filter by student&hellip;" autocomplete="off">
+    <select class="txn-filter-select" id="txnlog-type-filter">
+      <option value="">All Types</option>
+      <option value="Award">Award</option>
+      <option value="Award - Held">Award - Held</option>
+      <option value="Fine">Fine</option>
+      <option value="Purchase">Purchase</option>
+      <option value="Payout">Payout</option>
+    </select>
+  </div>
+  <div class="screen-body" id="txnlog-body">
+    <div class="txn-count" id="txnlog-count"></div>
+    <div id="txnlog-list"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 15 — EDIT TRANSACTION
+════════════════════════════════════════ -->
+<div class="screen" id="s-txn-edit">
+  <div class="app-header">
+    <div class="logo-wrap">
+      <span class="logo">IDEA.</span>
+      <span class="logo-sub">Edit Transaction</span>
+    </div>
+    <button class="back-btn" id="txnedit-back">&#8592; Back</button>
+  </div>
+  <div class="screen-body" id="txnedit-body">
+
+    <!-- Summary card -->
+    <div class="txn-summary-card">
+      <div class="txn-summary-name" id="txnedit-student"></div>
+      <div class="txn-summary-meta">
+        <span class="txn-row-date" id="txnedit-date"></span>
+        <span class="type-badge" id="txnedit-type-badge"></span>
+      </div>
+      <div class="txn-summary-reason" id="txnedit-reason-cur"></div>
+    </div>
+
+    <!-- Amount -->
+    <div class="field-group">
+      <label class="field-label">Amount (i&#162;)</label>
+      <input type="text" inputmode="numeric" pattern="[0-9]*" class="field-input" id="txnedit-amount" autocomplete="off">
+    </div>
+
+    <!-- Reason -->
+    <div class="field-group">
+      <label class="field-label">Reason</label>
+      <input type="search" class="reason-search" id="txnedit-reason-search" placeholder="Filter reasons&hellip;" autocomplete="off">
+      <div class="reason-list" id="txnedit-reason-list" style="max-height:220px;"></div>
+    </div>
+
+    <button class="action-btn gold" id="txnedit-save-btn" disabled style="margin-top:1rem;">Save Changes</button>
+    <div class="action-btns-spacer"></div>
+    <button class="action-btn red"  id="txnedit-delete-btn">Delete Transaction</button>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 16 — RECONCILE BALANCE
 ════════════════════════════════════════ -->
 <div class="screen" id="s-reconcile">
   <div class="app-header">
@@ -1258,6 +1379,10 @@ let studentsManageData   = [];
 let sectionsData         = [];
 let studentsManageLoaded = false;
 let sectionsLoaded       = false;
+
+let txnLogData    = [];
+let txnLogLoaded  = false;
+let activeTxnEdit = null;
 
 const STUDENTS_KEY    = 'idea-entry-students';
 const STUDENTS_TS_KEY = 'idea-entry-students-ts';
@@ -3079,6 +3204,7 @@ function openStudentDetail(s) {
   document.getElementById('sd-reactivate-btn').style.display = active ? 'none' : '';
   document.getElementById('sd-body').scrollTop = 0;
   showScreen('s-student-detail');
+  loadStudentTxns(smName(s));
 }
 
 document.getElementById('sd-back').addEventListener('click', () => {
@@ -3311,6 +3437,305 @@ document.getElementById('secnew-submit-btn').addEventListener('click', async () 
     } else { toast('Error — try again', 'error'); }
   } catch (e) { toast('Network error', 'error'); }
   finally { hideLoading(); }
+});
+
+// ── Transaction Log helpers ───────────────────────────
+function txnRow(t)    { return getField(t,'row','Row','id','ID','_row','rowIndex'); }
+function txnName(t)   { return getField(t,'name','Name','student','Student') || '—'; }
+function txnDate(t)   { return getField(t,'date','Date','timestamp','Timestamp') || ''; }
+function txnType(t)   { return getField(t,'type','Type') || ''; }
+function txnReason(t) { return getField(t,'reason','Reason') || ''; }
+function txnAmount(t) { return parseFloat(getField(t,'amount','Amount') || 0); }
+
+function txnBadgeClass(type) {
+  const t = (type || '').toLowerCase().replace(/[\s\-]/g,'');
+  if (t === 'awardheld') return 'held';
+  if (t.startsWith('award')) return 'award';
+  if (t === 'fine') return 'fine';
+  if (t === 'purchase') return 'purchase';
+  if (t === 'payout') return 'payout';
+  return 'award';
+}
+
+function txnIsCredit(type) {
+  const t = (type || '').toLowerCase();
+  return t === 'award' || t === 'award - held' || t === 'payout';
+}
+
+function fmtDate(dateStr) {
+  if (!dateStr) return '';
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return String(dateStr);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  } catch (_) { return String(dateStr); }
+}
+
+function txnRowHTML(t, showName) {
+  const row    = txnRow(t);
+  const name   = txnName(t);
+  const date   = fmtDate(txnDate(t));
+  const type   = txnType(t);
+  const reason = txnReason(t);
+  const amount = txnAmount(t);
+  const credit = txnIsCredit(type);
+  const amtStr = (credit ? '+' : '−') + Math.round(Math.abs(amount)) + ' i¢';
+  return `<div class="txn-row" data-txn-row="${esc(String(row))}">
+    <div class="txn-row-left">
+      ${showName ? `<div class="txn-row-name">${esc(name)}</div>` : ''}
+      <div class="txn-row-reason">${esc(reason)}</div>
+      <div class="txn-row-date">${esc(date)}</div>
+    </div>
+    <div class="txn-row-center"><span class="type-badge ${txnBadgeClass(type)}">${esc(type)}</span></div>
+    <div class="txn-row-right"><span class="txn-amount ${credit?'pos':'neg'}">${esc(amtStr)}</span></div>
+  </div>`;
+}
+
+// ── Fetch functions ───────────────────────────────────
+async function fetchTxnLog() {
+  const res  = await fetch(API + '?action=getTransactions&_=' + Date.now(), { cache: 'no-store' });
+  const data = await res.json();
+  let list = [];
+  if (Array.isArray(data))                           list = data;
+  else if (data && Array.isArray(data.transactions)) list = data.transactions;
+  else if (data && Array.isArray(data.data))         list = data.data;
+  list.sort((a, b) => {
+    const da = new Date(txnDate(a)).getTime() || 0;
+    const db = new Date(txnDate(b)).getTime() || 0;
+    return db - da;
+  });
+  txnLogData   = list;
+  txnLogLoaded = true;
+}
+
+async function fetchStudentTxns(name) {
+  const res  = await fetch(API + '?action=getTransactions&name=' + encodeURIComponent(name) + '&_=' + Date.now(), { cache: 'no-store' });
+  const data = await res.json();
+  let list = [];
+  if (Array.isArray(data))                           list = data;
+  else if (data && Array.isArray(data.transactions)) list = data.transactions;
+  else if (data && Array.isArray(data.data))         list = data.data;
+  list.sort((a, b) => {
+    const da = new Date(txnDate(a)).getTime() || 0;
+    const db = new Date(txnDate(b)).getTime() || 0;
+    return db - da;
+  });
+  return list;
+}
+
+// ── Transaction Log screen ────────────────────────────
+document.getElementById('btn-txn-log').addEventListener('click', async () => {
+  if (!txnLogLoaded) {
+    showLoading('Loading transactions…');
+    try { await fetchTxnLog(); }
+    catch (e) { hideLoading(); toast('Failed to load transactions', 'error'); return; }
+    hideLoading();
+  }
+  document.getElementById('txnlog-name-filter').value = '';
+  document.getElementById('txnlog-type-filter').value = '';
+  renderTxnLog();
+  showScreen('s-txn-log');
+});
+
+document.getElementById('txnlog-back').addEventListener('click', () => showScreen('s-home'));
+
+document.getElementById('txnlog-refresh').addEventListener('click', async () => {
+  showLoading('Refreshing…');
+  try { await fetchTxnLog(); renderTxnLog(); }
+  catch (e) { toast('Refresh failed', 'error'); }
+  finally { hideLoading(); }
+});
+
+document.getElementById('txnlog-name-filter').addEventListener('input', renderTxnLog);
+document.getElementById('txnlog-type-filter').addEventListener('change', renderTxnLog);
+
+function renderTxnLog() {
+  const q    = (document.getElementById('txnlog-name-filter').value || '').trim().toLowerCase();
+  const type = document.getElementById('txnlog-type-filter').value;
+  let filtered = txnLogData;
+  if (q)    filtered = filtered.filter(t => txnName(t).toLowerCase().includes(q));
+  if (type) filtered = filtered.filter(t => txnType(t) === type);
+
+  const countEl = document.getElementById('txnlog-count');
+  countEl.textContent = filtered.length + ' transaction' + (filtered.length !== 1 ? 's' : '');
+
+  const listEl = document.getElementById('txnlog-list');
+  if (!filtered.length) {
+    listEl.innerHTML = '<div class="txn-empty">No transactions found.</div>';
+    return;
+  }
+  listEl.innerHTML = filtered.map(t => txnRowHTML(t, true)).join('');
+  listEl.querySelectorAll('.txn-row[data-txn-row]').forEach(el => {
+    el.addEventListener('click', () => {
+      const t = txnLogData.find(x => String(txnRow(x)) === String(el.dataset.txnRow));
+      if (t) openTxnEdit(t, 's-txn-log');
+    });
+  });
+}
+
+// ── Edit Transaction screen ───────────────────────────
+let txnEditOrigin     = 's-txn-log';
+let txnEditSelReason  = null;
+let txnEditInitReason = null;
+let txnEditInitAmount = null;
+
+function openTxnEdit(t, origin) {
+  activeTxnEdit     = t;
+  txnEditOrigin     = origin || 's-txn-log';
+  const type        = txnType(t);
+  const reason      = txnReason(t);
+  const amount      = Math.round(txnAmount(t));
+
+  txnEditInitReason = reason;
+  txnEditInitAmount = amount;
+  txnEditSelReason  = reason;
+
+  document.getElementById('txnedit-student').textContent    = txnName(t);
+  document.getElementById('txnedit-date').textContent       = fmtDate(txnDate(t));
+  document.getElementById('txnedit-reason-cur').textContent = reason;
+  const badgeEl = document.getElementById('txnedit-type-badge');
+  badgeEl.textContent = type;
+  badgeEl.className   = 'type-badge ' + txnBadgeClass(type);
+  document.getElementById('txnedit-amount').value = String(amount);
+
+  const reasons  = REASONS[type] || REASONS[(type || '').replace(' - Held', '')] || [];
+  const listEl   = document.getElementById('txnedit-reason-list');
+  const searchEl = document.getElementById('txnedit-reason-search');
+  searchEl.value = '';
+  listEl.innerHTML = reasons.map(r =>
+    `<div class="reason-item${r === reason ? ' sel' : ''}" data-r="${esc(r)}">${esc(r)}</div>`
+  ).join('');
+
+  listEl.querySelectorAll('.reason-item').forEach(el => {
+    el.addEventListener('click', () => {
+      listEl.querySelectorAll('.reason-item').forEach(i => i.classList.remove('sel'));
+      el.classList.add('sel');
+      txnEditSelReason = el.dataset.r;
+      refreshTxnEditSave();
+    });
+  });
+
+  searchEl.oninput = () => {
+    const q = searchEl.value.trim().toLowerCase();
+    listEl.querySelectorAll('.reason-item').forEach(el => {
+      el.style.display = !q || el.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+  };
+
+  refreshTxnEditSave();
+  document.getElementById('txnedit-body').scrollTop = 0;
+  showScreen('s-txn-edit');
+}
+
+function refreshTxnEditSave() {
+  const curAmt = document.getElementById('txnedit-amount').value.trim();
+  const changed = txnEditSelReason !== txnEditInitReason || curAmt !== String(txnEditInitAmount);
+  document.getElementById('txnedit-save-btn').disabled = !changed;
+}
+
+document.getElementById('txnedit-amount').addEventListener('input', refreshTxnEditSave);
+
+document.getElementById('txnedit-back').addEventListener('click', () => showScreen(txnEditOrigin));
+
+document.getElementById('txnedit-save-btn').addEventListener('click', async () => {
+  const row    = txnRow(activeTxnEdit);
+  const amount = parseInt(document.getElementById('txnedit-amount').value, 10);
+  const reason = txnEditSelReason;
+  if (!row || isNaN(amount) || !reason) return;
+  showLoading('Saving…');
+  try {
+    const res  = await fetch(apiUrl({ action: 'updateTransaction', row, amount, reason }));
+    const data = await res.json();
+    if (data && (data.success || data.status === 'ok' || data.result === 'success')) {
+      toast('Transaction updated ✓', 'success');
+      if (txnEditOrigin === 's-txn-log') {
+        await fetchTxnLog();
+        renderTxnLog();
+      } else if (txnEditOrigin === 's-student-detail' && activeStudentData) {
+        loadStudentTxns(smName(activeStudentData));
+      }
+      showScreen(txnEditOrigin);
+    } else { toast('Error — try again', 'error'); }
+  } catch (e) { toast('Network error', 'error'); }
+  finally { hideLoading(); }
+});
+
+document.getElementById('txnedit-delete-btn').addEventListener('click', () => {
+  const t      = activeTxnEdit;
+  const name   = txnName(t);
+  const detail = `${fmtDate(txnDate(t))} · ${name} · ${txnType(t)} · ${Math.round(txnAmount(t))} i¢ · ${txnReason(t)}`;
+  confirm(
+    'Delete Transaction',
+    `${detail} — This cannot be undone and will affect ${name}'s balance.`,
+    async () => {
+      showLoading('Deleting…');
+      try {
+        const res  = await fetch(apiUrl({ action: 'deleteTransaction', row: txnRow(t) }));
+        const data = await res.json();
+        if (data && (data.success || data.status === 'ok' || data.result === 'success')) {
+          toast('Transaction deleted', 'success');
+          if (txnEditOrigin === 's-txn-log') {
+            await fetchTxnLog();
+            renderTxnLog();
+          } else if (txnEditOrigin === 's-student-detail' && activeStudentData) {
+            loadStudentTxns(smName(activeStudentData));
+          }
+          showScreen(txnEditOrigin);
+        } else { toast('Error — try again', 'error'); }
+      } catch (e) { toast('Network error', 'error'); }
+      finally { hideLoading(); }
+    }
+  );
+});
+
+// ── Student detail transaction history ────────────────
+let sdTxnData = [];
+
+async function loadStudentTxns(name) {
+  document.getElementById('sd-txn-list').innerHTML = '<div class="txn-empty" style="padding:1rem 0;">Loading transactions…</div>';
+  document.getElementById('sd-txn-viewall-wrap').style.display = 'none';
+  try {
+    sdTxnData = await fetchStudentTxns(name);
+    renderStudentTxns();
+  } catch (e) {
+    document.getElementById('sd-txn-list').innerHTML = '<div class="txn-empty" style="padding:1rem 0;">Failed to load transactions.</div>';
+  }
+}
+
+function renderStudentTxns() {
+  const visible = sdTxnData.slice(0, 30);
+  const hasMore = sdTxnData.length > 30;
+  const listEl  = document.getElementById('sd-txn-list');
+
+  if (!visible.length) {
+    listEl.innerHTML = '<div class="txn-empty" style="padding:1rem 0;">No transactions.</div>';
+    document.getElementById('sd-txn-viewall-wrap').style.display = 'none';
+    return;
+  }
+
+  listEl.innerHTML = visible.map(t => txnRowHTML(t, false)).join('');
+  listEl.querySelectorAll('.txn-row[data-txn-row]').forEach(el => {
+    el.addEventListener('click', () => {
+      const t = sdTxnData.find(x => String(txnRow(x)) === String(el.dataset.txnRow));
+      if (t) openTxnEdit(t, 's-student-detail');
+    });
+  });
+
+  document.getElementById('sd-txn-viewall-wrap').style.display = hasMore ? '' : 'none';
+}
+
+document.getElementById('sd-txn-viewall-btn').addEventListener('click', async () => {
+  if (!txnLogLoaded) {
+    showLoading('Loading…');
+    try { await fetchTxnLog(); }
+    catch (e) { hideLoading(); toast('Failed to load', 'error'); return; }
+    hideLoading();
+  }
+  const name = activeStudentData ? smName(activeStudentData) : '';
+  document.getElementById('txnlog-name-filter').value = name;
+  document.getElementById('txnlog-type-filter').value = '';
+  renderTxnLog();
+  showScreen('s-txn-log');
 });
 
 // ── Boot ──────────────────────────────────────────────

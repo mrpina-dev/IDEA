@@ -1,135 +1,94 @@
-﻿Edit entry/index.html. Add a full student and section management system.
+﻿Edit entry/index.html. Add transaction editing and deletion in two places: a global Transaction Log screen and per-student transaction history in the student detail screen.
 
 --- DATA ---
 Add at top of script:
-let studentsManageData = [];
-let sectionsData = [];
-let studentsManageLoaded = false;
-let sectionsLoaded = false;
+let txnLogData = [];
+let txnLogLoaded = false;
+let activeTxnEdit = null;
 
-Add fetchStudentsManage() that fetches API + "?action=getStudents" with cache no-store, stores in studentsManageData.
-Add fetchSectionsData() that fetches API + "?action=getSections" with cache no-store, stores in sectionsData.
-Cache both in localStorage with 5 min TTL keys "idea-entry-mgmt-students" and "idea-entry-mgmt-sections".
+Add fetchTxnLog() that fetches API + "?action=getTransactions" with cache no-store, parses JSON array, stores in txnLogData sorted newest first.
+
+Add fetchStudentTxns(name) that fetches API + "?action=getTransactions&name=" + encodeURIComponent(name) with cache no-store, returns the parsed array.
 
 --- HOME BUTTON ---
-Add a sixth home button after Reconcile Balance:
-- Border: rgba(136,221,255,0.35) ice
-- Icon: ◉
-- Label: "Students" in ice (#88DDFF)
-- Sub: "Add, edit, and manage students and sections"
-- On tap: fetch both students and sections if not loaded, then show s-students screen
+Add a seventh home button after Students:
+- Border: rgba(0,255,65,0.35) green
+- Icon: ≡
+- Label: "Transaction Log" in green
+- Sub: "View, edit, and delete transactions"
+- On tap: fetch txnLog if not loaded (show loading overlay), then show s-txn-log screen
 
---- SCREEN: s-students (Student List) ---
-Header: "Students" logo-sub + back to home + "+" add button (green, right side)
-Also a "Sections" button next to the add button (small, cyan border, Orbitron, opens s-sections screen)
+--- SCREEN: s-txn-log (Global Transaction Log) ---
+Header: "Transaction Log" logo-sub + back to home button
 
-Screen body:
-- Search input (same style as student search) that filters the list in real time by name or section
-- Students grouped by section, each section has a header label
-- Within each section, students sorted alphabetically
-- Each student row (min-height 56px, bg1, border-bottom):
-  - Left: student name (white, 0.88rem) + section in dim below
-  - Right: balance in gold/red Orbitron + "INACTIVE" badge in red if not active
-  - Tap to open s-student-detail
-- At bottom, a collapsed "Inactive Students" section with toggle button showing count
-- Show a dim placeholder if no students
+Filter bar below header (sticky, same bg as header):
+- Name search input (placeholder "Filter by student...")
+- Type dropdown (All / Award / Award - Held / Fine / Purchase / Payout)
+- Both filter the visible list in real time without re-fetching
 
---- SCREEN: s-student-detail (Edit Student) ---
-Header: student name truncated + back to s-students
+Transaction list:
+- Each row min-height 64px, bg1, border-bottom 1px solid rgba(0,255,65,0.05)
+- Left side: student name (white, 0.85rem) + date below in dim 0.6rem
+- Center: type badge (reuse existing type badge styles)
+- Right: amount with sign and color (Award/Award-Held/Payout = green +, Fine/Purchase = red -)
+- Reason shown below name in dim 0.65rem truncated with ellipsis
+- Tap anywhere on row to open s-txn-edit for that transaction
 
-Fields:
-1. Full Name (text input, required)
-2. Section (a custom select component - NOT a native select):
-   - Shows current section value in a tappable field
-   - Tapping opens a scrollable list of existing sections from sectionsData
-   - Last item in list: "+ New Section" which opens s-section-new pre-filled to return here after creation
-   - Selected section shown with its color dot
-3. Wage (text input, inputmode=numeric, pattern=[0-9]*)
-4. Notes (textarea, 3 rows)
+Show "No transactions found" dim message if list is empty after filtering.
+Show transaction count in dim text above the list.
 
-Action buttons:
-- SAVE CHANGES (gold border) - calls updateStudent API with rosterRow, name, section, wage, notes. On name change, show confirm dialog first: "Renaming will update all transaction history. This cannot be undone."
-- DEACTIVATE STUDENT (red border, small) - only shown for active students. Confirm dialog. Calls deactivateStudent API.
-- REACTIVATE STUDENT (green border, small) - only shown for inactive students. Calls reactivateStudent API.
+A refresh button in the header right side (small, dim border, ↻) that re-fetches and re-renders.
 
-After any save, refresh studentsManageData and re-render s-students.
+--- SCREEN: s-txn-edit (Edit/Delete Transaction) ---
+Header: "Edit Transaction" + back button returning to wherever it was opened from (s-txn-log or s-student-detail)
 
---- SCREEN: s-student-new (Add Student) ---
-Header: "New Student" + back to s-students
+Show a read-only summary card at top:
+- Student name (gold, Orbitron)
+- Date and Type badge on same row
+- Current Reason in dim text
 
-Fields:
-1. Full Name (required)
-2. Section (same custom select component as detail, with + New Section option)
-3. Wage (text input, inputmode=numeric, default value "1")
+Two editable fields below:
 
-CREATE STUDENT button (gold border) - calls addStudent API, returns to s-students, shows success toast.
+1. Amount (text input, inputmode=numeric, pattern=[0-9]*, current value pre-filled, label "Amount (i¢)")
 
---- SCREEN: s-sections (Section List) ---
-Header: "Sections" + back to s-students + "+" add button (green)
-
-Each section row (min-height 56px):
-- Left: a colored dot (12px circle using section color) + section name (white)
-- Right: student count (how many active students in that section from studentsManageData) + "INACTIVE" badge if section is inactive
-- Tap to open s-section-detail
-
---- SCREEN: s-section-detail (Edit Section) ---
-Header: section name + back to s-sections
-
-Fields:
-1. Section Name (text input, required)
-2. Color (custom color picker component):
-   - A row of 8 preset color swatches (24px circles, tappable):
-     #00FF41 (green), #C8FF00 (gold), #00F0FF (cyan), #FF8C00 (amber),
-     #FF4444 (red), #88DDFF (ice), #FF88CC (pink), #4A7A52 (dim)
-   - Below presets: a text input for hex value (shows # prefix, 6 char input)
-     inputmode text, auto-uppercases, validates as valid hex on blur
-   - A 32px preview swatch showing the current color (square, border-radius 4px)
-   - Tapping a preset fills the hex input and updates the preview
-   - Typing in hex input updates the preview live
+2. Reason (scrollable list matching the existing reason-list style, pre-filtered to the transaction type, current reason pre-selected with .sel class):
+   - Award reasons for Award and Award-Held types
+   - Fine reasons for Fine type
+   - Purchase reasons for Purchase type
+   - Payout reasons for Payout type
+   - Add a search filter input above the reason list (same as reason-search style)
 
 Action buttons:
-- SAVE CHANGES (gold border) - calls updateSection API. On name change, confirm dialog: "Renaming will update all students in this section."
-- REMOVE SECTION (red border, small) - calls removeSection API. If section has active students, show error toast "Cannot remove section with active students." instead of calling API.
+SAVE CHANGES (gold border, full width) - disabled if nothing changed. On tap:
+  - Call updateTransaction API with row, amount, reason
+  - Show success toast "Transaction updated"
+  - Refresh the transaction list in whichever screen opened this
+  - Go back
 
---- SCREEN: s-section-new (Add Section) ---
-Header: "New Section" + back button (returns to wherever opened from - s-sections or s-student-detail/new)
+DELETE TRANSACTION (red border, full width, smaller) - on tap show confirm overlay with:
+  - Title: "Delete Transaction"
+  - Full transaction details in the message: "[Date] · [Student] · [Type] · [Amount] i¢ · [Reason]"
+  - "This cannot be undone and will affect [Student]'s balance."
+  - Cancel and DELETE buttons
+  On confirm: call deleteTransaction API with row, show success toast "Transaction deleted", refresh list, go back.
 
-Same fields as s-section-detail (name + color picker).
-CREATE SECTION button (gold border) - calls addSection API, refreshes sectionsData, returns to previous screen.
+--- STUDENT DETAIL TRANSACTION HISTORY ---
+In s-student-detail screen, after the action buttons section, add a divider and a "Transaction History" section.
 
---- COLOR PICKER CSS ---
-.color-presets { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
-.color-swatch {
-  width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
-  border: 2px solid transparent; transition: border-color 0.15s, transform 0.15s;
-  flex-shrink: 0;
-}
-.color-swatch:hover { transform: scale(1.15); }
-.color-swatch.selected { border-color: var(--white); }
-.color-preview {
-  width: 32px; height: 32px; border-radius: 4px; flex-shrink: 0;
-  border: 1px solid rgba(74,122,82,0.4);
-}
-.color-input-row { display: flex; align-items: center; gap: 0.75rem; }
-.color-hex-input {
-  flex: 1; min-height: 48px;
-  background: rgba(0,0,0,0.4); border: 1px solid rgba(74,122,82,0.35);
-  border-radius: 2px; color: var(--white); font-family: 'Share Tech Mono', monospace;
-  font-size: 16px; padding: 0.55rem 0.85rem; outline: none;
-  letter-spacing: 0.08em; transition: border-color 0.2s;
-  text-transform: uppercase;
-}
-.color-hex-input:focus { border-color: rgba(0,255,65,0.5); }
+When s-student-detail opens for a student, fire fetchStudentTxns(name) in the background. While loading, show dim "Loading transactions..." text.
 
---- SECTION DOT ---
-.section-dot {
-  width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; display: inline-block;
-}
+On load, render up to 30 most recent transactions for that student in the same row style as the global log (without the student name column since it's implied). Show "No transactions" if empty.
+
+Each row is tappable and opens s-txn-edit for that transaction. After editing/deleting from here, return to s-student-detail and refresh the transaction list.
+
+Show a "View All" button below the list if more than 30 transactions exist, which opens s-txn-log pre-filtered to that student's name.
+
+--- NAVIGATION ---
+Track where s-txn-edit was opened from using a variable txnEditOrigin ('s-txn-log' or 's-student-detail'). Back button and post-save navigation uses this to return to the correct screen.
 
 --- GENERAL ---
-All new screens follow the existing pattern (position fixed, opacity/pointer-events transition, screen-body overflow-y auto).
-Wire all back buttons and navigation correctly.
+All new screens follow existing pattern. Wire all navigation correctly.
+Show loading overlay only for initial txnLog fetch and delete operations.
 All API calls use apiUrl() helper.
-Show loading overlay during non-background API calls.
 
-Commit with message "feat: full student and section management system in entry app" and push.
+Commit with message "feat: global transaction log with edit and delete, student transaction history" and push.
