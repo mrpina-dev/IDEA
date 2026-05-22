@@ -485,7 +485,8 @@ nav a.active { color: var(--gold); text-shadow: var(--glow-gold); }
 .type-fine   { color: var(--red);   border: 1px solid rgba(255,68,68,0.35); background: rgba(255,68,68,0.07); }
 .type-purchase { color: var(--amber); border: 1px solid rgba(255,140,0,0.35); background: rgba(255,140,0,0.07); }
 .type-payout { color: var(--blue);  border: 1px solid rgba(68,136,255,0.35); background: rgba(68,136,255,0.07); }
-.type-other  { color: var(--dim);   border: 1px solid rgba(74,122,82,0.3);  background: transparent; }
+.type-other    { color: var(--dim);   border: 1px solid rgba(74,122,82,0.3);  background: transparent; }
+.type-fine-owed { color: var(--amber); border: 1px solid rgba(255,140,0,0.35); background: rgba(255,140,0,0.07); }
 
 /* ── Pagination ─────────────────────────────────────── */
 .txn-pagination {
@@ -1410,7 +1411,9 @@ body::after {
       <select class="txn-type-select" id="txn-type-filter">
         <option value="">All Types</option>
         <option value="Award">Award</option>
+        <option value="Award - Held">Award - Held</option>
         <option value="Fine">Fine</option>
+        <option value="Fine - Owed">Fine - Owed</option>
         <option value="Purchase">Purchase</option>
         <option value="Payout">Payout</option>
       </select>
@@ -1890,6 +1893,7 @@ function typeBadgeClass(type) {
   switch ((type || '').toLowerCase()) {
     case 'award':         return 'type-award';
     case 'award - held':  return 'type-award-held';
+    case 'fine - owed':   return 'type-fine-owed';
     case 'fine':          return 'type-fine';
     case 'purchase':      return 'type-purchase';
     case 'payout':   return 'type-payout';
@@ -2104,13 +2108,13 @@ function renderLeaderboard() {
         return la - lb;
       }
       case 'balance-desc': {
-        const ba = parseFloat(pa('Awarded')||0) - parseFloat(pa('Fines')||0);
-        const bb = parseFloat(pb('Awarded')||0) - parseFloat(pb('Fines')||0);
+        const ba = parseFloat(pa('Coin Balance')||0);
+        const bb = parseFloat(pb('Coin Balance')||0);
         return bb - ba;
       }
       case 'balance-asc': {
-        const ba = parseFloat(pa('Awarded')||0) - parseFloat(pa('Fines')||0);
-        const bb = parseFloat(pb('Awarded')||0) - parseFloat(pb('Fines')||0);
+        const ba = parseFloat(pa('Coin Balance')||0);
+        const bb = parseFloat(pb('Coin Balance')||0);
         return ba - bb;
       }
       case 'awarded-desc':
@@ -2442,12 +2446,12 @@ function renderAnalytics() {
     const amount = Math.abs(parseFloat(pick(r)('Amount') || 0));
     if (dt >= thisMonday && dt <= now) {
       thisTxns++;
-      if (type === 'award') thisAwarded += amount;
-      if (type === 'fine')  thisFines   += amount;
+      if (type === 'award' || type === 'award - held') thisAwarded += amount;
+      if (type === 'fine'  || type === 'fine - owed')  thisFines   += amount;
     } else if (dt >= lastMonday && dt <= lastSunday) {
       lastTxns++;
-      if (type === 'award') lastAwarded += amount;
-      if (type === 'fine')  lastFines   += amount;
+      if (type === 'award' || type === 'award - held') lastAwarded += amount;
+      if (type === 'fine'  || type === 'fine - owed')  lastFines   += amount;
     }
   });
 
@@ -2498,10 +2502,11 @@ function renderAnalytics() {
   tblHtml += '</tbody></table>';
   document.getElementById('analytics-breakdown-table').innerHTML = tblHtml;
 
-  function topReasons(typeStr) {
+  function topReasons(typeStrs) {
+    const types = (Array.isArray(typeStrs) ? typeStrs : [typeStrs]).map(t => t.toLowerCase());
     const freq = {};
     txnData.forEach(r => {
-      if ((pick(r)('Type', 'Transaction Type') || '').toLowerCase() !== typeStr.toLowerCase()) return;
+      if (!types.includes((pick(r)('Type', 'Transaction Type') || '').toLowerCase())) return;
       const rsn = (pick(r)('Reason', 'Description', 'Note') || '').trim();
       if (rsn) freq[rsn] = (freq[rsn] || 0) + 1;
     });
@@ -2518,9 +2523,9 @@ function renderAnalytics() {
   }
   document.getElementById('analytics-reasons').innerHTML =
     '<div class="reason-group"><div class="reason-group-title">Top Fine Reasons</div>' +
-    reasonsHtml(topReasons('Fine'), 'var(--red)') + '</div>' +
+    reasonsHtml(topReasons(['Fine', 'Fine - Owed']), 'var(--red)') + '</div>' +
     '<div class="reason-group"><div class="reason-group-title">Top Award Reasons</div>' +
-    reasonsHtml(topReasons('Award'), 'var(--green)') + '</div>';
+    reasonsHtml(topReasons(['Award', 'Award - Held']), 'var(--green)') + '</div>';
 
   // ── Student Spotlights ────────────────────────────
   const sData = summaryData.map(r => ({
