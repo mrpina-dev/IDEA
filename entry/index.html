@@ -1762,7 +1762,7 @@ function renderPayoutGiveRow(s) {
     `<span class="payout-bal pos" style="margin-right:0.65rem;">${Math.round(s.bal)} i&#162;</span>` +
     (isPaid
       ? `<span class="payout-paid-badge">PAID &#10003;</span>`
-      : `<button class="payout-pay-btn" onclick="handlePayStudent(${JSON.stringify(s.name)})">PAY</button>`) +
+      : `<button class="payout-pay-btn" data-student="${esc(s.name)}">PAY</button>`) +
     `</div>`;
 }
 
@@ -1844,13 +1844,22 @@ function renderPayout(data) {
     ? give.map(s => renderPayoutGiveRow(s)).join('')
     : '<div class="payout-none">None</div>';
 
-  document.getElementById('payout-content').innerHTML =
+  const _pc = document.getElementById('payout-content');
+  _pc.replaceWith(_pc.cloneNode(false)); // remove stale listeners
+  const payoutContent = document.getElementById('payout-content');
+  payoutContent.innerHTML =
     `<div class="payout-sec-head give">Give Coin <span class="payout-sec-count">(${give.length})</span></div>` +
-    (give.length ? `<button class="payout-pay-all-btn" id="payout-pay-all-btn" onclick="handlePayAll()">Pay All (${give.length}) Students</button>` : '') +
+    (give.length ? `<button class="payout-pay-all-btn" id="payout-pay-all-btn">Pay All (${give.length}) Students</button>` : '') +
     giveRowsHTML +
     `<hr class="payout-divider">` +
     `<div class="payout-sec-head debt">Wage Only <span class="payout-sec-count">(${wage.length})</span></div>` +
     wageRows;
+
+  payoutContent.addEventListener('click', ev => {
+    const payBtn = ev.target.closest('.payout-pay-btn[data-student]');
+    if (payBtn) { handlePayStudent(payBtn.dataset.student); return; }
+    if (ev.target.closest('#payout-pay-all-btn')) handlePayAll();
+  });
 }
 
 // ── Student Search ────────────────────────────────────
@@ -2183,8 +2192,8 @@ function resetLog() {
 
 // ── PIN Lock ──────────────────────────────────────────
 // PIN stored in two parts, joined only at comparison time — never as a single literal.
-const _pX = '17';
-const _pY = '38';
+// Only the SHA-256 hash of the PIN is stored here. To change the PIN: compute sha256(newPin) offline and update PIN_HASH.
+const PIN_HASH = '30606ac3b4fd5c618ac4c6555ce007edd7fe73d75b685320aa56be211ebc4b40';
 const AUTH_KEY = 'idea-entry-auth';
 const AUTH_TTL = 30 * 24 * 60 * 60 * 1000; // 30 days
 
@@ -2231,11 +2240,8 @@ async function attemptUnlock() {
   if (pinBusy || pinBuffer.length !== 4) return;
   pinBusy = true;
   // Hash both input and reference independently — no plaintext PIN ever lives as one string
-  const [inputHash, refHash] = await Promise.all([
-    sha256hex(pinBuffer),
-    sha256hex(_pX + _pY)
-  ]);
-  if (inputHash === refHash) {
+  const inputHash = await sha256hex(pinBuffer);
+  if (inputHash === PIN_HASH) {
     localStorage.setItem(AUTH_KEY, String(Date.now()));
     launchApp(true);
   } else {
@@ -2770,7 +2776,7 @@ document.getElementById('btn-contracts').addEventListener('click', async () => {
   if (!contractsLoaded) {
     showLoading('Loading contracts…');
     try {
-      await fetchContracts();
+      await (_contractsFetch || fetchContracts());
     } catch (e) {
       hideLoading();
       toast('Failed to load contracts', 'error');
@@ -3491,7 +3497,8 @@ document.getElementById('secdet-save-btn').addEventListener('click', async () =>
   async function doSaveSection() {
     showLoading('Saving…');
     try {
-      const res  = await fetch(apiUrl({ action: 'updateSection', name: oldName, newName, color }));
+      const sRow = activeSectionData ? activeSectionData.row : '';
+      const res  = await fetch(apiUrl({ action: 'updateSection', row: sRow, name: oldName, newName, color }));
       const data = await res.json();
       if (data && (data.success || data.status === 'ok' || data.result === 'success')) {
         toast('Section updated ✓', 'success');
@@ -3516,7 +3523,8 @@ document.getElementById('secdet-remove-btn').addEventListener('click', () => {
   confirm('Remove Section', `Remove section "${name}"? This cannot be undone.`, async () => {
     showLoading('Removing…');
     try {
-      const res  = await fetch(apiUrl({ action: 'removeSection', name }));
+      const sRow = activeSectionData ? activeSectionData.row : '';
+      const res  = await fetch(apiUrl({ action: 'removeSection', row: sRow, name }));
       const data = await res.json();
       if (data && (data.success || data.status === 'ok' || data.result === 'success')) {
         toast('Section removed', 'success');
@@ -3926,8 +3934,7 @@ function getWageStudents() {
   const overrideRaw = document.getElementById('wage-override').value.trim();
   const override    = overrideRaw ? parseInt(overrideRaw, 10) : null;
   return allStudents.filter(s => {
-    const active = smActive ? smActive(s) : true;
-    if (!active) return false;
+    if (!smActive(s)) return false;
     if (wageAllSelected) return true;
     const sec = getField(s, 'section', 'Section', 'Class') || '';
     return wageSelectedSections.has(sec);
