@@ -1,94 +1,76 @@
-﻿Edit entry/index.html. Add transaction editing and deletion in two places: a global Transaction Log screen and per-student transaction history in the student detail screen.
+﻿Edit entry/index.html. Make three changes related to weekly wage:
 
---- DATA ---
-Add at top of script:
-let txnLogData = [];
-let txnLogLoaded = false;
-let activeTxnEdit = null;
+--- CHANGE 1: REPLACE WEEKLY WAGE CONFIRM DIALOG WITH FULL SCREEN ---
 
-Add fetchTxnLog() that fetches API + "?action=getTransactions" with cache no-store, parses JSON array, stores in txnLogData sorted newest first.
+Remove the existing btn-wage confirm dialog flow entirely. Instead, tapping the Weekly Wage home button opens a new screen s-wage.
 
-Add fetchStudentTxns(name) that fetches API + "?action=getTransactions&name=" + encodeURIComponent(name) with cache no-store, returns the parsed array.
+Add screen s-wage:
+Header: "Weekly Wage" logo-sub + back to home button
 
---- HOME BUTTON ---
-Add a seventh home button after Students:
-- Border: rgba(0,255,65,0.35) green
-- Icon: ≡
-- Label: "Transaction Log" in green
-- Sub: "View, edit, and delete transactions"
-- On tap: fetch txnLog if not loaded (show loading overlay), then show s-txn-log screen
+SECTION FILTERS:
+A row of toggle buttons below the header (same style as leaderboard filter buttons on the coins page):
+All | IDEA-113 | IDEA-208-1 | IDEA-208-2 | IDEA-304 | IDEA-403
+Multi-select - tapping a section toggles it on/off. "All" is a special toggle - selecting it deselects all individual sections and vice versa. Active sections highlighted in gold border and text.
+On open, default to All selected.
 
---- SCREEN: s-txn-log (Global Transaction Log) ---
-Header: "Transaction Log" logo-sub + back to home button
+OVERRIDE AMOUNT:
+A field group below section filters:
+Label: "Override Wage Amount (optional)"
+Input: text, inputmode=numeric, pattern=[0-9]*, placeholder "Leave blank to use each student's stored wage"
+If filled, all selected students receive this amount instead of their individual stored wage.
 
-Filter bar below header (sticky, same bg as header):
-- Name search input (placeholder "Filter by student...")
-- Type dropdown (All / Award / Award - Held / Fine / Purchase / Payout)
-- Both filter the visible list in real time without re-fetching
+PHYSICAL COIN CHECKBOX:
+Same style as Award physical checkbox.
+Label: "Physical coins given?"
+Checked by default.
 
-Transaction list:
-- Each row min-height 64px, bg1, border-bottom 1px solid rgba(0,255,65,0.05)
-- Left side: student name (white, 0.85rem) + date below in dim 0.6rem
-- Center: type badge (reuse existing type badge styles)
-- Right: amount with sign and color (Award/Award-Held/Payout = green +, Fine/Purchase = red -)
-- Reason shown below name in dim 0.65rem truncated with ellipsis
-- Tap anywhere on row to open s-txn-edit for that transaction
+STUDENT PREVIEW LIST:
+Below the checkbox, a scrollable list showing every student who will be paid based on current section selection. Each row shows:
+- Student name (white)
+- Section in dim text
+- Amount they will receive (their stored wage, or override amount if set) in gold Orbitron
+Derive this list from allStudents filtered by selected sections and active status.
+Update live as sections or override amount change.
+Show a count above the list: "Paying X students"
 
-Show "No transactions found" dim message if list is empty after filtering.
-Show transaction count in dim text above the list.
+PAY button (gold border, full width, min-height 56px):
+Label: "Pay [N] Students"
+Disabled if no students in preview.
+On tap: call logWeeklyWageFiltered API with:
+- sections: pipe-separated list of selected sections (empty string if All)
+- overrideAmount: override value or empty string
+- physical: 'true' or 'false'
+Show loading overlay during the call.
+On success: toast "Weekly wage paid to X students", return to home.
+On error: toast error.
 
-A refresh button in the header right side (small, dim border, ↻) that re-fetches and re-renders.
+--- CHANGE 2: WAGE RAISE DETECTION ON PURCHASE SUBMIT ---
 
---- SCREEN: s-txn-edit (Edit/Delete Transaction) ---
-Header: "Edit Transaction" + back button returning to wherever it was opened from (s-txn-log or s-student-detail)
+In the submit handler, after the optimistic UI (toast shown, screen returned to home, background API fire started), add an interceptor specifically for Purchase + "Raise Weekly Wage":
 
-Show a read-only summary card at top:
-- Student name (gold, Orbitron)
-- Date and Type badge on same row
-- Current Reason in dim text
+if (selType === 'Purchase' && selReason === 'Raise Weekly Wage') {
+  After showing the success toast and returning to home, show a second modal overlay (use the existing confirm-overlay styled with a number input) with:
+  - Title: "UPDATE WEEKLY WAGE"
+  - Message: "[student name]'s weekly wage purchase logged. Set their new wage:"
+  - A number input pre-filled with current student wage + 1 (read from allStudents)
+  - Label below input: "Current wage: X i¢"
+  - Two buttons: SKIP and UPDATE WAGE
+  
+  On UPDATE WAGE:
+  - Call updateStudentWage API with name and new wage value
+  - Update allStudents locally: find the student and set their wage property
+  - Show toast: "Wage updated to X i¢"
+  
+  On SKIP:
+  - Close modal, do nothing else
+  
+  Use the existing confirm-overlay and confirm-input elements for this. Add a number input inside confirm-box if confirm-input is not sufficient (it should work as a text input with inputmode=numeric).
+}
 
-Two editable fields below:
+--- CHANGE 3: USE SECTIONS FROM sectionsData ---
 
-1. Amount (text input, inputmode=numeric, pattern=[0-9]*, current value pre-filled, label "Amount (i¢)")
+In the s-wage section filter buttons, dynamically build the section buttons from sectionsData (active sections only) instead of hardcoding IDEA-113, IDEA-208-1, etc. If sectionsData is not loaded when s-wage opens, fetch it first.
 
-2. Reason (scrollable list matching the existing reason-list style, pre-filtered to the transaction type, current reason pre-selected with .sel class):
-   - Award reasons for Award and Award-Held types
-   - Fine reasons for Fine type
-   - Purchase reasons for Purchase type
-   - Payout reasons for Payout type
-   - Add a search filter input above the reason list (same as reason-search style)
+This ensures new sections added via the Students management screen automatically appear in the weekly wage screen.
 
-Action buttons:
-SAVE CHANGES (gold border, full width) - disabled if nothing changed. On tap:
-  - Call updateTransaction API with row, amount, reason
-  - Show success toast "Transaction updated"
-  - Refresh the transaction list in whichever screen opened this
-  - Go back
-
-DELETE TRANSACTION (red border, full width, smaller) - on tap show confirm overlay with:
-  - Title: "Delete Transaction"
-  - Full transaction details in the message: "[Date] · [Student] · [Type] · [Amount] i¢ · [Reason]"
-  - "This cannot be undone and will affect [Student]'s balance."
-  - Cancel and DELETE buttons
-  On confirm: call deleteTransaction API with row, show success toast "Transaction deleted", refresh list, go back.
-
---- STUDENT DETAIL TRANSACTION HISTORY ---
-In s-student-detail screen, after the action buttons section, add a divider and a "Transaction History" section.
-
-When s-student-detail opens for a student, fire fetchStudentTxns(name) in the background. While loading, show dim "Loading transactions..." text.
-
-On load, render up to 30 most recent transactions for that student in the same row style as the global log (without the student name column since it's implied). Show "No transactions" if empty.
-
-Each row is tappable and opens s-txn-edit for that transaction. After editing/deleting from here, return to s-student-detail and refresh the transaction list.
-
-Show a "View All" button below the list if more than 30 transactions exist, which opens s-txn-log pre-filtered to that student's name.
-
---- NAVIGATION ---
-Track where s-txn-edit was opened from using a variable txnEditOrigin ('s-txn-log' or 's-student-detail'). Back button and post-save navigation uses this to return to the correct screen.
-
---- GENERAL ---
-All new screens follow existing pattern. Wire all navigation correctly.
-Show loading overlay only for initial txnLog fetch and delete operations.
-All API calls use apiUrl() helper.
-
-Commit with message "feat: global transaction log with edit and delete, student transaction history" and push.
+Commit with message "feat: weekly wage screen with section filters, override amount, wage raise auto-update" and push.

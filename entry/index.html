@@ -692,6 +692,19 @@ body::after {
 .txn-summary-name { font-family: 'Orbitron', sans-serif; font-size: 0.9rem; font-weight: 700; color: var(--gold); text-shadow: var(--glow-gold); margin-bottom: 0.5rem; }
 .txn-summary-meta { display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.35rem; }
 .txn-summary-reason { font-size: 0.7rem; color: var(--dim); letter-spacing: 0.03em; }
+
+/* ── Wage screen section filters ─────────────────────── */
+.wage-filter-row { display: flex; flex-wrap: wrap; gap: 0.45rem; padding: 0.65rem 1.1rem; background: rgba(2,10,4,0.97); border-bottom: 1px solid rgba(0,255,65,0.1); flex-shrink: 0; }
+.wage-filter-btn { font-family: 'Orbitron', sans-serif; font-size: 0.5rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; background: rgba(0,0,0,0.3); border: 1px solid rgba(74,122,82,0.35); border-radius: 2px; color: var(--dim); padding: 0 0.85rem; cursor: pointer; min-height: 38px; transition: color 0.15s, border-color 0.15s, background 0.15s; }
+.wage-filter-btn.active { color: var(--gold); border-color: rgba(200,255,0,0.65); background: rgba(200,255,0,0.07); }
+.wage-filter-btn:not(.active):hover { border-color: rgba(200,255,0,0.35); color: var(--white); }
+
+/* ── Wage preview list ───────────────────────────────── */
+.wage-preview-row { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.85rem; min-height: 52px; background: var(--bg1); border-bottom: 1px solid rgba(0,255,65,0.05); }
+.wage-preview-info { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
+.wage-preview-name { font-size: 0.85rem; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wage-preview-sec  { font-size: 0.56rem; color: var(--dim); letter-spacing: 0.07em; }
+.wage-preview-amt  { font-family: 'Orbitron', sans-serif; font-size: 0.72rem; font-weight: 700; color: var(--gold); white-space: nowrap; flex-shrink: 0; }
 </style>
 </head>
 <body>
@@ -756,7 +769,8 @@ body::after {
   <div class="confirm-box">
     <div class="confirm-title" id="confirm-title"></div>
     <div class="confirm-msg" id="confirm-msg"></div>
-    <input type="text" class="field-input" id="confirm-input" style="display:none;margin-bottom:1rem;">
+    <input type="text" class="field-input" id="confirm-input" style="display:none;margin-bottom:0.5rem;">
+    <div id="confirm-input-note" style="display:none;font-size:0.6rem;color:var(--dim);letter-spacing:0.06em;margin-bottom:1rem;"></div>
     <div class="confirm-row">
       <button class="confirm-btn cancel" id="confirm-cancel">Cancel</button>
       <button class="confirm-btn ok" id="confirm-ok">Confirm</button>
@@ -1322,7 +1336,44 @@ body::after {
 </div>
 
 <!-- ══════════════════════════════════════
-     SCREEN 16 — RECONCILE BALANCE
+     SCREEN 16 — WEEKLY WAGE
+════════════════════════════════════════ -->
+<div class="screen" id="s-wage">
+  <div class="app-header">
+    <div class="logo-wrap">
+      <span class="logo">IDEA.</span>
+      <span class="logo-sub">Weekly Wage</span>
+    </div>
+    <button class="back-btn" id="wage-back">&#8592; Back</button>
+  </div>
+  <!-- Section filter row (dynamically built) -->
+  <div class="wage-filter-row" id="wage-filter-row"></div>
+  <div class="screen-body" id="wage-body">
+    <!-- Override amount -->
+    <div class="field-group" style="margin-top:0.25rem;">
+      <label class="field-label">Override Wage Amount (optional)</label>
+      <input type="text" inputmode="numeric" pattern="[0-9]*" class="field-input" id="wage-override"
+             placeholder="Leave blank to use each student's stored wage" autocomplete="off">
+    </div>
+    <!-- Physical coin -->
+    <div style="margin-bottom:1rem;">
+      <label style="display:flex;align-items:center;gap:0.75rem;cursor:pointer;min-height:48px;padding:0.6rem 0.85rem;background:var(--bg1);border:1px solid rgba(0,255,65,0.15);border-radius:3px;">
+        <input type="checkbox" id="wage-physical" checked style="width:22px;height:22px;accent-color:var(--green);cursor:pointer;flex-shrink:0;">
+        <div>
+          <div style="font-family:'Orbitron',sans-serif;font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--green);">Physical coins given?</div>
+        </div>
+      </label>
+    </div>
+    <!-- Preview count + list -->
+    <div class="step-label" style="margin-top:0;">Paying <span id="wage-preview-count">0</span> students</div>
+    <div id="wage-preview-list" style="border:1px solid rgba(0,255,65,0.08);border-radius:3px;overflow:hidden;margin-bottom:0.25rem;"></div>
+    <!-- Pay button -->
+    <button class="submit-btn show" id="wage-pay-btn" disabled>Pay <span id="wage-pay-count">0</span> Students</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 17 — RECONCILE BALANCE
 ════════════════════════════════════════ -->
 <div class="screen" id="s-reconcile">
   <div class="app-header">
@@ -1643,28 +1694,15 @@ document.getElementById('log-back').addEventListener('click', () => {
 });
 
 // ── Weekly Wage ───────────────────────────────────────
-document.getElementById('btn-wage').addEventListener('click', () => {
-  const n = allStudents.length;
-  confirm(
-    'Pay Weekly Wage',
-    `Pay weekly wage to all ${n} student${n !== 1 ? 's' : ''}? This will log wages automatically.`,
-    async () => {
-      showLoading('Paying wages…');
-      try {
-        const res  = await fetch(apiUrl({ action: 'weeklyWage' }));
-        const data = await res.json();
-        if (data && (data.success || data.status === 'ok' || data.result === 'success')) {
-          toast('Weekly wage paid ✓', 'success');
-        } else {
-          toast('Error — please try again', 'error');
-        }
-      } catch (e) {
-        toast('Network error', 'error');
-      } finally {
-        hideLoading();
-      }
-    }
-  );
+document.getElementById('btn-wage').addEventListener('click', async () => {
+  if (!await requireStudents()) return;
+  if (!sectionsLoaded) {
+    showLoading('Loading…');
+    try { await fetchSectionsData(); }
+    catch (e) { hideLoading(); toast('Failed to load sections', 'error'); return; }
+    hideLoading();
+  }
+  openWageScreen();
 });
 
 // ── Payout Check ──────────────────────────────────────
@@ -2008,6 +2046,12 @@ document.getElementById('submit-btn').addEventListener('click', () => {
   toast('Transaction logged ✓', 'success');
   resetLog();
   showScreen('s-home');
+
+  // 4. Wage raise modal — shown after navigation so it sits on top of home
+  if (type === 'Purchase' && reason === 'Raise Weekly Wage') {
+    const currentWage = parseFloat(getField(raw || {}, 'wage', 'Wage') || 1);
+    showWageUpdateModal(name, currentWage, raw);
+  }
 
   // 3. Fire API in background — no loading overlay
   fetch(apiUrl({ action: 'logTransaction', name, type, reason, amount }))
@@ -3737,6 +3781,186 @@ document.getElementById('sd-txn-viewall-btn').addEventListener('click', async ()
   renderTxnLog();
   showScreen('s-txn-log');
 });
+
+// ── Weekly Wage screen ────────────────────────────────
+let wageSelectedSections = new Set();
+let wageAllSelected      = true;
+
+function openWageScreen() {
+  wageAllSelected = true;
+  wageSelectedSections.clear();
+  document.getElementById('wage-override').value = '';
+  document.getElementById('wage-physical').checked = true;
+  buildWageFilterButtons();
+  buildWagePreview();
+  showScreen('s-wage');
+}
+
+document.getElementById('wage-back').addEventListener('click', () => showScreen('s-home'));
+
+function buildWageFilterButtons() {
+  const row = document.getElementById('wage-filter-row');
+  const active = sectionsData.filter(s => sectionActive(s))
+    .sort((a, b) => sectionName(a).localeCompare(sectionName(b)));
+  let html = '<button class="wage-filter-btn active" data-all="1">All</button>';
+  html += active.map(s => {
+    const n = sectionName(s);
+    return `<button class="wage-filter-btn" data-section="${esc(n)}">${esc(n)}</button>`;
+  }).join('');
+  row.innerHTML = html;
+
+  row.querySelectorAll('.wage-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (btn.dataset.all) {
+        wageAllSelected = true;
+        wageSelectedSections.clear();
+        row.querySelectorAll('.wage-filter-btn').forEach(b => b.classList.toggle('active', !!b.dataset.all));
+      } else {
+        const sec = btn.dataset.section;
+        const allBtn = row.querySelector('[data-all]');
+        if (wageSelectedSections.has(sec)) {
+          wageSelectedSections.delete(sec);
+          btn.classList.remove('active');
+          if (wageSelectedSections.size === 0) {
+            wageAllSelected = true;
+            if (allBtn) allBtn.classList.add('active');
+          }
+        } else {
+          wageAllSelected = false;
+          if (allBtn) allBtn.classList.remove('active');
+          wageSelectedSections.add(sec);
+          btn.classList.add('active');
+        }
+      }
+      buildWagePreview();
+    });
+  });
+}
+
+function getWageStudents() {
+  const overrideRaw = document.getElementById('wage-override').value.trim();
+  const override    = overrideRaw ? parseInt(overrideRaw, 10) : null;
+  return allStudents.filter(s => {
+    const active = smActive ? smActive(s) : true;
+    if (!active) return false;
+    if (wageAllSelected) return true;
+    const sec = getField(s, 'section', 'Section', 'Class') || '';
+    return wageSelectedSections.has(sec);
+  }).sort((a, b) => {
+    const sa = getField(a, 'section', 'Section', 'Class') || '';
+    const sb = getField(b, 'section', 'Section', 'Class') || '';
+    if (sa !== sb) return sa.localeCompare(sb);
+    return (getField(a,'name','Name','Full Name','Student') || '').localeCompare(
+           getField(b,'name','Name','Full Name','Student') || '');
+  }).map(s => {
+    const wage = override !== null ? override : (parseFloat(getField(s,'wage','Wage') || 1));
+    return { s, wage };
+  });
+}
+
+function buildWagePreview() {
+  const students = getWageStudents();
+  const n = students.length;
+  document.getElementById('wage-preview-count').textContent = n;
+  document.getElementById('wage-pay-count').textContent     = n;
+  document.getElementById('wage-pay-btn').disabled = n === 0;
+
+  if (!n) {
+    document.getElementById('wage-preview-list').innerHTML =
+      '<div class="manage-empty" style="padding:1.5rem 0;">No students match the selected sections.</div>';
+    return;
+  }
+  document.getElementById('wage-preview-list').innerHTML = students.map(({ s, wage }) => {
+    const name = getField(s,'name','Name','Full Name','Student') || '—';
+    const sec  = getField(s,'section','Section','Class') || '—';
+    return `<div class="wage-preview-row">
+      <div class="wage-preview-info">
+        <div class="wage-preview-name">${esc(name)}</div>
+        <div class="wage-preview-sec">${esc(sec)}</div>
+      </div>
+      <div class="wage-preview-amt">${wage} i&#162;</div>
+    </div>`;
+  }).join('');
+}
+
+document.getElementById('wage-override').addEventListener('input', buildWagePreview);
+
+document.getElementById('wage-pay-btn').addEventListener('click', async () => {
+  const students      = getWageStudents();
+  const n             = students.length;
+  const overrideRaw   = document.getElementById('wage-override').value.trim();
+  const overrideAmount = overrideRaw || '';
+  const physical      = document.getElementById('wage-physical').checked;
+  const sections      = wageAllSelected ? '' : Array.from(wageSelectedSections).join('|');
+  showLoading('Paying wages…');
+  try {
+    const res  = await fetch(apiUrl({ action: 'logWeeklyWageFiltered', sections, overrideAmount, physical: physical ? 'true' : 'false' }));
+    const data = await res.json();
+    if (data && (data.success || data.status === 'ok' || data.result === 'success')) {
+      toast(`Weekly wage paid to ${n} student${n !== 1 ? 's' : ''} ✓`, 'success');
+      showScreen('s-home');
+    } else {
+      toast('Error — please try again', 'error');
+    }
+  } catch (e) {
+    toast('Network error', 'error');
+  } finally {
+    hideLoading();
+  }
+});
+
+// ── Wage raise modal ──────────────────────────────────
+function showWageUpdateModal(studentName, currentWage, studentRaw) {
+  document.getElementById('confirm-title').textContent = 'UPDATE WEEKLY WAGE';
+  document.getElementById('confirm-msg').textContent   =
+    `${studentName}'s weekly wage purchase logged. Set their new wage:`;
+
+  const inputEl = document.getElementById('confirm-input');
+  inputEl.type        = 'text';
+  inputEl.inputMode   = 'numeric';
+  inputEl.pattern     = '[0-9]*';
+  inputEl.value       = String(currentWage + 1);
+  inputEl.style.display = '';
+
+  const noteEl = document.getElementById('confirm-input-note');
+  noteEl.textContent    = `Current wage: ${currentWage} i¢`;
+  noteEl.style.display  = '';
+
+  const overlay    = document.getElementById('confirm-overlay');
+  const okBtn      = document.getElementById('confirm-ok');
+  const cancelBtn  = document.getElementById('confirm-cancel');
+  okBtn.textContent    = 'Update Wage';
+  cancelBtn.textContent = 'Skip';
+  overlay.classList.add('show');
+
+  function close() {
+    overlay.classList.remove('show');
+    inputEl.style.display = 'none';
+    noteEl.style.display  = 'none';
+    okBtn.textContent     = 'Confirm';
+    cancelBtn.textContent = 'Cancel';
+    okBtn.removeEventListener('click', yes);
+    cancelBtn.removeEventListener('click', no);
+  }
+  function yes() {
+    const wageVal = parseInt(inputEl.value.trim(), 10);
+    close();
+    if (!isNaN(wageVal) && wageVal > 0) {
+      if (studentRaw) {
+        const wk = studentRaw.wage !== undefined ? 'wage' : 'Wage';
+        studentRaw[wk] = wageVal;
+      }
+      toast(`Wage updated to ${wageVal} i¢`, 'success');
+      fetch(apiUrl({ action: 'updateStudentWage', name: studentName, wage: wageVal }))
+        .then(r => r.json())
+        .then(d => { if (!d || !(d.success || d.status === 'ok' || d.result === 'success')) toast('Wage sync failed — check sheet', 'error'); })
+        .catch(() => toast('Wage sync failed', 'error'));
+    }
+  }
+  function no() { close(); }
+  okBtn.addEventListener('click', yes);
+  cancelBtn.addEventListener('click', no);
+}
 
 // ── Boot ──────────────────────────────────────────────
 (function boot() {
