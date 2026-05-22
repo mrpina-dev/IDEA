@@ -1,64 +1,135 @@
-﻿Edit entry/index.html. Add two automated physical coin reconciliation flows:
+﻿Edit entry/index.html. Add a full student and section management system.
 
---- FLOW 1: PURCHASE-TRIGGERED RECONCILIATION ---
+--- DATA ---
+Add at top of script:
+let studentsManageData = [];
+let sectionsData = [];
+let studentsManageLoaded = false;
+let sectionsLoaded = false;
 
-In the submit handler, before firing the logTransaction API call, add a check:
-If selType is 'Purchase' and selAmount > selStudent.balance:
+Add fetchStudentsManage() that fetches API + "?action=getStudents" with cache no-store, stores in studentsManageData.
+Add fetchSectionsData() that fetches API + "?action=getSections" with cache no-store, stores in sectionsData.
+Cache both in localStorage with 5 min TTL keys "idea-entry-mgmt-students" and "idea-entry-mgmt-sections".
 
-Instead of submitting normally, show a modal/overlay (styled like the confirm-overlay) with:
-- Title: "RECONCILIATION REQUIRED" in amber
-- Message: "Digital balance is X i¢. This purchase costs Y i¢. A physical coin submission of Z i¢ is needed to cover the difference."
-  Where X = current balance, Y = purchase amount, Z = Y - X
-- A number input labeled "Physical coins submitted by student:" pre-filled with Z
-- Two buttons: CANCEL and CONFIRM RECONCILIATION
+--- HOME BUTTON ---
+Add a sixth home button after Reconcile Balance:
+- Border: rgba(136,221,255,0.35) ice
+- Icon: ◉
+- Label: "Students" in ice (#88DDFF)
+- Sub: "Add, edit, and manage students and sections"
+- On tap: fetch both students and sections if not loaded, then show s-students screen
 
-On CONFIRM:
-1. Read the physical coins value from the input (call it physCoins)
-2. If physCoins < Z, show a toast error "Not enough physical coins submitted" and do not proceed
-3. If physCoins >= Z:
-   a. Fire background API call: logTransaction with type=Award, reason=Physical Coin Submission, amount=physCoins
-   b. Fire background API call: logTransaction with type=Purchase, reason=selReason, amount=selAmount
-   c. Update local balance: selStudent.balance += physCoins then selStudent.balance -= selAmount
-   d. Show success toast: "Reconciliation logged - X i¢ submitted, purchase of Y i¢ completed"
-   e. Return to home screen
+--- SCREEN: s-students (Student List) ---
+Header: "Students" logo-sub + back to home + "+" add button (green, right side)
+Also a "Sections" button next to the add button (small, cyan border, Orbitron, opens s-sections screen)
 
-Both API calls fire in background (optimistic, no loading overlay). If either fails show a sync error toast.
+Screen body:
+- Search input (same style as student search) that filters the list in real time by name or section
+- Students grouped by section, each section has a header label
+- Within each section, students sorted alphabetically
+- Each student row (min-height 56px, bg1, border-bottom):
+  - Left: student name (white, 0.88rem) + section in dim below
+  - Right: balance in gold/red Orbitron + "INACTIVE" badge in red if not active
+  - Tap to open s-student-detail
+- At bottom, a collapsed "Inactive Students" section with toggle button showing count
+- Show a dim placeholder if no students
 
---- FLOW 2: PROACTIVE RECONCILIATION SCREEN ---
+--- SCREEN: s-student-detail (Edit Student) ---
+Header: student name truncated + back to s-students
 
-Add a fifth home button after the Contracts button:
-- Border: rgba(0,240,255,0.35) cyan
-- Icon: ⟷
-- Label: "Reconcile Balance" in cyan
-- Sub: "Sync a student's physical coin count"
+Fields:
+1. Full Name (text input, required)
+2. Section (a custom select component - NOT a native select):
+   - Shows current section value in a tappable field
+   - Tapping opens a scrollable list of existing sections from sectionsData
+   - Last item in list: "+ New Section" which opens s-section-new pre-filled to return here after creation
+   - Selected section shown with its color dot
+3. Wage (text input, inputmode=numeric, pattern=[0-9]*)
+4. Notes (textarea, 3 rows)
 
-This button opens a new screen s-reconcile.
+Action buttons:
+- SAVE CHANGES (gold border) - calls updateStudent API with rosterRow, name, section, wage, notes. On name change, show confirm dialog first: "Renaming will update all transaction history. This cannot be undone."
+- DEACTIVATE STUDENT (red border, small) - only shown for active students. Confirm dialog. Calls deactivateStudent API.
+- REACTIVATE STUDENT (green border, small) - only shown for inactive students. Calls reactivateStudent API.
 
-Add screen s-reconcile with header "Reconcile Balance" and back button returning to home.
+After any save, refresh studentsManageData and re-render s-students.
 
-Screen content:
+--- SCREEN: s-student-new (Add Student) ---
+Header: "New Student" + back to s-students
 
-STEP 1 - STUDENT SEARCH
-Same search input and results as the log transaction screen. On student select, show the student card with name, section, eligibility badge, and current digital balance.
+Fields:
+1. Full Name (required)
+2. Section (same custom select component as detail, with + New Section option)
+3. Wage (text input, inputmode=numeric, default value "1")
 
-STEP 2 - PHYSICAL COIN COUNT (appears after student selected)
-Step label: "Physical Coins in Student's Possession"
-A large number input (same style as amount-input) for Mr. Pina to enter the physical coin count after counting the student's box.
-Below the input, show a live reconciliation preview that updates as the number is typed:
-- If physical > digital: show in green "Award X i¢ as Physical Coin Submission"
-- If physical < digital: show in red "Fine X i¢ as Balance Correction"
-- If physical === digital: show in dim "No reconciliation needed"
+CREATE STUDENT button (gold border) - calls addStudent API, returns to s-students, shows success toast.
 
-RECONCILE button (gold border, full width) - disabled if physical === digital or input is empty.
+--- SCREEN: s-sections (Section List) ---
+Header: "Sections" + back to s-students + "+" add button (green)
 
-On RECONCILE tap:
-- If physical > digital: fire background API logTransaction with type=Award, reason=Physical Coin Submission, amount=difference
-- If physical < digital: fire background API logTransaction with type=Fine, reason=Balance Correction, amount=difference
-- Update local allStudents balance optimistically
-- Show toast: "Balance reconciled - digital balance updated to X i¢"
-- Return to home
+Each section row (min-height 56px):
+- Left: a colored dot (12px circle using section color) + section name (white)
+- Right: student count (how many active students in that section from studentsManageData) + "INACTIVE" badge if section is inactive
+- Tap to open s-section-detail
+
+--- SCREEN: s-section-detail (Edit Section) ---
+Header: section name + back to s-sections
+
+Fields:
+1. Section Name (text input, required)
+2. Color (custom color picker component):
+   - A row of 8 preset color swatches (24px circles, tappable):
+     #00FF41 (green), #C8FF00 (gold), #00F0FF (cyan), #FF8C00 (amber),
+     #FF4444 (red), #88DDFF (ice), #FF88CC (pink), #4A7A52 (dim)
+   - Below presets: a text input for hex value (shows # prefix, 6 char input)
+     inputmode text, auto-uppercases, validates as valid hex on blur
+   - A 32px preview swatch showing the current color (square, border-radius 4px)
+   - Tapping a preset fills the hex input and updates the preview
+   - Typing in hex input updates the preview live
+
+Action buttons:
+- SAVE CHANGES (gold border) - calls updateSection API. On name change, confirm dialog: "Renaming will update all students in this section."
+- REMOVE SECTION (red border, small) - calls removeSection API. If section has active students, show error toast "Cannot remove section with active students." instead of calling API.
+
+--- SCREEN: s-section-new (Add Section) ---
+Header: "New Section" + back button (returns to wherever opened from - s-sections or s-student-detail/new)
+
+Same fields as s-section-detail (name + color picker).
+CREATE SECTION button (gold border) - calls addSection API, refreshes sectionsData, returns to previous screen.
+
+--- COLOR PICKER CSS ---
+.color-presets { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+.color-swatch {
+  width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+  border: 2px solid transparent; transition: border-color 0.15s, transform 0.15s;
+  flex-shrink: 0;
+}
+.color-swatch:hover { transform: scale(1.15); }
+.color-swatch.selected { border-color: var(--white); }
+.color-preview {
+  width: 32px; height: 32px; border-radius: 4px; flex-shrink: 0;
+  border: 1px solid rgba(74,122,82,0.4);
+}
+.color-input-row { display: flex; align-items: center; gap: 0.75rem; }
+.color-hex-input {
+  flex: 1; min-height: 48px;
+  background: rgba(0,0,0,0.4); border: 1px solid rgba(74,122,82,0.35);
+  border-radius: 2px; color: var(--white); font-family: 'Share Tech Mono', monospace;
+  font-size: 16px; padding: 0.55rem 0.85rem; outline: none;
+  letter-spacing: 0.08em; transition: border-color 0.2s;
+  text-transform: uppercase;
+}
+.color-hex-input:focus { border-color: rgba(0,255,65,0.5); }
+
+--- SECTION DOT ---
+.section-dot {
+  width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; display: inline-block;
+}
 
 --- GENERAL ---
-Add s-reconcile to the screen list. Wire back button. Reset the reconcile screen (clear student and input) when navigating away.
+All new screens follow the existing pattern (position fixed, opacity/pointer-events transition, screen-body overflow-y auto).
+Wire all back buttons and navigation correctly.
+All API calls use apiUrl() helper.
+Show loading overlay during non-background API calls.
 
-Commit with message "feat: purchase-triggered and proactive physical coin reconciliation" and push.
+Commit with message "feat: full student and section management system in entry app" and push.

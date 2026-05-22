@@ -620,6 +620,47 @@ body::after {
 }
 .alloc-total.ok  { color: var(--green); }
 .alloc-total.bad { color: var(--red); }
+
+/* ── Ice (Students button) ───────────────────────────── */
+.home-btn.ice  { border-color: rgba(136,221,255,0.35); }
+.home-btn.ice  .home-btn-label { color: #88DDFF; }
+.home-btn.ice:hover  { background: rgba(136,221,255,0.05); border-color: rgba(136,221,255,0.65); }
+
+/* ── Color picker ────────────────────────────────────── */
+.color-presets { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+.color-swatch { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: border-color 0.15s, transform 0.15s; flex-shrink: 0; }
+.color-swatch:hover { transform: scale(1.15); }
+.color-swatch.selected { border-color: var(--white); }
+.color-preview { width: 32px; height: 32px; border-radius: 4px; flex-shrink: 0; border: 1px solid rgba(74,122,82,0.4); }
+.color-input-row { display: flex; align-items: center; gap: 0.75rem; }
+.color-hex-input { flex: 1; min-height: 48px; background: rgba(0,0,0,0.4); border: 1px solid rgba(74,122,82,0.35); border-radius: 2px; color: var(--white); font-family: 'Share Tech Mono', monospace; font-size: 16px; padding: 0.55rem 0.85rem; outline: none; letter-spacing: 0.08em; transition: border-color 0.2s; text-transform: uppercase; }
+.color-hex-input:focus { border-color: rgba(0,255,65,0.5); }
+
+/* ── Section dot ─────────────────────────────────────── */
+.section-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
+
+/* ── Manage rows ─────────────────────────────────────── */
+.manage-row { display: flex; align-items: center; justify-content: space-between; min-height: 56px; background: var(--bg1); border-bottom: 1px solid rgba(0,255,65,0.07); padding: 0.65rem 1rem; cursor: pointer; transition: background 0.15s; gap: 0.65rem; }
+.manage-row:hover, .manage-row:active { background: rgba(0,255,65,0.04); }
+.manage-row-left { flex: 1; min-width: 0; }
+.manage-row-name { font-size: 0.88rem; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.manage-row-sub  { font-size: 0.56rem; color: var(--dim); letter-spacing: 0.07em; margin-top: 0.15rem; }
+.manage-row-right { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
+.inactive-badge { font-family: 'Orbitron', sans-serif; font-size: 0.38rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--red); border: 1px solid rgba(255,68,68,0.4); border-radius: 2px; padding: 0.15rem 0.4rem; }
+.section-group-head { font-family: 'Orbitron', sans-serif; font-size: 0.44rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--dim); padding: 0.65rem 1rem 0.3rem; border-bottom: 1px solid rgba(0,255,65,0.06); display: flex; align-items: center; gap: 0.5rem; }
+.toggle-inactive-btn { width: 100%; min-height: 44px; font-family: 'Orbitron', sans-serif; font-size: 0.46rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--dim); background: none; border: 1px solid rgba(74,122,82,0.3); border-radius: 2px; cursor: pointer; margin-top: 0.75rem; transition: color 0.2s, border-color 0.2s; }
+.toggle-inactive-btn:hover { color: var(--white); border-color: rgba(74,122,82,0.6); }
+.manage-empty { font-size: 0.72rem; color: var(--dim); padding: 2.5rem 0; letter-spacing: 0.04em; text-align: center; }
+
+/* ── Custom section select ───────────────────────────── */
+.section-select-field { width: 100%; min-height: 48px; background: rgba(0,0,0,0.4); border: 1px solid rgba(74,122,82,0.35); border-radius: 2px; color: var(--white); font-family: 'Share Tech Mono', monospace; font-size: 16px; padding: 0.55rem 0.85rem; outline: none; cursor: pointer; display: flex; align-items: center; gap: 0.65rem; letter-spacing: 0.04em; transition: border-color 0.2s; -webkit-tap-highlight-color: transparent; }
+.section-select-field:hover { border-color: rgba(0,255,65,0.5); }
+.section-select-dropdown { background: var(--bg1); border: 1px solid rgba(0,255,65,0.15); border-radius: 2px; overflow: hidden; display: none; margin-top: 0.2rem; max-height: 220px; overflow-y: auto; }
+.section-select-dropdown.open { display: block; }
+.section-select-option { display: flex; align-items: center; gap: 0.65rem; min-height: 48px; padding: 0.65rem 0.85rem; cursor: pointer; border-bottom: 1px solid rgba(0,255,65,0.05); font-size: 0.82rem; transition: background 0.15s; }
+.section-select-option:last-child { border-bottom: none; }
+.section-select-option:hover, .section-select-option:active { background: rgba(0,255,65,0.06); }
+.section-select-option.add-new { color: var(--cyan); font-family: 'Orbitron', sans-serif; font-size: 0.65rem; letter-spacing: 0.1em; }
 </style>
 </head>
 <body>
@@ -737,6 +778,13 @@ body::after {
       <div class="home-btn-content">
         <span class="home-btn-label">Reconcile Balance</span>
         <span class="home-btn-sub">Sync a student's physical coin count</span>
+      </div>
+    </button>
+    <button class="home-btn ice" id="btn-students">
+      <span class="home-btn-icon">&#9689;</span>
+      <div class="home-btn-content">
+        <span class="home-btn-label">Students</span>
+        <span class="home-btn-sub">Add, edit, and manage students and sections</span>
       </div>
     </button>
   </div>
@@ -982,7 +1030,178 @@ body::after {
 </div>
 
 <!-- ══════════════════════════════════════
-     SCREEN 8 — RECONCILE BALANCE
+     SCREEN 8 — STUDENT LIST
+════════════════════════════════════════ -->
+<div class="screen" id="s-students">
+  <div class="app-header">
+    <div class="logo-wrap">
+      <span class="logo">IDEA.</span>
+      <span class="logo-sub">Students</span>
+    </div>
+    <div style="display:flex;gap:0.5rem;align-items:center;">
+      <button class="back-btn" id="students-sections-btn" style="color:var(--cyan);border-color:rgba(0,240,255,0.4);font-family:'Orbitron',sans-serif;font-size:0.44rem;letter-spacing:0.14em;padding:0 0.7rem;">Sections</button>
+      <button class="back-btn" id="students-add-btn" style="color:var(--green);border-color:rgba(0,255,65,0.4);font-size:1.4rem;padding:0;min-width:48px;min-height:48px;display:flex;align-items:center;justify-content:center;">+</button>
+      <button class="back-btn" id="students-back">&#8592; Back</button>
+    </div>
+  </div>
+  <div class="screen-body" id="students-body">
+    <input type="search" class="search-input" id="students-search"
+           placeholder="Filter by name or section&hellip;" autocomplete="off" style="margin-bottom:0.75rem;">
+    <div id="students-list"></div>
+    <div id="students-inactive-toggle-wrap" style="display:none;">
+      <button class="toggle-inactive-btn" id="students-inactive-toggle"></button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 9 — STUDENT DETAIL
+════════════════════════════════════════ -->
+<div class="screen" id="s-student-detail">
+  <div class="app-header">
+    <div class="logo-wrap" style="min-width:0;flex:1;overflow:hidden;margin-right:0.5rem;">
+      <span class="logo" id="sd-header-name" style="font-size:0.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;letter-spacing:0.06em;">Student</span>
+    </div>
+    <button class="back-btn" id="sd-back">&#8592; Back</button>
+  </div>
+  <div class="screen-body" id="sd-body">
+    <div class="field-group">
+      <label class="field-label">Full Name <span style="color:var(--red)">*</span></label>
+      <input type="text" class="field-input" id="sd-name" autocomplete="off">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Section</label>
+      <div class="section-select-field" id="sd-section-field"></div>
+      <div class="section-select-dropdown" id="sd-section-dropdown"></div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Wage (i&#162;)</label>
+      <input type="text" inputmode="numeric" pattern="[0-9]*" class="field-input" id="sd-wage">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Notes</label>
+      <textarea class="field-textarea" id="sd-notes" rows="3"></textarea>
+    </div>
+    <div style="margin-top:1.5rem;">
+      <button class="action-btn gold" id="sd-save-btn">Save Changes</button>
+      <div class="action-btns-spacer"></div>
+      <button class="action-btn red"   id="sd-deactivate-btn" style="display:none;">Deactivate Student</button>
+      <button class="action-btn green" id="sd-reactivate-btn" style="display:none;">Reactivate Student</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 10 — ADD STUDENT
+════════════════════════════════════════ -->
+<div class="screen" id="s-student-new">
+  <div class="app-header">
+    <div class="logo-wrap">
+      <span class="logo">IDEA.</span>
+      <span class="logo-sub">New Student</span>
+    </div>
+    <button class="back-btn" id="sn-back">&#8592; Back</button>
+  </div>
+  <div class="screen-body">
+    <div class="field-group">
+      <label class="field-label">Full Name <span style="color:var(--red)">*</span></label>
+      <input type="text" class="field-input" id="sn-name" autocomplete="off">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Section</label>
+      <div class="section-select-field" id="sn-section-field"></div>
+      <div class="section-select-dropdown" id="sn-section-dropdown"></div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Wage (i&#162;)</label>
+      <input type="text" inputmode="numeric" pattern="[0-9]*" class="field-input" id="sn-wage" value="1">
+    </div>
+    <button class="action-btn gold" id="sn-submit-btn" style="margin-top:0.5rem;">Create Student</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 11 — SECTION LIST
+════════════════════════════════════════ -->
+<div class="screen" id="s-sections">
+  <div class="app-header">
+    <div class="logo-wrap">
+      <span class="logo">IDEA.</span>
+      <span class="logo-sub">Sections</span>
+    </div>
+    <div style="display:flex;gap:0.5rem;align-items:center;">
+      <button class="back-btn" id="sections-add-btn" style="color:var(--green);border-color:rgba(0,255,65,0.4);font-size:1.4rem;padding:0;min-width:48px;min-height:48px;display:flex;align-items:center;justify-content:center;">+</button>
+      <button class="back-btn" id="sections-back">&#8592; Back</button>
+    </div>
+  </div>
+  <div class="screen-body" id="sections-body">
+    <div id="sections-list"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 12 — SECTION DETAIL
+════════════════════════════════════════ -->
+<div class="screen" id="s-section-detail">
+  <div class="app-header">
+    <div class="logo-wrap" style="min-width:0;flex:1;overflow:hidden;margin-right:0.5rem;">
+      <span class="logo" id="secdet-header-name" style="font-size:0.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;letter-spacing:0.06em;">Section</span>
+    </div>
+    <button class="back-btn" id="secdet-back">&#8592; Back</button>
+  </div>
+  <div class="screen-body" id="secdet-body">
+    <div class="field-group">
+      <label class="field-label">Section Name <span style="color:var(--red)">*</span></label>
+      <input type="text" class="field-input" id="secdet-name" autocomplete="off">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Color</label>
+      <div class="color-presets" id="secdet-color-presets"></div>
+      <div class="color-input-row">
+        <span style="color:var(--dim);font-family:'Share Tech Mono',monospace;font-size:16px;">#</span>
+        <input type="text" class="color-hex-input" id="secdet-color-hex" maxlength="6" placeholder="00FF41">
+        <div class="color-preview" id="secdet-color-preview"></div>
+      </div>
+    </div>
+    <div style="margin-top:1.5rem;">
+      <button class="action-btn gold" id="secdet-save-btn">Save Changes</button>
+      <div class="action-btns-spacer"></div>
+      <button class="action-btn red" id="secdet-remove-btn">Remove Section</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 13 — ADD SECTION
+════════════════════════════════════════ -->
+<div class="screen" id="s-section-new">
+  <div class="app-header">
+    <div class="logo-wrap">
+      <span class="logo">IDEA.</span>
+      <span class="logo-sub">New Section</span>
+    </div>
+    <button class="back-btn" id="secnew-back">&#8592; Back</button>
+  </div>
+  <div class="screen-body">
+    <div class="field-group">
+      <label class="field-label">Section Name <span style="color:var(--red)">*</span></label>
+      <input type="text" class="field-input" id="secnew-name" autocomplete="off">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Color</label>
+      <div class="color-presets" id="secnew-color-presets"></div>
+      <div class="color-input-row">
+        <span style="color:var(--dim);font-family:'Share Tech Mono',monospace;font-size:16px;">#</span>
+        <input type="text" class="color-hex-input" id="secnew-color-hex" maxlength="6" placeholder="00FF41">
+        <div class="color-preview" id="secnew-color-preview"></div>
+      </div>
+    </div>
+    <button class="action-btn gold" id="secnew-submit-btn" style="margin-top:0.5rem;">Create Section</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 14 — RECONCILE BALANCE
 ════════════════════════════════════════ -->
 <div class="screen" id="s-reconcile">
   <div class="app-header">
@@ -1034,6 +1253,11 @@ const API = 'https://script.google.com/macros/s/AKfycby_p-lI7I5i4Rl1KZKgtWEhePnU
 let allStudents    = [];
 let studentsLoaded = false;
 let _studentsFetch = null; // in-flight fetch promise
+
+let studentsManageData   = [];
+let sectionsData         = [];
+let studentsManageLoaded = false;
+let sectionsLoaded       = false;
 
 const STUDENTS_KEY    = 'idea-entry-students';
 const STUDENTS_TS_KEY = 'idea-entry-students-ts';
@@ -2545,6 +2769,549 @@ function resetReconcile() {
   document.getElementById('recon-preview').textContent = '';
   document.getElementById('reconcile-body').scrollTop = 0;
 }
+
+// ── Student & Section Management ──────────────────────
+const MGMT_STUDENTS_KEY    = 'idea-entry-mgmt-students';
+const MGMT_STUDENTS_TS_KEY = 'idea-entry-mgmt-students-ts';
+const MGMT_SECTIONS_KEY    = 'idea-entry-mgmt-sections';
+const MGMT_SECTIONS_TS_KEY = 'idea-entry-mgmt-sections-ts';
+const MGMT_TTL             = 5 * 60 * 1000;
+
+const SECTION_COLORS = ['#00FF41','#C8FF00','#00F0FF','#FF8C00','#FF4444','#88DDFF','#FF88CC','#4A7A52'];
+
+let activeStudentData      = null;
+let activeSectionData      = null;
+let sectionNewReturnScreen = 's-sections';
+let showInactiveStudents   = false;
+let sdSectionSelect        = null;
+let snSectionSelect        = null;
+let secdetColorPicker      = null;
+let secnewColorPicker      = null;
+
+function sectionName(s)   { return getField(s,'name','Name') || ''; }
+function sectionColor(s)  { return getField(s,'color','Color') || '#4A7A52'; }
+function sectionActive(s) {
+  const v = s.active !== undefined ? s.active : (s.Active !== undefined ? s.Active : true);
+  return v !== false && v !== 'false' && v !== 0 && v !== '0';
+}
+function smName(s)    { return getField(s,'name','Name','Full Name','Student') || ''; }
+function smSection(s) { return getField(s,'section','Section','Class') || ''; }
+function smBalance(s) { return parseFloat(getField(s,'balance','Balance','coinBalance') || 0); }
+function smWage(s)    { return getField(s,'wage','Wage') || ''; }
+function smNotes(s)   { return getField(s,'notes','Notes') || ''; }
+function smRow(s)     { return getField(s,'rosterRow','row','Row','id','ID','_row'); }
+function smActive(s) {
+  const v = s.active !== undefined ? s.active : (s.Active !== undefined ? s.Active : true);
+  return v !== false && v !== 'false' && v !== 0 && v !== '0';
+}
+
+async function fetchStudentsManage() {
+  try {
+    const ts  = localStorage.getItem(MGMT_STUDENTS_TS_KEY);
+    const raw = localStorage.getItem(MGMT_STUDENTS_KEY);
+    if (ts && raw && Date.now() - parseInt(ts,10) < MGMT_TTL) {
+      studentsManageData   = JSON.parse(raw);
+      studentsManageLoaded = true;
+    }
+  } catch (_) {}
+  const res  = await fetch(API + '?action=getStudents&_=' + Date.now(), { cache: 'no-store' });
+  const data = await res.json();
+  let list = [];
+  if (Array.isArray(data))                        list = data;
+  else if (data && Array.isArray(data.students))  list = data.students;
+  else if (data && Array.isArray(data.data))      list = data.data;
+  studentsManageData   = list;
+  studentsManageLoaded = true;
+  try {
+    localStorage.setItem(MGMT_STUDENTS_KEY,    JSON.stringify(list));
+    localStorage.setItem(MGMT_STUDENTS_TS_KEY, String(Date.now()));
+  } catch (_) {}
+}
+
+async function fetchSectionsData() {
+  try {
+    const ts  = localStorage.getItem(MGMT_SECTIONS_TS_KEY);
+    const raw = localStorage.getItem(MGMT_SECTIONS_KEY);
+    if (ts && raw && Date.now() - parseInt(ts,10) < MGMT_TTL) {
+      sectionsData   = JSON.parse(raw);
+      sectionsLoaded = true;
+    }
+  } catch (_) {}
+  const res  = await fetch(API + '?action=getSections&_=' + Date.now(), { cache: 'no-store' });
+  const data = await res.json();
+  let list = [];
+  if (Array.isArray(data))                        list = data;
+  else if (data && Array.isArray(data.sections))  list = data.sections;
+  sectionsData   = list;
+  sectionsLoaded = true;
+  try {
+    localStorage.setItem(MGMT_SECTIONS_KEY,    JSON.stringify(list));
+    localStorage.setItem(MGMT_SECTIONS_TS_KEY, String(Date.now()));
+  } catch (_) {}
+}
+
+// ── Color Picker factory ───────────────────────────────
+function initColorPicker(presetsEl, hexInputEl, previewEl, initialColor) {
+  const initial = (initialColor || '#00FF41').replace('#','').toUpperCase();
+
+  presetsEl.innerHTML = SECTION_COLORS.map(c =>
+    `<div class="color-swatch" data-color="${c}" style="background:${c};"></div>`
+  ).join('');
+
+  function applyColor(hex) {
+    const h = hex.replace('#','').toUpperCase();
+    hexInputEl.value = h;
+    previewEl.style.background = '#' + h;
+    presetsEl.querySelectorAll('.color-swatch').forEach(s =>
+      s.classList.toggle('selected', s.dataset.color.toUpperCase() === '#' + h)
+    );
+  }
+
+  presetsEl.querySelectorAll('.color-swatch').forEach(s =>
+    s.addEventListener('click', () => applyColor(s.dataset.color))
+  );
+
+  hexInputEl.addEventListener('input', () => {
+    const val = hexInputEl.value.replace(/[^0-9A-Fa-f]/g,'').toUpperCase().slice(0,6);
+    hexInputEl.value = val;
+    if (val.length === 6) {
+      previewEl.style.background = '#' + val;
+      presetsEl.querySelectorAll('.color-swatch').forEach(s =>
+        s.classList.toggle('selected', s.dataset.color.toUpperCase() === '#' + val)
+      );
+    }
+  });
+
+  hexInputEl.addEventListener('blur', () => {
+    if (!/^[0-9A-F]{6}$/i.test(hexInputEl.value)) applyColor('#' + initial);
+  });
+
+  applyColor('#' + initial);
+  return {
+    getColor: () => '#' + hexInputEl.value.toUpperCase(),
+    setColor: applyColor
+  };
+}
+
+// ── Section Select factory ────────────────────────────
+function makeSectionSelect(fieldEl, dropdownEl, onNewSection) {
+  let selected = null;
+
+  function render() {
+    if (selected) {
+      const sec   = sectionsData.find(s => sectionName(s) === selected);
+      const color = sec ? sectionColor(sec) : '#4A7A52';
+      fieldEl.innerHTML = `<div class="section-dot" style="background:${color};margin-right:0.4rem;"></div><span>${esc(selected)}</span>`;
+    } else {
+      fieldEl.innerHTML = '<span style="color:var(--dim);">Select section…</span>';
+    }
+  }
+
+  function buildOptions() {
+    const active = sectionsData.filter(s => sectionActive(s))
+      .sort((a,b) => sectionName(a).localeCompare(sectionName(b)));
+    dropdownEl.innerHTML = active.map(s => {
+      const n = sectionName(s);
+      const c = sectionColor(s);
+      return `<div class="section-select-option" data-name="${esc(n)}">
+        <div class="section-dot" style="background:${c};"></div>
+        <span>${esc(n)}</span>
+      </div>`;
+    }).join('') +
+    '<div class="section-select-option add-new" data-action="new">+ New Section</div>';
+
+    dropdownEl.querySelectorAll('.section-select-option[data-name]').forEach(el => {
+      el.addEventListener('click', () => { pick(el.dataset.name); });
+    });
+    dropdownEl.querySelector('[data-action="new"]').addEventListener('click', () => {
+      dropdownEl.classList.remove('open');
+      if (onNewSection) onNewSection();
+    });
+  }
+
+  function pick(name) {
+    selected = name;
+    dropdownEl.classList.remove('open');
+    render();
+  }
+
+  fieldEl.addEventListener('click', () => {
+    if (dropdownEl.classList.contains('open')) dropdownEl.classList.remove('open');
+    else { buildOptions(); dropdownEl.classList.add('open'); }
+  });
+
+  render();
+  return {
+    getValue: () => selected,
+    setValue: (name) => { selected = name; render(); }
+  };
+}
+
+// ── btn-students ──────────────────────────────────────
+document.getElementById('btn-students').addEventListener('click', async () => {
+  showLoading('Loading…');
+  try {
+    await Promise.all([fetchStudentsManage(), fetchSectionsData()]);
+  } catch (e) {
+    hideLoading();
+    toast('Failed to load data', 'error');
+    return;
+  }
+  hideLoading();
+  showInactiveStudents = false;
+  renderStudentsList();
+  showScreen('s-students');
+});
+
+document.getElementById('students-back').addEventListener('click', () => showScreen('s-home'));
+
+document.getElementById('students-add-btn').addEventListener('click', () => {
+  document.getElementById('sn-name').value = '';
+  document.getElementById('sn-wage').value = '1';
+  snSectionSelect = makeSectionSelect(
+    document.getElementById('sn-section-field'),
+    document.getElementById('sn-section-dropdown'),
+    () => openSectionNew('s-student-new')
+  );
+  showScreen('s-student-new');
+});
+
+document.getElementById('students-sections-btn').addEventListener('click', () => {
+  renderSectionsList();
+  showScreen('s-sections');
+});
+
+document.getElementById('students-search').addEventListener('input', renderStudentsList);
+
+document.getElementById('students-inactive-toggle').addEventListener('click', () => {
+  showInactiveStudents = !showInactiveStudents;
+  renderStudentsList();
+});
+
+function studentRowHTML(s) {
+  const name   = smName(s);
+  const sec    = smSection(s) || '—';
+  const bal    = smBalance(s);
+  const row    = smRow(s);
+  const active = smActive(s);
+  return `<div class="manage-row" data-row="${esc(String(row))}">
+    <div class="manage-row-left">
+      <div class="manage-row-name">${esc(name)}</div>
+      <div class="manage-row-sub">${esc(sec)}</div>
+    </div>
+    <div class="manage-row-right">
+      <span style="font-family:'Orbitron',sans-serif;font-size:0.72rem;font-weight:700;white-space:nowrap;" class="${bal>=0?'pos':'neg'} result-bal">${Math.round(bal)} i&#162;</span>
+      ${!active ? '<span class="inactive-badge">Inactive</span>' : ''}
+    </div>
+  </div>`;
+}
+
+function renderStudentsList() {
+  const q      = (document.getElementById('students-search').value || '').trim().toLowerCase();
+  const active = studentsManageData.filter(s => smActive(s));
+  const inactive = studentsManageData.filter(s => !smActive(s));
+
+  const filtered = q
+    ? active.filter(s => smName(s).toLowerCase().includes(q) || smSection(s).toLowerCase().includes(q))
+    : active;
+
+  const bySection = {};
+  filtered.forEach(s => {
+    const sec = smSection(s) || '— No Section —';
+    if (!bySection[sec]) bySection[sec] = [];
+    bySection[sec].push(s);
+  });
+
+  let html = '';
+  if (!filtered.length) {
+    html = '<div class="manage-empty">No students found.</div>';
+  } else {
+    Object.keys(bySection).sort().forEach(sec => {
+      const sdata = sectionsData.find(x => sectionName(x) === sec);
+      const color = sdata ? sectionColor(sdata) : '#4A7A52';
+      html += `<div class="section-group-head"><div class="section-dot" style="background:${color};"></div>${esc(sec)}</div>`;
+      bySection[sec].sort((a,b) => smName(a).localeCompare(smName(b))).forEach(s => { html += studentRowHTML(s); });
+    });
+  }
+
+  document.getElementById('students-list').innerHTML = html;
+
+  if (showInactiveStudents && inactive.length && !q) {
+    let inHtml = '<div class="section-group-head">Inactive</div>';
+    inactive.sort((a,b) => smName(a).localeCompare(smName(b))).forEach(s => { inHtml += studentRowHTML(s); });
+    document.getElementById('students-list').insertAdjacentHTML('beforeend', inHtml);
+  }
+
+  document.querySelectorAll('#students-list .manage-row[data-row]').forEach(el => {
+    el.addEventListener('click', () => {
+      const s = studentsManageData.find(x => String(smRow(x)) === String(el.dataset.row));
+      if (s) openStudentDetail(s);
+    });
+  });
+
+  const wrap   = document.getElementById('students-inactive-toggle-wrap');
+  const togBtn = document.getElementById('students-inactive-toggle');
+  if (inactive.length && !q) {
+    wrap.style.display = '';
+    togBtn.textContent = showInactiveStudents
+      ? `Hide Inactive (${inactive.length})`
+      : `Show Inactive (${inactive.length})`;
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+// ── Student Detail ────────────────────────────────────
+function openStudentDetail(s) {
+  activeStudentData = s;
+  document.getElementById('sd-header-name').textContent = smName(s);
+  document.getElementById('sd-name').value  = smName(s);
+  document.getElementById('sd-wage').value  = smWage(s);
+  document.getElementById('sd-notes').value = smNotes(s);
+  sdSectionSelect = makeSectionSelect(
+    document.getElementById('sd-section-field'),
+    document.getElementById('sd-section-dropdown'),
+    () => openSectionNew('s-student-detail')
+  );
+  sdSectionSelect.setValue(smSection(s));
+  const active = smActive(s);
+  document.getElementById('sd-deactivate-btn').style.display = active ? '' : 'none';
+  document.getElementById('sd-reactivate-btn').style.display = active ? 'none' : '';
+  document.getElementById('sd-body').scrollTop = 0;
+  showScreen('s-student-detail');
+}
+
+document.getElementById('sd-back').addEventListener('click', () => {
+  renderStudentsList();
+  showScreen('s-students');
+});
+
+document.getElementById('sd-save-btn').addEventListener('click', async () => {
+  if (!activeStudentData) return;
+  const newName = document.getElementById('sd-name').value.trim();
+  const section = sdSectionSelect ? (sdSectionSelect.getValue() || '') : '';
+  const wage    = document.getElementById('sd-wage').value.trim();
+  const notes   = document.getElementById('sd-notes').value.trim();
+  const row     = smRow(activeStudentData);
+  const oldName = smName(activeStudentData);
+  if (!newName) { toast('Name is required', 'error'); return; }
+
+  async function doSaveStudent() {
+    showLoading('Saving…');
+    try {
+      const res  = await fetch(apiUrl({ action: 'updateStudent', rosterRow: row, name: newName, section, wage, notes }));
+      const data = await res.json();
+      if (data && (data.success || data.status === 'ok' || data.result === 'success')) {
+        toast('Student updated ✓', 'success');
+        await fetchStudentsManage();
+        renderStudentsList();
+        showScreen('s-students');
+      } else { toast('Error saving — try again', 'error'); }
+    } catch (e) { toast('Network error', 'error'); }
+    finally { hideLoading(); }
+  }
+
+  if (newName !== oldName) {
+    confirm('Rename Student', 'Renaming will update all transaction history. This cannot be undone.', doSaveStudent);
+  } else { await doSaveStudent(); }
+});
+
+document.getElementById('sd-deactivate-btn').addEventListener('click', () => {
+  confirm('Deactivate Student', 'This student will be marked inactive and hidden from transaction entry.', async () => {
+    showLoading('Deactivating…');
+    try {
+      const res  = await fetch(apiUrl({ action: 'deactivateStudent', rosterRow: smRow(activeStudentData) }));
+      const data = await res.json();
+      if (data && (data.success || data.status === 'ok' || data.result === 'success')) {
+        toast('Student deactivated', 'success');
+        await fetchStudentsManage();
+        renderStudentsList();
+        showScreen('s-students');
+      } else { toast('Error — try again', 'error'); }
+    } catch (e) { toast('Network error', 'error'); }
+    finally { hideLoading(); }
+  });
+});
+
+document.getElementById('sd-reactivate-btn').addEventListener('click', async () => {
+  showLoading('Reactivating…');
+  try {
+    const res  = await fetch(apiUrl({ action: 'reactivateStudent', rosterRow: smRow(activeStudentData) }));
+    const data = await res.json();
+    if (data && (data.success || data.status === 'ok' || data.result === 'success')) {
+      toast('Student reactivated ✓', 'success');
+      await fetchStudentsManage();
+      renderStudentsList();
+      showScreen('s-students');
+    } else { toast('Error — try again', 'error'); }
+  } catch (e) { toast('Network error', 'error'); }
+  finally { hideLoading(); }
+});
+
+// ── Add Student ───────────────────────────────────────
+document.getElementById('sn-back').addEventListener('click', () => showScreen('s-students'));
+
+document.getElementById('sn-submit-btn').addEventListener('click', async () => {
+  const name    = document.getElementById('sn-name').value.trim();
+  const section = snSectionSelect ? (snSectionSelect.getValue() || '') : '';
+  const wage    = document.getElementById('sn-wage').value.trim() || '1';
+  if (!name) { toast('Name is required', 'error'); return; }
+  showLoading('Creating…');
+  try {
+    const res  = await fetch(apiUrl({ action: 'addStudent', name, section, wage }));
+    const data = await res.json();
+    if (data && (data.success || data.status === 'ok' || data.result === 'success')) {
+      toast('Student created ✓', 'success');
+      await fetchStudentsManage();
+      renderStudentsList();
+      showScreen('s-students');
+    } else { toast('Error — try again', 'error'); }
+  } catch (e) { toast('Network error', 'error'); }
+  finally { hideLoading(); }
+});
+
+// ── Section List ──────────────────────────────────────
+document.getElementById('sections-back').addEventListener('click', () => showScreen('s-students'));
+
+document.getElementById('sections-add-btn').addEventListener('click', () => openSectionNew('s-sections'));
+
+function renderSectionsList() {
+  if (!sectionsData.length) {
+    document.getElementById('sections-list').innerHTML = '<div class="manage-empty">No sections yet.</div>';
+    return;
+  }
+  const sorted = [...sectionsData].sort((a,b) => sectionName(a).localeCompare(sectionName(b)));
+  document.getElementById('sections-list').innerHTML = sorted.map(s => {
+    const name   = sectionName(s);
+    const color  = sectionColor(s);
+    const active = sectionActive(s);
+    const count  = studentsManageData.filter(st => smActive(st) && smSection(st) === name).length;
+    return `<div class="manage-row" data-section="${esc(name)}">
+      <div class="manage-row-left" style="display:flex;align-items:center;gap:0.75rem;">
+        <div class="section-dot" style="background:${color};"></div>
+        <div class="manage-row-name">${esc(name)}</div>
+      </div>
+      <div class="manage-row-right">
+        <span style="font-size:0.68rem;color:var(--dim);letter-spacing:0.04em;">${count} student${count!==1?'s':''}</span>
+        ${!active ? '<span class="inactive-badge">Inactive</span>' : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  document.querySelectorAll('#sections-list .manage-row[data-section]').forEach(el => {
+    el.addEventListener('click', () => {
+      const s = sectionsData.find(x => sectionName(x) === el.dataset.section);
+      if (s) openSectionDetail(s);
+    });
+  });
+}
+
+// ── Section Detail ────────────────────────────────────
+function openSectionDetail(s) {
+  activeSectionData = s;
+  document.getElementById('secdet-header-name').textContent = sectionName(s);
+  document.getElementById('secdet-name').value = sectionName(s);
+  secdetColorPicker = initColorPicker(
+    document.getElementById('secdet-color-presets'),
+    document.getElementById('secdet-color-hex'),
+    document.getElementById('secdet-color-preview'),
+    sectionColor(s)
+  );
+  document.getElementById('secdet-body').scrollTop = 0;
+  showScreen('s-section-detail');
+}
+
+document.getElementById('secdet-back').addEventListener('click', () => {
+  renderSectionsList();
+  showScreen('s-sections');
+});
+
+document.getElementById('secdet-save-btn').addEventListener('click', async () => {
+  if (!activeSectionData) return;
+  const newName = document.getElementById('secdet-name').value.trim();
+  const color   = secdetColorPicker ? secdetColorPicker.getColor() : '#4A7A52';
+  const oldName = sectionName(activeSectionData);
+  if (!newName) { toast('Section name is required', 'error'); return; }
+
+  async function doSaveSection() {
+    showLoading('Saving…');
+    try {
+      const res  = await fetch(apiUrl({ action: 'updateSection', name: oldName, newName, color }));
+      const data = await res.json();
+      if (data && (data.success || data.status === 'ok' || data.result === 'success')) {
+        toast('Section updated ✓', 'success');
+        await Promise.all([fetchSectionsData(), fetchStudentsManage()]);
+        renderSectionsList();
+        showScreen('s-sections');
+      } else { toast('Error saving — try again', 'error'); }
+    } catch (e) { toast('Network error', 'error'); }
+    finally { hideLoading(); }
+  }
+
+  if (newName !== oldName) {
+    confirm('Rename Section', 'Renaming will update all students in this section.', doSaveSection);
+  } else { await doSaveSection(); }
+});
+
+document.getElementById('secdet-remove-btn').addEventListener('click', () => {
+  if (!activeSectionData) return;
+  const name  = sectionName(activeSectionData);
+  const count = studentsManageData.filter(s => smActive(s) && smSection(s) === name).length;
+  if (count > 0) { toast('Cannot remove section with active students', 'error'); return; }
+  confirm('Remove Section', `Remove section "${name}"? This cannot be undone.`, async () => {
+    showLoading('Removing…');
+    try {
+      const res  = await fetch(apiUrl({ action: 'removeSection', name }));
+      const data = await res.json();
+      if (data && (data.success || data.status === 'ok' || data.result === 'success')) {
+        toast('Section removed', 'success');
+        await fetchSectionsData();
+        renderSectionsList();
+        showScreen('s-sections');
+      } else { toast('Error — try again', 'error'); }
+    } catch (e) { toast('Network error', 'error'); }
+    finally { hideLoading(); }
+  });
+});
+
+// ── Add Section ───────────────────────────────────────
+function openSectionNew(returnScreen) {
+  sectionNewReturnScreen = returnScreen || 's-sections';
+  document.getElementById('secnew-name').value = '';
+  secnewColorPicker = initColorPicker(
+    document.getElementById('secnew-color-presets'),
+    document.getElementById('secnew-color-hex'),
+    document.getElementById('secnew-color-preview'),
+    '#00FF41'
+  );
+  showScreen('s-section-new');
+}
+
+document.getElementById('secnew-back').addEventListener('click', () => showScreen(sectionNewReturnScreen));
+
+document.getElementById('secnew-submit-btn').addEventListener('click', async () => {
+  const name  = document.getElementById('secnew-name').value.trim();
+  const color = secnewColorPicker ? secnewColorPicker.getColor() : '#00FF41';
+  if (!name) { toast('Section name is required', 'error'); return; }
+  showLoading('Creating…');
+  try {
+    const res  = await fetch(apiUrl({ action: 'addSection', name, color }));
+    const data = await res.json();
+    if (data && (data.success || data.status === 'ok' || data.result === 'success')) {
+      toast('Section created ✓', 'success');
+      await fetchSectionsData();
+      if (sectionNewReturnScreen === 's-student-detail' && sdSectionSelect) {
+        sdSectionSelect.setValue(name);
+      } else if (sectionNewReturnScreen === 's-student-new' && snSectionSelect) {
+        snSectionSelect.setValue(name);
+      } else {
+        renderSectionsList();
+      }
+      showScreen(sectionNewReturnScreen);
+    } else { toast('Error — try again', 'error'); }
+  } catch (e) { toast('Network error', 'error'); }
+  finally { hideLoading(); }
+});
 
 // ── Boot ──────────────────────────────────────────────
 (function boot() {
