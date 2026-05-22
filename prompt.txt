@@ -1,17 +1,64 @@
-﻿Make changes to two files:
+﻿Edit entry/index.html. Add two automated physical coin reconciliation flows:
 
-FILE 1 - entry/index.html
-Find the REASONS.Award array in the JavaScript. Add these two entries at the very beginning of the array before 'Legacy Wealth Declaration':
-'Physical Coin Submission',
-'Balance Correction',
+--- FLOW 1: PURCHASE-TRIGGERED RECONCILIATION ---
 
-FILE 2 - coins/index.html
-In the i¢ Guide modal, find the Awards section. Add these two entries after the existing "Legacy Wealth Declaration" entry and before "Contract Completion". Use the same expandable row format as other award items:
+In the submit handler, before firing the logTransaction API call, add a check:
+If selType is 'Purchase' and selAmount > selStudent.balance:
 
-Name: Physical Coin Submission | Rate: Varies
-Description: Used when a student physically brings coins to Mr. Pina to pay off debt or add to their balance. Mr. Pina counts the coins, takes possession of them, and logs this transaction for the submitted amount. Creates an audit trail for physical coin repayments.
+Instead of submitting normally, show a modal/overlay (styled like the confirm-overlay) with:
+- Title: "RECONCILIATION REQUIRED" in amber
+- Message: "Digital balance is X i¢. This purchase costs Y i¢. A physical coin submission of Z i¢ is needed to cover the difference."
+  Where X = current balance, Y = purchase amount, Z = Y - X
+- A number input labeled "Physical coins submitted by student:" pre-filled with Z
+- Two buttons: CANCEL and CONFIRM RECONCILIATION
 
-Name: Balance Correction | Rate: Varies
-Description: A manual adjustment logged by Mr. Pina to reconcile the digital record with physical reality. Used when the digital balance does not accurately reflect a student's true holdings due to untracked transactions, student-to-student trades, or coins earned before the digital system existed.
+On CONFIRM:
+1. Read the physical coins value from the input (call it physCoins)
+2. If physCoins < Z, show a toast error "Not enough physical coins submitted" and do not proceed
+3. If physCoins >= Z:
+   a. Fire background API call: logTransaction with type=Award, reason=Physical Coin Submission, amount=physCoins
+   b. Fire background API call: logTransaction with type=Purchase, reason=selReason, amount=selAmount
+   c. Update local balance: selStudent.balance += physCoins then selStudent.balance -= selAmount
+   d. Show success toast: "Reconciliation logged - X i¢ submitted, purchase of Y i¢ completed"
+   e. Return to home screen
 
-Commit with message "feat: add Physical Coin Submission and Balance Correction award reasons" and push.
+Both API calls fire in background (optimistic, no loading overlay). If either fails show a sync error toast.
+
+--- FLOW 2: PROACTIVE RECONCILIATION SCREEN ---
+
+Add a fifth home button after the Contracts button:
+- Border: rgba(0,240,255,0.35) cyan
+- Icon: ⟷
+- Label: "Reconcile Balance" in cyan
+- Sub: "Sync a student's physical coin count"
+
+This button opens a new screen s-reconcile.
+
+Add screen s-reconcile with header "Reconcile Balance" and back button returning to home.
+
+Screen content:
+
+STEP 1 - STUDENT SEARCH
+Same search input and results as the log transaction screen. On student select, show the student card with name, section, eligibility badge, and current digital balance.
+
+STEP 2 - PHYSICAL COIN COUNT (appears after student selected)
+Step label: "Physical Coins in Student's Possession"
+A large number input (same style as amount-input) for Mr. Pina to enter the physical coin count after counting the student's box.
+Below the input, show a live reconciliation preview that updates as the number is typed:
+- If physical > digital: show in green "Award X i¢ as Physical Coin Submission"
+- If physical < digital: show in red "Fine X i¢ as Balance Correction"
+- If physical === digital: show in dim "No reconciliation needed"
+
+RECONCILE button (gold border, full width) - disabled if physical === digital or input is empty.
+
+On RECONCILE tap:
+- If physical > digital: fire background API logTransaction with type=Award, reason=Physical Coin Submission, amount=difference
+- If physical < digital: fire background API logTransaction with type=Fine, reason=Balance Correction, amount=difference
+- Update local allStudents balance optimistically
+- Show toast: "Balance reconciled - digital balance updated to X i¢"
+- Return to home
+
+--- GENERAL ---
+Add s-reconcile to the screen list. Wire back button. Reset the reconcile screen (clear student and input) when navigating away.
+
+Commit with message "feat: purchase-triggered and proactive physical coin reconciliation" and push.

@@ -663,6 +663,22 @@ body::after {
 <!-- ── Toast ──────────────────────────── -->
 <div class="toast" id="toast"></div>
 
+<!-- ── Reconciliation Overlay (purchase-triggered) ── -->
+<div class="confirm-overlay" id="recon-overlay">
+  <div class="confirm-box">
+    <div class="confirm-title" style="color:var(--amber);text-shadow:0 0 10px rgba(255,140,0,0.6);">RECONCILIATION REQUIRED</div>
+    <div class="confirm-msg" id="recon-msg" style="margin-bottom:0.9rem;"></div>
+    <div style="margin-bottom:1.1rem;">
+      <label style="display:block;font-family:'Orbitron',sans-serif;font-size:0.46rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--dim);margin-bottom:0.42rem;">Physical coins submitted by student:</label>
+      <input type="number" class="amount-input" id="recon-coins-input" min="0" step="1" style="font-size:1.4rem;min-height:54px;">
+    </div>
+    <div class="confirm-row">
+      <button class="confirm-btn cancel" id="recon-cancel">Cancel</button>
+      <button class="confirm-btn ok" id="recon-confirm" style="color:var(--amber);border-color:rgba(255,140,0,0.5);">Confirm Reconciliation</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── Confirm Dialog ─────────────────── -->
 <div class="confirm-overlay" id="confirm-overlay">
   <div class="confirm-box">
@@ -714,6 +730,13 @@ body::after {
       <div class="home-btn-content">
         <span class="home-btn-label">Contracts</span>
         <span class="home-btn-sub">View, assign, and complete contracts</span>
+      </div>
+    </button>
+    <button class="home-btn cyan" id="btn-reconcile">
+      <span class="home-btn-icon">&#8596;</span>
+      <div class="home-btn-content">
+        <span class="home-btn-label">Reconcile Balance</span>
+        <span class="home-btn-sub">Sync a student's physical coin count</span>
       </div>
     </button>
   </div>
@@ -955,6 +978,51 @@ body::after {
     <div id="complete-split-list"></div>
     <div class="alloc-total bad" id="complete-alloc"></div>
     <button class="action-btn gold" id="complete-submit-btn" style="margin-top:1rem;" disabled>Complete</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 8 — RECONCILE BALANCE
+════════════════════════════════════════ -->
+<div class="screen" id="s-reconcile">
+  <div class="app-header">
+    <div class="logo-wrap">
+      <span class="logo">IDEA.</span>
+      <span class="logo-sub">Reconcile Balance</span>
+    </div>
+    <button class="back-btn" id="reconcile-back">&#8592; Back</button>
+  </div>
+  <div class="screen-body" id="reconcile-body">
+
+    <!-- Step 1: Student -->
+    <div class="step-label">01 &mdash; Select Student</div>
+    <div id="recon-search-wrap">
+      <input type="search" class="search-input" id="recon-student-search"
+             placeholder="Search by name or section&hellip;" autocomplete="off" autocorrect="off" spellcheck="false">
+      <div class="search-results" id="recon-search-results"></div>
+    </div>
+    <div class="student-card" id="recon-student-card">
+      <div class="student-card-top">
+        <div>
+          <div class="student-card-name" id="recon-card-name"></div>
+          <div class="student-card-section" id="recon-card-section"></div>
+        </div>
+        <button class="change-btn" id="recon-change-student">Change</button>
+      </div>
+      <div class="student-card-meta">
+        <span class="elig-badge" id="recon-card-elig"></span>
+        <span class="student-card-bal" id="recon-card-bal"></span>
+      </div>
+    </div>
+
+    <!-- Step 2: Physical coin count -->
+    <div id="recon-step2" style="display:none;">
+      <div class="step-label">Physical Coins in Student's Possession</div>
+      <input type="number" class="amount-input" id="recon-physical-input" placeholder="0" min="0" step="1">
+      <div id="recon-preview" style="margin-top:0.65rem;font-family:'Orbitron',sans-serif;font-size:0.72rem;letter-spacing:0.1em;text-align:center;min-height:1.4rem;transition:color 0.2s;"></div>
+      <button class="submit-btn show" id="recon-submit-btn" disabled style="border-color:rgba(200,255,0,0.4);">Reconcile</button>
+    </div>
+
   </div>
 </div>
 
@@ -1552,6 +1620,20 @@ function refreshSubmit() {
 // ── Submit (optimistic) ───────────────────────────────
 document.getElementById('submit-btn').addEventListener('click', () => {
   if (!selStudent || !selType || !selReason || !selAmount) return;
+
+  // Purchase-triggered reconciliation: show overlay if purchase exceeds balance
+  if (selType === 'Purchase' && selAmount > selStudent.balance) {
+    const x = Math.round(selStudent.balance);
+    const y = selAmount;
+    const z = y - x;
+    document.getElementById('recon-msg').textContent =
+      `Digital balance is ${x} i¢. This purchase costs ${y} i¢. A physical coin submission of ${z} i¢ is needed to cover the difference.`;
+    const coinsInput = document.getElementById('recon-coins-input');
+    coinsInput.value = z;
+    document.getElementById('recon-overlay').classList.add('show');
+    return;
+  }
+
   const { name } = selStudent;
   const physicalGiven = selType !== 'Award' || document.getElementById('physical-check').checked;
   const type   = (selType === 'Award' && !physicalGiven) ? 'Award - Held' : selType;
@@ -2249,6 +2331,220 @@ document.getElementById('show-cancelled-btn').addEventListener('click', () => {
   showCancelled = !showCancelled;
   renderContractsList();
 });
+
+// ── Purchase-triggered reconciliation overlay ─────────
+document.getElementById('recon-cancel').addEventListener('click', () => {
+  document.getElementById('recon-overlay').classList.remove('show');
+});
+
+document.getElementById('recon-confirm').addEventListener('click', () => {
+  const physCoins = parseInt(document.getElementById('recon-coins-input').value, 10) || 0;
+  const z = selAmount - Math.round(selStudent.balance);
+  if (physCoins < z) {
+    toast('Not enough physical coins submitted', 'error');
+    return;
+  }
+
+  document.getElementById('recon-overlay').classList.remove('show');
+
+  const name            = selStudent.name;
+  const purchaseAmount  = selAmount;
+  const purchaseReason  = selReason;
+
+  // Optimistic local update
+  const raw = allStudents.find(s =>
+    (getField(s,'name','Name','Full Name','Student') || '').toLowerCase() === name.toLowerCase()
+  );
+  if (raw) {
+    const ak = raw.awarded !== undefined ? 'awarded' : 'Awarded';
+    const fk = raw.fines   !== undefined ? 'fines'   : 'Fines';
+    raw[ak] = (parseFloat(raw[ak]) || 0) + physCoins;
+    raw[fk] = (parseFloat(raw[fk]) || 0) + purchaseAmount;
+  }
+
+  toast(`Reconciliation logged — ${physCoins} i¢ submitted, purchase of ${purchaseAmount} i¢ completed`, 'success');
+  resetLog();
+  showScreen('s-home');
+
+  fetch(apiUrl({ action: 'logTransaction', name, type: 'Award', reason: 'Physical Coin Submission', amount: physCoins }))
+    .then(r => r.json())
+    .then(d => { if (!d || !(d.success || d.status === 'ok' || d.result === 'success')) toast('Sync failed — check sheet', 'error'); })
+    .catch(() => toast('Sync failed — check sheet', 'error'));
+
+  fetch(apiUrl({ action: 'logTransaction', name, type: 'Purchase', reason: purchaseReason, amount: purchaseAmount }))
+    .then(r => r.json())
+    .then(d => { if (!d || !(d.success || d.status === 'ok' || d.result === 'success')) toast('Sync failed — check sheet', 'error'); })
+    .catch(() => toast('Sync failed — check sheet', 'error'));
+});
+
+// ── Reconcile Balance screen ──────────────────────────
+let reconStudent = null;
+
+const reconSearchInput   = document.getElementById('recon-student-search');
+const reconSearchResults = document.getElementById('recon-search-results');
+const reconStudentCard   = document.getElementById('recon-student-card');
+
+document.getElementById('btn-reconcile').addEventListener('click', async () => {
+  if (!await requireStudents()) return;
+  resetReconcile();
+  showScreen('s-reconcile');
+  reconSearchInput.focus();
+});
+
+document.getElementById('reconcile-back').addEventListener('click', () => {
+  resetReconcile();
+  showScreen('s-home');
+});
+
+reconSearchInput.addEventListener('input', () => {
+  const q = reconSearchInput.value.trim().toLowerCase();
+  if (!q) { reconSearchResults.style.display = 'none'; return; }
+
+  const matches = allStudents.filter(s => {
+    const name = (getField(s,'name','Name','Full Name','Student') || '').toLowerCase();
+    const sec  = (getField(s,'section','Section','Class') || '').toLowerCase();
+    return name.includes(q) || sec.includes(q);
+  }).slice(0, 10);
+
+  if (!matches.length) {
+    reconSearchResults.innerHTML = '<div class="result-empty">No students found.</div>';
+    reconSearchResults.style.display = 'block';
+    return;
+  }
+
+  reconSearchResults.innerHTML = matches.map(s => {
+    const name = getField(s,'name','Name','Full Name','Student') || '—';
+    const sec  = getField(s,'section','Section','Class') || '—';
+    const bal  = studentBal(s);
+    return `<div class="result-item" tabindex="0"
+                 data-name="${esc(name)}" data-sec="${esc(sec)}" data-bal="${bal}">
+      <div class="result-info">
+        <span class="result-name">${esc(name)}</span>
+        <span class="result-section">${esc(sec)}</span>
+      </div>
+      <span class="result-bal ${bal>=0?'pos':'neg'}">${Math.round(bal)} i&#162;</span>
+    </div>`;
+  }).join('');
+
+  reconSearchResults.style.display = 'block';
+  reconSearchResults.querySelectorAll('.result-item').forEach(el => {
+    el.addEventListener('click', () => reconPickStudent(el.dataset.name, el.dataset.sec, parseFloat(el.dataset.bal)));
+  });
+});
+
+function reconPickStudent(name, section, balance) {
+  reconStudent = { name, section, balance };
+  reconSearchInput.value = '';
+  reconSearchResults.style.display = 'none';
+  document.getElementById('recon-search-wrap').style.display = 'none';
+
+  document.getElementById('recon-card-name').textContent = name;
+  document.getElementById('recon-card-section').textContent = section;
+
+  const elig = document.getElementById('recon-card-elig');
+  elig.textContent = balance < 0 ? 'IN DEBT' : 'ELIGIBLE';
+  elig.className   = 'elig-badge ' + (balance < 0 ? 'bad' : 'ok');
+
+  const balEl = document.getElementById('recon-card-bal');
+  balEl.textContent = Math.round(balance) + ' i¢';
+  balEl.className   = 'student-card-bal ' + (balance >= 0 ? 'pos' : 'neg');
+
+  reconStudentCard.classList.add('show');
+  document.getElementById('recon-step2').style.display = '';
+  document.getElementById('recon-physical-input').value = '';
+  document.getElementById('recon-preview').textContent = '';
+  document.getElementById('recon-submit-btn').disabled = true;
+}
+
+document.getElementById('recon-change-student').addEventListener('click', () => {
+  reconStudent = null;
+  reconStudentCard.classList.remove('show');
+  document.getElementById('recon-search-wrap').style.display = '';
+  reconSearchInput.value = '';
+  reconSearchInput.focus();
+  document.getElementById('recon-step2').style.display = 'none';
+});
+
+document.getElementById('recon-physical-input').addEventListener('input', () => {
+  if (!reconStudent) return;
+  const inputEl = document.getElementById('recon-physical-input');
+  const preview  = document.getElementById('recon-preview');
+  const submitBtn = document.getElementById('recon-submit-btn');
+  const digital  = Math.round(reconStudent.balance);
+  const raw      = inputEl.value;
+
+  if (raw === '' || raw === null) {
+    preview.textContent = '';
+    submitBtn.disabled = true;
+    return;
+  }
+
+  const v    = parseInt(raw, 10);
+  const diff = v - digital;
+
+  if (diff > 0) {
+    preview.textContent = `Award ${diff} i¢ as Physical Coin Submission`;
+    preview.style.color = 'var(--green)';
+    submitBtn.disabled  = false;
+  } else if (diff < 0) {
+    preview.textContent = `Fine ${Math.abs(diff)} i¢ as Balance Correction`;
+    preview.style.color = 'var(--red)';
+    submitBtn.disabled  = false;
+  } else {
+    preview.textContent = 'No reconciliation needed';
+    preview.style.color = 'var(--dim)';
+    submitBtn.disabled  = true;
+  }
+});
+
+document.getElementById('recon-submit-btn').addEventListener('click', () => {
+  if (!reconStudent) return;
+  const v = parseInt(document.getElementById('recon-physical-input').value, 10);
+  if (isNaN(v)) return;
+  const digital = Math.round(reconStudent.balance);
+  const diff    = v - digital;
+  if (diff === 0) return;
+
+  const name    = reconStudent.name;
+  const absDiff = Math.abs(diff);
+  const type    = diff > 0 ? 'Award' : 'Fine';
+  const reason  = diff > 0 ? 'Physical Coin Submission' : 'Balance Correction';
+
+  // Optimistic local update
+  const raw = allStudents.find(s =>
+    (getField(s,'name','Name','Full Name','Student') || '').toLowerCase() === name.toLowerCase()
+  );
+  if (raw) {
+    if (diff > 0) {
+      const k = raw.awarded !== undefined ? 'awarded' : 'Awarded';
+      raw[k] = (parseFloat(raw[k]) || 0) + absDiff;
+    } else {
+      const k = raw.fines !== undefined ? 'fines' : 'Fines';
+      raw[k] = (parseFloat(raw[k]) || 0) + absDiff;
+    }
+  }
+
+  toast(`Balance reconciled — digital balance updated to ${v} i¢`, 'success');
+  resetReconcile();
+  showScreen('s-home');
+
+  fetch(apiUrl({ action: 'logTransaction', name, type, reason, amount: absDiff }))
+    .then(r => r.json())
+    .then(d => { if (!d || !(d.success || d.status === 'ok' || d.result === 'success')) toast('Sync failed — check sheet', 'error'); })
+    .catch(() => toast('Sync failed — check sheet', 'error'));
+});
+
+function resetReconcile() {
+  reconStudent = null;
+  reconSearchInput.value = '';
+  reconSearchResults.style.display = 'none';
+  document.getElementById('recon-search-wrap').style.display = '';
+  reconStudentCard.classList.remove('show');
+  document.getElementById('recon-step2').style.display = 'none';
+  document.getElementById('recon-physical-input').value = '';
+  document.getElementById('recon-preview').textContent = '';
+  document.getElementById('reconcile-body').scrollTop = 0;
+}
 
 // ── Boot ──────────────────────────────────────────────
 (function boot() {
