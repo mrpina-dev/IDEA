@@ -732,6 +732,31 @@ body::after {
 .home-btn.amber { border-color:rgba(255,140,0,0.35); }
 .home-btn.amber .home-btn-label { color:var(--amber); }
 .home-btn.amber:hover { background:rgba(255,140,0,0.05); border-color:rgba(255,140,0,0.65); }
+
+/* ── Fine-Owed badge ─────────────────────────────────── */
+.type-badge.fine-owed { color:var(--amber); border:1px solid rgba(255,140,0,0.4); background:rgba(255,140,0,0.07); }
+
+/* ── Collect Debts home button ───────────────────────── */
+.home-btn.red { border-color:rgba(255,68,68,0.35); }
+.home-btn.red .home-btn-label { color:var(--red); }
+.home-btn.red:hover { background:rgba(255,68,68,0.05); border-color:rgba(255,68,68,0.65); }
+
+/* ── Collect Debts screen ────────────────────────────── */
+.collect-summary { background:var(--bg1); border:1px solid rgba(255,68,68,0.15); border-radius:4px; padding:0.85rem 1rem; margin-bottom:1rem; font-size:0.75rem; color:var(--dim); letter-spacing:0.03em; }
+.collect-student-head { display:flex; align-items:center; justify-content:space-between; gap:0.65rem; background:rgba(255,68,68,0.06); border:1px solid rgba(255,68,68,0.15); border-radius:3px; padding:0.65rem 0.85rem; margin-top:0.85rem; margin-bottom:0.2rem; }
+.collect-student-name { font-family:'Orbitron',sans-serif; font-size:0.72rem; font-weight:700; color:var(--red); letter-spacing:0.06em; }
+.collect-student-meta { font-size:0.58rem; color:var(--dim); letter-spacing:0.05em; margin-top:0.15rem; }
+.collect-student-total { font-family:'Orbitron',sans-serif; font-size:0.68rem; font-weight:700; color:var(--amber); white-space:nowrap; flex-shrink:0; }
+.collect-all-btn { font-family:'Orbitron',sans-serif; font-size:0.48rem; letter-spacing:0.12em; text-transform:uppercase; background:none; border:1px solid rgba(255,68,68,0.4); border-radius:2px; color:var(--red); padding:0 0.75rem; cursor:pointer; min-height:34px; flex-shrink:0; transition:background 0.15s; }
+.collect-all-btn:hover { background:rgba(255,68,68,0.08); }
+.collect-fine-row { display:flex; align-items:center; gap:0.65rem; min-height:52px; background:var(--bg1); border-bottom:1px solid rgba(255,68,68,0.06); padding:0.55rem 0.85rem; }
+.collect-fine-info { flex:1; min-width:0; }
+.collect-fine-reason { font-size:0.78rem; color:var(--white); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.collect-fine-date { font-size:0.58rem; color:var(--dim); letter-spacing:0.04em; margin-top:0.1rem; }
+.collect-fine-amt { font-family:'Orbitron',sans-serif; font-size:0.72rem; font-weight:700; color:var(--amber); white-space:nowrap; flex-shrink:0; }
+.collect-btn { font-family:'Orbitron',sans-serif; font-size:0.48rem; letter-spacing:0.12em; text-transform:uppercase; background:none; border:1px solid rgba(0,255,65,0.4); border-radius:2px; color:var(--green); padding:0 0.75rem; cursor:pointer; min-height:34px; flex-shrink:0; transition:background 0.15s; }
+.collect-btn:hover { background:rgba(0,255,65,0.08); }
+.collect-empty { font-size:0.78rem; color:var(--green); padding:2.5rem 0; text-align:center; letter-spacing:0.04em; }
 </style>
 </head>
 <body>
@@ -866,6 +891,13 @@ body::after {
         <span class="home-btn-sub">View, edit, and delete transactions</span>
       </div>
     </button>
+    <button class="home-btn red" id="btn-collect">
+      <span class="home-btn-icon">&#8595;&#162;</span>
+      <div class="home-btn-content">
+        <span class="home-btn-label">Collect Debts</span>
+        <span class="home-btn-sub">Fine-Owed entries pending physical collection</span>
+      </div>
+    </button>
     <button class="home-btn amber" id="btn-economy">
       <span class="home-btn-icon">&#10022;</span>
       <div class="home-btn-content">
@@ -923,8 +955,8 @@ body::after {
       <label style="display:flex; align-items:center; gap:0.75rem; cursor:pointer; min-height:48px; padding:0.6rem 0.85rem; background:var(--bg1); border:1px solid rgba(0,255,65,0.15); border-radius:3px;">
         <input type="checkbox" id="physical-check" checked style="width:22px; height:22px; accent-color:var(--green); cursor:pointer; flex-shrink:0;">
         <div>
-          <div style="font-family:'Orbitron',sans-serif; font-size:0.65rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--green);">Physical coin given?</div>
-          <div style="font-size:0.58rem; color:var(--dim); margin-top:0.15rem; letter-spacing:0.04em;">Uncheck if you cannot give the coin right now</div>
+          <div id="physical-label-main" style="font-family:'Orbitron',sans-serif; font-size:0.65rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--green);">Physical coin given?</div>
+          <div id="physical-label-sub" style="font-size:0.58rem; color:var(--dim); margin-top:0.15rem; letter-spacing:0.04em;">Uncheck if you cannot give the coin right now</div>
         </div>
       </label>
     </div>
@@ -1452,6 +1484,26 @@ body::after {
 </div>
 
 <!-- ══════════════════════════════════════
+     SCREEN 18 — COLLECT DEBTS
+════════════════════════════════════════ -->
+<div class="screen" id="s-collect">
+  <div class="app-header">
+    <div class="logo-wrap">
+      <span class="logo">IDEA.</span>
+      <span class="logo-sub">Collect Debts</span>
+    </div>
+    <div style="display:flex;gap:0.5rem;align-items:center;">
+      <button class="back-btn" id="collect-refresh" style="font-size:1.1rem;padding:0;min-width:48px;min-height:48px;display:flex;align-items:center;justify-content:center;">&#8635;</button>
+      <button class="back-btn" id="collect-back">&#8592; Back</button>
+    </div>
+  </div>
+  <div class="screen-body" id="collect-body">
+    <div class="collect-summary" id="collect-summary">Loading&hellip;</div>
+    <div id="collect-list"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
      SCREEN 18 — ECONOMY RULES
 ════════════════════════════════════════ -->
 <div class="screen" id="s-economy">
@@ -1609,6 +1661,8 @@ const REASONS = {
   Payout: ['Coin Payout to Student']
 };
 REASONS['Award - Held'] = REASONS.Award;
+REASONS['Fine - Owed']  = REASONS.Fine;
+PRESETS['Fine - Owed']  = PRESETS.Fine;
 
 const PRESETS = {
   Award:    [1, 2, 3, 5, 10],
@@ -1636,7 +1690,9 @@ function saveReasonOverrides() {
 }
 
 function getEffectiveReasons(type) {
-  const baseKey = type === 'Award - Held' ? 'Award' : type;
+  const baseKey = type === 'Award - Held' ? 'Award'
+                : type === 'Fine - Owed'  ? 'Fine'
+                : type;
   const base    = REASONS[baseKey] || [];
   const custom  = customReasons[baseKey] || [];
   const removed = removedReasons[baseKey] || [];
@@ -2076,9 +2132,19 @@ function selectType(type) {
   document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
   selType = type;
-  const physToggle = document.getElementById('physical-toggle');
+  const physToggle  = document.getElementById('physical-toggle');
+  const mainLabel   = document.getElementById('physical-label-main');
+  const subLabel    = document.getElementById('physical-label-sub');
   if (type === 'Award') {
     physToggle.style.display = '';
+    mainLabel.textContent    = 'Physical coin given?';
+    mainLabel.style.color    = 'var(--green)';
+    subLabel.textContent     = 'Uncheck if you cannot give the coin right now';
+  } else if (type === 'Fine') {
+    physToggle.style.display = '';
+    mainLabel.textContent    = 'Physical coins collected?';
+    mainLabel.style.color    = 'var(--amber)';
+    subLabel.textContent     = 'Uncheck if the student was not present';
   } else {
     physToggle.style.display = 'none';
     document.getElementById('physical-check').checked = true;
@@ -2229,8 +2295,10 @@ document.getElementById('submit-btn').addEventListener('click', () => {
   }
 
   const { name } = selStudent;
-  const physicalGiven = selType !== 'Award' || document.getElementById('physical-check').checked;
-  const type   = (selType === 'Award' && !physicalGiven) ? 'Award - Held' : selType;
+  const physChecked = document.getElementById('physical-check').checked;
+  let type = selType;
+  if      (selType === 'Award' && !physChecked) type = 'Award - Held';
+  else if (selType === 'Fine'  && !physChecked) type = 'Fine - Owed';
   const reason = selReason;
   const amount = selAmount;
 
@@ -3704,6 +3772,7 @@ function txnBadgeClass(type) {
   const t = (type || '').toLowerCase().replace(/[\s\-]/g,'');
   if (t === 'awardheld') return 'held';
   if (t.startsWith('award')) return 'award';
+  if (t === 'fineowed') return 'fine-owed';
   if (t === 'fine') return 'fine';
   if (t === 'purchase') return 'purchase';
   if (t === 'payout') return 'payout';
@@ -3852,7 +3921,7 @@ function openTxnEdit(t, origin) {
   badgeEl.className   = 'type-badge ' + txnBadgeClass(type);
   document.getElementById('txnedit-amount').value = String(amount);
 
-  const reasons  = REASONS[type] || REASONS[(type || '').replace(' - Held', '')] || [];
+  const reasons  = REASONS[type] || REASONS[(type || '').replace(' - Held', '').replace(' - Owed', '')] || [];
   const listEl   = document.getElementById('txnedit-reason-list');
   const searchEl = document.getElementById('txnedit-reason-search');
   searchEl.value = '';
@@ -4169,6 +4238,140 @@ function showWageUpdateModal(studentName, currentWage, studentRaw) {
   function no() { close(); }
   okBtn.addEventListener('click', yes);
   cancelBtn.addEventListener('click', no);
+}
+
+// ── Collect Debts screen ──────────────────────────────
+let collectData = [];
+
+document.getElementById('btn-collect').addEventListener('click', () => {
+  bumpHomeFreq('btn-collect');
+  showScreen('s-collect');
+  loadCollectDebts();
+});
+
+document.getElementById('collect-back').addEventListener('click', () => showScreen('s-home'));
+
+document.getElementById('collect-refresh').addEventListener('click', loadCollectDebts);
+
+async function loadCollectDebts() {
+  document.getElementById('collect-summary').textContent = 'Loading…';
+  document.getElementById('collect-list').innerHTML = '';
+  showLoading('Loading outstanding fines…');
+  try {
+    const res  = await fetch(apiUrl({ action: 'getFineOwed' }));
+    collectData = await res.json();
+    renderCollectList();
+  } catch(e) {
+    document.getElementById('collect-summary').textContent = 'Error loading data.';
+    toast('Failed to load', 'error');
+  } finally {
+    hideLoading();
+  }
+}
+
+function renderCollectList() {
+  const data = collectData;
+
+  if (!data.length) {
+    document.getElementById('collect-summary').innerHTML =
+      '<span style="color:var(--green)">No outstanding fine debts.</span>';
+    document.getElementById('collect-list').innerHTML =
+      '<div class="collect-empty">All clear &#10003;</div>';
+    return;
+  }
+
+  // Group by student
+  const byStudent = {};
+  data.forEach(t => {
+    if (!byStudent[t.name]) byStudent[t.name] = { section: t.section, entries: [] };
+    byStudent[t.name].entries.push(t);
+  });
+
+  const totalStudents = Object.keys(byStudent).length;
+  const totalCoins    = data.reduce((s, t) => s + t.amount, 0);
+  document.getElementById('collect-summary').innerHTML =
+    `<span style="color:var(--amber)">${totalStudents} student${totalStudents !== 1 ? 's' : ''} owe <strong>${totalCoins} i¢</strong> in uncollected fines.</span>`;
+
+  const listEl = document.getElementById('collect-list');
+  listEl.innerHTML = Object.entries(byStudent).map(([name, { section, entries }]) => {
+    const studentTotal = entries.reduce((s, t) => s + t.amount, 0);
+    const rows = entries.map(t =>
+      `<div class="collect-fine-row" data-row="${esc(String(t.row))}">
+        <div class="collect-fine-info">
+          <div class="collect-fine-reason">${esc(t.reason)}</div>
+          <div class="collect-fine-date">${esc(fmtDate(t.date))}</div>
+        </div>
+        <span class="collect-fine-amt">${Math.round(t.amount)} i¢</span>
+        <button class="collect-btn" data-action="collect-one" data-row="${esc(String(t.row))}" data-name="${esc(name)}">Collect</button>
+      </div>`
+    ).join('');
+    return `<div class="collect-student-head" data-student="${esc(name)}">
+      <div>
+        <div class="collect-student-name">${esc(name)}</div>
+        <div class="collect-student-meta">${esc(section)}</div>
+      </div>
+      <span class="collect-student-total">${studentTotal} i¢</span>
+      <button class="collect-all-btn" data-action="collect-all" data-name="${esc(name)}">Collect All</button>
+    </div>
+    ${rows}`;
+  }).join('');
+
+  listEl.querySelectorAll('[data-action]').forEach(el => {
+    el.addEventListener('click', ev => {
+      ev.stopPropagation();
+      const action = el.dataset.action;
+      const name   = el.dataset.name;
+      if (action === 'collect-one') {
+        collectOneFine(parseInt(el.dataset.row, 10), name);
+      } else if (action === 'collect-all') {
+        collectAllForStudent(name);
+      }
+    });
+  });
+}
+
+function collectOneFine(row, name) {
+  fetch(apiUrl({ action: 'collectFine', row }))
+    .then(r => r.json())
+    .then(d => {
+      if (d && (d.success || d.status === 'ok')) {
+        collectData = collectData.filter(t => t.row !== row);
+        renderCollectList();
+        toast(`Fine collected from ${name} ✓`, 'success');
+      } else {
+        toast('Error — try again', 'error');
+      }
+    })
+    .catch(() => toast('Network error', 'error'));
+}
+
+function collectAllForStudent(name) {
+  const entries = collectData.filter(t => t.name === name);
+  if (!entries.length) return;
+  const total = entries.reduce((s, t) => s + t.amount, 0);
+  confirm(
+    'Collect All',
+    `Mark all ${entries.length} fine${entries.length !== 1 ? 's' : ''} (${total} i¢) from ${name} as collected?`,
+    () => {
+      showLoading('Collecting…');
+      Promise.all(entries.map(t =>
+        fetch(apiUrl({ action: 'collectFine', row: t.row })).then(r => r.json())
+      ))
+      .then(results => {
+        const succeeded = results.filter(d => d && (d.success || d.status === 'ok')).length;
+        if (succeeded === entries.length) {
+          collectData = collectData.filter(t => t.name !== name);
+          renderCollectList();
+          toast(`All ${succeeded} fine${succeeded !== 1 ? 's' : ''} collected from ${name} ✓`, 'success');
+        } else {
+          toast(`${succeeded}/${entries.length} collected -- refresh to check`, 'error');
+          loadCollectDebts();
+        }
+      })
+      .catch(() => toast('Network error', 'error'))
+      .finally(() => hideLoading());
+    }
+  );
 }
 
 // ── Economy Rules screen ──────────────────────────────
