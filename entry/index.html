@@ -334,6 +334,11 @@ body::after {
 .payout-bal.neg { color: var(--red); }
 .payout-none { font-size: 0.68rem; color: var(--dim); padding: 0.65rem 0; letter-spacing: 0.04em; }
 .payout-divider { border: none; border-top: 1px solid rgba(0,255,65,0.07); margin: 0.75rem 0; }
+.payout-pay-all-btn { width: 100%; font-family: 'Orbitron', sans-serif; font-size: 0.65rem; letter-spacing: 0.1em; background: transparent; border: 1px solid var(--green); color: var(--green); border-radius: 2px; padding: 0.55rem 1rem; margin-bottom: 0.65rem; cursor: pointer; transition: opacity 0.2s; }
+.payout-pay-all-btn:disabled { opacity: 0.45; cursor: default; }
+.payout-pay-btn { font-family: 'Orbitron', sans-serif; font-size: 0.52rem; letter-spacing: 0.08em; background: transparent; border: 1px solid var(--green); color: var(--green); border-radius: 2px; min-height: 36px; padding: 0 0.75rem; cursor: pointer; flex-shrink: 0; transition: opacity 0.2s; }
+.payout-paid-badge { font-family: 'Orbitron', sans-serif; font-size: 0.52rem; letter-spacing: 0.08em; color: var(--green); flex-shrink: 0; padding: 0 0.5rem; }
+.payout-row.paid { opacity: 0.45; }
 
 /* ── Loading overlay ─────────────────────── */
 .loading-overlay {
@@ -1726,46 +1731,126 @@ async function openPayoutScreen() {
   }
 }
 
+const paidThisSession = new Set();
+let payoutGiveList = [];
+
+function payStudentInternal(name) {
+  const raw = allStudents.find(s => smName(s) === name);
+  const wage = raw ? (parseFloat(smWage(raw)) || 1) : 1;
+  fetch(apiUrl({ action: 'logTransaction', name, type: 'Payout', reason: 'Coin Payout to Student', amount: wage }))
+    .catch(() => {});
+  if (raw) {
+    const balField = ['balance','Balance','coinBalance','coin_balance'].find(f => raw[f] !== undefined);
+    if (balField) raw[balField] = (parseFloat(raw[balField]) || 0) - wage;
+  }
+  paidThisSession.add(name);
+}
+
+function checkAllPaid() {
+  const allPaid = payoutGiveList.every(s => paidThisSession.has(s.name));
+  const btn = document.getElementById('payout-pay-all-btn');
+  if (btn && allPaid) { btn.textContent = 'All Paid ✓'; btn.disabled = true; }
+}
+
+function renderPayoutGiveRow(s) {
+  const isPaid = paidThisSession.has(s.name);
+  return `<div class="payout-row${isPaid ? ' paid' : ''}" id="payout-row-${CSS.escape(s.name)}">` +
+    `<div style="display:flex;flex-direction:column;flex:1;min-width:0;">` +
+    `<span style="color:var(--white)">${esc(s.name)}</span>` +
+    (s.sec ? `<span style="font-size:0.65rem;color:var(--dim);letter-spacing:0.04em;">${esc(s.sec)}</span>` : '') +
+    `</div>` +
+    `<span class="payout-bal pos" style="margin-right:0.65rem;">${Math.round(s.bal)} i&#162;</span>` +
+    (isPaid
+      ? `<span class="payout-paid-badge">PAID &#10003;</span>`
+      : `<button class="payout-pay-btn" onclick="handlePayStudent(${JSON.stringify(s.name)})">PAY</button>`) +
+    `</div>`;
+}
+
+function handlePayStudent(name) {
+  payStudentInternal(name);
+  const row = document.getElementById('payout-row-' + CSS.escape(name));
+  if (row) {
+    row.classList.add('paid');
+    const btn = row.querySelector('.payout-pay-btn');
+    if (btn) { const badge = document.createElement('span'); badge.className = 'payout-paid-badge'; badge.textContent = 'PAID ✓'; btn.replaceWith(badge); }
+  }
+  checkAllPaid();
+  toast('Payout logged for 1 student', 'success');
+}
+
+function handlePayAll() {
+  const unpaid = payoutGiveList.filter(s => !paidThisSession.has(s.name));
+  if (!unpaid.length) return;
+  unpaid.forEach(s => {
+    payStudentInternal(s.name);
+    const row = document.getElementById('payout-row-' + CSS.escape(s.name));
+    if (row) {
+      row.classList.add('paid');
+      const btn = row.querySelector('.payout-pay-btn');
+      if (btn) { const badge = document.createElement('span'); badge.className = 'payout-paid-badge'; badge.textContent = 'PAID ✓'; btn.replaceWith(badge); }
+    }
+  });
+  checkAllPaid();
+  toast(`Payout logged for ${unpaid.length} student${unpaid.length !== 1 ? 's' : ''}`, 'success');
+}
+
 function renderPayout(data) {
+  paidThisSession.clear();
   let give = [], wage = [];
 
   if (Array.isArray(data)) {
     data.forEach(s => {
       const name = getField(s,'name','Name','Full Name','Student') || '—';
+      const sec  = getField(s,'section','Section','Class') || '';
       const bal  = parseFloat(getField(s,'balance','Balance','coinBalance','coin_balance') || 0);
-      (bal < 0 ? wage : give).push({ name, bal });
+      (bal < 0 ? wage : give).push({ name, sec, bal });
     });
   } else {
     const raw = {
-      give: data.eligible || data.give || data.giveCoin || data.give_coin || [],
-      wage: data.debt || data.wageOnly || data.inDebt || data.wage_only || []
+      give: data.payOut || data.eligible || data.give || data.giveCoin || data.give_coin || [],
+      wage: data.wageOnly || data.debt || data.inDebt || data.wage_only || []
     };
     ['give','wage'].forEach(k => {
       raw[k].forEach(s => {
         const name = getField(s,'name','Name','Full Name','Student') || '—';
+        const sec  = getField(s,'section','Section','Class') || '';
         const bal  = parseFloat(getField(s,'balance','Balance','coinBalance') || 0);
-        (k === 'give' ? give : wage).push({ name, bal });
+        (k === 'give' ? give : wage).push({ name, sec, bal });
       });
     });
   }
 
   give.sort((a,b) => a.name.localeCompare(b.name));
   wage.sort((a,b) => a.name.localeCompare(b.name));
+  payoutGiveList = give;
 
   document.getElementById('payout-summary').innerHTML =
     `<span style="color:var(--green)">${give.length} student${give.length!==1?'s':''} get a coin.</span><br>` +
     `<span style="color:var(--red)">${wage.length} student${wage.length!==1?'s':''} in debt &mdash; wage only.</span>`;
 
-  const rows = list => list.length
-    ? list.map(s => `<div class="payout-row"><span>${esc(s.name)}</span><span class="payout-bal ${s.bal>=0?'pos':'neg'}">${Math.round(s.bal)} i&#162;</span></div>`).join('')
+  const wageRows = wage.length
+    ? wage.map(s =>
+        `<div class="payout-row">` +
+        `<div style="display:flex;flex-direction:column;flex:1;min-width:0;">` +
+        `<span style="color:var(--white)">${esc(s.name)}</span>` +
+        (s.sec ? `<span style="font-size:0.65rem;color:var(--dim);letter-spacing:0.04em;">${esc(s.sec)}</span>` : '') +
+        `</div>` +
+        `<span class="payout-bal neg">${Math.round(s.bal)} i&#162;</span>` +
+        `</div>`
+      ).join('')
+    : '<div class="payout-none">None</div>';
+
+  const giveRowsHTML = give.length
+    ? give.map(s => renderPayoutGiveRow(s)).join('')
     : '<div class="payout-none">None</div>';
 
   document.getElementById('payout-content').innerHTML =
     `<div class="payout-sec-head give">Give Coin <span class="payout-sec-count">(${give.length})</span></div>` +
-    rows(give) +
+    (give.length ? `<button class="payout-pay-all-btn" id="payout-pay-all-btn" onclick="handlePayAll()">Pay All (${give.length}) Students</button>` : '') +
+    giveRowsHTML +
     `<hr class="payout-divider">` +
     `<div class="payout-sec-head debt">Wage Only <span class="payout-sec-count">(${wage.length})</span></div>` +
-    rows(wage);
+    wageRows;
 }
 
 // ── Student Search ────────────────────────────────────

@@ -1,76 +1,44 @@
-﻿Edit entry/index.html. Make three changes related to weekly wage:
+﻿Edit entry/index.html. Fix the weekly payout check screen with two changes:
 
---- CHANGE 1: REPLACE WEEKLY WAGE CONFIRM DIALOG WITH FULL SCREEN ---
+--- FIX 1: GIVE COIN LIST BUG ---
+Find the renderPayout function. In the else branch where it builds the raw give and wage lists, add data.payOut to the give list lookup:
 
-Remove the existing btn-wage confirm dialog flow entirely. Instead, tapping the Weekly Wage home button opens a new screen s-wage.
+Change:
+give: data.eligible || data.give || data.giveCoin || data.give_coin || [],
+wage: data.debt || data.wageOnly || data.inDebt || data.wage_only || []
 
-Add screen s-wage:
-Header: "Weekly Wage" logo-sub + back to home button
+To:
+give: data.payOut || data.eligible || data.give || data.giveCoin || data.give_coin || [],
+wage: data.wageOnly || data.debt || data.inDebt || data.wage_only || []
 
-SECTION FILTERS:
-A row of toggle buttons below the header (same style as leaderboard filter buttons on the coins page):
-All | IDEA-113 | IDEA-208-1 | IDEA-208-2 | IDEA-304 | IDEA-403
-Multi-select - tapping a section toggles it on/off. "All" is a special toggle - selecting it deselects all individual sections and vice versa. Active sections highlighted in gold border and text.
-On open, default to All selected.
+--- FIX 2: ADD PAYOUT LOGGING FUNCTIONALITY ---
 
-OVERRIDE AMOUNT:
-A field group below section filters:
-Label: "Override Wage Amount (optional)"
-Input: text, inputmode=numeric, pattern=[0-9]*, placeholder "Leave blank to use each student's stored wage"
-If filled, all selected students receive this amount instead of their individual stored wage.
+Redesign the renderPayout function to make the Give Coin section actionable.
 
-PHYSICAL COIN CHECKBOX:
-Same style as Award physical checkbox.
-Label: "Physical coins given?"
-Checked by default.
+Track paid students in a local Set: const paidThisSession = new Set();
 
-STUDENT PREVIEW LIST:
-Below the checkbox, a scrollable list showing every student who will be paid based on current section selection. Each row shows:
-- Student name (white)
-- Section in dim text
-- Amount they will receive (their stored wage, or override amount if set) in gold Orbitron
-Derive this list from allStudents filtered by selected sections and active status.
-Update live as sections or override amount change.
-Show a count above the list: "Paying X students"
+GIVE COIN SECTION:
+- Add a "PAY ALL" button above the Give Coin list (green border, full width, Orbitron):
+  Label: "Pay All (N) Students"
+  On tap: loops through all give students, logs a Payout transaction for each, marks all as paid.
+  Disable and show "All Paid ✓" after all are paid.
 
-PAY button (gold border, full width, min-height 56px):
-Label: "Pay [N] Students"
-Disabled if no students in preview.
-On tap: call logWeeklyWageFiltered API with:
-- sections: pipe-separated list of selected sections (empty string if All)
-- overrideAmount: override value or empty string
-- physical: 'true' or 'false'
-Show loading overlay during the call.
-On success: toast "Weekly wage paid to X students", return to home.
-On error: toast error.
+- Each student row in Give Coin gets a PAY button on the right side (small, green border, Orbitron 0.52rem, min-height 36px, padding 0 0.75rem):
+  On tap:
+  1. Look up student wage from allStudents array (match by name). Default to 1 if not found.
+  2. Fire background API call: logTransaction with type=Payout, reason=Coin Payout to Student, name=student name, amount=wage
+  3. Update local allStudents balance optimistically
+  4. Add student name to paidThisSession Set
+  5. Re-render that row: replace PAY button with a green "PAID ✓" badge, dim the row slightly
+  6. If all give students are now paid, update the PAY ALL button to "All Paid ✓" and disable it
 
---- CHANGE 2: WAGE RAISE DETECTION ON PURCHASE SUBMIT ---
+- Student rows show: name on left, balance in gold on right (before the PAY button), section in dim below name
 
-In the submit handler, after the optimistic UI (toast shown, screen returned to home, background API fire started), add an interceptor specifically for Purchase + "Raise Weekly Wage":
+WAGE ONLY SECTION:
+- Keep as read-only list
+- Each row shows: name, section in dim, balance in red
+- No action buttons needed
 
-if (selType === 'Purchase' && selReason === 'Raise Weekly Wage') {
-  After showing the success toast and returning to home, show a second modal overlay (use the existing confirm-overlay styled with a number input) with:
-  - Title: "UPDATE WEEKLY WAGE"
-  - Message: "[student name]'s weekly wage purchase logged. Set their new wage:"
-  - A number input pre-filled with current student wage + 1 (read from allStudents)
-  - Label below input: "Current wage: X i¢"
-  - Two buttons: SKIP and UPDATE WAGE
-  
-  On UPDATE WAGE:
-  - Call updateStudentWage API with name and new wage value
-  - Update allStudents locally: find the student and set their wage property
-  - Show toast: "Wage updated to X i¢"
-  
-  On SKIP:
-  - Close modal, do nothing else
-  
-  Use the existing confirm-overlay and confirm-input elements for this. Add a number input inside confirm-box if confirm-input is not sufficient (it should work as a text input with inputmode=numeric).
-}
+After PAY ALL or individual PAY calls complete, show a toast with count: "Payout logged for X students"
 
---- CHANGE 3: USE SECTIONS FROM sectionsData ---
-
-In the s-wage section filter buttons, dynamically build the section buttons from sectionsData (active sections only) instead of hardcoding IDEA-113, IDEA-208-1, etc. If sectionsData is not loaded when s-wage opens, fetch it first.
-
-This ensures new sections added via the Students management screen automatically appear in the weekly wage screen.
-
-Commit with message "feat: weekly wage screen with section filters, override amount, wage raise auto-update" and push.
+Commit with message "fix: payout give coin list bug, add payout logging to payout screen" and push.
