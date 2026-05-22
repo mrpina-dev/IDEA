@@ -2208,7 +2208,8 @@ function openDrawer(row) {
   const fines   = parseFloat(p('Fines') || 0);
   const spent   = parseFloat(p('Spent') || 0);
   const debt    = parseFloat(p('Debt') || 0);
-  const coinBal = awarded - fines;
+  const lifetimeEarned = awarded - fines;
+  const coinBalance    = awarded - fines - spent;
   const bankBal = parseFloat(p('Bank Balance', 'Bank Bal', 'Bank') || NaN);
 
   const nameEl = document.getElementById('drawer-student-name');
@@ -2220,7 +2221,8 @@ function openDrawer(row) {
   badgeEl.style.cssText = 'color:' + sc + ';border:1px solid ' + sc + '55;background:' + sc + '11';
 
   let statsHtml =
-    drawerStatHtml('Coin Balance', fmtNum(coinBal) + ' i¢', coinBal < 0 ? 'var(--red)' : 'var(--gold)') +
+    drawerStatHtml('Lifetime Earned', fmtNum(lifetimeEarned) + ' i¢', 'var(--green)') +
+    drawerStatHtml('Coin Balance', fmtNum(coinBalance) + ' i¢', coinBalance < 0 ? 'var(--red)' : 'var(--gold)') +
     drawerStatHtml('Awarded', '+' + fmtNum(awarded), 'var(--green)') +
     drawerStatHtml('Fines', '-' + fmtNum(fines), 'var(--red)') +
     drawerStatHtml('Spent', '-' + fmtNum(spent), 'var(--amber)');
