@@ -129,18 +129,52 @@ input[type="text"],input[type="number"],textarea{cursor:url("data:image/svg+xml,
 .action-btn.del:hover{color:var(--amber)}
 .drag-handle{cursor:grab}
 body.dragging{cursor:grabbing!important}
-tr.drag-over{border-top:2px solid var(--green)!important;background:rgba(0,255,65,.05)!important}
-/* MATCH TABLE */
-#match-table{width:100%;border-collapse:collapse;min-width:760px}
-#match-table th{background:rgba(0,255,65,.05);color:var(--green);font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:1px;text-transform:uppercase;text-align:left;padding:10px;border-bottom:1px solid rgba(0,255,65,.18);border-right:1px solid rgba(0,255,65,.05);white-space:nowrap}
-#match-table td{padding:0;border-bottom:1px solid rgba(0,255,65,.05);border-right:1px solid rgba(0,255,65,.05);background:var(--bg1);vertical-align:middle}
-#match-table tbody tr{transition:background .25s}
-#match-table tbody tr.row-win td{background:rgba(0,255,65,.05)!important}
-#match-table tbody tr.row-loss td{background:rgba(255,140,0,.04)!important}
-#match-table td input[type="text"],#match-table td select{width:100%;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--white);font-family:'Share Tech Mono',monospace;padding:8px 10px;font-size:12px}
-#match-table td textarea.cell-ta{width:100%;background:transparent;border:none;color:var(--white);font-family:'Rajdhani',sans-serif;font-size:13px;padding:8px 10px;resize:none;min-height:44px;overflow:hidden;box-sizing:border-box}
-#match-table td input:focus,#match-table td select:focus,#match-table td textarea.cell-ta:focus{outline:none;background:rgba(0,255,65,.04);border-bottom-color:var(--green)}
-#match-table td select option{background:var(--bg1);color:var(--white)}
+/* MATCH CARDS */
+.match-cards-wrap{display:flex;flex-direction:column;gap:10px;margin-bottom:8px}
+.match-card{border:1px solid rgba(0,255,65,.18);border-left:3px solid rgba(0,255,65,.2);background:var(--bg1);position:relative;transition:border-left-color .2s}
+.match-card.result-win{border-left:3px solid var(--green)}
+.match-card.result-loss{border-left:3px solid var(--amber)}
+.match-card.drag-over{border-top:2px solid var(--green)!important;background:rgba(0,255,65,.05)!important}
+.mc-header{display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(0,255,65,.03);border-bottom:1px solid rgba(0,255,65,.08)}
+.mc-drag{color:var(--dim);font-size:14px;flex-shrink:0;cursor:grab;user-select:none}
+.mc-num{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--dim);flex:1;text-transform:uppercase}
+.mc-del{background:transparent;border:none;color:var(--dim);font-size:14px;cursor:pointer;padding:0 4px;line-height:1;transition:color .2s}
+.mc-del:hover{color:var(--amber)}
+.mc-phase-row{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid rgba(0,255,65,.08)}
+.phase-btn{min-height:48px;border:none;border-right:1px solid rgba(0,255,65,.08);background:transparent;color:var(--dim);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1.5px;cursor:pointer;text-transform:uppercase;transition:background .2s,color .2s}
+.phase-btn:last-child{border-right:none}
+.phase-btn.active{background:rgba(0,255,65,.08);color:var(--green)}
+.mc-fields{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid rgba(0,255,65,.08)}
+.mc-field{padding:8px 12px;display:flex;flex-direction:column;gap:4px;border-right:1px solid rgba(0,255,65,.08)}
+.mc-field:last-child,.mc-field-full{border-right:none}
+.mc-field-full{grid-column:1/-1;border-bottom:1px solid rgba(0,255,65,.08)}
+.mc-field>label{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase}
+.mc-field input[type="text"]{background:var(--bg2);border:1px solid rgba(0,255,65,.12);border-bottom:1px solid var(--dim);color:var(--green);font-family:'Rajdhani',sans-serif;font-size:15px;padding:9px 12px;outline:none;width:100%}
+.mc-field input[type="text"]:focus{border-color:var(--green)!important}
+.mc-field input::placeholder,.mc-field textarea::placeholder{color:var(--dim);font-style:italic;font-size:13px}
+.mc-field textarea{background:var(--bg2);border:1px solid rgba(0,255,65,.12);border-bottom:1px solid var(--dim);color:var(--green);font-family:'Rajdhani',sans-serif;font-size:15px;padding:9px 12px;outline:none;resize:none;overflow:hidden;width:100%;min-height:64px}
+.mc-field textarea:focus{border-color:var(--green)!important}
+.result-toggle{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.res-btn{min-height:56px;border:1px solid rgba(0,255,65,.18);background:transparent;color:var(--dim);font-family:'Orbitron',sans-serif;font-size:26px;font-weight:700;cursor:pointer;transition:background .2s,color .2s,border-color .2s}
+.res-btn[data-res="Win"].active{background:rgba(0,255,65,.15);color:var(--green);border-color:var(--green)}
+.res-btn[data-res="Loss"].active{background:rgba(255,140,0,.1);color:var(--amber);border-color:var(--amber)}
+/* PHONE ACCESS */
+.phone-access{background:var(--bg2);border:1px solid rgba(0,240,255,.2);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.phone-access-url{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--cyan);letter-spacing:.5px;flex:1;word-break:break-all}
+.phone-copy-btn{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1.5px;padding:6px 14px;border:1px solid rgba(0,240,255,.3);background:rgba(0,240,255,.04);color:var(--cyan);cursor:pointer;text-transform:uppercase;white-space:nowrap;transition:background .2s}
+.phone-copy-btn:hover{background:rgba(0,240,255,.1)}
+.phone-copy-msg{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--green);letter-spacing:1px;min-width:50px}
+/* SYNC PANEL */
+.sync-panel{background:var(--bg2);border:1px solid rgba(0,255,65,.15);padding:14px 16px;margin-top:2px}
+.sync-panel-title{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:10px}
+.sync-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.sync-col{display:flex;flex-direction:column;gap:8px}
+.sync-col>label{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase}
+.sync-textarea{background:var(--bg1);border:1px solid rgba(0,255,65,.12);border-bottom:1px solid var(--dim);color:var(--green);font-family:'Share Tech Mono',monospace;font-size:11px;padding:8px 10px;outline:none;resize:none;width:100%;min-height:72px}
+.sync-textarea:focus{border-color:rgba(0,255,65,.4)!important}
+.sync-msg{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px;min-height:18px}
+.sync-msg.ok{color:var(--green)}
+.sync-msg.err{color:var(--amber)}
 /* REBUILD TABLE */
 #rebuild-table{width:100%;border-collapse:collapse}
 #rebuild-table th{background:rgba(0,255,65,.04);color:var(--dim);font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;text-align:left;padding:8px 10px;border-bottom:1px solid rgba(0,255,65,.12)}
@@ -284,7 +318,8 @@ tr.drag-over{border-top:2px solid var(--green)!important;background:rgba(0,255,6
   .module{opacity:1!important;transform:none!important;background:var(--bg1)!important;border:1px solid rgba(0,255,65,.3)!important}
   .module-body{max-height:none!important;opacity:1!important}
   .module::after{display:none!important}
-  #match-table td input,#match-table td select,#match-table td textarea.cell-ta,
+  .sync-panel,.mc-drag,.mc-del,.result-toggle,.mc-phase-row{display:none!important}
+  .match-card{break-inside:avoid;page-break-inside:avoid;border:1px solid rgba(0,255,65,.3)!important;margin-bottom:8px!important}
   #rebuild-table td input,#rebuild-table td textarea.cell-ta{border:none!important;background:transparent!important;padding:4px!important;color:var(--white)!important}
   .instr-scores-wrap{display:none!important}
   .instr-locked-display{display:block!important}
@@ -299,6 +334,18 @@ tr.drag-over{border-top:2px solid var(--green)!important;background:rgba(0,255,6
   .module,.instr-gate{opacity:1!important;transform:none!important}
   .module-body{transition:none!important}
   .module::after{display:none!important}
+}
+@media(max-width:640px){
+  .page{padding:10px 8px 40px}
+  .mc-fields{grid-template-columns:1fr}
+  .mc-field{border-right:none;border-bottom:1px solid rgba(0,255,65,.08)}
+  .phase-btn{min-height:54px;font-size:11px}
+  .res-btn{min-height:68px;font-size:32px}
+  .mc-field input[type="text"]{font-size:18px;min-height:52px;padding:14px 12px}
+  .placement-row{grid-template-columns:1fr}
+  .sync-grid{grid-template-columns:1fr}
+  .submit-steps{flex-direction:column}
+  #toolbar .tb-btn{font-size:8px}
 }
 </style>
 </head>
@@ -400,21 +447,15 @@ tr.drag-over{border-top:2px solid var(--green)!important;background:rgba(0,255,6
     </div>
   </div>
   <div class="module-body" id="body-01">
-    <p class="prompt">Log every match you fought - Round Robin first, then Tournament. Each row needs an opponent and result at minimum. Observations are your notes on what happened in the fight.</p>
-    <div class="table-container">
-      <table id="match-table">
-        <thead><tr>
-          <th class="no-print" style="width:48px;text-align:center" data-tip="Controls — Drag to reorder rows. Delete with the X icon.">Ctrl</th>
-          <th style="width:130px" data-tip="Phase — Round Robin (seeding) or Tournament (bracket).">Phase</th>
-          <th style="width:160px" data-tip="Opponent — Name of the student you fought.">Opponent</th>
-          <th style="width:90px" data-tip="Result — Win or Loss.">Result</th>
-          <th style="width:140px" data-tip="Round — Which round or game this was (e.g. Game 2, Winners Final, Losers Round 1).">Round / Game</th>
-          <th data-tip="Observations — What happened in the fight. How did your top perform?">Observations</th>
-        </tr></thead>
-        <tbody id="match-body"></tbody>
-      </table>
+    <p class="prompt">Log every match you fought - Round Robin first, then Tournament. Each card needs an opponent and result at minimum. Observations are your notes on what happened in the fight.</p>
+    <div class="phone-access no-print">
+      <span style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;flex-shrink:0">Open on Phone:</span>
+      <span class="phone-access-url">https://mrpina-dev.github.io/IDEA/idea113-blade-05.html</span>
+      <button class="phone-copy-btn" onclick="copyPhoneUrl()">[ Copy URL ]</button>
+      <span class="phone-copy-msg" id="phone-copy-msg"></span>
     </div>
-    <button class="add-row-btn no-print" onclick="addMatchRow()">[ + Add Match ]</button>
+    <div class="match-cards-wrap" id="match-cards-wrap"></div>
+    <button class="add-row-btn no-print" onclick="addMatchCard()">[ + Add Match ]</button>
     <div class="placement-row">
       <div class="placement-field">
         <label>Seeded Position Entering Tournament</label>
@@ -430,6 +471,22 @@ tr.drag-over{border-top:2px solid var(--green)!important;background:rgba(0,255,6
     <div class="stat-row">
       <div class="stat-card"><div class="stat-card-label">Round Robin Record</div><div class="stat-card-value" id="stat-rr">- / -</div><div class="stat-card-sub">W - L</div></div>
       <div class="stat-card"><div class="stat-card-label">Tournament Record</div><div class="stat-card-value" id="stat-tn">- / -</div><div class="stat-card-sub">W - L</div></div>
+    </div>
+    <div class="sync-panel no-print">
+      <div class="sync-panel-title">Match Data Sync</div>
+      <div class="sync-grid">
+        <div class="sync-col">
+          <label>Export from this device</label>
+          <button class="add-row-btn" style="margin:0;display:inline-block" onclick="copySyncCode()">[ Copy Sync Code ]</button>
+          <span class="sync-msg" id="sync-copy-msg"></span>
+        </div>
+        <div class="sync-col">
+          <label>Import to this device</label>
+          <textarea class="sync-textarea" id="sync-import-ta" placeholder="Paste sync code here..."></textarea>
+          <button class="add-row-btn" style="margin:0;display:inline-block" onclick="importSyncCode()">[ Import Match Data ]</button>
+          <span class="sync-msg" id="sync-import-msg"></span>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -786,51 +843,147 @@ function restoreInstrLocked(data){
   updateInstrTotal();
 }
 
-/* --- MATCH TABLE --- */
-function addMatchRow(data){
-  const d=data||{};const tbody=document.getElementById('match-body');if(!tbody)return;
-  const tr=document.createElement('tr');tr.setAttribute('draggable','true');
-  const result=d.result||'';tr.className=result==='Win'?'row-win':result==='Loss'?'row-loss':'';
-  tr.innerHTML=`
-    <td class="no-print" style="width:48px;text-align:center;vertical-align:middle"><div style="display:flex;align-items:center;justify-content:space-evenly;min-height:40px"><span class="drag-handle action-btn" style="cursor:grab;color:var(--dim);font-size:14px">&#9776;</span><span class="action-btn del" onclick="this.closest('tr').remove();updateMatchStats();updateScoreAndDots();saveToStorage()">&#x2716;</span></div></td>
-    <td style="width:130px"><select class="match-phase" onchange="updateScoreAndDots();saveToStorage()"><option value="">Select Phase...</option><option value="Round Robin"${d.phase==='Round Robin'?' selected':''}>Round Robin</option><option value="Tournament"${d.phase==='Tournament'?' selected':''}>Tournament</option></select></td>
-    <td style="width:160px"><input type="text" class="match-opponent" value="${esc(d.opponent||'')}" placeholder="Opponent name" oninput="updateScoreAndDots();saveToStorage()"></td>
-    <td style="width:90px"><select class="match-result" onchange="updateMatchRowColor(this);updateMatchStats();updateScoreAndDots();saveToStorage()"><option value="">-</option><option value="Win"${d.result==='Win'?' selected':''}>Win</option><option value="Loss"${d.result==='Loss'?' selected':''}>Loss</option></select></td>
-    <td style="width:140px"><input type="text" class="match-round" value="${esc(d.round||'')}" placeholder="e.g. Game 1, Winners Final" oninput="saveToStorage()"></td>
-    <td><textarea class="cell-ta match-obs" placeholder="What happened in this match?" oninput="autoResize(this);saveToStorage()">${esc(d.obs||'')}</textarea></td>
+/* --- MATCH CARDS --- */
+let matchCardCounter=0;
+function addMatchCard(data){
+  const d=data||{};const wrap=document.getElementById('match-cards-wrap');if(!wrap)return;
+  matchCardCounter++;
+  const card=document.createElement('div');
+  card.className='match-card';card.setAttribute('draggable','true');
+  card.dataset.phase=d.phase||'';card.dataset.result=d.result||'';
+  if(d.result==='Win')card.classList.add('result-win');else if(d.result==='Loss')card.classList.add('result-loss');
+  card.innerHTML=`
+    <div class="mc-header">
+      <span class="mc-drag">&#9776;</span>
+      <span class="mc-num">Match #${matchCardCounter}</span>
+      <button class="mc-del" onclick="this.closest('.match-card').remove();updateMatchStats();updateScoreAndDots();saveToStorage()">&#x2716;</button>
+    </div>
+    <div class="mc-phase-row">
+      <button class="phase-btn${d.phase==='Round Robin'?' active':''}" data-phase-val="Round Robin" onclick="setCardPhase(this.closest('.match-card'),'Round Robin')">Round Robin</button>
+      <button class="phase-btn${d.phase==='Tournament'?' active':''}" data-phase-val="Tournament" onclick="setCardPhase(this.closest('.match-card'),'Tournament')">Tournament</button>
+    </div>
+    <div class="mc-fields">
+      <div class="mc-field">
+        <label>Opponent</label>
+        <input type="text" class="match-opponent" value="${esc(d.opponent||'')}" placeholder="Opponent name" oninput="card_mirrorOpp(this);updateScoreAndDots();saveToStorage()">
+        <div class="print-mirror single-line" data-mirror-card="opponent">${esc(d.opponent||'')}</div>
+      </div>
+      <div class="mc-field">
+        <label>Result</label>
+        <div class="result-toggle">
+          <button class="res-btn${d.result==='Win'?' active':''}" data-res="Win" onclick="setCardResult(this.closest('.match-card'),'Win')">W</button>
+          <button class="res-btn${d.result==='Loss'?' active':''}" data-res="Loss" onclick="setCardResult(this.closest('.match-card'),'Loss')">L</button>
+        </div>
+        <div class="print-mirror single-line" data-mirror-card="result">${esc(d.result||'')}</div>
+      </div>
+    </div>
+    <div class="mc-field mc-field-full">
+      <label>Round / Game</label>
+      <input type="text" class="match-round" value="${esc(d.round||'')}" placeholder="e.g. Game 1, Winners Final" oninput="card_mirrorRound(this);saveToStorage()">
+      <div class="print-mirror single-line" data-mirror-card="round">${esc(d.round||'')}</div>
+    </div>
+    <div class="mc-field mc-field-full" style="border-bottom:none">
+      <label>Observations</label>
+      <textarea class="match-obs" placeholder="What happened in this match?" oninput="autoResize(this);card_mirrorObs(this);saveToStorage()">${esc(d.obs||'')}</textarea>
+      <div class="print-mirror" data-mirror-card="obs">${esc(d.obs||'')}</div>
+    </div>
   `;
-  tr.querySelectorAll('textarea.cell-ta').forEach(ta=>requestAnimationFrame(()=>autoResize(ta)));
-  tbody.appendChild(tr);attachMatchDrag(tr);updateMatchStats();
+  const oppInput=card.querySelector('.match-opponent');
+  oppInput.card_mirrorOpp=function(){card.querySelector('[data-mirror-card="opponent"]').textContent=this.value;};
+  const roundInput=card.querySelector('.match-round');
+  roundInput.card_mirrorRound=function(){card.querySelector('[data-mirror-card="round"]').textContent=this.value;};
+  const obsTA=card.querySelector('.match-obs');
+  obsTA.card_mirrorObs=function(){card.querySelector('[data-mirror-card="obs"]').textContent=this.value;};
+  requestAnimationFrame(()=>autoResize(obsTA));
+  wrap.appendChild(card);attachMatchDrag(card);updateMatchStats();
 }
-function updateMatchRowColor(sel){
-  const tr=sel.closest('tr');if(!tr)return;
-  tr.className=sel.value==='Win'?'row-win':sel.value==='Loss'?'row-loss':'';
+function card_mirrorOpp(el){const m=el.closest('.match-card')?.querySelector('[data-mirror-card="opponent"]');if(m)m.textContent=el.value;}
+function card_mirrorRound(el){const m=el.closest('.match-card')?.querySelector('[data-mirror-card="round"]');if(m)m.textContent=el.value;}
+function card_mirrorObs(el){const m=el.closest('.match-card')?.querySelector('[data-mirror-card="obs"]');if(m)m.textContent=el.value;}
+function setCardPhase(card,phase){
+  card.dataset.phase=phase;
+  card.querySelectorAll('.phase-btn').forEach(b=>b.classList.toggle('active',b.dataset.phaseVal===phase));
+  updateScoreAndDots();saveToStorage();
+}
+function setCardResult(card,result){
+  card.dataset.result=result;
+  card.classList.toggle('result-win',result==='Win');card.classList.toggle('result-loss',result==='Loss');
+  card.querySelectorAll('.res-btn').forEach(b=>b.classList.toggle('active',b.dataset.res===result));
+  const m=card.querySelector('[data-mirror-card="result"]');if(m)m.textContent=result;
+  updateMatchStats();updateScoreAndDots();saveToStorage();
 }
 function getMatchData(){
-  return Array.from(document.querySelectorAll('#match-body tr')).map(tr=>({
-    phase:tr.querySelector('.match-phase')?.value||'',
-    opponent:tr.querySelector('.match-opponent')?.value||'',
-    result:tr.querySelector('.match-result')?.value||'',
-    round:tr.querySelector('.match-round')?.value||'',
-    obs:tr.querySelector('.match-obs')?.value||''
+  return Array.from(document.querySelectorAll('#match-cards-wrap .match-card')).map(card=>({
+    phase:card.dataset.phase||'',
+    opponent:card.querySelector('.match-opponent')?.value||'',
+    result:card.dataset.result||'',
+    round:card.querySelector('.match-round')?.value||'',
+    obs:card.querySelector('.match-obs')?.value||''
   }));
 }
-function loadMatchData(arr){document.getElementById('match-body').innerHTML='';(arr||[]).forEach(d=>addMatchRow(d));updateMatchStats();}
+function loadMatchData(arr){
+  const wrap=document.getElementById('match-cards-wrap');if(wrap)wrap.innerHTML='';
+  matchCardCounter=0;(arr||[]).forEach(d=>addMatchCard(d));updateMatchStats();
+}
 function updateMatchStats(){
   const rows=getMatchData();
   const rr=rows.filter(r=>r.phase==='Round Robin');const tn=rows.filter(r=>r.phase==='Tournament');
   const rrW=rr.filter(r=>r.result==='Win').length,rrL=rr.filter(r=>r.result==='Loss').length;
   const tnW=tn.filter(r=>r.result==='Win').length,tnL=tn.filter(r=>r.result==='Loss').length;
   const rrEl=document.getElementById('stat-rr');const tnEl=document.getElementById('stat-tn');
-  if(rrEl)rrEl.textContent=`${rrW} - ${rrL}`;
-  if(tnEl)tnEl.textContent=`${tnW} - ${tnL}`;
+  if(rrEl)rrEl.textContent=`${rrW} - ${rrL}`;if(tnEl)tnEl.textContent=`${tnW} - ${tnL}`;
 }
-function attachMatchDrag(tr){
-  tr.addEventListener('dragstart',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT'||e.target.tagName==='TEXTAREA'){e.preventDefault();return;}matchDragActive={row:this};e.dataTransfer.effectAllowed='move';this.style.opacity='.4';document.body.classList.add('dragging');});
-  tr.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='move';tr.classList.add('drag-over');});
-  tr.addEventListener('dragleave',()=>tr.classList.remove('drag-over'));
-  tr.addEventListener('drop',function(e){e.preventDefault();this.classList.remove('drag-over');if(matchDragActive&&matchDragActive.row!==this){const tb=this.parentNode,rect=this.getBoundingClientRect(),next=(e.clientY-rect.top)/(rect.bottom-rect.top)>.5;tb.insertBefore(matchDragActive.row,next?this.nextSibling:this);updateMatchStats();updateScoreAndDots();saveToStorage();}});
-  tr.addEventListener('dragend',function(){this.style.opacity='1';matchDragActive=null;document.body.classList.remove('dragging');});
+function attachMatchDrag(card){
+  card.addEventListener('dragstart',function(e){
+    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='BUTTON'){e.preventDefault();return;}
+    if(!e.target.classList.contains('mc-drag')&&!e.target.closest('.mc-drag')){e.preventDefault();return;}
+    matchDragActive={row:this};e.dataTransfer.effectAllowed='move';this.style.opacity='.4';document.body.classList.add('dragging');
+  });
+  card.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='move';card.classList.add('drag-over');});
+  card.addEventListener('dragleave',()=>card.classList.remove('drag-over'));
+  card.addEventListener('drop',function(e){
+    e.preventDefault();this.classList.remove('drag-over');
+    if(matchDragActive&&matchDragActive.row!==this){
+      const wrap=this.parentNode,rect=this.getBoundingClientRect(),next=(e.clientY-rect.top)/(rect.bottom-rect.top)>.5;
+      wrap.insertBefore(matchDragActive.row,next?this.nextSibling:this);
+      updateMatchStats();updateScoreAndDots();saveToStorage();
+    }
+  });
+  card.addEventListener('dragend',function(){this.style.opacity='1';matchDragActive=null;document.body.classList.remove('dragging');});
+}
+/* --- SYNC & PHONE COPY --- */
+function copyPhoneUrl(){
+  const url='https://mrpina-dev.github.io/IDEA/idea113-blade-05.html';
+  const msg=document.getElementById('phone-copy-msg');
+  const fallback=()=>{const ta=document.createElement('textarea');ta.value=url;ta.style.cssText='position:fixed;opacity:0';document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);};
+  const ok=()=>{if(msg){msg.textContent='Copied!';setTimeout(()=>msg.textContent='',2500);}};
+  const fail=()=>{if(msg){msg.textContent='Failed.';setTimeout(()=>msg.textContent='',2500);}};
+  if(navigator.clipboard){navigator.clipboard.writeText(url).then(ok).catch(()=>{try{fallback();ok();}catch(e){fail();}});}
+  else{try{fallback();ok();}catch(e){fail();}}
+}
+function copySyncCode(){
+  const seedResult=document.getElementById('seed-input')?.value||'';
+  const finalPlacement=document.getElementById('placement-input')?.value||'';
+  const code=btoa(unescape(encodeURIComponent(JSON.stringify({matchRows:getMatchData(),seedResult,finalPlacement}))));
+  const msg=document.getElementById('sync-copy-msg');
+  const fallback=()=>{const ta=document.createElement('textarea');ta.value=code;ta.style.cssText='position:fixed;opacity:0';document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);};
+  const ok=()=>{if(msg){msg.textContent='Sync code copied!';msg.className='sync-msg ok';setTimeout(()=>{msg.textContent='';msg.className='sync-msg';},3000);}};
+  const fail=()=>{if(msg){msg.textContent='Copy failed.';msg.className='sync-msg err';}};
+  if(navigator.clipboard){navigator.clipboard.writeText(code).then(ok).catch(()=>{try{fallback();ok();}catch(e){fail();}});}
+  else{try{fallback();ok();}catch(e){fail();}}
+}
+function importSyncCode(){
+  const ta=document.getElementById('sync-import-ta');
+  const msg=document.getElementById('sync-import-msg');
+  if(!ta||!ta.value.trim()){if(msg){msg.textContent='Paste a sync code first.';msg.className='sync-msg err';}return;}
+  try{
+    const parsed=JSON.parse(decodeURIComponent(escape(atob(ta.value.trim()))));
+    if(parsed.matchRows)loadMatchData(parsed.matchRows);
+    if(parsed.seedResult){const el=document.getElementById('seed-input');if(el){el.value=parsed.seedResult;updateMirror('seed-result',parsed.seedResult);}}
+    if(parsed.finalPlacement){const el=document.getElementById('placement-input');if(el){el.value=parsed.finalPlacement;updateMirror('final-placement',parsed.finalPlacement);}}
+    saveToStorage();updateScoreAndDots();
+    if(msg){msg.textContent='Import successful!';msg.className='sync-msg ok';setTimeout(()=>{msg.textContent='';msg.className='sync-msg';},3000);}
+  }catch(e){if(msg){msg.textContent='Invalid sync code.';msg.className='sync-msg err';}}
 }
 
 /* --- REBUILD TABLE --- */
@@ -947,7 +1100,7 @@ function downloadHTML(){
   const clone=document.documentElement.cloneNode(true);
   clone.querySelectorAll('input[type="text"],input[type="number"],textarea,select').forEach(el=>{if(el.tagName==='TEXTAREA')el.textContent='';else el.removeAttribute('value');if(el.tagName==='SELECT')el.querySelectorAll('option').forEach(o=>o.removeAttribute('selected'));});
   clone.querySelectorAll('input[type="checkbox"]').forEach(el=>el.removeAttribute('checked'));
-  ['match-body','rebuild-body'].forEach(id=>{const el=clone.querySelector('#'+id);if(el)el.innerHTML='';});
+  ['match-cards-wrap','rebuild-body'].forEach(id=>{const el=clone.querySelector('#'+id);if(el)el.innerHTML='';});
   ['instr-locked-scores','instr-locked-ts'].forEach(id=>{const el=clone.querySelector('#'+id);if(el)el.innerHTML='';});
   clone.querySelectorAll('#__ib05_data__').forEach(el=>el.remove());
   const sc=document.createElement('script');sc.id='__ib05_data__';sc.type='application/json';sc.textContent=JSON.stringify(data);clone.querySelector('head').appendChild(sc);

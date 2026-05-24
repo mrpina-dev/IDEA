@@ -1,10 +1,15 @@
-﻿Open the portal index file (index.html in the repo root or the IDEA portal index - whichever hosts the IDEA-113 assignment list). Locate the IDEA-Blade assignment section. Add an entry for Assignment 05 with the following details:
+﻿Open idea113-blade-05.html. Make the following changes:
 
-- Title: Assignment 05 - Competition Record & Final Presentation
-- Link: idea113-blade-05.html
-- Points: 100 pts
-- Due: 05/29/2026
+1. MODULE 01 - Replace the match table entirely with a card-based layout. Each match is a card (.match-card) with: a header row showing match number and a delete button; a full-width two-button phase toggle (Round Robin / Tournament) with large tap targets (min-height 48px); a two-column field grid containing an Opponent text input and a Result toggle (W / L buttons, min-height 56px, font-size 26px); a Round/Game text input; and a full-width Observations textarea. Store phase in card.dataset.phase, result in card.dataset.result. Cards with Win get class result-win (green left border), Loss gets result-loss (amber left border). Remove all table HTML and table-related CSS. Keep drag-to-reorder using dragstart/dragover/drop on cards. Keep getMatchData(), loadMatchData(), updateMatchStats() working the same way - they just read from cards instead of table rows. Keep stat cards and placement fields unchanged.
 
-Match the style and structure of the existing A01 through A04 entries exactly. Do not change any other content.
+2. ADD a phone access block above the match cards inside .module-body: show the text "https://mrpina-dev.github.io/IDEA/idea113-blade-05.html" with a Copy button that uses navigator.clipboard.writeText with an execCommand fallback.
 
-After updating the index, stage all changes, commit with the message "portal: add A05 Competition Record & Final Presentation", and push to origin.
+3. ADD a sync panel below the stat cards (class sync-panel, hidden in print with no-print class). Left column: "Copy Sync Code" button that calls btoa(unescape(encodeURIComponent(JSON.stringify({matchRows:getMatchData(), seedResult, finalPlacement})))) and copies to clipboard, shows confirmation. Right column: a textarea for pasting, an "Import Match Data" button that decodes the code, calls loadMatchData() with the imported rows, updates seed and placement fields if present, then calls saveToStorage() and updateScoreAndDots(). Show success or error message after import.
+
+4. ADD mobile-responsive CSS in a media query for max-width 640px: reduce page padding to 10px 8px; make .mc-fields single-column; increase phase-btn min-height to 54px and font-size to 11px; increase res-btn min-height to 68px and font-size to 32px; increase mc-field input font-size to 18px and min-height to 52px; make .placement-row and .sync-grid single-column; make .submit-steps column direction; reduce toolbar button font-size to 8px.
+
+5. ADD print rules: hide .sync-panel, .mc-drag, .mc-del, .result-toggle, .mc-phase-row in print. Show .print-mirror elements inside match cards. Match cards should print as simple bordered boxes.
+
+6. In addMatchCard(), add print-mirror divs for opponent, result, round, and obs fields alongside each input/textarea.
+
+Commit "feat: mobile match cards and sync code for A05" and push.
