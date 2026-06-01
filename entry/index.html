@@ -107,6 +107,12 @@ body::after {
   font-size: 0.48rem; letter-spacing: 0.22em; text-transform: uppercase;
   color: var(--dim); margin-bottom: 1rem; margin-top: 0.1rem;
 }
+.home-group-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.46rem; letter-spacing: 0.24em; text-transform: uppercase;
+  color: var(--dim); margin: 1.4rem 0 0.65rem; padding-left: 0.15rem;
+}
+.home-group-label:first-of-type { margin-top: 0.5rem; }
 .home-btn {
   display: flex; align-items: center; gap: 1rem;
   width: 100%; min-height: 72px;
@@ -842,6 +848,8 @@ body::after {
   </div>
   <div class="screen-body">
     <div class="home-eyebrow">IDEA Coins &mdash; Transaction Entry</div>
+
+    <div class="home-group-label">Log</div>
     <button class="home-btn gold" id="btn-log-txn">
       <span class="home-btn-icon">i&#162;</span>
       <div class="home-btn-content">
@@ -849,6 +857,8 @@ body::after {
         <span class="home-btn-sub">Award, fine, purchase, or payout</span>
       </div>
     </button>
+
+    <div class="home-group-label">Weekly</div>
     <button class="home-btn green" id="btn-wage">
       <span class="home-btn-icon">&#10227;</span>
       <div class="home-btn-content">
@@ -863,11 +873,13 @@ body::after {
         <span class="home-btn-sub">See who gets a coin this week</span>
       </div>
     </button>
-    <button class="home-btn gold" id="btn-contracts">
-      <span class="home-btn-icon">&#9678;</span>
+
+    <div class="home-group-label">Coins In / Out</div>
+    <button class="home-btn green" id="btn-accept-coins">
+      <span class="home-btn-icon">&#8615;</span>
       <div class="home-btn-content">
-        <span class="home-btn-label">Contracts</span>
-        <span class="home-btn-sub">View, assign, and complete contracts</span>
+        <span class="home-btn-label">Accept Coins</span>
+        <span class="home-btn-sub">Student handed you coins or is paying off debt</span>
       </div>
     </button>
     <button class="home-btn cyan" id="btn-reconcile">
@@ -875,6 +887,22 @@ body::after {
       <div class="home-btn-content">
         <span class="home-btn-label">Reconcile Balance</span>
         <span class="home-btn-sub">Sync a student's physical coin count</span>
+      </div>
+    </button>
+    <button class="home-btn red" id="btn-collect">
+      <span class="home-btn-icon">&#8595;&#162;</span>
+      <div class="home-btn-content">
+        <span class="home-btn-label">Collect Debts</span>
+        <span class="home-btn-sub">Fine-Owed entries pending physical collection</span>
+      </div>
+    </button>
+
+    <div class="home-group-label">Manage</div>
+    <button class="home-btn gold" id="btn-contracts">
+      <span class="home-btn-icon">&#9678;</span>
+      <div class="home-btn-content">
+        <span class="home-btn-label">Contracts</span>
+        <span class="home-btn-sub">View, assign, and complete contracts</span>
       </div>
     </button>
     <button class="home-btn ice" id="btn-students">
@@ -889,13 +917,6 @@ body::after {
       <div class="home-btn-content">
         <span class="home-btn-label">Transaction Log</span>
         <span class="home-btn-sub">View, edit, and delete transactions</span>
-      </div>
-    </button>
-    <button class="home-btn red" id="btn-collect">
-      <span class="home-btn-icon">&#8595;&#162;</span>
-      <div class="home-btn-content">
-        <span class="home-btn-label">Collect Debts</span>
-        <span class="home-btn-sub">Fine-Owed entries pending physical collection</span>
       </div>
     </button>
     <button class="home-btn amber" id="btn-economy">
@@ -1484,7 +1505,47 @@ body::after {
 </div>
 
 <!-- ══════════════════════════════════════
-     SCREEN 18 — COLLECT DEBTS
+     SCREEN 18 — ACCEPT COINS
+════════════════════════════════════════ -->
+<div class="screen" id="s-accept">
+  <div class="app-header">
+    <div class="logo-wrap">
+      <span class="logo">IDEA.</span>
+      <span class="logo-sub">Accept Coins</span>
+    </div>
+    <button class="back-btn" id="accept-back">&#8592; Back</button>
+  </div>
+  <div class="screen-body" id="accept-body">
+    <div class="step-label">01 &mdash; Select Student</div>
+    <div id="accept-search-wrap">
+      <input type="search" class="search-input" id="accept-student-search"
+             placeholder="Search by name or section&hellip;" autocomplete="off" autocorrect="off" spellcheck="false">
+      <div class="search-results" id="accept-search-results"></div>
+    </div>
+    <div class="student-card" id="accept-student-card">
+      <div class="student-card-top">
+        <div>
+          <div class="student-card-name" id="accept-card-name"></div>
+          <div class="student-card-section" id="accept-card-section"></div>
+        </div>
+        <button class="change-btn" id="accept-change-student">Change</button>
+      </div>
+      <div class="student-card-meta">
+        <span class="elig-badge" id="accept-card-elig"></span>
+        <span class="student-card-bal" id="accept-card-bal"></span>
+      </div>
+    </div>
+    <div id="accept-step2" style="display:none;">
+      <div class="step-label">Coins Received From Student</div>
+      <input type="number" class="amount-input" id="accept-coins-input" placeholder="0" min="1" step="1">
+      <div id="accept-preview" style="margin-top:0.65rem;font-family:'Orbitron',sans-serif;font-size:0.72rem;letter-spacing:0.1em;text-align:center;min-height:1.4rem;color:var(--green);"></div>
+      <button class="submit-btn show" id="accept-submit-btn" disabled style="border-color:rgba(0,255,65,0.4);color:var(--green);text-shadow:var(--glow-green);">Accept Coins</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 19 — COLLECT DEBTS
 ════════════════════════════════════════ -->
 <div class="screen" id="s-collect">
   <div class="app-header">
@@ -1714,11 +1775,7 @@ function bumpHomeFreq(key) {
 }
 
 function sortHomeButtons() {
-  const body = document.querySelector('#s-home .screen-body');
-  if (!body) return;
-  const btns = Array.from(body.querySelectorAll('.home-btn'));
-  btns.sort((a, b) => (homeFreqs[b.id] || 0) - (homeFreqs[a.id] || 0));
-  btns.forEach(btn => body.appendChild(btn)); // appendChild moves existing nodes
+  // Groups are now fixed by layout — frequency sort disabled to preserve group order.
 }
 
 // ── Helpers ───────────────────────────────────────────
@@ -3211,6 +3268,122 @@ function resetReconcile() {
   document.getElementById('recon-physical-input').value = '';
   document.getElementById('recon-preview').textContent = '';
   document.getElementById('reconcile-body').scrollTop = 0;
+}
+
+// ── Accept Coins ──────────────────────────────────────
+let acceptStudent = null;
+const acceptSearchInput   = document.getElementById('accept-student-search');
+const acceptSearchResults = document.getElementById('accept-search-results');
+const acceptStudentCard   = document.getElementById('accept-student-card');
+
+document.getElementById('btn-accept-coins').addEventListener('click', async () => {
+  if (!await requireStudents()) return;
+  resetAccept();
+  showScreen('s-accept');
+  acceptSearchInput.focus();
+});
+
+document.getElementById('accept-back').addEventListener('click', () => {
+  resetAccept();
+  showScreen('s-home');
+});
+
+acceptSearchInput.addEventListener('input', () => {
+  const q = acceptSearchInput.value.trim().toLowerCase();
+  if (!q) { acceptSearchResults.style.display = 'none'; return; }
+  const matches = allStudents.filter(s => {
+    const name = (getField(s,'name','Name','Full Name','Student') || '').toLowerCase();
+    const sec  = (getField(s,'section','Section','Class') || '').toLowerCase();
+    return name.includes(q) || sec.includes(q);
+  }).slice(0, 10);
+  if (!matches.length) {
+    acceptSearchResults.innerHTML = '<div class="result-empty">No students found.</div>';
+    acceptSearchResults.style.display = 'block';
+    return;
+  }
+  acceptSearchResults.innerHTML = matches.map(s => {
+    const name = getField(s,'name','Name','Full Name','Student') || '—';
+    const sec  = getField(s,'section','Section','Class') || '—';
+    const bal  = studentBal(s);
+    return `<div class="result-item" tabindex="0" data-name="${esc(name)}" data-sec="${esc(sec)}" data-bal="${bal}">
+      <div class="result-info"><span class="result-name">${esc(name)}</span><span class="result-section">${esc(sec)}</span></div>
+      <span class="result-bal ${bal>=0?'pos':'neg'}">${Math.round(bal)} i&#162;</span></div>`;
+  }).join('');
+  acceptSearchResults.style.display = 'block';
+  acceptSearchResults.querySelectorAll('.result-item').forEach(el => {
+    el.addEventListener('click', () => acceptPickStudent(el.dataset.name, el.dataset.sec, parseFloat(el.dataset.bal)));
+  });
+});
+
+function acceptPickStudent(name, section, balance) {
+  acceptStudent = { name, section, balance };
+  acceptSearchInput.value = '';
+  acceptSearchResults.style.display = 'none';
+  document.getElementById('accept-search-wrap').style.display = 'none';
+  document.getElementById('accept-card-name').textContent = name;
+  document.getElementById('accept-card-section').textContent = section;
+  const elig = document.getElementById('accept-card-elig');
+  elig.textContent = balance < 0 ? 'IN DEBT' : 'ELIGIBLE';
+  elig.className = 'elig-badge ' + (balance < 0 ? 'bad' : 'ok');
+  const balEl = document.getElementById('accept-card-bal');
+  balEl.textContent = Math.round(balance) + ' i¢';
+  balEl.className = 'student-card-bal ' + (balance >= 0 ? 'pos' : 'neg');
+  acceptStudentCard.classList.add('show');
+  document.getElementById('accept-step2').style.display = '';
+  document.getElementById('accept-coins-input').value = '';
+  document.getElementById('accept-preview').textContent = '';
+  document.getElementById('accept-submit-btn').disabled = true;
+}
+
+document.getElementById('accept-change-student').addEventListener('click', () => {
+  acceptStudent = null;
+  acceptStudentCard.classList.remove('show');
+  document.getElementById('accept-search-wrap').style.display = '';
+  acceptSearchInput.value = '';
+  acceptSearchInput.focus();
+  document.getElementById('accept-step2').style.display = 'none';
+});
+
+document.getElementById('accept-coins-input').addEventListener('input', () => {
+  if (!acceptStudent) return;
+  const v = parseInt(document.getElementById('accept-coins-input').value, 10);
+  const preview = document.getElementById('accept-preview');
+  const btn = document.getElementById('accept-submit-btn');
+  if (isNaN(v) || v <= 0) { preview.textContent = ''; btn.disabled = true; return; }
+  const newBal = Math.round(acceptStudent.balance) + v;
+  preview.textContent = `New balance: ${newBal} i¢`;
+  btn.disabled = false;
+});
+
+document.getElementById('accept-submit-btn').addEventListener('click', () => {
+  if (!acceptStudent) return;
+  const v = parseInt(document.getElementById('accept-coins-input').value, 10);
+  if (isNaN(v) || v <= 0) return;
+  const name = acceptStudent.name;
+  const raw = allStudents.find(s => (getField(s,'name','Name','Full Name','Student') || '').toLowerCase() === name.toLowerCase());
+  if (raw) {
+    const k = raw.awarded !== undefined ? 'awarded' : 'Awarded';
+    raw[k] = (parseFloat(raw[k]) || 0) + v;
+  }
+  toast(`Accepted ${v} i¢ from ${name}`, 'success');
+  resetAccept();
+  showScreen('s-home');
+  fetch(apiUrl({ action: 'logTransaction', name, type: 'Award', reason: 'Physical Coin Submission', amount: v }))
+    .then(r => r.json())
+    .then(d => { if (!d || !(d.success || d.status === 'ok' || d.result === 'success')) toast('Sync failed — check sheet', 'error'); })
+    .catch(() => toast('Sync failed — check sheet', 'error'));
+});
+
+function resetAccept() {
+  acceptStudent = null;
+  acceptSearchInput.value = '';
+  acceptSearchResults.style.display = 'none';
+  document.getElementById('accept-search-wrap').style.display = '';
+  acceptStudentCard.classList.remove('show');
+  document.getElementById('accept-step2').style.display = 'none';
+  document.getElementById('accept-coins-input').value = '';
+  document.getElementById('accept-preview').textContent = '';
+  document.getElementById('accept-body').scrollTop = 0;
 }
 
 // ── Student & Section Management ──────────────────────
