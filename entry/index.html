@@ -919,6 +919,13 @@ body::after {
         <span class="home-btn-sub">View, edit, and delete transactions</span>
       </div>
     </button>
+    <button class="home-btn gold" id="btn-reasons">
+      <span class="home-btn-icon">&#9776;</span>
+      <div class="home-btn-content">
+        <span class="home-btn-label">Reasons</span>
+        <span class="home-btn-sub">Add or retire award, fine, and purchase reasons</span>
+      </div>
+    </button>
     <button class="home-btn amber" id="btn-economy">
       <span class="home-btn-icon">&#10022;</span>
       <div class="home-btn-content">
@@ -1423,7 +1430,60 @@ body::after {
 </div>
 
 <!-- ══════════════════════════════════════
-     SCREEN 16 — WEEKLY WAGE
+     SCREEN 16 — REASONS
+════════════════════════════════════════ -->
+<div class="screen" id="s-reasons">
+  <div class="app-header">
+    <div class="logo-wrap"><span class="logo">IDEA.</span><span class="logo-sub">Reasons</span></div>
+    <div style="display:flex;gap:0.5rem;align-items:center;">
+      <button class="back-btn" id="reasons-add-btn" style="color:var(--green);border-color:rgba(0,255,65,0.4);font-size:1.4rem;padding:0;min-width:48px;min-height:48px;display:flex;align-items:center;justify-content:center;">+</button>
+      <button class="back-btn" id="reasons-back">&#8592; Back</button>
+    </div>
+  </div>
+  <div class="wage-filter-row" id="reasons-filter-row"></div>
+  <div class="screen-body" id="reasons-body">
+    <div id="reasons-list"></div>
+    <div id="reasons-inactive-toggle-wrap" style="display:none;"><button class="toggle-inactive-btn" id="reasons-inactive-toggle"></button></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 17 — REASON EDIT
+════════════════════════════════════════ -->
+<div class="screen" id="s-reason-edit">
+  <div class="app-header">
+    <div class="logo-wrap"><span class="logo">IDEA.</span><span class="logo-sub" id="reason-edit-sub">Reason</span></div>
+    <button class="back-btn" id="reason-edit-back">&#8592; Back</button>
+  </div>
+  <div class="screen-body">
+    <div class="field-group">
+      <label class="field-label">Type</label>
+      <select class="field-select" id="reason-edit-type">
+        <option value="Award">Award</option>
+        <option value="Fine">Fine</option>
+        <option value="Purchase">Purchase</option>
+        <option value="Payout">Payout</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Reason <span style="color:var(--red)">*</span></label>
+      <input type="text" class="field-input" id="reason-edit-text" autocomplete="off">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Detail (optional)</label>
+      <textarea class="field-textarea" id="reason-edit-detail" rows="2" placeholder="Shown in the public guide"></textarea>
+    </div>
+    <div style="margin-top:1.5rem;">
+      <button class="action-btn gold" id="reason-edit-save">Save</button>
+      <div class="action-btns-spacer"></div>
+      <button class="action-btn red" id="reason-edit-deactivate" style="display:none;">Retire Reason</button>
+      <button class="action-btn green" id="reason-edit-reactivate" style="display:none;">Reactivate Reason</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 18 — WEEKLY WAGE
 ════════════════════════════════════════ -->
 <div class="screen" id="s-wage">
   <div class="app-header">
@@ -1724,6 +1784,56 @@ const REASONS = {
 REASONS['Award - Held'] = REASONS.Award;
 REASONS['Fine - Owed']  = REASONS.Fine;
 
+let reasonsData = [];
+let reasonsMap = null;
+const REASONS_KEY    = 'idea-entry-reasons';
+const REASONS_TS_KEY = 'idea-entry-reasons-ts';
+const REASONS_TTL    = 5 * 60 * 1000;
+
+function buildReasonsMap(list) {
+  const map = { 'Award': [], 'Fine': [], 'Purchase': [], 'Payout': [] };
+  list.forEach(r => {
+    const active = r.active !== false && String(r.active).toLowerCase() !== 'no';
+    if (!active) return;
+    const t = getField(r, 'type', 'Type');
+    const reason = getField(r, 'reason', 'Reason');
+    if (map[t] && reason) map[t].push(reason);
+  });
+  map['Award - Held'] = map['Award'];
+  return map;
+}
+
+function reasonsFor(type) {
+  const t = (type === 'Award - Held') ? 'Award' : type;
+  if (reasonsMap && reasonsMap[t] && reasonsMap[t].length) return reasonsMap[t];
+  return REASONS[type] || REASONS[t] || [];
+}
+
+function fetchReasons() {
+  try {
+    const ts = localStorage.getItem(REASONS_TS_KEY);
+    const raw = localStorage.getItem(REASONS_KEY);
+    if (ts && raw && Date.now() - parseInt(ts,10) < REASONS_TTL) {
+      reasonsData = JSON.parse(raw);
+      reasonsMap = buildReasonsMap(reasonsData);
+    }
+  } catch(_) {}
+  return fetch(API + '?action=getReasons&_=' + Date.now(), { cache: 'no-store' })
+    .then(r => r.json())
+    .then(data => {
+      let list = Array.isArray(data) ? data : (data && Array.isArray(data.reasons) ? data.reasons : []);
+      if (list.length) {
+        reasonsData = list;
+        reasonsMap = buildReasonsMap(list);
+        try {
+          localStorage.setItem(REASONS_KEY, JSON.stringify(list));
+          localStorage.setItem(REASONS_TS_KEY, String(Date.now()));
+        } catch(_) {}
+      }
+    })
+    .catch(() => {});
+}
+
 const PRESETS = {
   Award:    [1, 2, 3, 5, 10],
   Fine:     [1, 2, 5, 10],
@@ -1754,7 +1864,7 @@ function getEffectiveReasons(type) {
   const baseKey = type === 'Award - Held' ? 'Award'
                 : type === 'Fine - Owed'  ? 'Fine'
                 : type;
-  const base    = REASONS[baseKey] || [];
+  const base    = reasonsFor(baseKey);
   const custom  = customReasons[baseKey] || [];
   const removed = removedReasons[baseKey] || [];
   return [...base, ...custom].filter(r => !removed.includes(r));
@@ -1913,6 +2023,7 @@ document.getElementById('btn-log-txn').addEventListener('click', async () => {
   if (!await requireStudents()) return;
   loadFreqsCache();
   fetchFreqs();
+  fetchReasons();
   showScreen('s-log');
   document.getElementById('student-search').focus();
 });
@@ -2415,6 +2526,7 @@ function updatePinDots() {
 function launchApp(withAnimation) {
   // Start pre-loading students immediately — before any animation
   initStudentsData();
+  fetchReasons();
 
   const pinEl = document.getElementById('pin-screen');
   if (withAnimation) {
@@ -4057,7 +4169,7 @@ function openTxnEdit(t, origin) {
   badgeEl.className   = 'type-badge ' + txnBadgeClass(type);
   document.getElementById('txnedit-amount').value = String(amount);
 
-  const reasons  = REASONS[type] || REASONS[(type || '').replace(' - Held', '').replace(' - Owed', '')] || [];
+  const reasons  = reasonsFor(type);
   const listEl   = document.getElementById('txnedit-reason-list');
   const searchEl = document.getElementById('txnedit-reason-search');
   searchEl.value = '';
@@ -4509,6 +4621,187 @@ function collectAllForStudent(name) {
     }
   );
 }
+
+// ── Reasons Management screen ─────────────────────────
+let reasonsFilterType = 'All';
+let showInactiveReasons = false;
+let activeReasonEdit = null;
+
+function reasonRow(r)    { return getField(r,'row','Row'); }
+function reasonType(r)   { return getField(r,'type','Type') || ''; }
+function reasonText(r)   { return getField(r,'reason','Reason') || ''; }
+function reasonDetail(r) { return getField(r,'detail','Detail') || ''; }
+function reasonActive(r) { const v = r.active !== undefined ? r.active : r.Active; return v !== false && String(v).toLowerCase() !== 'no'; }
+
+async function refreshReasons() {
+  try {
+    const res = await fetch(API + '?action=getReasons&_=' + Date.now(), { cache: 'no-store' });
+    const data = await res.json();
+    let list = Array.isArray(data) ? data : (data && Array.isArray(data.reasons) ? data.reasons : []);
+    reasonsData = list;
+    reasonsMap = buildReasonsMap(list);
+    try {
+      localStorage.setItem(REASONS_KEY, JSON.stringify(list));
+      localStorage.setItem(REASONS_TS_KEY, String(Date.now()));
+    } catch(_) {}
+  } catch(_) {}
+}
+
+document.getElementById('btn-reasons').addEventListener('click', async () => {
+  showLoading('Loading reasons…');
+  try { await refreshReasons(); }
+  catch(e) { hideLoading(); toast('Failed to load reasons', 'error'); return; }
+  hideLoading();
+  reasonsFilterType = 'All';
+  showInactiveReasons = false;
+  buildReasonsFilter();
+  renderReasonsList();
+  showScreen('s-reasons');
+});
+
+document.getElementById('reasons-back').addEventListener('click', () => showScreen('s-home'));
+
+document.getElementById('reasons-add-btn').addEventListener('click', () => openReasonEdit(null));
+
+function buildReasonsFilter() {
+  const row = document.getElementById('reasons-filter-row');
+  const types = ['All','Award','Fine','Purchase','Payout'];
+  row.innerHTML = types.map(t =>
+    `<button class="wage-filter-btn${t === reasonsFilterType ? ' active' : ''}" data-type="${t}">${t}</button>`
+  ).join('');
+  row.querySelectorAll('.wage-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      reasonsFilterType = btn.dataset.type;
+      buildReasonsFilter();
+      renderReasonsList();
+    });
+  });
+}
+
+function renderReasonsList() {
+  const types = reasonsFilterType === 'All' ? ['Award','Fine','Purchase','Payout'] : [reasonsFilterType];
+  const active = reasonsData.filter(r => reasonActive(r));
+  const inactive = reasonsData.filter(r => !reasonActive(r));
+  let html = '';
+  types.forEach(t => {
+    const group = active.filter(r => reasonType(r) === t)
+      .sort((a,b) => reasonText(a).localeCompare(reasonText(b)));
+    if (!group.length) return;
+    html += `<div class="section-group-head">${esc(t)}</div>`;
+    html += group.map(reasonRowHTML).join('');
+  });
+  if (showInactiveReasons) {
+    const inGroup = inactive.filter(r => reasonsFilterType === 'All' || reasonType(r) === reasonsFilterType)
+      .sort((a,b) => reasonText(a).localeCompare(reasonText(b)));
+    if (inGroup.length) {
+      html += '<div class="section-group-head">Retired</div>';
+      html += inGroup.map(reasonRowHTML).join('');
+    }
+  }
+  if (!html) html = '<div class="manage-empty">No reasons found.</div>';
+  document.getElementById('reasons-list').innerHTML = html;
+  document.querySelectorAll('#reasons-list .manage-row[data-rrow]').forEach(el => {
+    el.addEventListener('click', () => {
+      const r = reasonsData.find(x => String(reasonRow(x)) === String(el.dataset.rrow));
+      if (r) openReasonEdit(r);
+    });
+  });
+
+  const wrap = document.getElementById('reasons-inactive-toggle-wrap');
+  const togBtn = document.getElementById('reasons-inactive-toggle');
+  if (inactive.length) {
+    wrap.style.display = '';
+    togBtn.textContent = showInactiveReasons ? `Hide Retired (${inactive.length})` : `Show Retired (${inactive.length})`;
+  } else { wrap.style.display = 'none'; }
+}
+
+function reasonRowHTML(r) {
+  const text = reasonText(r);
+  const detail = reasonDetail(r);
+  const active = reasonActive(r);
+  return `<div class="manage-row" data-rrow="${esc(String(reasonRow(r)))}">
+    <div class="manage-row-left">
+      <div class="manage-row-name">${esc(text)}</div>
+      ${detail ? `<div class="manage-row-sub">${esc(detail)}</div>` : ''}
+    </div>
+    <div class="manage-row-right">${!active ? '<span class="inactive-badge">Retired</span>' : ''}</div>
+  </div>`;
+}
+
+document.getElementById('reasons-inactive-toggle').addEventListener('click', () => {
+  showInactiveReasons = !showInactiveReasons;
+  renderReasonsList();
+});
+
+function openReasonEdit(r) {
+  activeReasonEdit = r;
+  const isNew = !r;
+  document.getElementById('reason-edit-sub').textContent = isNew ? 'New Reason' : 'Edit Reason';
+  document.getElementById('reason-edit-type').value = isNew ? (reasonsFilterType !== 'All' ? reasonsFilterType : 'Award') : reasonType(r);
+  document.getElementById('reason-edit-text').value = isNew ? '' : reasonText(r);
+  document.getElementById('reason-edit-detail').value = isNew ? '' : reasonDetail(r);
+  document.getElementById('reason-edit-deactivate').style.display = (!isNew && reasonActive(r)) ? '' : 'none';
+  document.getElementById('reason-edit-reactivate').style.display = (!isNew && !reasonActive(r)) ? '' : 'none';
+  showScreen('s-reason-edit');
+}
+
+document.getElementById('reason-edit-back').addEventListener('click', () => { renderReasonsList(); showScreen('s-reasons'); });
+
+document.getElementById('reason-edit-save').addEventListener('click', async () => {
+  const type = document.getElementById('reason-edit-type').value;
+  const reason = document.getElementById('reason-edit-text').value.trim();
+  const detail = document.getElementById('reason-edit-detail').value.trim();
+  if (!reason) { toast('Reason text is required', 'error'); return; }
+  showLoading('Saving…');
+  try {
+    let params;
+    if (activeReasonEdit) params = { action:'updateReason', row: reasonRow(activeReasonEdit), type, reason, detail };
+    else params = { action:'addReason', type, reason, detail };
+    const res = await fetch(apiUrl(params));
+    const data = await res.json();
+    if (data && (data.success || data.status === 'ok' || data.result === 'success')) {
+      toast('Reason saved ✓', 'success');
+      await refreshReasons();
+      renderReasonsList();
+      showScreen('s-reasons');
+    } else { toast('Error saving — try again', 'error'); }
+  } catch(e) { toast('Network error', 'error'); }
+  finally { hideLoading(); }
+});
+
+document.getElementById('reason-edit-deactivate').addEventListener('click', () => {
+  if (!activeReasonEdit) return;
+  confirm('Retire Reason', 'This reason will be hidden from new transactions everywhere. Existing transactions keep it.', async () => {
+    showLoading('Retiring…');
+    try {
+      const res = await fetch(apiUrl({ action:'deactivateReason', row: reasonRow(activeReasonEdit) }));
+      const data = await res.json();
+      if (data && (data.success || data.status === 'ok' || data.result === 'success')) {
+        toast('Reason retired', 'success');
+        await refreshReasons();
+        renderReasonsList();
+        showScreen('s-reasons');
+      } else { toast('Error — try again', 'error'); }
+    } catch(e) { toast('Network error', 'error'); }
+    finally { hideLoading(); }
+  });
+});
+
+document.getElementById('reason-edit-reactivate').addEventListener('click', async () => {
+  if (!activeReasonEdit) return;
+  showLoading('Reactivating…');
+  try {
+    const res = await fetch(apiUrl({ action:'reactivateReason', row: reasonRow(activeReasonEdit) }));
+    const data = await res.json();
+    if (data && (data.success || data.status === 'ok' || data.result === 'success')) {
+      toast('Reason reactivated ✓', 'success');
+      await refreshReasons();
+      renderReasonsList();
+      showScreen('s-reasons');
+    } else { toast('Error — try again', 'error'); }
+  } catch(e) { toast('Network error', 'error'); }
+  finally { hideLoading(); }
+});
 
 // ── Economy Rules screen ──────────────────────────────
 document.getElementById('btn-economy').addEventListener('click', () => {
