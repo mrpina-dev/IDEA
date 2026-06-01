@@ -1,22 +1,29 @@
-﻿Edit entry/index.html. Remove the old client-side "Economy Rules" feature entirely. It has been fully replaced by the synced "Reasons" screen.
+﻿Edit coins/index.html. The i¢ Guide modal currently builds its Awards / Purchases / Fines content from hardcoded reason arrays. Repoint it to read from the live Reasons sheet via the API so it stays in sync with the entry app.
+
+API: use the same Apps Script base URL already used for contracts on this page (the constant ending in /exec). The endpoint is:
+[that base URL] + "?action=getReasons&_=" + Date.now()
+It returns a JSON array of objects: { row, type, reason, detail, active }.
 
 STEPS:
-1. Find the home screen button for "Economy Rules" (likely id contains "economy" or "rules", label text "Economy Rules"). Remove that button element.
 
-2. Find the Economy Rules screen(s) - the screen div(s) it navigates to, where reasons/rules were added, edited, and enabled/disabled client-side. Remove the entire screen div(s).
+1. Add state near the contracts data: let reasonsGuideData = [];
 
-3. Remove all JavaScript associated with the Economy Rules feature: its click handler, render functions, add/edit/enable/disable handlers, and any state variables only it used.
+2. Add a function fetchReasonsGuide() that fetches the getReasons endpoint with cache: 'no-store', stores the array in reasonsGuideData, then calls the guide render function. Wrap in try/catch that fails silently. Call fetchReasonsGuide() once on page load (alongside or right after the contracts fetch) and also when the i¢ Guide modal is opened.
 
-4. Remove any localStorage keys that the Economy Rules feature used to store reasons/rules client-side (keys likely containing "rules" or "economy"). Delete the read/write logic for those keys.
+3. Find the i¢ Guide rendering logic and the hardcoded reason arrays it uses. Replace the hardcoded data source with reasonsGuideData. Build the guide sections like this:
+   - Awards section: reasonsGuideData where type === "Award" AND active is true
+   - Purchases section: type === "Purchase" AND active
+   - Fines section: type === "Fine" AND active
+   - Do NOT show Payout reasons (internal) and do NOT show any reason where active is false (retired reasons are hidden from students)
+   - Within each section, sort reasons alphabetically by reason text
+   - Each row shows the reason text, and if the detail field is non-empty, show it as the description/subtext using the existing row styling
 
-CRITICAL - do NOT touch any of these, which are the NEW synced reasons system that replaces Economy Rules:
-- The "Reasons" home button (id="btn-reasons")
-- Screens s-reasons and s-reason-edit
-- The fetchReasons, refreshReasons, buildReasonsMap, reasonsFor functions
-- reasonsData, reasonsMap variables
-- The REASONS fallback object
-- Any reason-edit / reasons-list / reasons-filter handlers
+4. Remove the old "Inactive" section from the guide if one exists - retired reasons simply don't appear now.
 
-After removal, verify the app still loads and the Reasons button works. The Reasons screen is now the single place to manage award, fine, purchase, and payout reasons.
+5. Preserve all existing modal UI: the gold callout button that opens it, the modal open/close behavior, and any search filter, type filter, sort, and expand/collapse row interactions. Those should now operate over the fetched data instead of the hardcoded arrays.
 
-Commit with message "refactor: remove redundant client-side Economy Rules, replaced by synced Reasons" and push.
+6. If reasonsGuideData is empty (fetch not yet returned or failed), show a brief "Loading…" state in the guide body rather than an empty modal.
+
+Keep all styling consistent with the current guide. Do not change anything outside the i¢ Guide feature.
+
+Commit with message "feat: i-cent guide reads reasons from synced sheet via API" and push.

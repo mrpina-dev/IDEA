@@ -1522,7 +1522,6 @@ body::after {
         <button class="filter-btn active" data-guide-filter="awards">Awards</button>
         <button class="filter-btn active" data-guide-filter="purchases">Purchases</button>
         <button class="filter-btn active" data-guide-filter="fines">Fines</button>
-        <button class="filter-btn active" data-guide-filter="inactive">Inactive</button>
       </div>
       <select class="txn-type-select" id="guide-sort">
         <option value="default">Default Order</option>
@@ -1534,269 +1533,9 @@ body::after {
     </div>
     <div class="guide-modal-body" id="guide-modal-body">
       <div class="guide-col">
-
-        <!-- Awards -->
-        <div class="guide-section-wrap" data-guide-section="awards">
-          <div class="guide-section-head">
-            <span class="guide-section-label" style="color:var(--green)">Awards</span>
-            <span class="guide-section-line" style="background:var(--green)"></span>
-          </div>
-          <div class="guide-item guide-item-award" data-section="awards">
-            <div class="guide-item-main"><span class="type-badge type-award">Award</span><span class="guide-item-name">Legacy Wealth Declaration</span><span class="guide-item-rate guide-rate-award">Varies</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">A one-time entry logged by Mr. Pina to record coin balances earned before the digital system was implemented. Students cannot self-report.</div>
-          </div>
-          <div class="guide-item guide-item-award" data-section="awards">
-            <div class="guide-item-main"><span class="type-badge type-award">Award</span><span class="guide-item-name">Physical Coin Submission</span><span class="guide-item-rate guide-rate-award">Varies</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Used when a student physically brings coins to Mr. Pina to pay off debt or add to their balance. Mr. Pina counts the coins, takes possession of them, and logs this transaction for the submitted amount. Creates an audit trail for physical coin repayments.</div>
-          </div>
-          <div class="guide-item guide-item-award" data-section="awards">
-            <div class="guide-item-main"><span class="type-badge type-award">Award</span><span class="guide-item-name">Balance Correction</span><span class="guide-item-rate guide-rate-award">Varies</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">A manual adjustment logged by Mr. Pina to reconcile the digital record with physical reality. Used when the digital balance does not accurately reflect a student's true holdings due to untracked transactions, student-to-student trades, or coins earned before the digital system existed.</div>
-          </div>
-          <div class="guide-item guide-item-award" data-section="awards">
-            <div class="guide-item-main"><span class="type-badge type-award">Award</span><span class="guide-item-name">Contract Completion</span><span class="guide-item-rate guide-rate-award">1i&#162;+</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Refer to the Contracts page for details. Award depends on contract total plus any applicable bonus.</div>
-          </div>
-          <div class="guide-item guide-item-award" data-section="awards">
-            <div class="guide-item-main"><span class="type-badge type-award">Award</span><span class="guide-item-name">Improve IDEA Coin Infrastructure</span><span class="guide-item-rate guide-rate-award">1i&#162;+</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Any suggestions that may lead to a better IDEA Coin system. Award depends on significance of improvement. Final value determined by Mr. Pina.</div>
-          </div>
-          <div class="guide-item guide-item-award" data-section="awards">
-            <div class="guide-item-main"><span class="type-badge type-award">Award</span><span class="guide-item-name">Donate Supplies</span><span class="guide-item-rate guide-rate-award">2&ndash;6i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Donate shop towels, shop rags, nitrile gloves, protective masks, filament, or miscellaneous IDEA supplies. Larger rolls will be considered for higher payment. Final value determined by Mr. Pina. Limit: 1 donation per week.</div>
-          </div>
-          <div class="guide-item guide-item-award" data-section="awards">
-            <div class="guide-item-main"><span class="type-badge type-award">Award</span><span class="guide-item-name">Donate Tissue Box</span><span class="guide-item-rate guide-rate-award">1&ndash;2i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Rectangular tissue boxes net 2i&#162;. Square cube boxes are awarded 1i&#162;. Limit: 1 per week.</div>
-          </div>
-          <div class="guide-item guide-item-award" data-section="awards">
-            <div class="guide-item-main"><span class="type-badge type-award">Award</span><span class="guide-item-name">Answer Questions Correctly During Class</span><span class="guide-item-rate guide-rate-award">1i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Any question you answer correctly during lectures or discussions will be awarded. Limit: 1&ndash;2 per class.</div>
-          </div>
-          <div class="guide-item guide-item-award" data-section="awards">
-            <div class="guide-item-main"><span class="type-badge type-award">Award</span><span class="guide-item-name">Bounty Hunting / Fine Reporting / Policing</span><span class="guide-item-rate guide-rate-award">1i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">If you are a registered bounty hunter and witness a fineable offense, you may report it for compensation. Must provide evidence or compelling reasoning. Must be done professionally or your bounty hunter status will be revoked. Limit: 1 per week per hunter.</div>
-          </div>
-          <div class="guide-item guide-item-award" data-section="awards">
-            <div class="guide-item-main"><span class="type-badge type-award">Award</span><span class="guide-item-name">Exceptional Performance</span><span class="guide-item-rate guide-rate-award">1i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Going above and beyond what is asked is highly valued in this class.</div>
-          </div>
-          <div class="guide-item guide-item-award" data-section="awards">
-            <div class="guide-item-main"><span class="type-badge type-award">Award</span><span class="guide-item-name">Helping Peers</span><span class="guide-item-rate guide-rate-award">1i&#162; / moment</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Help your peers with problems they encounter. Both the helper and the helped must confirm, along with a brief overview of what was helped with. Guiding peers through the process counts &mdash; doing the work for them does not. Limit: 1 per day.</div>
-          </div>
-          <div class="guide-item guide-item-award" data-section="awards">
-            <div class="guide-item-main"><span class="type-badge type-award">Award</span><span class="guide-item-name">Perfect Assignment Score</span><span class="guide-item-rate guide-rate-award">1i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">A 100% score on any assignment worth 20 points or more will be awarded.</div>
-          </div>
-          <div class="guide-item guide-item-award" data-section="awards">
-            <div class="guide-item-main"><span class="type-badge type-award">Award</span><span class="guide-item-name">Weekly Wage</span><span class="guide-item-rate guide-rate-award">1i&#162; / week</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Showing up to class on time is worth something. Paid weekly at your current wage rate.</div>
-          </div>
-          <div class="guide-item guide-item-award" data-section="awards">
-            <div class="guide-item-main"><span class="type-badge type-award">Award</span><span class="guide-item-name">100% IDEA Grade or Highest Grade in Section</span><span class="guide-item-rate guide-rate-award">1i&#162; / week</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Awarded weekly for maintaining a perfect IDEA grade or the highest grade in your section.</div>
-          </div>
-          <div class="guide-item guide-item-award" data-section="awards">
-            <div class="guide-item-main"><span class="type-badge type-award">Award</span><span class="guide-item-name">Quality IDEA Background</span><span class="guide-item-rate guide-rate-award">1i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Email Mr. Pina a quality IDEA background. Must be aesthetically adequate. Subject line must include &ldquo;background&rdquo; or &ldquo;IDEA background&rdquo;. Include the AI prompt if applicable. Limit: 1 per month.</div>
-          </div>
-        </div>
-
-        <!-- Purchases -->
-        <div class="guide-section-wrap" data-guide-section="purchases">
-          <div class="guide-section-head">
-            <span class="guide-section-label" style="color:var(--amber)">Purchases / Expenses</span>
-            <span class="guide-section-line" style="background:var(--amber)"></span>
-          </div>
-          <div class="guide-item guide-item-purchase" data-section="purchases">
-            <div class="guide-item-main"><span class="type-badge type-purchase">Purchase</span><span class="guide-item-name">In-N-Out Combo</span><span class="guide-item-rate guide-rate-purchase">250i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">You will receive an In-N-Out meal. Limited to combo deals or single items only. Limit: 1 per month.</div>
-          </div>
-          <div class="guide-item guide-item-purchase" data-section="purchases">
-            <div class="guide-item-main"><span class="type-badge type-purchase">Purchase</span><span class="guide-item-name">Executive Classroom Eating Pass</span><span class="guide-item-rate guide-rate-purchase">100i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Eat in IDEA at any time, even during class. Includes a buddy pass for 1 other person.</div>
-          </div>
-          <div class="guide-item guide-item-purchase" data-section="purchases">
-            <div class="guide-item-main"><span class="type-badge type-purchase">Purchase</span><span class="guide-item-name">Basic Classroom Eating Pass</span><span class="guide-item-rate guide-rate-purchase">40i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Eat in IDEA outside of class hours &mdash; lunch, after school, early morning, etc. Can upgrade to Executive for an additional 60i&#162;.</div>
-          </div>
-          <div class="guide-item guide-item-purchase" data-section="purchases">
-            <div class="guide-item-main"><span class="type-badge type-purchase">Purchase</span><span class="guide-item-name">Raise Weekly Wage</span><span class="guide-item-rate guide-rate-purchase">100i&#162; &times; raise #</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Raise your weekly wage by 1i&#162;. First raise costs 100i&#162; (wage goes from 1i&#162; to 2i&#162;). Second raise costs 200i&#162;. Third costs 300i&#162;. Each raise is 100i&#162; more than the last. Raises are permanent.</div>
-          </div>
-          <div class="guide-item guide-item-purchase" data-section="purchases">
-            <div class="guide-item-main"><span class="type-badge type-purchase">Purchase</span><span class="guide-item-name">Bounty Hunter Application</span><span class="guide-item-rate guide-rate-purchase">10i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Register to become an IDEA Coin Bounty Hunter. Application form will be sent once payment is made.</div>
-          </div>
-          <div class="guide-item guide-item-purchase" data-section="purchases">
-            <div class="guide-item-main"><span class="type-badge type-purchase">Purchase</span><span class="guide-item-name">Weekly Bounty Limit Increase</span><span class="guide-item-rate guide-rate-purchase">10i&#162; &times; limit</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Increase your weekly bounty reporting limit by 1i&#162;.</div>
-          </div>
-          <div class="guide-item guide-item-purchase" data-section="purchases">
-            <div class="guide-item-main"><span class="type-badge type-purchase">Purchase</span><span class="guide-item-name">Outside Time</span><span class="guide-item-rate guide-rate-purchase">10i&#162; / 30 min</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Go outside only when the instructor is not actively teaching or informing the class. Limit: 1 hour per week.</div>
-          </div>
-          <div class="guide-item guide-item-purchase" data-section="purchases">
-            <div class="guide-item-main"><span class="type-badge type-purchase">Purchase</span><span class="guide-item-name">B&amp;W Paper Printing</span><span class="guide-item-rate guide-rate-purchase">1i&#162; / 2-sided pg</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Black and white double-sided printing service.</div>
-          </div>
-          <div class="guide-item guide-item-purchase" data-section="purchases">
-            <div class="guide-item-main"><span class="type-badge type-purchase">Purchase</span><span class="guide-item-name">Paper Printing</span><span class="guide-item-rate guide-rate-purchase">1i&#162; / page</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Standard single-page color or black and white printing.</div>
-          </div>
-          <div class="guide-item guide-item-purchase" data-section="purchases">
-            <div class="guide-item-main"><span class="type-badge type-purchase">Purchase</span><span class="guide-item-name">Extra Credit</span><span class="guide-item-rate guide-rate-purchase">1i&#162; / point</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Points added to your total score for any assignment. Up to 100% grade.</div>
-          </div>
-          <div class="guide-item guide-item-purchase" data-section="purchases">
-            <div class="guide-item-main"><span class="type-badge type-purchase">Purchase</span><span class="guide-item-name">Games During Downtime</span><span class="guide-item-rate guide-rate-purchase">1i&#162; / class</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Play games once all assignments are complete. Games are not allowed by default but study hall is permitted. Limit: 1 per class.</div>
-          </div>
-          <div class="guide-item guide-item-purchase" data-section="purchases">
-            <div class="guide-item-main"><span class="type-badge type-purchase">Purchase</span><span class="guide-item-name">Mr. Pina Does Your Work</span><span class="guide-item-rate guide-rate-purchase">1i&#162; / min</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Mr. Pina will work through your assignment with you at your computer, guiding you step by step. Max 5 min per student per class. Max 15 min total per class. Max 10 min per student per week. You must be present the entire time.</div>
-          </div>
-          <div class="guide-item guide-item-purchase" data-section="purchases">
-            <div class="guide-item-main"><span class="type-badge type-purchase">Purchase</span><span class="guide-item-name">Song Request</span><span class="guide-item-rate guide-rate-purchase">1i&#162; / song</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Email your song request to apina@boscotech.edu. Your song is placed next in queue. Song must not be highly disruptive or explicit. Playlists may only be selected when Mr. Pina allows and are subject to bidding &mdash; highest offer wins.</div>
-          </div>
-          <div class="guide-item guide-item-purchase" data-section="purchases">
-            <div class="guide-item-main"><span class="type-badge type-purchase">Purchase</span><span class="guide-item-name">Turn On/Off Ceiling Lights</span><span class="guide-item-rate guide-rate-purchase">1i&#162; / change</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Configure the classroom lighting however you want for the duration of the period. Subject to bidding &mdash; highest offer wins. Limit: 2 changes per class.</div>
-          </div>
-          <div class="guide-item guide-item-purchase" data-section="purchases">
-            <div class="guide-item-main"><span class="type-badge type-purchase">Purchase</span><span class="guide-item-name">3D Printing</span><span class="guide-item-rate guide-rate-purchase">1i&#162; / 10g</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Standard rate is 1i&#162; per 10g. You must complete 3D printer training to print yourself, or find someone who has completed training at no extra charge.</div>
-          </div>
-        </div>
-
-        <!-- Fines -->
-        <div class="guide-section-wrap" data-guide-section="fines">
-          <div class="guide-section-head">
-            <span class="guide-section-label" style="color:#FF4444">Fines</span>
-            <span class="guide-section-line" style="background:#FF4444"></span>
-          </div>
-          <div class="guide-item guide-item-fine" data-section="fines">
-            <div class="guide-item-main"><span class="type-badge type-fine">Fine</span><span class="guide-item-name">Failure to Clean Up in Shop</span><span class="guide-item-rate guide-rate-fine">&minus;1i&#162; all</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Everyone is fined if the shop is not properly cleaned up after use.</div>
-          </div>
-          <div class="guide-item guide-item-fine" data-section="fines">
-            <div class="guide-item-main"><span class="type-badge type-fine">Fine</span><span class="guide-item-name">Tampering With IDEA Coin Mint (Unknown Suspect)</span><span class="guide-item-rate guide-rate-fine">&minus;1i&#162; all</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">If an unknown individual has tampered with the IDEA Coin Minting Process, everyone will be equally fined 1 coin.</div>
-          </div>
-          <div class="guide-item guide-item-fine" data-section="fines">
-            <div class="guide-item-main"><span class="type-badge type-fine">Fine</span><span class="guide-item-name">Feet on 2nd Chair</span><span class="guide-item-rate guide-rate-fine">&minus;1i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Keep your feet on the floor at all times.</div>
-          </div>
-          <div class="guide-item guide-item-fine" data-section="fines">
-            <div class="guide-item-main"><span class="type-badge type-fine">Fine</span><span class="guide-item-name">Leaving Classroom Without Permission</span><span class="guide-item-rate guide-rate-fine">&minus;1i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Do not leave the classroom without explicit permission from the instructor.</div>
-          </div>
-          <div class="guide-item guide-item-fine" data-section="fines">
-            <div class="guide-item-main"><span class="type-badge type-fine">Fine</span><span class="guide-item-name">Extended Bathroom Break</span><span class="guide-item-rate guide-rate-fine">&minus;1i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Staying in the bathroom for 15 or more minutes will result in a fine.</div>
-          </div>
-          <div class="guide-item guide-item-fine" data-section="fines">
-            <div class="guide-item-main"><span class="type-badge type-fine">Fine</span><span class="guide-item-name">Out of Seat During Attendance</span><span class="guide-item-rate guide-rate-fine">&minus;1i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Attendance is taken at the very start of each period. Be in your seat or a fine will ensue. Limit: 1 per class.</div>
-          </div>
-          <div class="guide-item guide-item-fine" data-section="fines">
-            <div class="guide-item-main"><span class="type-badge type-fine">Fine</span><span class="guide-item-name">Paper Printing Without Permission</span><span class="guide-item-rate guide-rate-fine">&minus;2i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Do not use the printer without permission. Rate applies per 2-sided page.</div>
-          </div>
-          <div class="guide-item guide-item-fine" data-section="fines">
-            <div class="guide-item-main"><span class="type-badge type-fine">Fine</span><span class="guide-item-name">Brain Rot</span><span class="guide-item-rate guide-rate-fine">&minus;2i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Any distracting or annoying behavior deemed brain rot by the instructor. Limit: 1 per class.</div>
-          </div>
-          <div class="guide-item guide-item-fine" data-section="fines">
-            <div class="guide-item-main"><span class="type-badge type-fine">Fine</span><span class="guide-item-name">Crashing Out</span><span class="guide-item-rate guide-rate-fine">&minus;2i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Falling asleep or completely checking out during class.</div>
-          </div>
-          <div class="guide-item guide-item-fine" data-section="fines">
-            <div class="guide-item-main"><span class="type-badge type-fine">Fine</span><span class="guide-item-name">Gambling</span><span class="guide-item-rate guide-rate-fine">&minus;2i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Any form of gambling or wagering involving IDEA Coins or otherwise.</div>
-          </div>
-          <div class="guide-item guide-item-fine" data-section="fines">
-            <div class="guide-item-main"><span class="type-badge type-fine">Fine</span><span class="guide-item-name">Failure to Tidy Up Before Leaving Class</span><span class="guide-item-rate guide-rate-fine">&minus;2i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Chair pushed in, work saved, tabs closed, peripherals neat, nothing left behind.</div>
-          </div>
-          <div class="guide-item guide-item-fine" data-section="fines">
-            <div class="guide-item-main"><span class="type-badge type-fine">Fine</span><span class="guide-item-name">Failure to Return Flash Drive</span><span class="guide-item-rate guide-rate-fine">&minus;2i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Return any borrowed flash drive by the end of class or a penalty will be issued.</div>
-          </div>
-          <div class="guide-item guide-item-fine" data-section="fines">
-            <div class="guide-item-main"><span class="type-badge type-fine">Fine</span><span class="guide-item-name">IDEA Coin Theft</span><span class="guide-item-rate guide-rate-fine">&minus;2&times; stolen</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Stealing IDEA coins results in a fine of 2x the stolen amount. The amount logged in Transactions will reflect the actual 2x value, not a flat rate.</div>
-          </div>
-          <div class="guide-item guide-item-fine" data-section="fines">
-            <div class="guide-item-main"><span class="type-badge type-fine">Fine</span><span class="guide-item-name">Inappropriate / Disruptive Behavior</span><span class="guide-item-rate guide-rate-fine">&minus;1 to &minus;2i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Any communication or physical action that disrupts the class or is deemed inappropriate &mdash; including talking out of turn, touching others, being out of seat for no reason, sleeping, going off-topic, or profanity. Minor or first-time offenses may only result in &minus;1i&#162;.</div>
-          </div>
-          <div class="guide-item guide-item-fine" data-section="fines">
-            <div class="guide-item-main"><span class="type-badge type-fine">Fine</span><span class="guide-item-name">Arguing</span><span class="guide-item-rate guide-rate-fine">&minus;2i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Arguing with the instructor or peers in a disruptive or disrespectful manner.</div>
-          </div>
-          <div class="guide-item guide-item-fine" data-section="fines">
-            <div class="guide-item-main"><span class="type-badge type-fine">Fine</span><span class="guide-item-name">Planting Evidence</span><span class="guide-item-rate guide-rate-fine">&minus;2i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Deliberately framing another student for a fine they did not commit.</div>
-          </div>
-          <div class="guide-item guide-item-fine" data-section="fines">
-            <div class="guide-item-main"><span class="type-badge type-fine">Fine</span><span class="guide-item-name">Tampering With Another Student's Computer</span><span class="guide-item-rate guide-rate-fine">&minus;2i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Do not touch or interfere with another student's computer or work.</div>
-          </div>
-          <div class="guide-item guide-item-fine" data-section="fines">
-            <div class="guide-item-main"><span class="type-badge type-fine">Fine</span><span class="guide-item-name">Non-IDEA / Inappropriate Computer Background</span><span class="guide-item-rate guide-rate-fine">&minus;2i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Your computer background must be IDEA-related and appropriate at all times.</div>
-          </div>
-          <div class="guide-item guide-item-fine" data-section="fines">
-            <div class="guide-item-main"><span class="type-badge type-fine">Fine</span><span class="guide-item-name">Using Device for Non-School Purposes</span><span class="guide-item-rate guide-rate-fine">&minus;2i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Games, YouTube, and other non-school activity on any device during class is not allowed unless exempt or instructor permits. Includes inappropriate phone use during class.</div>
-          </div>
-          <div class="guide-item guide-item-fine" data-section="fines">
-            <div class="guide-item-main"><span class="type-badge type-fine">Fine</span><span class="guide-item-name">Failure to Reset 3D Printer After Use</span><span class="guide-item-rate guide-rate-fine">&minus;2i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Reset the 3D printer to its default state after every use.</div>
-          </div>
-          <div class="guide-item guide-item-fine" data-section="fines">
-            <div class="guide-item-main"><span class="type-badge type-fine">Fine</span><span class="guide-item-name">Leaving Mess in Classroom</span><span class="guide-item-rate guide-rate-fine">&minus;5i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Clean up after yourself before leaving.</div>
-          </div>
-          <div class="guide-item guide-item-fine" data-section="fines">
-            <div class="guide-item-main"><span class="type-badge type-fine">Fine</span><span class="guide-item-name">Eating Without Eating Pass</span><span class="guide-item-rate guide-rate-fine">&minus;5i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Eating or drinking anything other than water during class without an eating pass will result in a fine. Applies after a warning.</div>
-          </div>
-          <div class="guide-item guide-item-fine" data-section="fines">
-            <div class="guide-item-main"><span class="type-badge type-fine">Fine</span><span class="guide-item-name">Unsafe in Shop</span><span class="guide-item-rate guide-rate-fine">&minus;5i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Any hazardous behavior in the shop &mdash; not rolling up sleeves, not wearing safety glasses, messing around, etc. Fined per safety violation.</div>
-          </div>
-          <div class="guide-item guide-item-fine" data-section="fines">
-            <div class="guide-item-main"><span class="type-badge type-fine">Fine</span><span class="guide-item-name">Sitting in Mr. Pina's Chair</span><span class="guide-item-rate guide-rate-fine">&minus;5i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Do not sit in Mr. Pina's chair. Ever. Fined per sit.</div>
-          </div>
-          <div class="guide-item guide-item-fine" data-section="fines">
-            <div class="guide-item-main"><span class="type-badge type-fine">Fine</span><span class="guide-item-name">Tampering With IDEA Coin Mint (Known Suspect)</span><span class="guide-item-rate guide-rate-fine">&minus;10i&#162;</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">If a known person has evidently tampered with the IDEA Coin Minting Process, they will be fined 10 coins. Opening other students' coin boxes without stealing is &minus;5i&#162;. Touching the vault in any way is &minus;5 to &minus;10i&#162;.</div>
-          </div>
-        </div>
-
-        <!-- Inactive -->
-        <div class="guide-section-wrap" data-guide-section="inactive">
-          <div class="guide-section-head">
-            <span class="guide-section-label" style="color:var(--dim)">Inactive</span>
-            <span class="guide-section-line" style="background:var(--dim)"></span>
-          </div>
-          <div class="guide-inactive-note">These awards are not currently active.</div>
-          <div class="guide-item guide-item-inactive" data-section="inactive">
-            <div class="guide-item-main"><span class="type-badge type-other">Award</span><span class="guide-item-name">TA Helper Time</span><span class="guide-item-rate guide-rate-inactive">1i&#162; / 2 min</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">Assist Mr. Pina as a teaching assistant. Max 10 min per student per session. Max 30 min total per class.</div>
-          </div>
-          <div class="guide-item guide-item-inactive" data-section="inactive">
-            <div class="guide-item-main"><span class="type-badge type-other">Award</span><span class="guide-item-name">Clean Spider Kill with Evidence</span><span class="guide-item-rate guide-rate-inactive">1i&#162; / spider</span><span class="guide-arrow">&#8250;</span></div>
-            <div class="guide-item-desc">A clean spider kill with photographic evidence required. Limit: 2 per active day.</div>
-          </div>
-        </div>
-
+        <div style="padding:2rem;color:var(--dim);font-size:0.8rem;text-align:center;letter-spacing:0.04em;">Loading&#8230;</div>
       </div>
+
     </div>
   </div>
 </div>
@@ -1826,6 +1565,7 @@ let summaryData = [];
 let txnData = [];
 let contractsData = [];
 let contractHistoryData = [];
+let reasonsGuideData = [];
 let activeSection = 'All';
 let txnNameQ = '';
 let txnTypeQ = '';
@@ -1957,6 +1697,65 @@ async function fetchContractsData() {
     renderContracts();
     document.getElementById('contracts-loading').style.display = 'none';
   } catch (err) { /* fail silently — contracts tab shows stale or empty */ }
+}
+
+async function fetchReasonsGuide() {
+  try {
+    const res = await fetch(CONTRACTS_API + '?action=getReasons&_=' + Date.now(), { cache: 'no-store' });
+    const data = await res.json();
+    reasonsGuideData = Array.isArray(data) ? data : (data && Array.isArray(data.reasons) ? data.reasons : []);
+    renderGuideModal();
+  } catch(_) {}
+}
+
+function renderGuideModal() {
+  const bodyEl = document.getElementById('guide-modal-body');
+  if (!bodyEl) return;
+
+  function isActive(r) {
+    return r.active !== false && String(r.active).toLowerCase() !== 'no';
+  }
+  function escHtml(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function buildSection(type, secKey, label, color, itemClass, badgeClass) {
+    const items = reasonsGuideData
+      .filter(r => (r.type || r.Type) === type && isActive(r))
+      .sort((a, b) => (a.reason || a.Reason || '').localeCompare(b.reason || b.Reason || ''));
+    if (!items.length) return '';
+    const rows = items.map((r, i) => {
+      const name = escHtml(r.reason || r.Reason || '');
+      const detail = (r.detail || r.Detail || '').trim();
+      const hasDesc = detail.length > 0;
+      return `<div class="guide-item ${itemClass}" data-section="${secKey}" data-guide-idx="${i}">
+          <div class="guide-item-main">
+            <span class="type-badge ${badgeClass}">${escHtml(type)}</span>
+            <span class="guide-item-name">${name}</span>
+            ${hasDesc ? '<span class="guide-arrow">&#8250;</span>' : ''}
+          </div>
+          ${hasDesc ? `<div class="guide-item-desc">${escHtml(detail)}</div>` : ''}
+        </div>`;
+    }).join('');
+    return `<div class="guide-section-wrap" data-guide-section="${secKey}">
+      <div class="guide-section-head">
+        <span class="guide-section-label" style="color:${color}">${label}</span>
+        <span class="guide-section-line" style="background:${color}"></span>
+      </div>
+      ${rows}
+    </div>`;
+  }
+
+  if (!reasonsGuideData.length) {
+    bodyEl.innerHTML = '<div class="guide-col"><div style="padding:2rem;color:var(--dim);font-size:0.8rem;text-align:center;letter-spacing:0.04em;">Loading&#8230;</div></div>';
+    return;
+  }
+
+  const html =
+    buildSection('Award',    'awards',    'Awards',             'var(--green)', 'guide-item-award',    'type-award')
+  + buildSection('Purchase', 'purchases', 'Purchases / Expenses','var(--amber)', 'guide-item-purchase', 'type-purchase')
+  + buildSection('Fine',     'fines',     'Fines',              '#FF4444',      'guide-item-fine',     'type-fine');
+
+  bodyEl.innerHTML = '<div class="guide-col">' + (html || '<div style="padding:2rem;color:var(--dim);font-size:0.8rem;text-align:center;letter-spacing:0.04em;">No reasons found.</div>') + '</div>';
 }
 
 // ── Stats Bar ────────────────────────────────────────
@@ -2894,6 +2693,7 @@ fetchData();
 setInterval(fetchData, 60000);
 fetchContractsData();
 setInterval(fetchContractsData, 60000);
+fetchReasonsGuide();
 
 // ── Background Particles ──────────────────────────────
 const canvas = document.getElementById('bg-canvas');
@@ -2943,15 +2743,11 @@ else canvas.style.display = 'none';
   const searchClear = document.getElementById('guide-search-clear');
   const sortSel = document.getElementById('guide-sort');
   const filterBtns = document.querySelectorAll('[data-guide-filter]');
-  const activeFilters = new Set(['awards', 'purchases', 'fines', 'inactive']);
-
-  // Store original order index per item within its section wrapper
-  document.querySelectorAll('#guide-modal-body .guide-section-wrap').forEach(wrap => {
-    wrap.querySelectorAll('.guide-item').forEach((item, i) => { item.dataset.guideIdx = i; });
-  });
+  const activeFilters = new Set(['awards', 'purchases', 'fines']);
 
   // Open / close
   function openModal() {
+    fetchReasonsGuide();
     backdrop.classList.add('open');
     document.body.style.overflow = 'hidden';
     searchInput.focus();
@@ -2969,14 +2765,14 @@ else canvas.style.display = 'none';
   backdrop.addEventListener('click', e => { if (e.target === backdrop) closeModal(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && backdrop.classList.contains('open')) closeModal(); });
 
-  // Accordion expand / collapse
-  document.querySelectorAll('#guide-modal-body .guide-item').forEach(item => {
-    item.addEventListener('click', () => {
-      const sec = item.dataset.section;
-      const wasOpen = item.classList.contains('open');
-      document.querySelectorAll(`#guide-modal-body .guide-item[data-section="${sec}"]`).forEach(i => i.classList.remove('open'));
-      if (!wasOpen) item.classList.add('open');
-    });
+  // Accordion expand / collapse — event delegation since body is dynamically rendered
+  document.getElementById('guide-modal-body').addEventListener('click', e => {
+    const item = e.target.closest('.guide-item');
+    if (!item) return;
+    const sec = item.dataset.section;
+    const wasOpen = item.classList.contains('open');
+    document.querySelectorAll(`#guide-modal-body .guide-item[data-section="${sec}"]`).forEach(i => i.classList.remove('open'));
+    if (!wasOpen) item.classList.add('open');
   });
 
   // Type filter buttons
