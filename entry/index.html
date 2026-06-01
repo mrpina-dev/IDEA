@@ -716,25 +716,6 @@ body::after {
 .wage-preview-name { font-size: 0.85rem; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .wage-preview-sec  { font-size: 0.56rem; color: var(--dim); letter-spacing: 0.07em; }
 .wage-preview-amt  { font-family: 'Orbitron', sans-serif; font-size: 0.72rem; font-weight: 700; color: var(--gold); white-space: nowrap; flex-shrink: 0; }
-/* ── Economy Rules screen ────────────────────────────── */
-.econ-tab-bar { display:flex; gap:0.45rem; padding:0.65rem 1.1rem; background:rgba(2,10,4,0.97); border-bottom:1px solid rgba(0,255,65,0.1); flex-shrink:0; }
-.econ-tab-btn { font-family:'Orbitron',sans-serif; font-size:0.5rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; background:rgba(0,0,0,0.3); border:1px solid rgba(74,122,82,0.35); border-radius:2px; color:var(--dim); padding:0 0.85rem; cursor:pointer; min-height:38px; transition:color 0.15s,border-color 0.15s,background 0.15s; }
-.econ-tab-btn.active { color:var(--gold); border-color:rgba(200,255,0,0.65); background:rgba(200,255,0,0.07); }
-.econ-tab-btn:not(.active):hover { border-color:rgba(200,255,0,0.35); color:var(--white); }
-.econ-reason-row { display:flex; align-items:center; gap:0.65rem; min-height:56px; background:var(--bg1); border-bottom:1px solid rgba(0,255,65,0.07); padding:0.6rem 1rem; transition:opacity 0.2s; }
-.econ-reason-row.inactive { opacity:0.38; }
-.econ-reason-text { flex:1; font-size:0.82rem; color:var(--white); line-height:1.35; }
-.econ-reason-freq { font-family:'Orbitron',sans-serif; font-size:0.52rem; font-weight:700; color:var(--dim); letter-spacing:0.08em; white-space:nowrap; flex-shrink:0; min-width:2.2rem; text-align:right; }
-.econ-reason-freq.used { color:var(--gold); }
-.econ-custom-badge { font-family:'Orbitron',sans-serif; font-size:0.38rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--cyan); border:1px solid rgba(0,240,255,0.35); border-radius:2px; padding:0.12rem 0.38rem; flex-shrink:0; }
-.econ-btn { font-family:'Orbitron',sans-serif; font-size:0.42rem; letter-spacing:0.1em; text-transform:uppercase; background:none; border:1px solid rgba(74,122,82,0.3); border-radius:2px; color:var(--dim); padding:0 0.55rem; cursor:pointer; min-height:32px; flex-shrink:0; transition:color 0.15s,border-color 0.15s; }
-.econ-btn:hover { color:var(--white); border-color:rgba(74,122,82,0.6); }
-.econ-btn.edit:hover { color:var(--gold); border-color:rgba(200,255,0,0.5); }
-.econ-btn.del:hover  { color:var(--red);  border-color:rgba(255,68,68,0.4); }
-.econ-btn.tog-on  { color:var(--green); border-color:rgba(0,255,65,0.4); }
-.econ-btn.tog-off { color:var(--dim); }
-.econ-add-btn { width:100%; min-height:48px; font-family:'Orbitron',sans-serif; font-size:0.6rem; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; background:none; border:1px dashed rgba(0,255,65,0.22); border-radius:3px; color:var(--dim); cursor:pointer; margin-top:0.75rem; transition:color 0.2s,border-color 0.2s; }
-.econ-add-btn:hover { color:var(--green); border-color:rgba(0,255,65,0.5); }
 .home-btn.amber { border-color:rgba(255,140,0,0.35); }
 .home-btn.amber .home-btn-label { color:var(--amber); }
 .home-btn.amber:hover { background:rgba(255,140,0,0.05); border-color:rgba(255,140,0,0.65); }
@@ -924,13 +905,6 @@ body::after {
       <div class="home-btn-content">
         <span class="home-btn-label">Reasons</span>
         <span class="home-btn-sub">Add or retire award, fine, and purchase reasons</span>
-      </div>
-    </button>
-    <button class="home-btn amber" id="btn-economy">
-      <span class="home-btn-icon">&#10022;</span>
-      <div class="home-btn-content">
-        <span class="home-btn-label">Economy Rules</span>
-        <span class="home-btn-sub">Manage award, fine, and purchase reasons</span>
       </div>
     </button>
   </div>
@@ -1624,28 +1598,6 @@ body::after {
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
-     SCREEN 18 — ECONOMY RULES
-════════════════════════════════════════ -->
-<div class="screen" id="s-economy">
-  <div class="app-header">
-    <div class="logo-wrap">
-      <span class="logo">IDEA.</span>
-      <span class="logo-sub">Economy Rules</span>
-    </div>
-    <button class="back-btn" id="economy-back">&#8592; Back</button>
-  </div>
-  <div class="econ-tab-bar" id="econ-tab-bar">
-    <button class="econ-tab-btn active" data-econ-tab="Award">Award</button>
-    <button class="econ-tab-btn" data-econ-tab="Fine">Fine</button>
-    <button class="econ-tab-btn" data-econ-tab="Purchase">Purchase</button>
-    <button class="econ-tab-btn" data-econ-tab="Payout">Payout</button>
-  </div>
-  <div class="screen-body" id="econ-body">
-    <div id="econ-list"></div>
-    <button class="econ-add-btn" id="econ-add-btn">+ Add Reason</button>
-  </div>
-</div>
 
 <script>
 'use strict';
@@ -1665,15 +1617,9 @@ let txnLogData    = [];
 let txnLogLoaded  = false;
 let activeTxnEdit = null;
 
-// ── Economy Rules state ───────────────────────────────
-const REASONS_CUSTOM_KEY  = 'idea-entry-reasons-custom';
-const REASONS_REMOVED_KEY = 'idea-entry-reasons-removed';
-const HOME_FREQS_KEY      = 'idea-entry-home-freqs';
+const HOME_FREQS_KEY = 'idea-entry-home-freqs';
 
-let customReasons  = { Award: [], Fine: [], Purchase: [], Payout: [] };
-let removedReasons = { Award: [], Fine: [], Purchase: [], Payout: [] };
-let homeFreqs      = {};
-let econActiveTab  = 'Award';
+let homeFreqs = {};
 
 const STUDENTS_KEY    = 'idea-entry-students';
 const STUDENTS_TS_KEY = 'idea-entry-students-ts';
@@ -1844,30 +1790,11 @@ PRESETS['Award - Held'] = PRESETS.Award;
 PRESETS['Fine - Owed']  = PRESETS.Fine;
 
 // ── Reason override helpers ───────────────────────────
-function loadReasonOverrides() {
-  try {
-    const c = localStorage.getItem(REASONS_CUSTOM_KEY);
-    const r = localStorage.getItem(REASONS_REMOVED_KEY);
-    if (c) customReasons  = { Award:[], Fine:[], Purchase:[], Payout:[], ...JSON.parse(c) };
-    if (r) removedReasons = { Award:[], Fine:[], Purchase:[], Payout:[], ...JSON.parse(r) };
-  } catch(_) {}
-}
-
-function saveReasonOverrides() {
-  try {
-    localStorage.setItem(REASONS_CUSTOM_KEY,  JSON.stringify(customReasons));
-    localStorage.setItem(REASONS_REMOVED_KEY, JSON.stringify(removedReasons));
-  } catch(_) {}
-}
-
 function getEffectiveReasons(type) {
   const baseKey = type === 'Award - Held' ? 'Award'
                 : type === 'Fine - Owed'  ? 'Fine'
                 : type;
-  const base    = reasonsFor(baseKey);
-  const custom  = customReasons[baseKey] || [];
-  const removed = removedReasons[baseKey] || [];
-  return [...base, ...custom].filter(r => !removed.includes(r));
+  return reasonsFor(baseKey);
 }
 
 // ── Home button frequency ─────────────────────────────
@@ -4803,133 +4730,8 @@ document.getElementById('reason-edit-reactivate').addEventListener('click', asyn
   finally { hideLoading(); }
 });
 
-// ── Economy Rules screen ──────────────────────────────
-document.getElementById('btn-economy').addEventListener('click', () => {
-  bumpHomeFreq('btn-economy');
-  loadFreqsCache();
-  econActiveTab = 'Award';
-  document.querySelectorAll('.econ-tab-btn').forEach(b =>
-    b.classList.toggle('active', b.dataset.econTab === econActiveTab));
-  renderEconList();
-  showScreen('s-economy');
-});
-
-document.getElementById('economy-back').addEventListener('click', () => showScreen('s-home'));
-
-document.querySelectorAll('.econ-tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    econActiveTab = btn.dataset.econTab;
-    document.querySelectorAll('.econ-tab-btn').forEach(b =>
-      b.classList.toggle('active', b.dataset.econTab === econActiveTab));
-    renderEconList();
-  });
-});
-
-function renderEconList() {
-  const type    = econActiveTab;
-  const base    = REASONS[type] || [];
-  const custom  = customReasons[type]  || [];
-  const removed = removedReasons[type] || [];
-  const all     = [
-    ...base.map(r   => ({ r, isCustom: false })),
-    ...custom.map(r => ({ r, isCustom: true  })),
-  ];
-
-  const listEl = document.getElementById('econ-list');
-  if (!all.length) {
-    listEl.innerHTML = '<div class="manage-empty">No reasons defined.</div>';
-    return;
-  }
-
-  listEl.innerHTML = all.map(({ r, isCustom }) => {
-    const inactive = removed.includes(r);
-    const freq     = reasonFreqs[type + '::' + r] || 0;
-    return `<div class="econ-reason-row${inactive ? ' inactive' : ''}">
-      <div class="econ-reason-text">${esc(r)}</div>
-      <span class="econ-reason-freq${freq > 0 ? ' used' : ''}">${freq > 0 ? freq + 'x' : ''}</span>
-      ${isCustom ? '<span class="econ-custom-badge">custom</span>' : ''}
-      <button class="econ-btn edit" data-action="edit" data-reason="${esc(r)}" data-custom="${isCustom}">Edit</button>
-      <button class="econ-btn ${inactive ? 'tog-off' : 'tog-on'}" data-action="toggle" data-reason="${esc(r)}">${inactive ? 'Off' : 'On'}</button>
-      ${isCustom ? `<button class="econ-btn del" data-action="del" data-reason="${esc(r)}">Del</button>` : ''}
-    </div>`;
-  }).join('');
-
-  listEl.querySelectorAll('[data-action]').forEach(el => {
-    el.addEventListener('click', ev => {
-      ev.stopPropagation();
-      const action   = el.dataset.action;
-      const reason   = el.dataset.reason;
-      const isCustom = el.dataset.custom === 'true';
-      if (action === 'toggle') econToggle(reason);
-      else if (action === 'edit') econEdit(reason, isCustom);
-      else if (action === 'del')  econDelete(reason);
-    });
-  });
-}
-
-function econToggle(reason) {
-  const type    = econActiveTab;
-  const removed = removedReasons[type] || [];
-  const idx     = removed.indexOf(reason);
-  if (idx >= 0) removed.splice(idx, 1);
-  else removed.push(reason);
-  removedReasons[type] = removed;
-  saveReasonOverrides();
-  renderEconList();
-}
-
-function econEdit(reason, isCustom) {
-  if (!isCustom) {
-    toast('Built-in reasons can\'t be renamed -- toggle it off and add a new one instead', 'error');
-    return;
-  }
-  promptConfirm('Edit Reason', 'Update reason text:', '', newVal => {
-    if (!newVal || newVal === reason) return;
-    const type   = econActiveTab;
-    const custom = customReasons[type] || [];
-    const idx    = custom.indexOf(reason);
-    if (idx >= 0) custom[idx] = newVal;
-    customReasons[type] = custom;
-    const removed = removedReasons[type] || [];
-    const ridx = removed.indexOf(reason);
-    if (ridx >= 0) { removed[ridx] = newVal; removedReasons[type] = removed; }
-    saveReasonOverrides();
-    renderEconList();
-    toast('Reason updated ✓', 'success');
-  }, reason);
-}
-
-function econDelete(reason) {
-  confirm(
-    'Delete Reason',
-    `Remove "${reason}" from the ${econActiveTab} list? Past transactions are not affected.`,
-    () => {
-      const type    = econActiveTab;
-      customReasons[type]  = (customReasons[type]  || []).filter(r => r !== reason);
-      removedReasons[type] = (removedReasons[type] || []).filter(r => r !== reason);
-      saveReasonOverrides();
-      renderEconList();
-      toast('Reason removed', 'success');
-    }
-  );
-}
-
-document.getElementById('econ-add-btn').addEventListener('click', () => {
-  const type = econActiveTab;
-  promptConfirm(`Add ${type} Reason`, 'New reason text:', 'e.g. Exceptional Cleanup…', val => {
-    if (!val) return;
-    const existing = [...(REASONS[type] || []), ...(customReasons[type] || [])];
-    if (existing.includes(val)) { toast('Reason already exists', 'error'); return; }
-    customReasons[type] = [...(customReasons[type] || []), val];
-    saveReasonOverrides();
-    renderEconList();
-    toast('Reason added ✓', 'success');
-  });
-});
-
 // ── Boot ──────────────────────────────────────────────
 (function boot() {
-  loadReasonOverrides();
   loadHomeFreqs();
   const ts = localStorage.getItem(AUTH_KEY);
   if (ts && Date.now() - parseInt(ts, 10) < AUTH_TTL) {
