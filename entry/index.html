@@ -974,7 +974,7 @@ body::after {
     </div>
     <div id="physical-toggle" style="display:none; margin-top:0.75rem;">
       <label style="display:flex; align-items:center; gap:0.75rem; cursor:pointer; min-height:48px; padding:0.6rem 0.85rem; background:var(--bg1); border:1px solid rgba(0,255,65,0.15); border-radius:3px;">
-        <input type="checkbox" id="physical-check" checked style="width:22px; height:22px; accent-color:var(--green); cursor:pointer; flex-shrink:0;">
+        <input type="checkbox" id="physical-check" style="width:22px; height:22px; accent-color:var(--green); cursor:pointer; flex-shrink:0;">
         <div>
           <div id="physical-label-main" style="font-family:'Orbitron',sans-serif; font-size:0.65rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--green);">Physical coin given?</div>
           <div id="physical-label-sub" style="font-size:0.58rem; color:var(--dim); margin-top:0.15rem; letter-spacing:0.04em;">Uncheck if you cannot give the coin right now</div>
@@ -1013,7 +1013,7 @@ body::after {
     <button class="back-btn" id="payout-back">&#8592; Back</button>
   </div>
   <div class="screen-body">
-    <div class="step-label">Weekly Payout Check</div>
+    <div class="step-label">Coins Owed - Pay Period</div>
     <div class="payout-summary" id="payout-summary">Loading&hellip;</div>
     <div id="payout-content"></div>
   </div>
@@ -1154,7 +1154,7 @@ body::after {
     </div>
     <div style="margin-bottom:1.25rem;">
       <label style="display:flex;align-items:center;gap:0.75rem;cursor:pointer;min-height:48px;padding:0.6rem 0.85rem;background:var(--bg1);border:1px solid rgba(0,255,65,0.15);border-radius:3px;">
-        <input type="checkbox" id="complete-physical" checked style="width:22px;height:22px;accent-color:var(--green);cursor:pointer;flex-shrink:0;">
+        <input type="checkbox" id="complete-physical" style="width:22px;height:22px;accent-color:var(--green);cursor:pointer;flex-shrink:0;">
         <div>
           <div style="font-family:'Orbitron',sans-serif;font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--green);">Physical coin given?</div>
           <div style="font-size:0.58rem;color:var(--dim);margin-top:0.15rem;letter-spacing:0.04em;">Uncheck if you cannot give the coin right now</div>
@@ -1445,7 +1445,7 @@ body::after {
     <!-- Physical coin -->
     <div style="margin-bottom:1rem;">
       <label style="display:flex;align-items:center;gap:0.75rem;cursor:pointer;min-height:48px;padding:0.6rem 0.85rem;background:var(--bg1);border:1px solid rgba(0,255,65,0.15);border-radius:3px;">
-        <input type="checkbox" id="wage-physical" checked style="width:22px;height:22px;accent-color:var(--green);cursor:pointer;flex-shrink:0;">
+        <input type="checkbox" id="wage-physical" style="width:22px;height:22px;accent-color:var(--green);cursor:pointer;flex-shrink:0;">
         <div>
           <div style="font-family:'Orbitron',sans-serif;font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--green);">Physical coins given?</div>
         </div>
@@ -1959,38 +1959,63 @@ async function openPayoutScreen() {
 }
 
 const paidThisSession = new Set();
-let payoutGiveList = [];
+let payoutOwedList = [];
 
-function payStudentInternal(name) {
-  const raw = allStudents.find(s => smName(s) === name);
-  const wage = raw ? (parseFloat(smWage(raw)) || 1) : 1;
-  fetch(apiUrl({ action: 'logTransaction', name, type: 'Payout', reason: 'Coin Payout to Student', amount: wage }))
-    .catch(() => {});
-  if (raw) {
-    const balField = ['balance','Balance','coinBalance','coin_balance'].find(f => raw[f] !== undefined);
-    if (balField) raw[balField] = (parseFloat(raw[balField]) || 0) - wage;
+function renderPayout(data) {
+  paidThisSession.clear();
+  let owed = [];
+  if (data && Array.isArray(data.owed)) {
+    owed = data.owed.map(s => ({
+      name: getField(s,'name','Name') || '—',
+      sec:  getField(s,'section','Section') || '',
+      bank: parseFloat(getField(s,'bankBalance','bank_balance','BankBalance') || 0)
+    }));
   }
-  paidThisSession.add(name);
+  owed = owed.filter(s => s.bank > 0).sort((a,b) => a.name.localeCompare(b.name));
+  payoutOwedList = owed;
+
+  const summaryEl = document.getElementById('payout-summary');
+  const contentEl = document.getElementById('payout-content');
+
+  if (!owed.length) {
+    summaryEl.innerHTML = '<span style="color:var(--green)">All paid up - you do not owe any physical coins right now.</span>';
+    contentEl.innerHTML = '';
+    return;
+  }
+
+  const totalCoins = owed.reduce((sum, s) => sum + s.bank, 0);
+  summaryEl.innerHTML =
+    `<span style="color:var(--gold)">You owe physical coins to ${owed.length} student${owed.length!==1?'s':''}.</span><br>` +
+    `<span style="color:var(--dim)">Total: ${totalCoins} i&#162; across all students.</span>`;
+
+  contentEl.innerHTML =
+    `<div class="payout-sec-head give">Owed Coins <span class="payout-sec-count">(${owed.length})</span></div>` +
+    `<button class="payout-pay-all-btn" id="payout-pay-all-btn" onclick="handlePayAll()">Pay All (${owed.length}) Students</button>` +
+    owed.map(s => renderPayoutOwedRow(s)).join('');
 }
 
-function checkAllPaid() {
-  const allPaid = payoutGiveList.every(s => paidThisSession.has(s.name));
-  const btn = document.getElementById('payout-pay-all-btn');
-  if (btn && allPaid) { btn.textContent = 'All Paid ✓'; btn.disabled = true; }
-}
-
-function renderPayoutGiveRow(s) {
+function renderPayoutOwedRow(s) {
   const isPaid = paidThisSession.has(s.name);
   return `<div class="payout-row${isPaid ? ' paid' : ''}" id="payout-row-${CSS.escape(s.name)}">` +
     `<div style="display:flex;flex-direction:column;flex:1;min-width:0;">` +
     `<span style="color:var(--white)">${esc(s.name)}</span>` +
     (s.sec ? `<span style="font-size:0.65rem;color:var(--dim);letter-spacing:0.04em;">${esc(s.sec)}</span>` : '') +
     `</div>` +
-    `<span class="payout-bal pos" style="margin-right:0.65rem;">${Math.round(s.bal)} i&#162;</span>` +
+    `<span class="payout-bal pos" style="margin-right:0.65rem;">${Math.round(s.bank)} i&#162;</span>` +
     (isPaid
       ? `<span class="payout-paid-badge">PAID &#10003;</span>`
-      : `<button class="payout-pay-btn" data-student="${esc(s.name)}">PAY</button>`) +
+      : `<button class="payout-pay-btn" onclick="handlePayStudent(${JSON.stringify(s.name)})">PAY</button>`) +
     `</div>`;
+}
+
+function payStudentInternal(name) {
+  const s = payoutOwedList.find(x => x.name === name);
+  if (!s) return;
+  const amount = Math.round(s.bank);
+  if (amount <= 0) return;
+  fetch(apiUrl({ action: 'logTransaction', name, type: 'Payout', reason: 'Coin Payout to Student', amount }))
+    .catch(() => {});
+  paidThisSession.add(name);
 }
 
 function handlePayStudent(name) {
@@ -2006,7 +2031,7 @@ function handlePayStudent(name) {
 }
 
 function handlePayAll() {
-  const unpaid = payoutGiveList.filter(s => !paidThisSession.has(s.name));
+  const unpaid = payoutOwedList.filter(s => !paidThisSession.has(s.name));
   if (!unpaid.length) return;
   unpaid.forEach(s => {
     payStudentInternal(s.name);
@@ -2021,72 +2046,10 @@ function handlePayAll() {
   toast(`Payout logged for ${unpaid.length} student${unpaid.length !== 1 ? 's' : ''}`, 'success');
 }
 
-function renderPayout(data) {
-  paidThisSession.clear();
-  let give = [], wage = [];
-
-  if (Array.isArray(data)) {
-    data.forEach(s => {
-      const name = getField(s,'name','Name','Full Name','Student') || '—';
-      const sec  = getField(s,'section','Section','Class') || '';
-      const bal  = parseFloat(getField(s,'balance','Balance','coinBalance','coin_balance') || 0);
-      (bal < 0 ? wage : give).push({ name, sec, bal });
-    });
-  } else {
-    const raw = {
-      give: data.payOut || data.eligible || data.give || data.giveCoin || data.give_coin || [],
-      wage: data.wageOnly || data.debt || data.inDebt || data.wage_only || []
-    };
-    ['give','wage'].forEach(k => {
-      raw[k].forEach(s => {
-        const name = getField(s,'name','Name','Full Name','Student') || '—';
-        const sec  = getField(s,'section','Section','Class') || '';
-        const bal  = parseFloat(getField(s,'balance','Balance','coinBalance') || 0);
-        (k === 'give' ? give : wage).push({ name, sec, bal });
-      });
-    });
-  }
-
-  give.sort((a,b) => a.name.localeCompare(b.name));
-  wage.sort((a,b) => a.name.localeCompare(b.name));
-  payoutGiveList = give;
-
-  document.getElementById('payout-summary').innerHTML =
-    `<span style="color:var(--green)">${give.length} student${give.length!==1?'s':''} get a coin.</span><br>` +
-    `<span style="color:var(--red)">${wage.length} student${wage.length!==1?'s':''} in debt &mdash; wage only.</span>`;
-
-  const wageRows = wage.length
-    ? wage.map(s =>
-        `<div class="payout-row">` +
-        `<div style="display:flex;flex-direction:column;flex:1;min-width:0;">` +
-        `<span style="color:var(--white)">${esc(s.name)}</span>` +
-        (s.sec ? `<span style="font-size:0.65rem;color:var(--dim);letter-spacing:0.04em;">${esc(s.sec)}</span>` : '') +
-        `</div>` +
-        `<span class="payout-bal neg">${Math.round(s.bal)} i&#162;</span>` +
-        `</div>`
-      ).join('')
-    : '<div class="payout-none">None</div>';
-
-  const giveRowsHTML = give.length
-    ? give.map(s => renderPayoutGiveRow(s)).join('')
-    : '<div class="payout-none">None</div>';
-
-  const _pc = document.getElementById('payout-content');
-  _pc.replaceWith(_pc.cloneNode(false)); // remove stale listeners
-  const payoutContent = document.getElementById('payout-content');
-  payoutContent.innerHTML =
-    `<div class="payout-sec-head give">Give Coin <span class="payout-sec-count">(${give.length})</span></div>` +
-    (give.length ? `<button class="payout-pay-all-btn" id="payout-pay-all-btn">Pay All (${give.length}) Students</button>` : '') +
-    giveRowsHTML +
-    `<hr class="payout-divider">` +
-    `<div class="payout-sec-head debt">Wage Only <span class="payout-sec-count">(${wage.length})</span></div>` +
-    wageRows;
-
-  payoutContent.addEventListener('click', ev => {
-    const payBtn = ev.target.closest('.payout-pay-btn[data-student]');
-    if (payBtn) { handlePayStudent(payBtn.dataset.student); return; }
-    if (ev.target.closest('#payout-pay-all-btn')) handlePayAll();
-  });
+function checkAllPaid() {
+  const allPaid = payoutOwedList.every(s => paidThisSession.has(s.name));
+  const btn = document.getElementById('payout-pay-all-btn');
+  if (btn && allPaid) { btn.textContent = 'All Paid ✓'; btn.disabled = true; }
 }
 
 // ── Student Search ────────────────────────────────────
@@ -2421,7 +2384,7 @@ function resetLog() {
   document.getElementById('submit-btn').classList.remove('show');
   document.getElementById('submit-btn').disabled = true;
 
-  document.getElementById('physical-check').checked = true;
+  document.getElementById('physical-check').checked = false;
   document.getElementById('physical-toggle').style.display = 'none';
 
   // Scroll log body to top
@@ -2954,7 +2917,7 @@ function openContractComplete() {
 
   document.getElementById('complete-contract-name').textContent = name;
   document.getElementById('complete-contract-total').textContent = total + ' i¢';
-  document.getElementById('complete-physical').checked = true;
+  document.getElementById('complete-physical').checked = false;
 
   renderCompleteSplit();
   document.getElementById('detail-body').scrollTop = 0;
@@ -4242,7 +4205,7 @@ function openWageScreen() {
   wageAllSelected = true;
   wageSelectedSections.clear();
   document.getElementById('wage-override').value = '';
-  document.getElementById('wage-physical').checked = true;
+  document.getElementById('wage-physical').checked = false;
   buildWageFilterButtons();
   buildWagePreview();
   showScreen('s-wage');
