@@ -870,7 +870,7 @@ function endRun(){
 }
 
 /* leaderboard (local fallback + shared online board via Apps Script) */
-const API_URL='https://script.google.com/macros/s/AKfycbxFMp3q3BcQ4Lpwl_c4hqwzrDw0zi4AYhjxY0ieoZXWYYG1vb8nO6lZ0hoS18Co5o9_kA/exec'; // <-- paste the deployed Apps Script /exec URL between the quotes to enable the shared board
+const API_URL='https://script.google.com/macros/s/AKfycbxFMp3q3BcQ4Lpwl_c4hqwzrDw0zi4AYhjxY0ieoZXWYYG1vb8nO6lZ0hoS18Co5o9_kA/exec';
 let onlineBoard=null, runNonce='';
 function jsonp(url,cb){ const id='vcb_'+Math.random().toString(36).slice(2); let done=false;
   const s=document.createElement('script');
