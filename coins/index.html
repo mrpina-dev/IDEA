@@ -1341,6 +1341,23 @@ body::after {
 }
 .role-submit-btn:hover:not(:disabled) { background: rgba(0,240,255,0.14); box-shadow: 0 0 12px rgba(0,240,255,0.2); }
 .role-submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Role Application Questions ─────────────────────── */
+.role-questions-wrap { margin-top: 0.75rem; }
+.role-question-item { margin-bottom: 1.1rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(0,255,65,0.07); }
+.role-question-item:last-child { border-bottom: none; margin-bottom: 0; }
+.role-question-text { font-size: 0.72rem; color: var(--white); letter-spacing: 0.02em; line-height: 1.5; margin-bottom: 0.55rem; }
+.role-mc-options { display: flex; flex-direction: column; gap: 0.35rem; }
+.role-mc-label { display: flex; align-items: flex-start; gap: 0.6rem; cursor: pointer; padding: 0.45rem 0.65rem; border-radius: 3px; border: 1px solid rgba(74,122,82,0.22); background: var(--bg2); transition: border-color 0.15s, background 0.15s; }
+.role-mc-label:hover { border-color: rgba(0,240,255,0.35); background: rgba(0,240,255,0.04); }
+.role-mc-label:has(input:checked) { border-color: var(--cyan); background: rgba(0,240,255,0.07); }
+.role-mc-input { accent-color: var(--cyan); flex-shrink: 0; margin-top: 0.18rem; }
+.role-mc-text { font-size: 0.68rem; color: var(--white); line-height: 1.45; }
+.role-textarea { width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(74,122,82,0.3); border-radius: 2px; color: var(--white); font-family: 'Share Tech Mono', monospace; font-size: 0.68rem; padding: 0.5rem 0.75rem; outline: none; letter-spacing: 0.03em; resize: vertical; transition: border-color 0.2s; box-sizing: border-box; line-height: 1.5; }
+.role-textarea:focus { border-color: rgba(0,240,255,0.5); }
+.role-textarea::placeholder { color: var(--dim); }
+.role-textarea-hint { font-size: 0.54rem; color: var(--dim); letter-spacing: 0.06em; margin-top: 0.25rem; text-align: right; }
+
 .apply-role-btn {
   font-family: 'Orbitron', sans-serif; font-size: 0.54rem;
   font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
@@ -3027,12 +3044,14 @@ else canvas.style.display = 'none';
   const closeBtn  = document.getElementById('role-modal-close');
   const openBtn   = document.getElementById('apply-role-btn');
 
-  let selectedName = '';
-  let selectedRole = '';
+  let selectedName   = '';
+  let selectedRole   = '';
+  let applyQuestions = [];
 
   function openModal() {
-    selectedName = '';
-    selectedRole = '';
+    selectedName   = '';
+    selectedRole   = '';
+    applyQuestions = [];
     renderStep1();
     backdrop.classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -3068,6 +3087,7 @@ else canvas.style.display = 'none';
           '<div id="role-role-options" class="role-options"></div>' +
         '</div>' +
       '</div>' +
+      '<div id="role-questions-section"></div>' +
       '<div id="role-status-msg"></div>' +
       '<button class="role-submit-btn" id="role-submit-btn" disabled>Submit Application</button>';
 
@@ -3098,11 +3118,13 @@ else canvas.style.display = 'none';
   }
 
   function selectName(name) {
-    selectedName = name;
-    selectedRole = '';
+    selectedName   = name;
+    selectedRole   = '';
+    applyQuestions = [];
     const nameInput = document.getElementById('role-name-input');
     if (nameInput) nameInput.value = name;
     document.getElementById('role-name-options').innerHTML = '';
+    clearQuestions();
 
     const row = summaryData.find(r => (pick(r)('Name', 'Student', 'Full Name') || '').trim() === name);
     const section = row ? (pick(row)('Section', 'Class', 'Course') || '').trim() : '';
@@ -3143,10 +3165,85 @@ else canvas.style.display = 'none';
       btn.addEventListener('click', () => {
         roleOptions.querySelectorAll('.role-option').forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
-        selectedRole = btn.dataset.role;
-        submitBtn.disabled = false;
+        selectedRole   = btn.dataset.role;
+        applyQuestions = [];
+        clearQuestions();
+        loadQuestions(btn.dataset.role);
       });
     });
+  }
+
+  function clearQuestions() {
+    const qs = document.getElementById('role-questions-section');
+    if (qs) qs.innerHTML = '';
+    const submitBtn = document.getElementById('role-submit-btn');
+    if (submitBtn) submitBtn.disabled = true;
+  }
+
+  async function loadQuestions(role) {
+    const qs = document.getElementById('role-questions-section');
+    if (!qs) return;
+    qs.innerHTML = '<div style="color:var(--dim);font-size:0.68rem;padding:0.65rem 0;letter-spacing:0.04em;">Loading questions…</div>';
+    try {
+      const res  = await fetch(CONTRACTS_API + '?action=getRoleQuestions&role=' + encodeURIComponent(role) + '&_=' + Date.now(), { cache: 'no-store' });
+      const data = await res.json();
+      applyQuestions = Array.isArray(data) ? data : [];
+    } catch(e) {
+      applyQuestions = [];
+    }
+    if (selectedRole !== role) return;
+    renderQuestions();
+    checkSubmitReady();
+  }
+
+  function renderQuestions() {
+    const qs = document.getElementById('role-questions-section');
+    if (!qs) return;
+    if (!applyQuestions.length) { qs.innerHTML = ''; checkSubmitReady(); return; }
+    let html = '<div class="role-questions-wrap">';
+    applyQuestions.forEach((q, i) => {
+      html += '<div class="role-question-item">';
+      html += '<div class="role-question-text">' + escHtml(q.question || '') + '</div>';
+      if (q.type === 'MC') {
+        html += '<div class="role-mc-options">';
+        (q.options || []).forEach((opt, oi) => {
+          const id = 'rq_' + i + '_' + oi;
+          html +=
+            '<label class="role-mc-label" for="' + id + '">' +
+              '<input type="radio" name="rq_' + i + '" value="' + escHtml(opt) + '" id="' + id + '" class="role-mc-input">' +
+              '<span class="role-mc-text">' + escHtml(opt) + '</span>' +
+            '</label>';
+        });
+        html += '</div>';
+      } else {
+        html +=
+          '<textarea class="role-textarea" id="rq_free_' + i + '" maxlength="280" rows="3" placeholder="Your answer…"></textarea>' +
+          '<div class="role-textarea-hint">280 char max</div>';
+      }
+      html += '</div>';
+    });
+    html += '</div>';
+    qs.innerHTML = html;
+    qs.querySelectorAll('.role-mc-input').forEach(inp => inp.addEventListener('change', checkSubmitReady));
+    qs.querySelectorAll('.role-textarea').forEach(ta => ta.addEventListener('input', checkSubmitReady));
+  }
+
+  function checkSubmitReady() {
+    const submitBtn = document.getElementById('role-submit-btn');
+    if (!submitBtn) return;
+    if (!selectedName || !selectedRole || !applyQuestions.length) {
+      submitBtn.disabled = true;
+      return;
+    }
+    const allAnswered = applyQuestions.every((q, i) => {
+      if (q.type === 'MC') {
+        return !!document.querySelector('input[name="rq_' + i + '"]:checked');
+      } else {
+        const ta = document.getElementById('rq_free_' + i);
+        return ta && ta.value.trim().length > 0;
+      }
+    });
+    submitBtn.disabled = !allAnswered;
   }
 
   async function submitApplication() {
@@ -3156,9 +3253,19 @@ else canvas.style.display = 'none';
     submitBtn.disabled = true;
     submitBtn.textContent = 'Submitting…';
     try {
+      const answers = applyQuestions.map((q, i) => {
+        if (q.type === 'MC') {
+          const checked = document.querySelector('input[name="rq_' + i + '"]:checked');
+          return { answer: checked ? checked.value : '' };
+        } else {
+          const ta = document.getElementById('rq_free_' + i);
+          return { answer: ta ? ta.value.trim() : '' };
+        }
+      });
       const url = CONTRACTS_API +
         '?action=submitRoleApplication&student=' + encodeURIComponent(selectedName) +
-        '&role=' + encodeURIComponent(selectedRole);
+        '&role='    + encodeURIComponent(selectedRole) +
+        '&answers=' + encodeURIComponent(JSON.stringify(answers));
       const res  = await fetch(url, { cache: 'no-store' });
       const data = await res.json();
       if (data.success) {
