@@ -787,7 +787,7 @@ body::after {
 .drawer-txn-table .txn-date { font-size: 0.58rem; line-height: 1.25; white-space: nowrap; color: var(--dim); }
 .drawer-txn-table .txn-date .t { opacity: 0.65; }
 .drawer-txn-table .txn-amount { font-size: 0.62rem; }
-.drawer-txn-table .type-badge { display: inline-block; white-space: normal; overflow-wrap: anywhere; max-width: 100%; font-size: 0.4rem; letter-spacing: 0.04em; padding: 0.15rem 0.3rem; line-height: 1.15; }
+.drawer-txn-table .type-badge { display: inline-block; white-space: nowrap; font-size: 0.4rem; letter-spacing: 0.05em; padding: 0.18rem 0.38rem; line-height: 1.15; }
 .drawer-txn-table .txn-reason { white-space: normal; word-break: break-word; font-size: 0.62rem; line-height: 1.35; color: var(--dim); }
 
 /* ── QR Modal ───────────────────────────────────────── */
@@ -2294,6 +2294,7 @@ function renderDrawerTxns() {
     const isPos = ['award', 'award - held', 'payout'].includes(typeLower);
     const amtClass  = isPos ? 'positive' : typeLower === 'purchase' ? 'purchase' : 'negative';
     const amtPrefix = isPos ? '+' : '-';
+    const shortType = { 'award - held': 'HELD', 'fine - owed': 'OWED' }[typeLower] || t.type;
     const parts = String(t.date).split(' ');
     let dDate = parts[0] || String(t.date);
     const dTime = parts[1] || '';
@@ -2302,7 +2303,7 @@ function renderDrawerTxns() {
     html += '<tr>' +
       '<td class="txn-date">' + escHtml(dDate) + (dTime ? '<br><span class="t">' + escHtml(dTime) + '</span>' : '') + '</td>' +
       '<td class="txn-amount ' + amtClass + '">' + amtPrefix + fmtNum(Math.abs(t.amount)) + '</td>' +
-      '<td><span class="type-badge ' + typeBadgeClass(t.type) + '">' + escHtml(t.type) + '</span></td>' +
+      '<td><span class="type-badge ' + typeBadgeClass(t.type) + '" title="' + escHtml(t.type) + '">' + escHtml(shortType) + '</span></td>' +
       '<td class="txn-reason">' + escHtml(t.reason) + '</td>' +
       '</tr>';
   });

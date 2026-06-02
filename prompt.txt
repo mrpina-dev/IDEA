@@ -1,45 +1,36 @@
 ﻿Edit coins/index.html only. Make these three changes exactly. Do not reformat unrelated code.
 
-=== CHANGE 1: adjust drawer column widths ===
+=== CHANGE 1: compute a short label in renderDrawerTxns ===
 
 FIND:
 
-    '<colgroup><col style="width:60px"><col style="width:44px"><col style="width:64px"><col></colgroup>' +
-
-REPLACE with:
-
-    '<colgroup><col style="width:52px"><col style="width:40px"><col style="width:70px"><col></colgroup>' +
-
-=== CHANGE 2: shorten the date (drop the year) in renderDrawerTxns ===
-
-FIND:
-
+    const amtPrefix = isPos ? '+' : '-';
     const parts = String(t.date).split(' ');
-    const dDate = parts[0] || t.date;
-    const dTime = parts[1] || '';
 
 REPLACE with:
 
+    const amtPrefix = isPos ? '+' : '-';
+    const shortType = { 'award - held': 'HELD', 'fine - owed': 'OWED' }[typeLower] || t.type;
     const parts = String(t.date).split(' ');
-    let dDate = parts[0] || String(t.date);
-    const dTime = parts[1] || '';
-    const ymd = dDate.match(/^\d{4}-(\d{2}-\d{2})$/);
-    if (ymd) dDate = ymd[1];
 
-=== CHANGE 3: contain the badge and keep the date on one line per row ===
+=== CHANGE 2: render the short label with a full-name tooltip ===
 
 FIND:
 
-.drawer-txn-table .txn-date { font-size: 0.56rem; line-height: 1.3; white-space: normal; color: var(--dim); }
-.drawer-txn-table .txn-date .t { opacity: 0.65; }
-.drawer-txn-table .txn-amount { font-size: 0.62rem; }
-.drawer-txn-table .type-badge { white-space: normal; font-size: 0.42rem; }
+      '<td><span class="type-badge ' + typeBadgeClass(t.type) + '">' + escHtml(t.type) + '</span></td>' +
 
 REPLACE with:
 
-.drawer-txn-table .txn-date { font-size: 0.58rem; line-height: 1.25; white-space: nowrap; color: var(--dim); }
-.drawer-txn-table .txn-date .t { opacity: 0.65; }
-.drawer-txn-table .txn-amount { font-size: 0.62rem; }
+      '<td><span class="type-badge ' + typeBadgeClass(t.type) + '" title="' + escHtml(t.type) + '">' + escHtml(shortType) + '</span></td>' +
+
+=== CHANGE 3: stop the badge from wrapping ===
+
+FIND:
+
 .drawer-txn-table .type-badge { display: inline-block; white-space: normal; overflow-wrap: anywhere; max-width: 100%; font-size: 0.4rem; letter-spacing: 0.04em; padding: 0.15rem 0.3rem; line-height: 1.15; }
 
-Commit with message "fix: drawer date format and badge containment to stop overlap" and push.
+REPLACE with:
+
+.drawer-txn-table .type-badge { display: inline-block; white-space: nowrap; font-size: 0.4rem; letter-spacing: 0.05em; padding: 0.18rem 0.38rem; line-height: 1.15; }
+
+Commit with message "fix: short single-line drawer type badges for held and owed" and push.
