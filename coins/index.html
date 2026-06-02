@@ -1696,6 +1696,7 @@ let txnDateFrom = '';
 let txnDateTo = '';
 let loaded = false;
 let rolesData = [];
+let studentRoleMap = {};
 
 // ── CSV Parsing ──────────────────────────────────────
 function parseCSVRow(line) {
@@ -1834,6 +1835,12 @@ async function fetchRolesData() {
     rolesData = Array.isArray(data) ? data : [];
     if (loaded) renderLeaderboard();
   } catch(_) {}
+}
+
+function weeklyPayFor(wName) {
+  const wRow = summaryData.find(r => (pick(r)('Name', 'Student', 'Full Name') || '').trim() === wName);
+  const base = wRow ? (parseFloat(pick(wRow)('Weekly Wage', 'Wage', 'Base Wage', 'Weekly Pay') || 0)) : 0;
+  return base + (studentRoleMap[wName] ? 1 : 0);
 }
 
 function renderGuideModal() {
@@ -2065,7 +2072,7 @@ function renderLeaderboard() {
   });
 
   // ── Role / eating-pass maps ───────────────────────────
-  const studentRoleMap = {};
+  studentRoleMap = {};
   rolesData.forEach(sec => {
     (sec.roles || []).forEach(role => {
       (role.holders || []).forEach(hName => { studentRoleMap[hName] = role.role; });
@@ -2084,11 +2091,6 @@ function renderLeaderboard() {
       eatingPassMap[rName] = 'Basic';
     }
   });
-  function weeklyPayFor(wName) {
-    const wRow = summaryData.find(r => (pick(r)('Name', 'Student', 'Full Name') || '').trim() === wName);
-    const base = wRow ? (parseFloat(pick(wRow)('Weekly Wage', 'Wage', 'Base Wage', 'Weekly Pay') || 0)) : 0;
-    return base + (studentRoleMap[wName] ? 1 : 0);
-  }
 
   grid.innerHTML = '';
 
@@ -2134,10 +2136,6 @@ function renderLeaderboard() {
       : passType === 'Basic' ? '<span class="pass-badge-basic">BASIC PASS</span>' : '';
     const badgesHtml = (roleBadgeHtml || passBadgeHtml)
       ? '<div class="card-badges">' + roleBadgeHtml + passBadgeHtml + '</div>' : '';
-    const wPay = weeklyPayFor(name);
-    const payMetaHtml = wPay > 0
-      ? '<div class="coin-meta-item"><span class="coin-meta-label">Pay</span><span class="coin-meta-value" style="color:var(--teal)">' + wPay + ' i¢/wk</span></div>' : '';
-
     card.innerHTML =
       (i === 0 ? '<div class="shimmer-sweep"></div>' : '') +
       '<div class="coin-rank">' + escHtml(rankLabel) + '</div>' +
@@ -2155,7 +2153,6 @@ function renderLeaderboard() {
         (fines > 0 ? '<div class="coin-meta-item"><span class="coin-meta-label">Net Awards</span><span class="coin-meta-value" style="color:var(--green)">+' + fmtNum(awarded) + '</span></div>' : '') +
         (fines > 0 ? '<div class="coin-meta-item"><span class="coin-meta-label">Net Fines</span><span class="coin-meta-value" style="color:var(--red)">-' + fmtNum(fines) + '</span></div>' : '') +
         (spent > 0 ? '<div class="coin-meta-item"><span class="coin-meta-label">Net Spent</span><span class="coin-meta-value" style="color:var(--amber)">-' + fmtNum(spent) + '</span></div>' : '') +
-        payMetaHtml +
       '</div>';
 
     card.addEventListener('click', () => openDrawer(row));
@@ -2202,6 +2199,9 @@ function openDrawer(row) {
     statsHtml += drawerStatHtml('Bank Bal', fmtNum(bankBal) + ' i¢', 'var(--cyan)');
   if (debt > 0)
     statsHtml += drawerStatHtml('Debt', fmtNum(debt), 'var(--red)');
+  const wPay = weeklyPayFor(name);
+  if (wPay > 0)
+    statsHtml += drawerStatHtml('Weekly Pay', wPay + ' i¢/wk', 'var(--teal)');
   document.getElementById('drawer-stats').innerHTML = statsHtml;
 
   const studentTxns = txnData.filter(r =>
