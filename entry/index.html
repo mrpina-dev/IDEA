@@ -907,6 +907,13 @@ body::after {
         <span class="home-btn-sub">Add or retire award, fine, and purchase reasons</span>
       </div>
     </button>
+    <button class="home-btn cyan" id="btn-roles">
+      <span class="home-btn-icon">&#9733;</span>
+      <div class="home-btn-content">
+        <span class="home-btn-label">Roles</span>
+        <span class="home-btn-sub">Assign roles, review applications, set windows</span>
+      </div>
+    </button>
   </div>
 </div>
 
@@ -1453,6 +1460,21 @@ body::after {
       <button class="action-btn red" id="reason-edit-deactivate" style="display:none;">Retire Reason</button>
       <button class="action-btn green" id="reason-edit-reactivate" style="display:none;">Reactivate Reason</button>
     </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN — ROLES
+════════════════════════════════════════ -->
+<div class="screen" id="s-roles">
+  <div class="app-header">
+    <div class="logo-wrap"><span class="logo">IDEA.</span><span class="logo-sub">Roles</span></div>
+    <button class="back-btn" id="roles-back">&#8592; Back</button>
+  </div>
+  <div class="screen-body" id="roles-body">
+    <div id="roles-pending"></div>
+    <div id="roles-windows"></div>
+    <div id="roles-holders"></div>
   </div>
 </div>
 
@@ -4729,6 +4751,162 @@ document.getElementById('reason-edit-reactivate').addEventListener('click', asyn
   } catch(e) { toast('Network error', 'error'); }
   finally { hideLoading(); }
 });
+
+// ── Roles screen ─────────────────────────────────────
+let rolesScreenRoles   = [];
+let rolesScreenApps    = [];
+let rolesScreenHolders = [];
+
+document.getElementById('btn-roles').addEventListener('click', openRolesScreen);
+document.getElementById('roles-back').addEventListener('click', () => showScreen('s-home'));
+
+async function openRolesScreen() {
+  bumpHomeFreq('btn-roles');
+  showLoading('Loading roles…');
+  try { await refreshRolesScreen(); }
+  catch (e) { hideLoading(); toast('Failed to load roles', 'error'); return; }
+  hideLoading();
+  showScreen('s-roles');
+}
+
+async function refreshRolesScreen() {
+  const bust = '&_=' + Date.now();
+  const [rolesRes, appsRes, holdersRes] = await Promise.all([
+    fetch(API + '?action=getRoles'            + bust, { cache: 'no-store' }).then(r => r.json()),
+    fetch(API + '?action=getRoleApplications' + bust, { cache: 'no-store' }).then(r => r.json()),
+    fetch(API + '?action=getRoleHolders'      + bust, { cache: 'no-store' }).then(r => r.json())
+  ]);
+  rolesScreenRoles   = Array.isArray(rolesRes)    ? rolesRes    : [];
+  rolesScreenApps    = Array.isArray(appsRes)     ? appsRes     : [];
+  rolesScreenHolders = Array.isArray(holdersRes)  ? holdersRes  : [];
+  renderRolesPending();
+  renderRolesWindows();
+  renderRolesHolders();
+}
+
+function renderRolesPending() {
+  const pending = rolesScreenApps.filter(a => String(getField(a,'status','Status')).toLowerCase() === 'pending');
+  let html = '<div class="section-group-head">Pending Applications' + (pending.length ? ' (' + pending.length + ')' : '') + '</div>';
+  if (!pending.length) {
+    html += '<div class="manage-empty">No pending applications.</div>';
+  } else {
+    html += pending.map(a => {
+      const row     = getField(a, 'row', 'Row');
+      const student = getField(a, 'student', 'Student');
+      const role    = getField(a, 'role', 'Role');
+      const section = getField(a, 'section', 'Section');
+      return `<div class="manage-row">
+        <div class="manage-row-left">
+          <div class="manage-row-name">${esc(student)}</div>
+          <div class="manage-row-sub">${esc(role)} &middot; ${esc(section)}</div>
+        </div>
+        <div class="manage-row-right" style="display:flex;gap:0.4rem;">
+          <button class="action-btn green" style="padding:0.4rem 0.8rem;margin:0;" onclick="handleSelectApplicant(${row})">Select</button>
+          <button class="action-btn red"   style="padding:0.4rem 0.8rem;margin:0;" onclick="handleRejectApplicant(${row})">Reject</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('roles-pending').innerHTML = html;
+}
+
+function renderRolesWindows() {
+  let html = '<div class="section-group-head">Application Windows</div>';
+  html += rolesScreenRoles.map(s => {
+    const sec  = getField(s, 'section', 'Section');
+    const open = getField(s, 'appsOpen', 'AppsOpen') === true;
+    return `<div class="manage-row">
+      <div class="manage-row-left"><div class="manage-row-name">${esc(sec)}</div></div>
+      <div class="manage-row-right">
+        <button class="action-btn ${open ? 'green' : 'gold'}" style="padding:0.4rem 0.9rem;margin:0;"
+          onclick="handleToggleWindow(${JSON.stringify(sec)}, ${open ? 'false' : 'true'})">
+          ${open ? 'OPEN' : 'CLOSED'}
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('roles-windows').innerHTML = html;
+}
+
+function renderRolesHolders() {
+  let html = '<div class="section-group-head">Current Holders</div>';
+  rolesScreenRoles.forEach(s => {
+    const sec   = getField(s, 'section', 'Section');
+    const roles = getField(s, 'roles', 'Roles') || [];
+    html += `<div style="margin:0.6rem 0 0.2rem;color:var(--cyan);font-family:'Share Tech Mono',monospace;letter-spacing:0.05em;">${esc(sec)}</div>`;
+    roles.forEach(r => {
+      const role    = getField(r, 'role', 'Role');
+      const cap     = getField(r, 'capacity', 'Capacity') || 0;
+      const open    = getField(r, 'open', 'Open') || 0;
+      const holders = getField(r, 'holders', 'Holders') || [];
+      html += `<div style="font-size:0.8rem;color:var(--dim);margin:0.3rem 0 0.15rem;">${esc(role)} — ${holders.length}/${cap} filled${open > 0 ? ', ' + open + ' open' : ''}</div>`;
+      if (!holders.length) {
+        html += `<div style="font-size:0.75rem;color:var(--dim);opacity:0.6;margin-left:0.5rem;">none</div>`;
+      } else {
+        holders.forEach(name => {
+          const h    = rolesScreenHolders.find(x =>
+            getField(x,'student','Student') === name &&
+            getField(x,'section','Section') === sec  &&
+            getField(x,'role','Role')       === role);
+          const hRow = h ? getField(h, 'row', 'Row') : null;
+          html += `<div class="manage-row">
+            <div class="manage-row-left"><div class="manage-row-name" style="font-size:0.85rem;">${esc(name)}</div></div>
+            <div class="manage-row-right">
+              ${hRow ? `<button class="action-btn red" style="padding:0.35rem 0.8rem;margin:0;" onclick="handleRetireHolder(${hRow}, ${JSON.stringify(name)})">Retire</button>` : ''}
+            </div>
+          </div>`;
+        });
+      }
+    });
+  });
+  document.getElementById('roles-holders').innerHTML = html;
+}
+
+async function handleSelectApplicant(row) {
+  showLoading('Assigning…');
+  try {
+    const res  = await fetch(apiUrl({ action: 'selectRoleApplicant', row }));
+    const data = await res.json();
+    if (data && data.success) { toast('Role assigned ✓', 'success'); await refreshRolesScreen(); }
+    else { toast(data && data.error ? data.error : 'Error', 'error'); }
+  } catch(e) { toast('Network error', 'error'); }
+  finally { hideLoading(); }
+}
+
+async function handleRejectApplicant(row) {
+  showLoading('Rejecting…');
+  try {
+    const res  = await fetch(apiUrl({ action: 'rejectRoleApplication', row }));
+    const data = await res.json();
+    if (data && data.success) { toast('Application rejected', 'success'); await refreshRolesScreen(); }
+    else { toast(data && data.error ? data.error : 'Error', 'error'); }
+  } catch(e) { toast('Network error', 'error'); }
+  finally { hideLoading(); }
+}
+
+function handleRetireHolder(row, name) {
+  confirm('Retire Role', 'Remove ' + name + ' from their role? This reopens the slot for applications.', async () => {
+    showLoading('Retiring…');
+    try {
+      const res  = await fetch(apiUrl({ action: 'retireRole', row }));
+      const data = await res.json();
+      if (data && data.success) { toast('Role retired', 'success'); await refreshRolesScreen(); }
+      else { toast(data && data.error ? data.error : 'Error', 'error'); }
+    } catch(e) { toast('Network error', 'error'); }
+    finally { hideLoading(); }
+  });
+}
+
+async function handleToggleWindow(section, open) {
+  showLoading(open === 'true' ? 'Opening…' : 'Closing…');
+  try {
+    const res  = await fetch(apiUrl({ action: 'setSectionAppsOpen', section, open }));
+    const data = await res.json();
+    if (data && data.success) { toast('Window updated', 'success'); await refreshRolesScreen(); }
+    else { toast(data && data.error ? data.error : 'Error', 'error'); }
+  } catch(e) { toast('Network error', 'error'); }
+  finally { hideLoading(); }
+}
 
 // ── Boot ──────────────────────────────────────────────
 (function boot() {
