@@ -272,6 +272,28 @@ body::after {
 .reason-item:last-child { border-bottom: none; }
 .reason-item:hover, .reason-item:active { background: rgba(0,255,65,0.05); }
 .reason-item.sel { background: rgba(0,255,65,0.09); border-left: 3px solid var(--green); padding-left: calc(0.85rem - 3px); }
+.reason-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.5rem; }
+.reason-chip {
+  font-family: 'Share Tech Mono', monospace; font-size: 0.72rem;
+  background: rgba(0,0,0,0.3); border: 1px solid rgba(0,255,65,0.3); border-radius: 3px;
+  color: var(--white); padding: 0.5rem 0.7rem; min-height: 44px; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 0.4rem; letter-spacing: 0.02em;
+  transition: background 0.15s, border-color 0.15s;
+}
+.reason-chip:hover, .reason-chip:active { background: rgba(0,255,65,0.06); border-color: rgba(0,255,65,0.55); }
+.reason-chip.sel { background: rgba(0,255,65,0.12); border-color: var(--green); color: var(--green); }
+.reason-chip.last { border-color: rgba(200,255,0,0.5); }
+.reason-chip.last.sel { border-color: var(--gold); }
+.reason-chip-tag {
+  font-family: 'Orbitron', sans-serif; font-size: 0.42rem; letter-spacing: 0.12em;
+  color: var(--gold); border: 1px solid rgba(200,255,0,0.5); border-radius: 2px; padding: 0.05rem 0.3rem;
+}
+.reason-group-head {
+  font-family: 'Orbitron', sans-serif; font-size: 0.46rem; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--dim);
+  padding: 0.55rem 0.85rem 0.3rem; border-bottom: 1px solid rgba(0,255,65,0.05);
+  background: var(--bg1); position: sticky; top: 0; z-index: 1;
+}
 
 /* ── Amount ──────────────────────────────── */
 .amount-wrap { margin-bottom: 0.25rem; }
@@ -973,6 +995,7 @@ body::after {
     <!-- Step 3: Reason -->
     <div class="step-label" id="lbl-reason" style="display:none">03 &mdash; Reason</div>
     <div class="reason-wrap hidden" id="reason-section">
+      <div class="reason-chips" id="reason-chips"></div>
       <input type="search" class="reason-search" id="reason-search" placeholder="Filter reasons..." autocomplete="off">
       <div class="reason-list" id="reason-list"></div>
     </div>
@@ -1673,6 +1696,38 @@ function fetchFreqs() {
           localStorage.setItem(FREQS_KEY,    JSON.stringify(data));
           localStorage.setItem(FREQS_TS_KEY, String(Date.now()));
         } catch (_) {}
+        maybeRebuildReasons();
+      }
+    })
+    .catch(() => {});
+}
+
+let lastReasonsData = {};
+const LASTREASONS_KEY    = 'idea-entry-lastreasons';
+const LASTREASONS_TS_KEY = 'idea-entry-lastreasons-ts';
+const LASTREASONS_TTL    = 5 * 60 * 1000;
+
+function loadLastReasonsCache() {
+  try {
+    const ts  = localStorage.getItem(LASTREASONS_TS_KEY);
+    const raw = localStorage.getItem(LASTREASONS_KEY);
+    if (ts && raw && Date.now() - parseInt(ts, 10) < LASTREASONS_TTL) {
+      lastReasonsData = JSON.parse(raw);
+    }
+  } catch (_) {}
+}
+
+function fetchLastReasons() {
+  fetch(apiUrl({ action: 'lastReasons' }))
+    .then(r => r.json())
+    .then(data => {
+      if (data && typeof data === 'object' && !data.status) {
+        lastReasonsData = data;
+        try {
+          localStorage.setItem(LASTREASONS_KEY,    JSON.stringify(data));
+          localStorage.setItem(LASTREASONS_TS_KEY, String(Date.now()));
+        } catch (_) {}
+        maybeRebuildReasons();
       }
     })
     .catch(() => {});
@@ -1972,6 +2027,8 @@ document.getElementById('btn-log-txn').addEventListener('click', async () => {
   if (!await requireStudents()) return;
   loadFreqsCache();
   fetchFreqs();
+  loadLastReasonsCache();
+  fetchLastReasons();
   fetchReasons();
   showScreen('s-log');
   document.getElementById('student-search').focus();
@@ -2256,36 +2313,125 @@ function clearTypeDown() {
 }
 
 // ── Reason ────────────────────────────────────────────
+function baseTypeOf(type) {
+  if (type === 'Award - Held') return 'Award';
+  if (type === 'Fine - Owed')  return 'Fine';
+  return type;
+}
+
+const CATEGORY_ORDER = [
+  'Participation','Achievement','Contribution','Economy',
+  'Device & Distraction','Behavior','Shop & Cleanup','Theft & Mint',
+  'Food','Privileges','Printing','Class Perks'
+];
+
+function reasonObjsFor(type) {
+  const base = baseTypeOf(type);
+  if (Array.isArray(reasonsData) && reasonsData.length) {
+    const objs = reasonsData.filter(r => {
+      const active = r.active !== false && String(r.active).toLowerCase() !== 'no';
+      return active && getField(r, 'type', 'Type') === base;
+    }).map(r => ({
+      reason: getField(r, 'reason', 'Reason'),
+      category: getField(r, 'category', 'Category') || ''
+    })).filter(o => o.reason);
+    if (objs.length) return objs;
+  }
+  return (reasonsFor(base) || []).map(r => ({ reason: r, category: '' }));
+}
+
+function selectReason(r) {
+  selReason = r;
+  const sec = document.getElementById('reason-section');
+  sec.querySelectorAll('.reason-item').forEach(i => i.classList.toggle('sel', i.dataset.r === r));
+  sec.querySelectorAll('.reason-chip').forEach(c => c.classList.toggle('sel', c.dataset.r === r));
+  clearAmountDown();
+  buildPresets();
+}
+
+function maybeRebuildReasons() {
+  const sec = document.getElementById('reason-section');
+  if (!selType || !sec || sec.classList.contains('hidden')) return;
+  const searchEl = document.getElementById('reason-search');
+  if (searchEl && searchEl.value.trim()) return;
+  buildReasonList();
+}
+
 function buildReasonList() {
-  const reasons = [...getEffectiveReasons(selType)].sort((a, b) => {
-    const fa = reasonFreqs[selType + '::' + a] || 0;
-    const fb = reasonFreqs[selType + '::' + b] || 0;
-    return fb - fa;
+  const type   = selType;
+  const objs   = reasonObjsFor(type);
+  const freqOf = r => reasonFreqs[type + '::' + r] || 0;
+  const valid  = new Set(objs.map(o => o.reason));
+
+  const lastReason = lastReasonsData[baseTypeOf(type)] || '';
+  const picks = [];
+  if (lastReason && valid.has(lastReason)) picks.push({ reason: lastReason, last: true });
+  [...objs].sort((a, b) => freqOf(b.reason) - freqOf(a.reason)).forEach(o => {
+    if (picks.length >= 6) return;
+    if (o.reason === lastReason) return;
+    if (freqOf(o.reason) <= 0) return;
+    picks.push({ reason: o.reason, last: false });
+  });
+
+  const chipsEl = document.getElementById('reason-chips');
+  chipsEl.innerHTML = picks.map(p =>
+    '<button class="reason-chip' + (p.last ? ' last' : '') + '" data-r="' + esc(p.reason) + '">' +
+      (p.last ? '<span class="reason-chip-tag">LAST</span>' : '') + esc(p.reason) +
+    '</button>'
+  ).join('');
+  chipsEl.style.display = picks.length ? '' : 'none';
+  chipsEl.querySelectorAll('.reason-chip').forEach(c =>
+    c.addEventListener('click', () => selectReason(c.dataset.r)));
+
+  const groups = {};
+  objs.forEach(o => {
+    const cat = o.category || 'Other';
+    (groups[cat] = groups[cat] || []).push(o.reason);
+  });
+  Object.keys(groups).forEach(cat =>
+    groups[cat].sort((a, b) => (freqOf(b) - freqOf(a)) || a.localeCompare(b)));
+
+  const cats = Object.keys(groups).sort((a, b) => {
+    if (a === 'Other') return 1;
+    if (b === 'Other') return -1;
+    const ia = CATEGORY_ORDER.indexOf(a), ib = CATEGORY_ORDER.indexOf(b);
+    if (ia === -1 && ib === -1) return a.localeCompare(b);
+    if (ia === -1) return 1;
+    if (ib === -1) return -1;
+    return ia - ib;
   });
 
   const list = document.getElementById('reason-list');
-  list.innerHTML = reasons.map(r =>
-    `<div class="reason-item" data-r="${esc(r)}">${esc(r)}</div>`
-  ).join('');
-  list.querySelectorAll('.reason-item').forEach(el => {
-    el.addEventListener('click', () => {
-      list.querySelectorAll('.reason-item').forEach(i => i.classList.remove('sel'));
-      el.classList.add('sel');
-      selReason = el.dataset.r;
-      clearAmountDown();
-      buildPresets();
-    });
-  });
+  const onlyOther = cats.length === 1 && cats[0] === 'Other';
+  list.innerHTML = cats.map(cat => {
+    const head = onlyOther ? '' : '<div class="reason-group-head">' + esc(cat) + '</div>';
+    const items = groups[cat].map(r =>
+      '<div class="reason-item" data-r="' + esc(r) + '">' + esc(r) + '</div>').join('');
+    return head + items;
+  }).join('');
+
+  list.querySelectorAll('.reason-item').forEach(el =>
+    el.addEventListener('click', () => selectReason(el.dataset.r)));
 
   const searchEl = document.getElementById('reason-search');
   searchEl.value = '';
   searchEl.oninput = () => {
     const q = searchEl.value.trim().toLowerCase();
+    chipsEl.style.display = (!q && picks.length) ? '' : 'none';
     let any = false;
     list.querySelectorAll('.reason-item').forEach(el => {
       const show = !q || el.textContent.toLowerCase().includes(q);
       el.style.display = show ? '' : 'none';
       if (show) any = true;
+    });
+    list.querySelectorAll('.reason-group-head').forEach(head => {
+      let vis = false;
+      let n = head.nextElementSibling;
+      while (n && n.classList.contains('reason-item')) {
+        if (n.style.display !== 'none') { vis = true; break; }
+        n = n.nextElementSibling;
+      }
+      head.style.display = vis ? '' : 'none';
     });
     let noMatch = list.querySelector('.reason-no-match');
     if (!any) {
@@ -2301,9 +2447,13 @@ function buildReasonList() {
     }
   };
 
+  if (selReason) {
+    list.querySelectorAll('.reason-item').forEach(i => i.classList.toggle('sel', i.dataset.r === selReason));
+    chipsEl.querySelectorAll('.reason-chip').forEach(c => c.classList.toggle('sel', c.dataset.r === selReason));
+  }
+
   document.getElementById('lbl-reason').style.display = '';
   document.getElementById('reason-section').classList.remove('hidden');
-  clearAmountDown();
 }
 
 function clearReasonDown() {
@@ -2458,6 +2608,7 @@ function resetLog() {
   document.getElementById('lbl-reason').style.display = 'none';
   document.getElementById('reason-section').classList.add('hidden');
   document.getElementById('reason-list').innerHTML = '';
+  var _rc = document.getElementById('reason-chips'); if (_rc) _rc.innerHTML = '';
 
   document.getElementById('lbl-amount').style.display = 'none';
   document.getElementById('amount-section').classList.add('hidden');
