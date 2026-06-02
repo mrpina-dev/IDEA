@@ -1,307 +1,126 @@
-﻿Edit entry/index.html only. Make these changes exactly. Do not reformat unrelated code.
+﻿Edit coins/index.html only. Make these three changes exactly. Do not reformat unrelated code.
 
-=== CHANGE 1: replace the fetchFreqs function and add last-used support ===
+=== CHANGE 1: replace the transaction-table build inside openDrawer ===
 
-FIND this exact function:
+In the function openDrawer, find the block that STARTS with this line:
 
-function fetchFreqs() {
-  fetch(apiUrl({ action: 'frequencies' }))
-    .then(r => r.json())
-    .then(data => {
-      if (data && typeof data === 'object') {
-        reasonFreqs = data;
-        try {
-          localStorage.setItem(FREQS_KEY,    JSON.stringify(data));
-          localStorage.setItem(FREQS_TS_KEY, String(Date.now()));
-        } catch (_) {}
-      }
-    })
-    .catch(() => {});
+  const studentTxns = txnData.filter(r =>
+
+and ENDS with this line:
+
+  document.getElementById('drawer-txn-body').innerHTML = txnHtml;
+
+Replace that entire block (inclusive of both lines above and everything between) with:
+
+  const studentTxns = txnData.filter(r =>
+    (pick(r)('Name', 'Student', 'Full Name') || '').trim().toLowerCase() === name.toLowerCase()
+  );
+  drawerTxns = studentTxns.map(r => {
+    const rp = pick(r);
+    const dateStr = rp('Date / Time', 'Date/Time', 'Date', 'Timestamp') || '';
+    return {
+      date:    dateStr || '-',
+      dateObj: dateStr ? new Date(dateStr) : new Date(0),
+      amount:  parseFloat(rp('Amount') || 0),
+      type:    rp('Type', 'Transaction Type') || '-',
+      reason:  rp('Reason', 'Description', 'Note') || '-'
+    };
+  });
+  drawerSortCol = 'date';
+  drawerSortDir = 'desc';
+  renderDrawerTxns();
+
+=== CHANGE 2: add the renderer and its state right after closeDrawer ===
+
+FIND this function:
+
+function closeDrawer() {
+  document.getElementById('student-drawer').classList.remove('open');
+  document.getElementById('drawer-overlay').classList.remove('open');
 }
-
-REPLACE it with:
-
-function fetchFreqs() {
-  fetch(apiUrl({ action: 'frequencies' }))
-    .then(r => r.json())
-    .then(data => {
-      if (data && typeof data === 'object') {
-        reasonFreqs = data;
-        try {
-          localStorage.setItem(FREQS_KEY,    JSON.stringify(data));
-          localStorage.setItem(FREQS_TS_KEY, String(Date.now()));
-        } catch (_) {}
-        maybeRebuildReasons();
-      }
-    })
-    .catch(() => {});
-}
-
-let lastReasonsData = {};
-const LASTREASONS_KEY    = 'idea-entry-lastreasons';
-const LASTREASONS_TS_KEY = 'idea-entry-lastreasons-ts';
-const LASTREASONS_TTL    = 5 * 60 * 1000;
-
-function loadLastReasonsCache() {
-  try {
-    const ts  = localStorage.getItem(LASTREASONS_TS_KEY);
-    const raw = localStorage.getItem(LASTREASONS_KEY);
-    if (ts && raw && Date.now() - parseInt(ts, 10) < LASTREASONS_TTL) {
-      lastReasonsData = JSON.parse(raw);
-    }
-  } catch (_) {}
-}
-
-function fetchLastReasons() {
-  fetch(apiUrl({ action: 'lastReasons' }))
-    .then(r => r.json())
-    .then(data => {
-      if (data && typeof data === 'object' && !data.status) {
-        lastReasonsData = data;
-        try {
-          localStorage.setItem(LASTREASONS_KEY,    JSON.stringify(data));
-          localStorage.setItem(LASTREASONS_TS_KEY, String(Date.now()));
-        } catch (_) {}
-        maybeRebuildReasons();
-      }
-    })
-    .catch(() => {});
-}
-
-=== CHANGE 2: load last-used when the log screen opens ===
-
-FIND:
-
-  loadFreqsCache();
-  fetchFreqs();
-  fetchReasons();
-  showScreen('s-log');
-
-REPLACE with:
-
-  loadFreqsCache();
-  fetchFreqs();
-  loadLastReasonsCache();
-  fetchLastReasons();
-  fetchReasons();
-  showScreen('s-log');
-
-=== CHANGE 3: add the chip row to the reason section markup ===
-
-FIND:
-
-  <div class="reason-wrap hidden" id="reason-section">
-    <input type="search" class="reason-search" id="reason-search" placeholder="Filter reasons..." autocomplete="off">
-    <div class="reason-list" id="reason-list"></div>
-  </div>
-
-REPLACE with:
-
-  <div class="reason-wrap hidden" id="reason-section">
-    <div class="reason-chips" id="reason-chips"></div>
-    <input type="search" class="reason-search" id="reason-search" placeholder="Filter reasons..." autocomplete="off">
-    <div class="reason-list" id="reason-list"></div>
-  </div>
-
-=== CHANGE 4: add CSS for chips and group headers ===
-
-FIND this line:
-
-.reason-item.sel { background: rgba(0,255,65,0.09); border-left: 3px solid var(--green); padding-left: calc(0.85rem - 3px); }
 
 INSERT immediately AFTER it:
 
-.reason-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.5rem; }
-.reason-chip {
-  font-family: 'Share Tech Mono', monospace; font-size: 0.72rem;
-  background: rgba(0,0,0,0.3); border: 1px solid rgba(0,255,65,0.3); border-radius: 3px;
-  color: var(--white); padding: 0.5rem 0.7rem; min-height: 44px; cursor: pointer;
-  display: inline-flex; align-items: center; gap: 0.4rem; letter-spacing: 0.02em;
-  transition: background 0.15s, border-color 0.15s;
-}
-.reason-chip:hover, .reason-chip:active { background: rgba(0,255,65,0.06); border-color: rgba(0,255,65,0.55); }
-.reason-chip.sel { background: rgba(0,255,65,0.12); border-color: var(--green); color: var(--green); }
-.reason-chip.last { border-color: rgba(200,255,0,0.5); }
-.reason-chip.last.sel { border-color: var(--gold); }
-.reason-chip-tag {
-  font-family: 'Orbitron', sans-serif; font-size: 0.42rem; letter-spacing: 0.12em;
-  color: var(--gold); border: 1px solid rgba(200,255,0,0.5); border-radius: 2px; padding: 0.05rem 0.3rem;
-}
-.reason-group-head {
-  font-family: 'Orbitron', sans-serif; font-size: 0.46rem; letter-spacing: 0.2em;
-  text-transform: uppercase; color: var(--dim);
-  padding: 0.55rem 0.85rem 0.3rem; border-bottom: 1px solid rgba(0,255,65,0.05);
-  background: var(--bg1); position: sticky; top: 0; z-index: 1;
-}
+let drawerTxns = [];
+let drawerSortCol = 'date';
+let drawerSortDir = 'desc';
 
-=== CHANGE 5: replace buildReasonList with a grouped + chip version and add helpers ===
-
-FIND the entire existing function that begins with:
-
-function buildReasonList() {
-
-and ends at its closing brace before:
-
-function clearReasonDown() {
-
-REPLACE that whole buildReasonList function with the following block (helpers included):
-
-function baseTypeOf(type) {
-  if (type === 'Award - Held') return 'Award';
-  if (type === 'Fine - Owed')  return 'Fine';
-  return type;
-}
-
-const CATEGORY_ORDER = [
-  'Participation','Achievement','Contribution','Economy',
-  'Device & Distraction','Behavior','Shop & Cleanup','Theft & Mint',
-  'Food','Privileges','Printing','Class Perks'
-];
-
-function reasonObjsFor(type) {
-  const base = baseTypeOf(type);
-  if (Array.isArray(reasonsData) && reasonsData.length) {
-    const objs = reasonsData.filter(r => {
-      const active = r.active !== false && String(r.active).toLowerCase() !== 'no';
-      return active && getField(r, 'type', 'Type') === base;
-    }).map(r => ({
-      reason: getField(r, 'reason', 'Reason'),
-      category: getField(r, 'category', 'Category') || ''
-    })).filter(o => o.reason);
-    if (objs.length) return objs;
+function renderDrawerTxns() {
+  const body = document.getElementById('drawer-txn-body');
+  if (!drawerTxns.length) {
+    body.innerHTML = '<div style="color:var(--dim);font-size:0.68rem;padding:1rem 0">No transactions found for this student.</div>';
+    return;
   }
-  return (reasonsFor(base) || []).map(r => ({ reason: r, category: '' }));
-}
-
-function selectReason(r) {
-  selReason = r;
-  const sec = document.getElementById('reason-section');
-  sec.querySelectorAll('.reason-item').forEach(i => i.classList.toggle('sel', i.dataset.r === r));
-  sec.querySelectorAll('.reason-chip').forEach(c => c.classList.toggle('sel', c.dataset.r === r));
-  clearAmountDown();
-  buildPresets();
-}
-
-function maybeRebuildReasons() {
-  const sec = document.getElementById('reason-section');
-  if (!selType || !sec || sec.classList.contains('hidden')) return;
-  const searchEl = document.getElementById('reason-search');
-  if (searchEl && searchEl.value.trim()) return;
-  buildReasonList();
-}
-
-function buildReasonList() {
-  const type   = selType;
-  const objs   = reasonObjsFor(type);
-  const freqOf = r => reasonFreqs[type + '::' + r] || 0;
-  const valid  = new Set(objs.map(o => o.reason));
-
-  const lastReason = lastReasonsData[baseTypeOf(type)] || '';
-  const picks = [];
-  if (lastReason && valid.has(lastReason)) picks.push({ reason: lastReason, last: true });
-  [...objs].sort((a, b) => freqOf(b.reason) - freqOf(a.reason)).forEach(o => {
-    if (picks.length >= 6) return;
-    if (o.reason === lastReason) return;
-    if (freqOf(o.reason) <= 0) return;
-    picks.push({ reason: o.reason, last: false });
-  });
-
-  const chipsEl = document.getElementById('reason-chips');
-  chipsEl.innerHTML = picks.map(p =>
-    '<button class="reason-chip' + (p.last ? ' last' : '') + '" data-r="' + esc(p.reason) + '">' +
-      (p.last ? '<span class="reason-chip-tag">LAST</span>' : '') + esc(p.reason) +
-    '</button>'
-  ).join('');
-  chipsEl.style.display = picks.length ? '' : 'none';
-  chipsEl.querySelectorAll('.reason-chip').forEach(c =>
-    c.addEventListener('click', () => selectReason(c.dataset.r)));
-
-  const groups = {};
-  objs.forEach(o => {
-    const cat = o.category || 'Other';
-    (groups[cat] = groups[cat] || []).push(o.reason);
-  });
-  Object.keys(groups).forEach(cat =>
-    groups[cat].sort((a, b) => (freqOf(b) - freqOf(a)) || a.localeCompare(b)));
-
-  const cats = Object.keys(groups).sort((a, b) => {
-    if (a === 'Other') return 1;
-    if (b === 'Other') return -1;
-    const ia = CATEGORY_ORDER.indexOf(a), ib = CATEGORY_ORDER.indexOf(b);
-    if (ia === -1 && ib === -1) return a.localeCompare(b);
-    if (ia === -1) return 1;
-    if (ib === -1) return -1;
-    return ia - ib;
-  });
-
-  const list = document.getElementById('reason-list');
-  const onlyOther = cats.length === 1 && cats[0] === 'Other';
-  list.innerHTML = cats.map(cat => {
-    const head = onlyOther ? '' : '<div class="reason-group-head">' + esc(cat) + '</div>';
-    const items = groups[cat].map(r =>
-      '<div class="reason-item" data-r="' + esc(r) + '">' + esc(r) + '</div>').join('');
-    return head + items;
-  }).join('');
-
-  list.querySelectorAll('.reason-item').forEach(el =>
-    el.addEventListener('click', () => selectReason(el.dataset.r)));
-
-  const searchEl = document.getElementById('reason-search');
-  searchEl.value = '';
-  searchEl.oninput = () => {
-    const q = searchEl.value.trim().toLowerCase();
-    chipsEl.style.display = (!q && picks.length) ? '' : 'none';
-    let any = false;
-    list.querySelectorAll('.reason-item').forEach(el => {
-      const show = !q || el.textContent.toLowerCase().includes(q);
-      el.style.display = show ? '' : 'none';
-      if (show) any = true;
-    });
-    list.querySelectorAll('.reason-group-head').forEach(head => {
-      let vis = false;
-      let n = head.nextElementSibling;
-      while (n && n.classList.contains('reason-item')) {
-        if (n.style.display !== 'none') { vis = true; break; }
-        n = n.nextElementSibling;
-      }
-      head.style.display = vis ? '' : 'none';
-    });
-    let noMatch = list.querySelector('.reason-no-match');
-    if (!any) {
-      if (!noMatch) {
-        noMatch = document.createElement('div');
-        noMatch.className = 'reason-no-match';
-        noMatch.textContent = 'No matches';
-        list.appendChild(noMatch);
-      }
-      noMatch.style.display = '';
-    } else if (noMatch) {
-      noMatch.style.display = 'none';
+  const dir = drawerSortDir === 'asc' ? 1 : -1;
+  const sorted = drawerTxns.slice().sort((a, b) => {
+    switch (drawerSortCol) {
+      case 'amount': return (a.amount - b.amount) * dir;
+      case 'type':   return a.type.toLowerCase().localeCompare(b.type.toLowerCase()) * dir;
+      case 'reason': return a.reason.toLowerCase().localeCompare(b.reason.toLowerCase()) * dir;
+      default:       return (a.dateObj - b.dateObj) * dir;
     }
-  };
+  });
 
-  if (selReason) {
-    list.querySelectorAll('.reason-item').forEach(i => i.classList.toggle('sel', i.dataset.r === selReason));
-    chipsEl.querySelectorAll('.reason-chip').forEach(c => c.classList.toggle('sel', c.dataset.r === selReason));
-  }
+  const ind = col => drawerSortCol === col
+    ? '<span class="sort-indicator" style="color:var(--gold)">' + (drawerSortDir === 'asc' ? '&#8593;' : '&#8595;') + '</span>'
+    : '<span class="sort-indicator">&#8597;</span>';
 
-  document.getElementById('lbl-reason').style.display = '';
-  document.getElementById('reason-section').classList.remove('hidden');
+  let html = '<table class="txn-table drawer-txn-table">' +
+    '<colgroup><col style="width:60px"><col style="width:44px"><col style="width:64px"><col></colgroup>' +
+    '<thead><tr>' +
+      '<th data-dsort="date">Date ' + ind('date') + '</th>' +
+      '<th data-dsort="amount">Amt ' + ind('amount') + '</th>' +
+      '<th data-dsort="type">Type ' + ind('type') + '</th>' +
+      '<th data-dsort="reason">Reason ' + ind('reason') + '</th>' +
+    '</tr></thead><tbody>';
+
+  sorted.forEach(t => {
+    const typeLower = t.type.toLowerCase();
+    const isPos = ['award', 'award - held', 'payout'].includes(typeLower);
+    const amtClass  = isPos ? 'positive' : typeLower === 'purchase' ? 'purchase' : 'negative';
+    const amtPrefix = isPos ? '+' : '-';
+    const parts = String(t.date).split(' ');
+    const dDate = parts[0] || t.date;
+    const dTime = parts[1] || '';
+    html += '<tr>' +
+      '<td class="txn-date">' + escHtml(dDate) + (dTime ? '<br><span class="t">' + escHtml(dTime) + '</span>' : '') + '</td>' +
+      '<td class="txn-amount ' + amtClass + '">' + amtPrefix + fmtNum(Math.abs(t.amount)) + '</td>' +
+      '<td><span class="type-badge ' + typeBadgeClass(t.type) + '">' + escHtml(t.type) + '</span></td>' +
+      '<td class="txn-reason">' + escHtml(t.reason) + '</td>' +
+      '</tr>';
+  });
+  html += '</tbody></table>';
+  body.innerHTML = html;
+
+  body.querySelectorAll('th[data-dsort]').forEach(th => {
+    th.addEventListener('click', () => {
+      const col = th.dataset.dsort;
+      if (drawerSortCol === col) drawerSortDir = drawerSortDir === 'asc' ? 'desc' : 'asc';
+      else { drawerSortCol = col; drawerSortDir = (col === 'date') ? 'desc' : 'asc'; }
+      renderDrawerTxns();
+    });
+  });
 }
 
-=== CHANGE 6: clear the chip row on reset ===
+=== CHANGE 3: add drawer table CSS ===
 
-FIND:
+FIND this CSS rule:
 
-  document.getElementById('lbl-reason').style.display = 'none';
-  document.getElementById('reason-section').classList.add('hidden');
-  document.getElementById('reason-list').innerHTML = '';
+.drawer-txn-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.5rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--teal); margin-bottom: 0.75rem;
+}
 
-REPLACE with:
+INSERT immediately AFTER it:
 
-  document.getElementById('lbl-reason').style.display = 'none';
-  document.getElementById('reason-section').classList.add('hidden');
-  document.getElementById('reason-list').innerHTML = '';
-  var _rc = document.getElementById('reason-chips'); if (_rc) _rc.innerHTML = '';
+.drawer-txn-table { table-layout: fixed; width: 100%; }
+.drawer-txn-table th, .drawer-txn-table td { padding: 0.5rem 0.4rem; vertical-align: top; }
+.drawer-txn-table th { cursor: pointer; white-space: nowrap; }
+.drawer-txn-table .txn-date { font-size: 0.56rem; line-height: 1.3; white-space: normal; color: var(--dim); }
+.drawer-txn-table .txn-date .t { opacity: 0.65; }
+.drawer-txn-table .txn-amount { font-size: 0.62rem; }
+.drawer-txn-table .type-badge { white-space: normal; font-size: 0.42rem; }
+.drawer-txn-table .txn-reason { white-space: normal; word-break: break-word; font-size: 0.62rem; line-height: 1.35; color: var(--dim); }
 
-Commit with message "feat: grouped reason picker with quick-pick and last-used chips" and push.
+Commit with message "feat: sortable drawer transaction history with fixed-width readable layout" and push.
