@@ -784,10 +784,10 @@ body::after {
 .drawer-txn-table { table-layout: fixed; width: 100%; }
 .drawer-txn-table th, .drawer-txn-table td { padding: 0.5rem 0.4rem; vertical-align: top; }
 .drawer-txn-table th { cursor: pointer; white-space: nowrap; }
-.drawer-txn-table .txn-date { font-size: 0.56rem; line-height: 1.3; white-space: normal; color: var(--dim); }
+.drawer-txn-table .txn-date { font-size: 0.58rem; line-height: 1.25; white-space: nowrap; color: var(--dim); }
 .drawer-txn-table .txn-date .t { opacity: 0.65; }
 .drawer-txn-table .txn-amount { font-size: 0.62rem; }
-.drawer-txn-table .type-badge { white-space: normal; font-size: 0.42rem; }
+.drawer-txn-table .type-badge { display: inline-block; white-space: normal; overflow-wrap: anywhere; max-width: 100%; font-size: 0.4rem; letter-spacing: 0.04em; padding: 0.15rem 0.3rem; line-height: 1.15; }
 .drawer-txn-table .txn-reason { white-space: normal; word-break: break-word; font-size: 0.62rem; line-height: 1.35; color: var(--dim); }
 
 /* ── QR Modal ───────────────────────────────────────── */
@@ -2281,7 +2281,7 @@ function renderDrawerTxns() {
     : '<span class="sort-indicator">&#8597;</span>';
 
   let html = '<table class="txn-table drawer-txn-table">' +
-    '<colgroup><col style="width:60px"><col style="width:44px"><col style="width:64px"><col></colgroup>' +
+    '<colgroup><col style="width:52px"><col style="width:40px"><col style="width:70px"><col></colgroup>' +
     '<thead><tr>' +
       '<th data-dsort="date">Date ' + ind('date') + '</th>' +
       '<th data-dsort="amount">Amt ' + ind('amount') + '</th>' +
@@ -2295,8 +2295,10 @@ function renderDrawerTxns() {
     const amtClass  = isPos ? 'positive' : typeLower === 'purchase' ? 'purchase' : 'negative';
     const amtPrefix = isPos ? '+' : '-';
     const parts = String(t.date).split(' ');
-    const dDate = parts[0] || t.date;
+    let dDate = parts[0] || String(t.date);
     const dTime = parts[1] || '';
+    const ymd = dDate.match(/^\d{4}-(\d{2}-\d{2})$/);
+    if (ymd) dDate = ymd[1];
     html += '<tr>' +
       '<td class="txn-date">' + escHtml(dDate) + (dTime ? '<br><span class="t">' + escHtml(dTime) + '</span>' : '') + '</td>' +
       '<td class="txn-amount ' + amtClass + '">' + amtPrefix + fmtNum(Math.abs(t.amount)) + '</td>' +
