@@ -4790,24 +4790,53 @@ function renderRolesPending() {
   if (!pending.length) {
     html += '<div class="manage-empty">No pending applications.</div>';
   } else {
-    html += pending.map(a => {
+    html += pending.map((a, idx) => {
       const row     = getField(a, 'row', 'Row');
       const student = getField(a, 'student', 'Student');
       const role    = getField(a, 'role', 'Role');
       const section = getField(a, 'section', 'Section');
-      return `<div class="manage-row">
-        <div class="manage-row-left">
-          <div class="manage-row-name">${esc(student)}</div>
-          <div class="manage-row-sub">${esc(role)} &middot; ${esc(section)}</div>
+      const score   = getField(a, 'score', 'Score') || '';
+      const answers = getField(a, 'answers', 'Answers') || [];
+
+      let scoreColor = 'var(--dim)';
+      const m = String(score).match(/^(\d+)\/(\d+)$/);
+      if (m) scoreColor = (m[1] === m[2]) ? 'var(--green)' : 'var(--amber)';
+
+      const answersHtml = answers.map(ans => {
+        const q       = getField(ans, 'question', 'Question') || '';
+        const av      = getField(ans, 'answer',   'Answer')   || '';
+        const correct = ans.correct;
+        let mark = '';
+        if (correct === true)  mark = ' <span style="color:var(--green)">&#10003;</span>';
+        else if (correct === false) mark = ' <span style="color:var(--red)">&#10007;</span>';
+        return `<div style="margin:0.4rem 0;">
+          <div style="font-size:0.72rem;color:var(--dim);">${esc(q)}</div>
+          <div style="font-size:0.82rem;color:var(--white);">${esc(av)}${mark}</div>
+        </div>`;
+      }).join('');
+
+      return `<div class="manage-row" style="flex-direction:column;align-items:stretch;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;">
+          <div class="manage-row-left">
+            <div class="manage-row-name">${esc(student)}</div>
+            <div class="manage-row-sub">${esc(role)} &middot; ${esc(section)}${score ? ' &middot; <span style="color:' + scoreColor + '">Trick Qs ' + esc(score) + '</span>' : ''}</div>
+          </div>
+          <div class="manage-row-right" style="display:flex;gap:0.4rem;">
+            <button class="action-btn green" style="padding:0.4rem 0.8rem;margin:0;" onclick="handleSelectApplicant(${row})">Select</button>
+            <button class="action-btn red"   style="padding:0.4rem 0.8rem;margin:0;" onclick="handleRejectApplicant(${row})">Reject</button>
+          </div>
         </div>
-        <div class="manage-row-right" style="display:flex;gap:0.4rem;">
-          <button class="action-btn green" style="padding:0.4rem 0.8rem;margin:0;" onclick="handleSelectApplicant(${row})">Select</button>
-          <button class="action-btn red"   style="padding:0.4rem 0.8rem;margin:0;" onclick="handleRejectApplicant(${row})">Reject</button>
-        </div>
+        ${answers.length ? `<button class="back-btn" style="margin-top:0.5rem;align-self:flex-start;font-size:0.7rem;padding:0.3rem 0.7rem;min-width:0;min-height:0;" onclick="toggleAppAnswers(${idx})">View application</button>
+        <div id="app-answers-${idx}" style="display:none;margin-top:0.4rem;padding:0.5rem 0.7rem;border-left:2px solid var(--dim);">${answersHtml}</div>` : ''}
       </div>`;
     }).join('');
   }
   document.getElementById('roles-pending').innerHTML = html;
+}
+
+function toggleAppAnswers(idx) {
+  const el = document.getElementById('app-answers-' + idx);
+  if (el) el.style.display = (el.style.display === 'none' || !el.style.display) ? 'block' : 'none';
 }
 
 function renderRolesWindows() {
