@@ -1,36 +1,26 @@
-﻿Edit coins/index.html only. Make these three changes exactly. Do not reformat unrelated code.
+﻿Edit coins/index.html only. The Analytics sections "Activity Over Time", "Recently Active", and "Weekly Summary" render nothing. The cause is transaction date parsing: dates are read from a column name that does not exist in the CSV, so every Date is Invalid and all date filters return empty. The correct transaction date column is "Date / Time".
 
-=== CHANGE 1: compute a short label in renderDrawerTxns ===
+STEP 1 - add a robust date helper.
+Find the existing helper function named pick (used like pick(r)('Name','Student',...)). Immediately after that function, add:
 
-FIND:
+function txnDateObj(r) {
+  var v = pick(r)('Date / Time', 'Date/Time', 'Date', 'Timestamp', 'date');
+  if (!v) return null;
+  var d = new Date(v);
+  return isNaN(d.getTime()) ? null : d;
+}
 
-    const amtPrefix = isPos ? '+' : '-';
-    const parts = String(t.date).split(' ');
+STEP 2 - route every transaction date read through txnDateObj(r).
+Locate each of these and replace however the date is currently derived from a transaction row with a call to txnDateObj(r), and skip (continue/return) rows where it returns null:
+  a) The code that builds the "Activity Over Time" chart (groups transactions by calendar day).
+  b) The code that builds the "Recently Active" list (transactions within the last 7 days).
+  c) The code that builds the "Weekly Summary" panel (assigns each transaction to this week vs last week).
+  d) The global txnData sort inside fetchData (it currently sorts on a "Date"/"Timestamp" field; switch it to txnDateObj so the default order is correct everywhere).
 
-REPLACE with:
+Do not change anything other than date parsing in those four places. Do not alter the working sections (breakdown, spotlights, stats bar) except the shared sort in (d).
 
-    const amtPrefix = isPos ? '+' : '-';
-    const shortType = { 'award - held': 'HELD', 'fine - owed': 'OWED' }[typeLower] || t.type;
-    const parts = String(t.date).split(' ');
+STEP 3 - if you cannot confidently locate any one of the three sections, do NOT guess. Make the changes you are sure of, then print the function name(s) and a few surrounding lines for the section you could not locate so it can be handled separately.
 
-=== CHANGE 2: render the short label with a full-name tooltip ===
+After editing, print a short summary listing each spot you changed and the old date expression you replaced.
 
-FIND:
-
-      '<td><span class="type-badge ' + typeBadgeClass(t.type) + '">' + escHtml(t.type) + '</span></td>' +
-
-REPLACE with:
-
-      '<td><span class="type-badge ' + typeBadgeClass(t.type) + '" title="' + escHtml(t.type) + '">' + escHtml(shortType) + '</span></td>' +
-
-=== CHANGE 3: stop the badge from wrapping ===
-
-FIND:
-
-.drawer-txn-table .type-badge { display: inline-block; white-space: normal; overflow-wrap: anywhere; max-width: 100%; font-size: 0.4rem; letter-spacing: 0.04em; padding: 0.15rem 0.3rem; line-height: 1.15; }
-
-REPLACE with:
-
-.drawer-txn-table .type-badge { display: inline-block; white-space: nowrap; font-size: 0.4rem; letter-spacing: 0.05em; padding: 0.18rem 0.38rem; line-height: 1.15; }
-
-Commit with message "fix: short single-line drawer type badges for held and owed" and push.
+Commit with message "fix: route analytics date parsing through txnDateObj on Date / Time column" and push.

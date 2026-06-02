@@ -1774,6 +1774,12 @@ function pick(row) {
     return '';
   };
 }
+function txnDateObj(r) {
+  var v = pick(r)('Date / Time', 'Date/Time', 'Date', 'Timestamp', 'date');
+  if (!v) return null;
+  var d = new Date(v);
+  return isNaN(d.getTime()) ? null : d;
+}
 function typeBadgeClass(type) {
   switch ((type || '').toLowerCase()) {
     case 'award':         return 'type-award';
@@ -1801,8 +1807,8 @@ async function fetchData() {
       return calcBal(b) - calcBal(a);
     });
     txnData.sort((a, b) => {
-      const da = new Date(pick(a)('Date', 'Timestamp') || 0);
-      const db = new Date(pick(b)('Date', 'Timestamp') || 0);
+      const da = txnDateObj(a) || new Date(0);
+      const db = txnDateObj(b) || new Date(0);
       return db - da;
     });
 
@@ -2478,9 +2484,8 @@ function renderAnalytics() {
   let lastAwarded = 0, lastFines = 0, lastTxns = 0;
 
   txnData.forEach(r => {
-    const dateStr = pick(r)('Date', 'Timestamp') || '';
-    const dt = new Date(dateStr);
-    if (isNaN(dt.getTime())) return;
+    const dt = txnDateObj(r);
+    if (!dt) return;
     const type   = (pick(r)('Type', 'Transaction Type') || '').toLowerCase();
     const amount = Math.abs(parseFloat(pick(r)('Amount') || 0));
     if (dt >= thisMonday && dt <= now) {
@@ -2634,10 +2639,8 @@ function renderAnalytics() {
   // ── Activity Over Time ────────────────────────────
   const dateMap = {};
   txnData.forEach(r => {
-    const raw = (pick(r)('Date', 'Timestamp') || '').trim();
-    if (!raw) return;
-    const dt = new Date(raw);
-    if (isNaN(dt.getTime())) return;
+    const dt = txnDateObj(r);
+    if (!dt) return;
     const key = dt.getFullYear() + '-' +
       String(dt.getMonth() + 1).padStart(2, '0') + '-' +
       String(dt.getDate()).padStart(2, '0');
@@ -2674,9 +2677,9 @@ function renderAnalytics() {
   const sevenAgo = new Date(now); sevenAgo.setDate(sevenAgo.getDate() - 7); sevenAgo.setHours(0,0,0,0);
   const recentMap = {};
   txnData.forEach(r => {
-    const dateStr = pick(r)('Date', 'Timestamp') || '';
-    const dt = new Date(dateStr);
-    if (isNaN(dt.getTime()) || dt < sevenAgo) return;
+    const dt = txnDateObj(r);
+    if (!dt || dt < sevenAgo) return;
+    const dateStr = pick(r)('Date / Time', 'Date/Time', 'Date', 'Timestamp') || '';
     const name = (pick(r)('Name', 'Student', 'Full Name') || '').trim();
     if (!name) return;
     if (!recentMap[name] || dt > recentMap[name].dt) {
