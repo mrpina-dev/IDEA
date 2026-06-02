@@ -2154,7 +2154,13 @@ searchInput.addEventListener('input', () => {
 });
 
 function pickStudent(name, section, balance) {
-  selStudent = { name, section, balance };
+  const rawRec = allStudents.find(s =>
+    (getField(s,'name','Name','Full Name','Student') || '').toLowerCase() === name.toLowerCase()
+  );
+  const bankBalance = rawRec
+    ? (parseFloat(getField(rawRec,'bankBalance','bank_balance','BankBalance')) || 0)
+    : 0;
+  selStudent = { name, section, balance, bankBalance };
   searchInput.value = '';
   searchResults.style.display = 'none';
   document.getElementById('search-wrap').style.display = 'none';
@@ -2382,41 +2388,58 @@ document.getElementById('submit-btn').addEventListener('click', () => {
   const reason = selReason;
   const amount = selAmount;
 
-  // 1. Update local balance immediately
-  const raw = allStudents.find(s =>
-    (getField(s,'name','Name','Full Name','Student') || '').toLowerCase() === name.toLowerCase()
-  );
-  if (raw) {
-    const tl = type.toLowerCase();
-    if (tl === 'award' || tl === 'payout') {
-      const k = raw.awarded !== undefined ? 'awarded' : 'Awarded';
-      raw[k] = (parseFloat(raw[k]) || 0) + amount;
-    } else {
-      const k = raw.fines !== undefined ? 'fines' : 'Fines';
-      raw[k] = (parseFloat(raw[k]) || 0) + amount;
-    }
-  }
-
-  // 2. Show success and return to home immediately
-  toast('Transaction logged ✓', 'success');
-  resetLog();
-  showScreen('s-home');
-
-  // 4. Wage raise modal — shown after navigation so it sits on top of home
-  if (type === 'Purchase' && reason === 'Raise Weekly Wage') {
-    const currentWage = parseFloat(getField(raw || {}, 'wage', 'Wage') || 1);
-    showWageUpdateModal(name, currentWage, raw);
-  }
-
-  // 3. Fire API in background — no loading overlay
-  fetch(apiUrl({ action: 'logTransaction', name, type, reason, amount }))
-    .then(r => r.json())
-    .then(data => {
-      if (!data || !(data.success || data.status === 'ok' || data.result === 'success')) {
-        toast('Sync failed — check sheet', 'error');
+  function fireTransaction() {
+    // 1. Update local balance immediately
+    const raw = allStudents.find(s =>
+      (getField(s,'name','Name','Full Name','Student') || '').toLowerCase() === name.toLowerCase()
+    );
+    if (raw) {
+      const tl = type.toLowerCase();
+      if (tl === 'award' || tl === 'payout') {
+        const k = raw.awarded !== undefined ? 'awarded' : 'Awarded';
+        raw[k] = (parseFloat(raw[k]) || 0) + amount;
+      } else {
+        const k = raw.fines !== undefined ? 'fines' : 'Fines';
+        raw[k] = (parseFloat(raw[k]) || 0) + amount;
       }
-    })
-    .catch(() => toast('Sync failed — check sheet', 'error'));
+    }
+
+    // 2. Show success and return to home immediately
+    toast('Transaction logged ✓', 'success');
+    resetLog();
+    showScreen('s-home');
+
+    // 4. Wage raise modal — shown after navigation so it sits on top of home
+    if (type === 'Purchase' && reason === 'Raise Weekly Wage') {
+      const currentWage = parseFloat(getField(raw || {}, 'wage', 'Wage') || 1);
+      showWageUpdateModal(name, currentWage, raw);
+    }
+
+    // 3. Fire API in background — no loading overlay
+    fetch(apiUrl({ action: 'logTransaction', name, type, reason, amount }))
+      .then(r => r.json())
+      .then(data => {
+        if (!data || !(data.success || data.status === 'ok' || data.result === 'success')) {
+          toast('Sync failed — check sheet', 'error');
+        }
+      })
+      .catch(() => toast('Sync failed — check sheet', 'error'));
+  }
+
+  // Purchase: confirm how many physical coins to collect after draining bank balance
+  if (selType === 'Purchase') {
+    const bank    = selStudent.bankBalance || 0;
+    const covered = Math.min(amount, bank);
+    const collect = Math.max(0, amount - bank);
+    let msg;
+    if (collect === 0)  msg = `Bank balance covers all ${amount} i¢. Collect no physical coins from ${name}.`;
+    else if (bank > 0)  msg = `Bank balance covers ${covered} i¢. Collect ${collect} physical coins from ${name}.`;
+    else                msg = `Collect ${amount} physical coins from ${name}.`;
+    confirm('Confirm Purchase', msg, fireTransaction);
+    return;
+  }
+
+  fireTransaction();
 });
 
 // ── Reset log screen ──────────────────────────────────
