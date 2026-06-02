@@ -5022,7 +5022,7 @@ function renderRolesWindows() {
       <div class="manage-row-left"><div class="manage-row-name">${esc(sec)}</div></div>
       <div class="manage-row-right">
         <button class="action-btn ${open ? 'green' : 'gold'}" style="padding:0.4rem 0.9rem;margin:0;"
-          onclick="handleToggleWindow(${JSON.stringify(sec)}, ${open ? 'false' : 'true'})">
+          onclick="handleToggleWindow(${esc(JSON.stringify(sec))}, ${open ? 'false' : 'true'})">
           ${open ? 'OPEN' : 'CLOSED'}
         </button>
       </div>
@@ -5055,7 +5055,7 @@ function renderRolesHolders() {
           html += `<div class="manage-row">
             <div class="manage-row-left"><div class="manage-row-name" style="font-size:0.85rem;">${esc(name)}</div></div>
             <div class="manage-row-right">
-              ${hRow ? `<button class="action-btn red" style="padding:0.35rem 0.8rem;margin:0;" onclick="handleRetireHolder(${hRow}, ${JSON.stringify(name)})">Retire</button>` : ''}
+              ${hRow ? `<button class="action-btn red" style="padding:0.35rem 0.8rem;margin:0;" onclick="handleRetireHolder(${hRow}, ${esc(JSON.stringify(name))})">Retire</button>` : ''}
             </div>
           </div>`;
         });
@@ -5101,7 +5101,7 @@ function handleRetireHolder(row, name) {
 }
 
 async function handleToggleWindow(section, open) {
-  showLoading(open === 'true' ? 'Opening…' : 'Closing…');
+  showLoading((open === true || open === 'true') ? 'Opening…' : 'Closing…');
   try {
     const res  = await fetch(apiUrl({ action: 'setSectionAppsOpen', section, open }));
     const data = await res.json();
