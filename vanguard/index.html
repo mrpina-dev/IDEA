@@ -988,7 +988,7 @@ function update(dt){
   /* ----- boss ----- */
   if(boss){ updateBoss(dt); }
   if(bossFlash>0) bossFlash-=dt*1.8;
-  if(bossSpoils>0){ bossSpoils-=dt; if(bossSpoils<=0){ for(let i=pods.length-1;i>=0;i--) applyPod(pods[i]); pods.length=0; openRefit(); } }
+  if(bossSpoils>0){ bossSpoils-=dt; if(bossSpoils<=0){ for(let i=pods.length-1;i>=0;i--) applyPod(pods[i]); pods.length=0; if(gameOverT<=0) openRefit(); } }
 
   /* ----- bullets ----- */
   for(let i=pbul.length-1;i>=0;i--){const b=pbul[i];
@@ -1568,37 +1568,39 @@ const OVS=['ovlTitle','ovlPause','ovlRefit','ovlOver','ovlBoard'];
 function showOverlay(id){ OVS.forEach(o=>el(o).classList.toggle('hidden',o!==id)); el('hud').style.opacity=(id===null||id==='ovlPause')?1:0.25; }
 function fmtTime(s){ s=Math.max(0,Math.round(s)); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
 function startGameOver(){
-  let k=(lastHitBy && !lastHitBy.dead && enemies.indexOf(lastHitBy)>=0)?lastHitBy:null;
+  let k=(lastHitBy && lastHitBy.draw && !lastHitBy.dead && enemies.indexOf(lastHitBy)>=0)?lastHitBy:null;
   if(!k){ let bd=1e9; for(const e of enemies){ if(e.dead)continue; const d=dist2(e.x,e.y,player.x,player.y); if(d<bd){bd=d;k=e;} } }
   if(k){ killerInfo={draw:k.draw,c:k.c,variant:k.variant,label:killerName(k)};
-    killer=k; k.state='celebrate'; k.celT=0; k.baseR=k.r; gameOverT=1.9; }
-  else if(boss){ killerInfo={draw:boss.draw,c:boss.c,variant:2,label:boss.name+' BOSS'}; endRun(); }
-  else { killerInfo={draw:null,c:COL.dim,variant:0,label:'FIELD HAZARD'}; endRun(); }
+    killer=k; k.state='celebrate'; k.celT=0; k.baseR=k.r; }
+  else if(boss){ killerInfo={draw:boss.draw,c:boss.c,variant:2,label:boss.name+' BOSS'}; killer=null; }
+  else { killerInfo={draw:null,c:COL.dim,variant:0,label:'FIELD HAZARD'}; killer=null; }
+  gameOverT=1.9;
 }
 function endRun(){
   state='over'; player.dead=true;
-  const acc=shotsFired?Math.round(shotsHit/shotsFired*100):0;
-  el('finalScore').textContent=window.scoreT.toLocaleString();
-  el('finalSector').textContent=roman(sector);
-  el('finalAcc').textContent=acc+'%';
-  el('finalTime').textContent=fmtTime(runTime);
-  el('finalKills').textContent=runKills;
-  el('finalBosses').textContent=runBosses;
-  el('finalCombo').textContent='x'+(window.maxCombo||1);
-  // Killer glyph + name
-  const fb=el('felledBy'); const kg=document.getElementById('killerGlyph');
-  if(killerInfo){ fb.textContent=killerInfo.label; fb.style.color=killerInfo.c;
-    if(killerInfo.draw&&kg){ const kctx=kg.getContext('2d'); kctx.clearRect(0,0,64,64);
-      kctx.save(); kctx.translate(32,32); kctx.strokeStyle=killerInfo.c; kctx.lineWidth=2;
-      kctx.shadowColor=killerInfo.c; kctx.shadowBlur=10; kctx.lineJoin='round';
-      try{ killerInfo.draw(kctx,{r:20,variant:killerInfo.variant,core:1.6,aimAng:Math.PI/2,tell:0,fireFlash:0}); }catch(er){}
-      kctx.restore(); kg.style.display='block'; }
-    else if(kg){ kg.style.display='none'; }
-  } else { if(fb)fb.textContent='-'; if(kg)kg.style.display='none'; }
-  pendingScore={score:window.scoreT,sector:sector,acc:acc};
-  buildInitials(); showOverlay('ovlOver');
   document.getElementById('touch').classList.add('hidden');
   document.getElementById('bossname').style.display='none'; document.getElementById('bossbar').style.display='none';
+  buildInitials(); showOverlay('ovlOver');
+  try{
+    const acc=shotsFired?Math.round(shotsHit/shotsFired*100):0;
+    el('finalScore').textContent=window.scoreT.toLocaleString();
+    el('finalSector').textContent=roman(sector);
+    el('finalAcc').textContent=acc+'%';
+    el('finalTime').textContent=fmtTime(runTime);
+    el('finalKills').textContent=runKills;
+    el('finalBosses').textContent=runBosses;
+    el('finalCombo').textContent='x'+(window.maxCombo||1);
+    const fb=el('felledBy'); const kg=document.getElementById('killerGlyph');
+    if(killerInfo){ fb.textContent=killerInfo.label; fb.style.color=killerInfo.c;
+      if(killerInfo.draw&&kg){ const kctx=kg.getContext('2d'); kctx.clearRect(0,0,64,64);
+        kctx.save(); kctx.translate(32,32); kctx.strokeStyle=killerInfo.c; kctx.lineWidth=2;
+        kctx.shadowColor=killerInfo.c; kctx.shadowBlur=10; kctx.lineJoin='round';
+        try{ killerInfo.draw(kctx,{r:20,variant:killerInfo.variant,core:1.6,aimAng:Math.PI/2,tell:0,fireFlash:0}); }catch(er){}
+        kctx.restore(); kg.style.display='block'; }
+      else if(kg){ kg.style.display='none'; }
+    } else { if(fb)fb.textContent='-'; if(kg)kg.style.display='none'; }
+    pendingScore={score:window.scoreT,sector:sector,acc:acc};
+  }catch(err){ console.error('VANGUARD endRun error:',err); pendingScore={score:window.scoreT,sector:sector,acc:0}; }
 }
 
 /* leaderboard (local fallback + shared online board via Apps Script) */
@@ -1750,10 +1752,11 @@ try{ if(localStorage.getItem('vanguard_mute')==='1'){Audio_.muted=true;const pmb
 /* ============================= loop ============================= */
 renderBoard('titleBoard'); fetchOnline(()=>renderBoard('titleBoard'));
 function frame(now){ let dt=(now-last)/1000; last=now; if(dt>0.05)dt=0.05;
-  // process delayed boss explosions
-  for(let i=_delayed.length-1;i>=0;i--){ if(now>=_delayed[i].at){ explode(_delayed[i].x,_delayed[i].y,_delayed[i].c,true); _delayed.splice(i,1); } }
-  if(deathSlow>0) deathSlow=Math.max(0,deathSlow-dt);
-  update(deathSlow>0?dt*0.4:dt); drawBG(); drawFX(); hud(dt);
+  try{
+    for(let i=_delayed.length-1;i>=0;i--){ if(now>=_delayed[i].at){ explode(_delayed[i].x,_delayed[i].y,_delayed[i].c,true); _delayed.splice(i,1); } }
+    if(deathSlow>0) deathSlow=Math.max(0,deathSlow-dt);
+    update(deathSlow>0?dt*0.4:dt); drawBG(); drawFX(); hud(dt);
+  }catch(err){ console.error('VANGUARD frame error:',err); }
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
