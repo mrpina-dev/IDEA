@@ -510,10 +510,10 @@ function spawnBoss(){
   const fk=sectorTheme().fk || factionForSector(); const F=FACTIONS[fk];
   const hp=150+sector*64;
   boss={fk,c:F.c,draw:F.draw,variant:2, x:W/2, y:-90, ty:128, r:60, name:F.name,
-    hp:hp, maxhp:hp, core:0, phase:0, lastPhase:0, ph:0, fire:1.0, sweep:0, entering:true,
+    hp:hp, maxhp:hp, core:0, phase:0, lastPhase:0, ph:0, fire:Math.max(0.18,1.0/(1+sector*0.10)), sweep:0, entering:true,
     flash:0, dead:false, dying:false, deathT:0, salvo:0,
     gx:W/2, gy:140, moveMode:'track', moveT:1.0, dodgeCd:0,
-    sigCd:2.6, ramState:0, ramT:0, ramVy:0, blinkCd:3.2, lockT:0, lockX:0, lockY:0,
+    sigCd:Math.max(0.4,2.6/(1+sector*0.10)), ramState:0, ramT:0, ramVy:0, blinkCd:Math.max(0.8,3.2/(1+sector*0.10)), lockT:0, lockX:0, lockY:0,
     sweepState:0, sweepT:0, sweepAng:0, regenT:0,
     plates:0, plateMax:0, plateHp:0};
   if(fk==='mset'){ boss.plates=3; boss.plateMax=Math.round(hp*0.15); boss.plateHp=boss.plateMax; boss.r=62; }
@@ -868,6 +868,7 @@ function updateBoss(dt){
     return; }
 
   const phase = b.hp<b.maxhp*0.38?2 : b.hp<b.maxhp*0.72?1:0; b.phase=phase;
+  const sf=1/(1+sector*0.10); // sector aggression scaling factor
   if(phase!==b.lastPhase){ b.lastPhase=phase; b.flash=.25; shake=Math.max(shake,8); rings.push({x:b.x,y:b.y,r:b.r,vr:240,life:.5,max:.5,c:b.c}); }
   const pdx=player.x-b.x, pdy=player.y-b.y; b.sweep+=dt;
 
@@ -886,7 +887,7 @@ function updateBoss(dt){
   const beamUnder = player.beamActive && Math.abs(player.x-b.x)<30;
   if(b.dodgeCd<=0 && (beamUnder || (Math.abs(pdx)<22 && Math.random()<0.02))){
     b.gx = clamp(b.x + (b.x<player.x?-1:1)*rnd(75,125),70,W-70); b.dodgeCd=0.8; }
-  const ease=(b.fk==='ace'||b.fk==='mset')?2.0 : b.fk==='csee'?3.6 : 3.0;
+  const ease=((b.fk==='ace'||b.fk==='mset')?2.0 : b.fk==='csee'?3.6 : 3.0)*(1+sector*0.06);
   if(b.ramState===0 && b.sweepState!==2){ b.x+=(b.gx-b.x)*Math.min(1,dt*ease); b.y+=(b.gy-b.y)*Math.min(1,dt*ease); }
 
   /* faction signature */
@@ -895,18 +896,18 @@ function updateBoss(dt){
     if(b.ramState===1){ b.ramT-=dt; b.x+=(player.x-b.x)*Math.min(1,dt*1.6); if(b.ramT<=0){ b.ramState=2; b.ramVy=640; } }
     else if(b.ramState===2){ b.y+=b.ramVy*dt; b.ramVy-=dt*180; if(b.y>H*0.60||b.ramVy<60) b.ramState=3; }
     else if(b.ramState===3){ b.y+=(b.gy-b.y)*Math.min(1,dt*2.0); b.x+=(b.gx-b.x)*Math.min(1,dt*2.0); if(Math.abs(b.y-b.gy)<8) b.ramState=0; }
-    if(b.ramState===0 && b.sigCd<=0){ if(Math.random()<0.55){ b.ramState=1; b.ramT=0.55; b.flash=.22; Audio_.hit(); } else spawnBarrier(); b.sigCd=rnd(2.6,3.6)-phase*0.4; }
+    if(b.ramState===0 && b.sigCd<=0){ if(Math.random()<0.55){ b.ramState=1; b.ramT=0.55; b.flash=.22; Audio_.hit(); } else spawnBarrier(); b.sigCd=Math.max(0.4,(rnd(2.6,3.6)-phase*0.4)*sf); }
   } else if(b.fk==='bmet'){
     if(b.regenT>0) b.regenT-=dt; else if(b.hp<b.maxhp){ b.hp=Math.min(b.maxhp,b.hp+dt*b.maxhp*0.045);
       if(Math.random()<0.3) parts.push({x:b.x+rnd(-b.r/2,b.r/2),y:b.y+rnd(-b.r/2,b.r/2),vx:0,vy:-20,life:.4,max:.4,c:COL.green,sz:1.4}); }
-    if(b.sigCd<=0){ const n=2+phase; for(let i=0;i<n;i++){ const e=makeEnemy('bmet',0,b.x+rnd(-34,34),b.y+18,'dive'); e.vy=70; e.vx=rnd(-30,30); e.hp=2; e.maxhp=2; e.fire=0.5; enemies.push(e); } Audio_.pickup(); b.sigCd=rnd(3.0,4.2)-phase*0.5; }
+    if(b.sigCd<=0){ const n=Math.min(6,2+phase+Math.floor(sector/4)); for(let i=0;i<n;i++){ const e=makeEnemy('bmet',0,b.x+rnd(-34,34),b.y+18,'dive'); e.vy=70; e.vx=rnd(-30,30); e.hp=2; e.maxhp=2; e.fire=0.5; enemies.push(e); } Audio_.pickup(); b.sigCd=Math.max(0.4,(rnd(3.0,4.2)-phase*0.5)*sf); }
   } else if(b.fk==='csee'){
     b.blinkCd-=dt;
     if(b.lockT>0){ b.lockT-=dt; if(b.lockT<=0){ const dx=b.lockX-b.x,dy=b.lockY-b.y,m=Math.hypot(dx,dy)||1,sp=540;
       for(let k=-1;k<=1;k++){ const a=Math.atan2(dy,dx)+k*0.045; ebul.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:b.c,r:3}); } Audio_.beam(); } }
     if(b.blinkCd<=0){ b.x=clamp(player.x+rnd(-80,80),70,W-70); b.gx=b.x; b.y=clamp(rnd(108,180),90,200); b.gy=b.y;
-      for(let k=0;k<12;k++) parts.push({x:b.x,y:b.y,vx:rnd(-130,130),vy:rnd(-130,130),life:.25,max:.25,c:b.c,sz:1.6}); b.blinkCd=rnd(2.8,4.0)-phase*0.4; }
-    if(b.sigCd<=0){ b.lockX=player.x; b.lockY=player.y; b.lockT=0.7; b.sigCd=rnd(2.2,3.0)-phase*0.3; }
+      for(let k=0;k<12;k++) parts.push({x:b.x,y:b.y,vx:rnd(-130,130),vy:rnd(-130,130),life:.25,max:.25,c:b.c,sz:1.6}); b.blinkCd=Math.max(0.8,(rnd(2.8,4.0)-phase*0.4)*sf); }
+    if(b.sigCd<=0){ b.lockX=player.x; b.lockY=player.y; b.lockT=0.7; b.sigCd=Math.max(0.3,(rnd(2.2,3.0)-phase*0.3)*sf); }
   } else if(b.fk==='mat'){
     if(b.sweepState===1){ b.sweepT-=dt; if(b.sweepT<=0){ b.sweepState=2; b.sweepT=1.3; b.sweepAng=0.45; } }
     else if(b.sweepState===2){ b.sweepT-=dt; b.sweepAng+=dt*1.6;
@@ -914,20 +915,21 @@ function updateBoss(dt){
       if(player.y>b.y-10 && d<0.11 && !player.dead && player.inv<=0) playerHit();
       if(b.sweepT<=0) b.sweepState=0; }
     if(b.sweepState===0 && b.sigCd<=0){ if(Math.random()<0.6){ b.sweepState=1; b.sweepT=0.9; Audio_.beam(); }
-      else { const m=Math.hypot(pdx,pdy)||1,sp=360; for(let k=-1;k<=1;k++){const a=Math.atan2(pdy,pdx)+k*0.12; ebul.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:b.c,r:3});} } b.sigCd=rnd(2.8,3.8)-phase*0.4; }
+      else { const m=Math.hypot(pdx,pdy)||1,sp=360; const mshots=Math.min(2,1+Math.floor(sector/4)); for(let k=-mshots;k<=mshots;k++){const a=Math.atan2(pdy,pdx)+k*0.12; ebul.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:b.c,r:3});} } b.sigCd=Math.max(0.4,(rnd(2.8,3.8)-phase*0.4)*sf); }
   } else if(b.fk==='mset'){
-    if(b.sigCd<=0 && b.plates===0){ const n=10+phase*4; for(let i=0;i<n;i++){ const a=(i/n)*6.28+b.core;
+    if(b.sigCd<=0 && b.plates===0){ const n=Math.min(20,10+phase*4+Math.floor(sector/3)); for(let i=0;i<n;i++){ const a=(i/n)*6.28+b.core;
       ebul.push({x:b.x,y:b.y,vx:Math.cos(a)*240,vy:Math.sin(a)*240,c:b.c,r:3});
-      shards.push({x:b.x,y:b.y,vx:Math.cos(a)*200,vy:Math.sin(a)*200,rot:a,vr:6,len:12,life:1.0,max:1.0,c:b.c}); } Audio_.hit(); b.sigCd=rnd(2.2,3.0)-phase*0.3; }
+      shards.push({x:b.x,y:b.y,vx:Math.cos(a)*200,vy:Math.sin(a)*200,rot:a,vr:6,len:12,life:1.0,max:1.0,c:b.c}); } Audio_.hit(); b.sigCd=Math.max(0.3,(rnd(2.2,3.0)-phase*0.3)*sf); }
   }
 
   /* adaptive base attack: react to where the player is */
   b.fire-=dt;
   if(b.fire<=0 && b.ramState!==2 && b.sweepState!==2){ const dx=pdx, dy=pdy;
-    if(Math.abs(dx)<70){ b.fire=0.7-phase*0.1; for(let i=-2;i<=2;i++) ebul.push({x:b.x+i*14,y:b.y+b.r*0.4,vx:i*30,vy:250+sector*8,c:b.c,r:3}); }
-    else { b.fire=0.62-phase*0.1; const sp=250+sector*10, spread=phase>=1?2:1;
+    const ext=Math.min(2,Math.floor(sector/3));
+    if(Math.abs(dx)<70){ b.fire=Math.max(0.18,(0.7-phase*0.1)*sf); for(let i=-(2+ext);i<=(2+ext);i++) ebul.push({x:b.x+i*14,y:b.y+b.r*0.4,vx:i*30,vy:250+sector*8,c:b.c,r:3}); }
+    else { b.fire=Math.max(0.18,(0.62-phase*0.1)*sf); const sp=250+sector*10, spread=Math.min(4,(phase>=1?2:1)+ext);
       for(let k=-spread;k<=spread;k++){ const a=Math.atan2(dy,dx)+k*0.14; ebul.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:b.c,r:3}); } }
-    if(phase===2 && Math.random()<0.5){ for(let i=0;i<6;i++){ const a=b.core*2+i*1.05; ebul.push({x:b.x,y:b.y,vx:Math.cos(a)*180,vy:Math.sin(a)*180+90,c:b.c,r:2.6}); } }
+    if(phase===2 && Math.random()<0.5){ for(let i=0;i<Math.min(10,6+Math.floor(sector/4));i++){ const a=b.core*2+i*1.05; ebul.push({x:b.x,y:b.y,vx:Math.cos(a)*180,vy:Math.sin(a)*180+90,c:b.c,r:2.6}); } }
   }
 
   if(!player.dead && player.inv<=0 && dist2(b.x,b.y,player.x,player.y)<(b.r+10)*(b.r+10)) playerHit();
@@ -1210,7 +1212,7 @@ function hud(dt){
   else if(bossPending){ bp.textContent='⚠ BOSS INBOUND'; bp.style.color=COL.gold; }
   else { const N=8, f=clamp(Math.round(N*sectorKills/Math.max(1,killsForBoss)),0,N);
     bp.textContent='BOSS ▸ '+'▰'.repeat(f)+'▱'.repeat(N-f); bp.style.color=f>=N?COL.gold:'var(--dim)'; }
-  if(player.lives!==lastLives){ lastLives=player.lives; el('lives').innerHTML=shipGlyph.repeat(Math.max(0,player.lives)); }
+  if(player.lives!==lastLives){ lastLives=player.lives; const lv=Math.max(0,player.lives); el('lives').innerHTML=lv<=5?shipGlyph.repeat(lv):shipGlyph+'<span style="font-size:10px;color:#00FF41;vertical-align:middle;letter-spacing:.04em">x'+lv+'</span>'; }
   if(player.wtype!==lastWname){ lastWname=player.wtype; el('wname').textContent=player.wtype.toUpperCase(); }
   if(player.wlevel!==lastWlvl){ lastWlvl=player.wlevel; el('wlvl').textContent='Lv.'+player.wlevel;
     let s=''; for(let i=0;i<5;i++) s+='<i class="seg'+(i<player.wlevel?' on':'')+'"></i>'; el('pbar').innerHTML=s; }
