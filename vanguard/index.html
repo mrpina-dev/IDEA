@@ -121,6 +121,8 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 .refitwrap.warp{animation:refitWarpIn .5s cubic-bezier(.2,.7,.2,1) both}
 .mini{font-size:10px;color:var(--dim);letter-spacing:.1em;background:none;border:1px solid var(--dim);color:var(--dim);
   padding:6px 12px;border-radius:5px;cursor:pointer;pointer-events:auto;font-family:'Share Tech Mono',monospace}
+.fbbtn{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:11px;letter-spacing:.06em;background:rgba(0,240,255,.12);border:1px solid var(--cyan);color:var(--cyan);padding:7px 16px;border-radius:5px;cursor:pointer;pointer-events:auto;text-shadow:0 0 8px rgba(0,240,255,.5);box-shadow:0 0 12px rgba(0,240,255,.25)}
+.fbbtn:active{background:rgba(0,240,255,.22)}
 .modes{display:flex;gap:8px;justify-content:center;margin-top:2px}
 .modebtn{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;background:rgba(0,20,8,.5);border:1px solid var(--dim);color:var(--dim);padding:6px 12px;border-radius:5px;cursor:pointer;pointer-events:auto}
 .modebtn.sel{border-color:var(--green);color:var(--green);box-shadow:0 0 10px rgba(0,255,65,.4);text-shadow:0 0 8px rgba(0,255,65,.6)}
@@ -209,6 +211,14 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
       <button class="modebtn" data-m="hardcore">HARDCORE</button>
       <button class="modebtn" data-m="arcade">ARCADE</button>
     </div>
+    <div class="lbl" style="color:var(--dim);letter-spacing:.22em">LOADOUT</div>
+    <div class="modes" id="loadSel">
+      <button class="modebtn sel" data-l="vanguard">VANGUARD</button>
+      <button class="modebtn" data-l="gunner">GUNNER</button>
+      <button class="modebtn" data-l="striker">STRIKER</button>
+      <button class="modebtn" data-l="warden">WARDEN</button>
+    </div>
+    <div class="tag" id="loadDesc" style="min-height:12px">Balanced standard rig.</div>
     <div class="btabs" id="titleBoardTabs"><button class="btab sel" data-bm="normal">NORMAL</button><button class="btab" data-bm="hardcore">HARDCORE</button></div>
     <div class="board" id="titleBoard"></div>
     <div class="cta" id="startCta">PRESS ENTER / TAP TO LAUNCH</div>
@@ -217,7 +227,8 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
       <span class="k">BEAM</span> HOLD C/SPACE &nbsp; <span class="k">BOMB</span> X/SHIFT &nbsp; <span class="k">PARRY</span> Z &nbsp; <span class="k">SWITCH WEAPON</span> Q<br>
       <span class="k">PAUSE</span> P/ESC &nbsp; <span class="k">MUTE</span> M &nbsp; <span class="k">earn i¢ at REFIT after each boss</span></div>
     <button class="mini" id="ctrlsToggle">CONTROLS: ON</button>
-    <button class="mini" id="titleFeedback">FEEDBACK</button>
+    <div class="tag" style="color:var(--cyan);letter-spacing:.12em;margin-top:2px">FOUND A BUG OR HAVE AN IDEA?</div>
+    <button class="fbbtn" id="titleFeedback">SEND FEEDBACK</button>
   </div>
 
   <!-- PAUSE -->
@@ -228,6 +239,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
     <button class="mini" id="pauseMuteBtn">SOUND: ON</button>
     <button class="mini" id="restartBtn">RESTART RUN</button>
     <button class="mini" id="quitBtn">QUIT TO TITLE</button>
+    <button class="fbbtn" id="pauseFeedback">SEND FEEDBACK</button>
   </div>
 
   <!-- REFIT (post-boss upgrade shop) -->
@@ -252,7 +264,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
     <div class="tag" id="enterHint">ENTER INITIALS</div>
     <div class="initials" id="initials"></div>
     <button class="obtn sub" id="submitBtn">SUBMIT</button>
-    <button class="mini" id="overFeedback">FEEDBACK</button>
+    <button class="fbbtn" id="overFeedback">SEND FEEDBACK</button>
   </div>
 
   <!-- FEEDBACK MODAL -->
@@ -288,7 +300,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=560,H=840; const VERSION='2524';
+const W=560,H=840; const VERSION='2525';
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
 const bg=bgC.getContext('2d'), fx=fxC.getContext('2d');
@@ -374,6 +386,7 @@ let sector, waveIdx, wavesPerSector, waveTimer, bossPending, sectorClearT, bossS
 let runFactionSeq=[], waveFk=null;
 let hybridTimer=0;
 let gameMode='normal';
+let loadout='vanguard';
 let shotsFired, shotsHit, runTime, runKills=0, runBosses=0, deathSlow=0, killerInfo=null;
 let bgScroll=0; const stars=[
   Array.from({length:34},()=>({x:rnd(0,W),y:rnd(0,H),sp:14,sz:.6,al:.30,st:0})),
@@ -745,6 +758,8 @@ function startGame(){
   shotsFired=0; shotsHit=0; runTime=0; window.scoreT=0; window.scoreD=0; window.combo=0; window.mult=1; window.comboT=0;
   runKills=0; runBosses=0; deathSlow=0; killerInfo=null; window.maxCombo=0;
   resetPlayer(true);
+  if(LOADOUTS[loadout]) LOADOUTS[loadout].apply(player);
+  applyUpgrades(); player.armor=player.maxArmor; player.beamE=player.beamMax;
   if(gameMode==='hardcore'){ player.lives=0; } else if(gameMode==='arcade'){ player.lives=8; player.coins=9000; }
   envGrid=[0,255,65]; lastSec=-1; triggerBanner();
   showOverlay(null);
@@ -829,6 +844,12 @@ function dropPod(x,y,fromBoss){
   pods.push(pod);
 }
 const WEAPONS=['spread','lance','homing','rapid'];
+const LOADOUTS={
+  vanguard:{name:'VANGUARD', desc:'Balanced standard rig.', apply:p=>{}},
+  gunner:{name:'GUNNER', desc:'Starts with a heavier forward gun.', apply:p=>{ p.up.gun=3; }},
+  striker:{name:'STRIKER', desc:'Piercing lance plus side guns.', apply:p=>{ p.unlocked.lance=1; p.wtype='lance'; p.up.flank=1; }},
+  warden:{name:'WARDEN', desc:'Tougher hull, a shield, an extra bomb.', apply:p=>{ p.up.armor=2; p.shieldHits=1; p.bombs=3; }}
+};
 const WCOL={spread:COL.green,lance:COL.cyan,homing:COL.gold,rapid:COL.mat};
 function applyPod(p){
   if(p.type==='core'){ const jack=150+sector*30; player.coins+=jack; addScore(jack,p.x,p.y,p.c);
@@ -1825,6 +1846,7 @@ window.addEventListener('pointercancel',()=>{ ptr.active=false; });
 
 window.addEventListener('keydown',e=>{ Audio_.init(); Audio_.resume();
   const k=e.key.length===1?e.key.toLowerCase():e.key; keys[k]=true; keys[e.key]=true;
+  if(!document.getElementById('ovlFeedback').classList.contains('hidden')) return;
   if(!document.getElementById('ovlConfirm').classList.contains('hidden')){
     if(e.key==='Enter') doRestart(); else if(e.key==='Escape') cancelRestart();
     e.preventDefault(); return; }
@@ -1926,6 +1948,17 @@ try{ if(localStorage.getItem('vanguard_mute')==='1'){Audio_.muted=true;const pmb
   apply();
 })();
 
+/* loadout select */
+(function(){
+  let l; try{ l=localStorage.getItem('vanguard_loadout')||'vanguard'; }catch(e){ l='vanguard'; }
+  if(!LOADOUTS[l]) l='vanguard'; loadout=l;
+  const wrap=document.getElementById('loadSel'); if(!wrap)return;
+  const btns=[...wrap.querySelectorAll('.modebtn')]; const desc=document.getElementById('loadDesc');
+  function apply(){ btns.forEach(b=>b.classList.toggle('sel',b.dataset.l===loadout)); if(desc&&LOADOUTS[loadout]) desc.textContent=LOADOUTS[loadout].desc; }
+  btns.forEach(b=>b.addEventListener('click',ev=>{ ev.stopPropagation(); loadout=b.dataset.l; try{localStorage.setItem('vanguard_loadout',loadout);}catch(e){} apply(); Audio_.hit(); }));
+  apply();
+})();
+
 /* feedback */
 (function(){
   const modal=document.getElementById('ovlFeedback');
@@ -1936,6 +1969,7 @@ try{ if(localStorage.getItem('vanguard_mute')==='1'){Audio_.muted=true;const pmb
   function closeFb(){ modal.classList.add('hidden'); }
   document.getElementById('titleFeedback').addEventListener('click',e=>{e.stopPropagation();openFb();});
   document.getElementById('overFeedback').addEventListener('click',e=>{e.stopPropagation();openFb();});
+  { const pf=document.getElementById('pauseFeedback'); if(pf) pf.addEventListener('click',e=>{e.stopPropagation();openFb();}); }
   document.getElementById('fbCancel').addEventListener('click',closeFb);
   msg.addEventListener('input',()=>cnt.textContent=msg.value.length);
   sendBtn.addEventListener('click',()=>{
