@@ -344,6 +344,19 @@ const FACTIONS={
 };
 const FKEYS=Object.keys(FACTIONS);
 
+/* ============================= sector identity ============================= */
+const SECTOR_THEMES=[
+  {fk:null,   accent:COL.green, grid:[0,255,65]},    // I   IDEA green (neutral opener)
+  {fk:'ace',  accent:COL.ace,   grid:[255,122,26]},  // II  ACE orange
+  {fk:'bmet', accent:COL.bmet,  grid:[178,77,255]},  // III BMET purple
+  {fk:'csee', accent:COL.csee,  grid:[46,155,255]},  // IV  CSEE blue
+  {fk:'mat',  accent:COL.mat,   grid:[255,210,26]},  // V   MAT yellow
+  {fk:'mset', accent:COL.mset,  grid:[255,46,46]}    // VI  MSET red
+];
+function sectorTheme(){ return SECTOR_THEMES[(((sector|0)-1)%SECTOR_THEMES.length+SECTOR_THEMES.length)%SECTOR_THEMES.length]; }
+let envGrid=[0,255,65], sectorBanner=0, bannerSec=1, lastSec=-1;
+function triggerBanner(){ sectorBanner=2.4; bannerSec=sector; }
+
 /* ============================= spawning ============================= */
 function makeEnemy(fk,variant,x,y,behavior){
   const F=FACTIONS[fk];
@@ -352,7 +365,9 @@ function makeEnemy(fk,variant,x,y,behavior){
     core:rnd(0,6.28), spin:rnd(-.4,.4), bob:rnd(0,6.28), flash:0, dead:false, dt:0, gone:false,
     state:behavior||'free', slot:-1, vx:0, vy:rnd(40,70), fire:rnd(.6,1.6), bank:0, t:0};
 }
-function factionForSector(){ const n=Math.min(sector,5); return FKEYS[(Math.random()*n)|0]; }
+function factionForSector(){ const th=sectorTheme();
+  if(th.fk && Math.random()<0.55) return th.fk;
+  const n=Math.min(sector+1,5); return FKEYS[(Math.random()*n)|0]; }
 
 function buildFormation(){
   const N=12; const p=pick(['grid','arrow','double']); slots=[];
@@ -362,8 +377,8 @@ function buildFormation(){
     widths.forEach((w,r)=>{for(let c=0;c<w;c++) slots.push({ox:(c-(w-1)/2)*dx,oy:r*dy});}); }
   else { const dy=40; for(let i=0;i<6;i++){ slots.push({ox:-90-i*4,oy:i*dy}); slots.push({ox:90+i*4,oy:i*dy}); } }
   slots=slots.slice(0,N);
-  const fkPool=[]; const nF=Math.min(sector+1,5);
-  for(let i=0;i<N;i++) fkPool.push(FKEYS[i%nF]);
+  const fkPool=[]; const th=sectorTheme(); const nF=Math.min(sector+1,5);
+  for(let i=0;i<N;i++) fkPool.push( (th.fk && Math.random()<0.55) ? th.fk : FKEYS[(Math.random()*nF)|0] );
   for(let i=fkPool.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;const tmp=fkPool[i];fkPool[i]=fkPool[j];fkPool[j]=tmp;}
   slots.forEach((s,i)=>{ s.fk=fkPool[i]; });
 }
@@ -427,9 +442,10 @@ function startGame(){
   state='play';
   enemies=[]; pbul=[]; ebul=[]; pods=[]; parts=[]; shards=[]; rings=[]; pops=[]; boss=null;
   fleet=null; slots=[]; refill=[]; reconfTimer=0; volleyTimer=2; diveTimer=2.6;
-  sector=1; waveIdx=0; wavesPerSector=3; waveTimer=0.5; bossPending=false; sectorClearT=0;
+  sector=1; waveIdx=0; wavesPerSector=3; waveTimer=1.6; bossPending=false; sectorClearT=0;
   shotsFired=0; shotsHit=0; runTime=0; window.scoreT=0; window.scoreD=0; window.combo=0; window.mult=1; window.comboT=0;
   resetPlayer(true);
+  envGrid=[0,255,65]; lastSec=-1; triggerBanner();
   showOverlay(null);
   requestNonce(); fetchOnline();
   document.getElementById('touch').classList.toggle('hidden', !isTouch);
@@ -547,6 +563,9 @@ function update(dt){
   t+=dt; runTime+=dt; if(shake>0)shake=Math.max(0,shake-dt*40);
   bgScroll=(bgScroll+60*dt)%36;
   stars.forEach(L=>L.forEach(s=>{s.y+=s.sp*dt;s.st+=dt*3;if(s.y>H){s.y=-2;s.x=rnd(0,W);}}));
+  if(state==='play'||state==='refit'||state==='over'){ const tg=sectorTheme().grid;
+    for(let i=0;i<3;i++) envGrid[i]+=(tg[i]-envGrid[i])*Math.min(1,dt*2.2); }
+  if(sectorBanner>0) sectorBanner-=dt;
   if(state!=='play')return;
 
   /* ----- player ----- */
@@ -722,8 +741,8 @@ function defeatBoss(){ explode(boss.x,boss.y,boss.c,true); Audio_.big(); shake=1
 }
 function openRefit(){ state='refit'; document.getElementById('touch').classList.add('hidden');
   el('refitNext').textContent=roman(sector+1); buildRefit(); showOverlay('ovlRefit'); }
-function launchFromRefit(){ sector++; waveIdx=0; waveTimer=1.2; bossPending=false; fleet=null;
-  player.beamE=player.beamMax; state='play'; showOverlay(null);
+function launchFromRefit(){ sector++; waveIdx=0; waveTimer=1.6; bossPending=false; fleet=null;
+  player.beamE=player.beamMax; triggerBanner(); state='play'; showOverlay(null);
   document.getElementById('touch').classList.toggle('hidden', !isTouch); }
 function refitItems(){ const u=player.up;
   return [
@@ -765,12 +784,12 @@ function drawBG(){
   if(shake>0 && !REDUCED) bg.translate(rnd(-shake,shake),rnd(-shake,shake));
   bg.clearRect(-20,-20,W+40,H+40); bg.fillStyle=COL.bg; bg.fillRect(-20,-20,W+40,H+40);
   // grid
-  const gs=36, off=bgScroll;
-  for(let y=-gs+off;y<H;y+=gs){ const d=clamp(y/H,0,1); bg.strokeStyle='rgba(0,255,65,'+(0.03+0.07*d)+')'; bg.lineWidth=1;
+  const gs=36, off=bgScroll; const gc=Math.round(envGrid[0])+','+Math.round(envGrid[1])+','+Math.round(envGrid[2]);
+  for(let y=-gs+off;y<H;y+=gs){ const d=clamp(y/H,0,1); bg.strokeStyle='rgba('+gc+','+(0.03+0.07*d)+')'; bg.lineWidth=1;
     bg.beginPath();bg.moveTo(0,y);bg.lineTo(W,y);bg.stroke(); }
-  for(let x=0;x<=W;x+=gs){ bg.strokeStyle='rgba(0,170,136,0.035)'; bg.beginPath();bg.moveTo(x,0);bg.lineTo(x,H);bg.stroke(); }
+  for(let x=0;x<=W;x+=gs){ bg.strokeStyle='rgba('+gc+',0.045)'; bg.beginPath();bg.moveTo(x,0);bg.lineTo(x,H);bg.stroke(); }
   if(!REDUCED){ const sy=(t*150)%(H+120)-60; const g=bg.createLinearGradient(0,sy-40,0,sy+40);
-    g.addColorStop(0,'rgba(0,255,65,0)');g.addColorStop(.5,'rgba(0,255,65,0.06)');g.addColorStop(1,'rgba(0,255,65,0)');
+    g.addColorStop(0,'rgba('+gc+',0)');g.addColorStop(.5,'rgba('+gc+',0.07)');g.addColorStop(1,'rgba('+gc+',0)');
     bg.fillStyle=g; bg.fillRect(0,sy-40,W,80); }
   // stars
   stars.forEach(L=>L.forEach(s=>{ const tw=0.7+0.3*Math.sin(s.st); bg.shadowColor=COL.white; bg.shadowBlur=4;
@@ -797,6 +816,28 @@ function drawBG(){
   // top fade
   const tf=bg.createLinearGradient(0,0,0,72); tf.addColorStop(0,'rgba(2,10,4,0.92)'); tf.addColorStop(1,'rgba(2,10,4,0)');
   bg.fillStyle=tf; bg.fillRect(0,0,W,72);
+  if(sectorBanner>0) drawBanner();
+  bg.restore();
+}
+function drawBanner(){
+  const T=2.4, p=clamp(1-sectorBanner/T,0,1);
+  const a = p<0.14 ? p/0.14 : p>0.82 ? Math.max(0,(1-p)/0.18) : 1;
+  const cx=W/2, cy=H*0.42, acc=sectorTheme().accent;
+  bg.save();
+  const band=bg.createLinearGradient(0,cy-62,0,cy+62);
+  band.addColorStop(0,'rgba(2,10,4,0)'); band.addColorStop(.5,'rgba(2,10,4,'+(0.82*a)+')'); band.addColorStop(1,'rgba(2,10,4,0)');
+  bg.fillStyle=band; bg.fillRect(0,cy-62,W,124);
+  const sw=Math.min(1,p/0.45)*W*0.44;
+  bg.globalAlpha=a; bg.strokeStyle=acc; bg.shadowColor=acc; bg.shadowBlur=14; bg.lineWidth=2;
+  bg.beginPath(); bg.moveTo(cx-sw,cy-36); bg.lineTo(cx+sw,cy-36); bg.stroke();
+  bg.beginPath(); bg.moveTo(cx-sw,cy+32); bg.lineTo(cx+sw,cy+32); bg.stroke();
+  bg.textAlign='center'; bg.fillStyle=acc; bg.shadowBlur=20;
+  bg.font="700 42px 'Chakra Petch',system-ui,sans-serif";
+  bg.fillText('SECTOR '+roman(bannerSec), cx, cy+2);
+  bg.globalAlpha=a*0.95; bg.shadowBlur=10; bg.fillStyle=COL.white;
+  bg.font="600 15px 'Share Tech Mono',monospace";
+  bg.fillText(SECTORS[(bannerSec-1)%SECTORS.length], cx, cy+24);
+  bg.globalAlpha=1; bg.shadowBlur=0; bg.textAlign='start';
   bg.restore();
 }
 function drawCraft(ctx,e,drawFn,isBoss){
@@ -907,6 +948,8 @@ function hud(dt){
   if(window.mult!==lastCombo){ lastCombo=window.mult; el('combo').textContent='x'+window.mult; const c=el('combo'); c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop'); }
   el('charge').querySelector('i').style.width=(player.beamE/player.beamMax*100).toFixed(0)+'%'; el('charge').classList.toggle('full',player.beamActive);
   el('secNum').textContent=roman(sector); el('secName').textContent=SECTORS[(sector-1)%SECTORS.length];
+  if(sector!==lastSec){ lastSec=sector; const acc=sectorTheme().accent;
+    el('secNum').style.color=acc; el('secName').style.color=acc; el('secNum').style.textShadow='0 0 10px '+acc; }
   if(player.lives!==lastLives){ lastLives=player.lives; el('lives').innerHTML=shipGlyph.repeat(Math.max(0,player.lives)); }
   if(player.wtype!==lastWname){ lastWname=player.wtype; el('wname').textContent=player.wtype.toUpperCase(); }
   if(player.wlevel!==lastWlvl){ lastWlvl=player.wlevel; el('wlvl').textContent='Lv.'+player.wlevel;
