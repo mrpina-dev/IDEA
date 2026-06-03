@@ -440,10 +440,10 @@ function resetPlayer(full){
     player.beamOn=false; player.beamLock=false; player.beamActive=false; player.beamE=player.beamMax; }
 }
 function applyUpgrades(){ const u=player.up;
-  player.speed   = 208 + u.speed*30;     // tier1 238 ... tier6 388
+  player.speed   = 212 + u.speed*64;
   player.wlevel  = u.gun;                // 1..5
-  player.beamMax = 0.7 + u.beamCap*0.45; // tier1 1.15s ...
-  player.beamDps = 34 + u.beamPow*12;    // tier1 46/s ...
+  player.beamMax = 0.9 + u.beamCap*0.7;
+  player.beamDps = 40 + u.beamPow*26;
   if(player.beamE>player.beamMax) player.beamE=player.beamMax;
 }
 
@@ -453,7 +453,7 @@ function startGame(){
   enemies=[]; pbul=[]; ebul=[]; pods=[]; parts=[]; shards=[]; rings=[]; pops=[]; boss=null; barriers=[]; bossSpoils=0; bossFlash=0;
   fleet=null; slots=[]; refill=[]; reconfTimer=0; volleyTimer=2; diveTimer=2.6;
   sector=1; waveIdx=0; wavesPerSector=3; waveTimer=1.6; bossPending=false; sectorClearT=0;
-  sectorKills=0; killsForBoss=30+sector*8;
+  sectorKills=0; killsForBoss=40+sector*12;
   shotsFired=0; shotsHit=0; runTime=0; window.scoreT=0; window.scoreD=0; window.combo=0; window.mult=1; window.comboT=0;
   resetPlayer(true);
   envGrid=[0,255,65]; lastSec=-1; triggerBanner();
@@ -468,8 +468,9 @@ function nextSectorCheck(dt){
   if(!bossPending){
     const alive = enemies.reduce((a,e)=>a+(e.dead?0:1),0);
     if(sectorKills>=killsForBoss){
-      bossPending=true; waveTimer=1.4;            // brief lull, then the boss arrives
-      if(fleet){ fleet.retiring=true; fleet.descend=120; }
+      bossPending=true; waveTimer=1.7;            // grunts retreat, then the boss arrives
+      fleet=null;
+      for(const e of enemies){ if(e.dead)continue; e.state='retreat'; e.vx=(e.x<W/2?-1:1)*rnd(220,300); e.vy=-rnd(40,120); }
     } else {
       waveTimer-=dt;
       if(alive<6 && waveTimer<=0){ spawnWave(); waveTimer=rnd(1.3,2.3); }
@@ -545,8 +546,9 @@ function firePrimary(){
   shotsFired++;
   if(player.wtype==='spread'){
     const angs=[[0],[-.12,.12],[-.18,0,.18],[-.26,-.09,.09,.26],[-.32,-.16,0,.16,.32]][lv-1];
-    angs.forEach(a=>pbul.push({x:x+Math.sin(a)*7,y,vx:Math.sin(a)*180,vy:-560,c,r:1.6,dmg:1}));
-    player.fireCd=.16;
+    const dmg=0.8+lv*0.3;
+    angs.forEach(a=>pbul.push({x:x+Math.sin(a)*7,y,vx:Math.sin(a)*180,vy:-560,c,r:1.6,dmg}));
+    player.fireCd=.185-lv*0.014;
   } else if(player.wtype==='rapid'){
     const streams=lv<3?1:lv<5?2:3; const sp=10;
     for(let i=0;i<streams;i++){ const ox=(i-(streams-1)/2)*sp;
@@ -670,6 +672,9 @@ function update(dt){
       e.x+=e.vx*dt; e.y+=e.vy*dt; e.bank=e.vx*0.04;
       e.fire-=dt; if(e.fire<=0){ e.fire=rnd(0.8,1.6); if(e.x>0&&e.x<W) enemyShot(e,0,1); }
       if(e.x<-50||e.x>W+50){ e.dead=true; e.dt=0; e.gone=true; }
+    } else if(e.state==='retreat'){
+      e.x+=e.vx*dt; e.y+=e.vy*dt; e.vy-=dt*70; e.bank=e.vx*0.05;
+      if(e.x<-60||e.x>W+60||e.y<-60){ e.dead=true; e.dt=0; e.gone=true; }
     } else { // free
       e.y+=e.vy*dt; e.fire-=dt; if(e.fire<=0){ e.fire=rnd(1,2); enemyAimShot(e); }
       if(e.y>H+40){ e.dead=true; e.dt=0; e.gone=true; }
@@ -846,7 +851,7 @@ function finishBoss(){ const b=boss; explode(b.x,b.y,b.c,true); Audio_.big(); sh
 function openRefit(){ state='refit'; document.getElementById('touch').classList.add('hidden');
   el('refitNext').textContent=roman(sector+1); buildRefit(); showOverlay('ovlRefit'); }
 function launchFromRefit(){ sector++; waveIdx=0; waveTimer=1.6; bossPending=false; fleet=null;
-  sectorKills=0; killsForBoss=30+sector*8;
+  sectorKills=0; killsForBoss=40+sector*12;
   player.beamE=player.beamMax; triggerBanner(); state='play'; showOverlay(null);
   document.getElementById('touch').classList.toggle('hidden', !isTouch); }
 function refitItems(){ const u=player.up;
@@ -1205,10 +1210,14 @@ el('menuBtn').addEventListener('click',toTitle);
 el('startCta').addEventListener('click',()=>{ if(state==='title')startGame(); });
 el('submitBtn').addEventListener('click',submitScore);
 el('againBtn').addEventListener('click',()=>{ startGame(); });
-function submitScore(){ const sc=pendingScore?pendingScore.score:window.scoreT;
-  saveLocal(curInitials, sc); submitToServer(sc, pendingScore?pendingScore.sector:sector, pendingScore?pendingScore.acc:0);
-  state='board'; showOverlay('ovlBoard'); renderBoard('bigBoard',curInitials,sc);
-  if(API_URL) setTimeout(()=>fetchOnline(()=>renderBoard('bigBoard',curInitials,sc)), 1600); }
+function mergeScore(name,score){ const b=(onlineBoard?onlineBoard.slice():[]);
+  if(!b.some(r=>r.name===name&&r.score===score)) b.push({name,score});
+  b.sort((a,c)=>c.score-a.score); onlineBoard=b.slice(0,10); }
+function submitScore(){ const sc=pendingScore?pendingScore.score:window.scoreT; const nm=curInitials;
+  saveLocal(nm, sc); submitToServer(sc, pendingScore?pendingScore.sector:sector, pendingScore?pendingScore.acc:0);
+  mergeScore(nm,sc);
+  state='board'; showOverlay('ovlBoard'); renderBoard('bigBoard',nm,sc);
+  if(API_URL){ [1600,3800,6500].forEach(ms=>setTimeout(()=>fetchOnline(()=>{ mergeScore(nm,sc); renderBoard('bigBoard',nm,sc); }), ms)); } }
 
 function toggleMute(){ Audio_.muted=!Audio_.muted; el('muteBtn').textContent='SOUND: '+(Audio_.muted?'OFF':'ON'); try{localStorage.setItem('vanguard_mute',Audio_.muted?'1':'0');}catch(e){} }
 el('muteBtn').addEventListener('click',e=>{e.stopPropagation();toggleMute();});
