@@ -103,6 +103,11 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 .obtn.sub{background:var(--gold);box-shadow:0 0 16px rgba(200,255,0,.5)}
 .mini{font-size:10px;color:var(--dim);letter-spacing:.1em;background:none;border:1px solid var(--dim);color:var(--dim);
   padding:6px 12px;border-radius:5px;cursor:pointer;pointer-events:auto;font-family:'Share Tech Mono',monospace}
+.modes{display:flex;gap:8px;justify-content:center;margin-top:2px}
+.modebtn{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;background:rgba(0,20,8,.5);border:1px solid var(--dim);color:var(--dim);padding:6px 12px;border-radius:5px;cursor:pointer;pointer-events:auto}
+.modebtn.sel{border-color:var(--green);color:var(--green);box-shadow:0 0 10px rgba(0,255,65,.4);text-shadow:0 0 8px rgba(0,255,65,.6)}
+.modebtn[data-m=hardcore].sel{border-color:var(--mset);color:var(--mset);box-shadow:0 0 10px rgba(255,46,46,.4);text-shadow:0 0 8px rgba(255,46,46,.6)}
+.modebtn[data-m=arcade].sel{border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 10px rgba(0,240,255,.4);text-shadow:0 0 8px rgba(0,240,255,.6)}
 
 .legend{display:flex;flex-wrap:wrap;gap:8px 14px;justify-content:center;max-width:320px;font-size:10px;letter-spacing:.04em}
 .legend span{display:inline-flex;align-items:center;gap:5px;color:var(--white)}
@@ -177,6 +182,11 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
   <div class="ovl" id="ovlTitle">
     <div class="title-wm"><div class="a">VANGUARD</div><div class="b">I D E A</div></div>
     <div class="tag">A BOSCO TECH ARCADE</div>
+    <div class="modes" id="modeSel">
+      <button class="modebtn sel" data-m="normal">NORMAL</button>
+      <button class="modebtn" data-m="hardcore">HARDCORE</button>
+      <button class="modebtn" data-m="arcade">ARCADE</button>
+    </div>
     <div class="board" id="titleBoard"></div>
     <div class="cta" id="startCta">PRESS ENTER / TAP TO LAUNCH</div>
     <div class="legend" id="legend"></div>
@@ -252,7 +262,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=560,H=840; const VERSION='2514';
+const W=560,H=840; const VERSION='2515';
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
 const bg=bgC.getContext('2d'), fx=fxC.getContext('2d');
@@ -336,6 +346,7 @@ let fleet=null, slots=[], refill=[], reconfTimer=0, volleyTimer=0, diveTimer=0;
 let sector, waveIdx, wavesPerSector, waveTimer, bossPending, sectorClearT, bossSpoils=0, bossFlash=0, sectorKills=0, killsForBoss=21, gameOverT=0, killer=null, lastHitBy=null;
 let runFactionSeq=[], waveFk=null;
 let hybridTimer=0;
+let gameMode='normal';
 let shotsFired, shotsHit, runTime, runKills=0, runBosses=0, deathSlow=0, killerInfo=null;
 let bgScroll=0; const stars=[
   Array.from({length:34},()=>({x:rnd(0,W),y:rnd(0,H),sp:14,sz:.6,al:.30,st:0})),
@@ -704,6 +715,7 @@ function startGame(){
   shotsFired=0; shotsHit=0; runTime=0; window.scoreT=0; window.scoreD=0; window.combo=0; window.mult=1; window.comboT=0;
   runKills=0; runBosses=0; deathSlow=0; killerInfo=null; window.maxCombo=0;
   resetPlayer(true);
+  if(gameMode==='hardcore'){ player.lives=0; } else if(gameMode==='arcade'){ player.lives=8; player.coins=9000; }
   envGrid=[0,255,65]; lastSec=-1; triggerBanner();
   showOverlay(null);
   requestNonce(); fetchOnline();
@@ -1623,6 +1635,11 @@ function endRun(){
   document.getElementById('touch').classList.add('hidden');
   document.getElementById('bossname').style.display='none'; document.getElementById('bossbar').style.display='none';
   buildInitials(); showOverlay('ovlOver');
+  { const arc=(gameMode==='arcade');
+    el('initials').style.display=arc?'none':'flex';
+    el('enterHint').textContent=arc?'PRACTICE RUN - NOT RANKED':'ENTER INITIALS';
+    el('submitBtn').textContent=arc?'MAIN MENU':'SUBMIT';
+    el('overTitle').textContent=(gameMode==='hardcore')?'HARDCORE END':'MISSION END'; }
   try{
     const acc=shotsFired?Math.round(shotsHit/shotsFired*100):0;
     el('finalScore').textContent=window.scoreT.toLocaleString();
@@ -1672,7 +1689,7 @@ function saveLocal(name,score){ const b=localBoard(); b.push({name,score}); b.so
   const top=b.slice(0,10); try{localStorage.setItem('vanguard_scores',JSON.stringify(top));}catch(e){} return top; }
 function boardRows(){ return (API_URL && onlineBoard)? onlineBoard : localBoard(); }
 function submitToServer(score,sec,acc){ if(!API_URL)return; try{ const img=new Image();
-  img.src=API_URL+'?action=submit&name='+encodeURIComponent(curInitials)+'&score='+score+'&sector='+sec+'&acc='+acc+'&t='+Math.round(runTime)+'&nonce='+encodeURIComponent(runNonce)+'&cb='+Date.now(); }catch(e){} }
+  img.src=API_URL+'?action=submit&name='+encodeURIComponent(curInitials)+'&score='+score+'&sector='+sec+'&acc='+acc+'&t='+Math.round(runTime)+'&mode='+gameMode+'&nonce='+encodeURIComponent(runNonce)+'&cb='+Date.now(); }catch(e){} }
 function renderBoard(target,highlightName,highlightScore){
   const box=el(target); if(!box)return;
   if(API_URL && !onlineBoard){ box.innerHTML='<div class="row"><span class="nm" style="color:var(--dim)">LOADING LEADERBOARD...</span></div>'; return; }
@@ -1764,7 +1781,7 @@ el('againBtn').addEventListener('click',()=>{ startGame(); });
 function mergeScore(name,score){ const b=(onlineBoard?onlineBoard.slice():[]);
   if(!b.some(r=>r.name===name&&r.score===score)) b.push({name,score});
   b.sort((a,c)=>c.score-a.score); onlineBoard=b.slice(0,10); }
-function submitScore(){ const sc=pendingScore?pendingScore.score:window.scoreT; const nm=curInitials;
+function submitScore(){ if(gameMode==='arcade'){ toTitle(); return; } const sc=pendingScore?pendingScore.score:window.scoreT; const nm=curInitials;
   saveLocal(nm, sc); try{localStorage.setItem('vanguard_lastInitials',nm);}catch(e){}
   submitToServer(sc, pendingScore?pendingScore.sector:sector, pendingScore?pendingScore.acc:0);
   mergeScore(nm,sc);
@@ -1788,6 +1805,18 @@ try{ if(localStorage.getItem('vanguard_mute')==='1'){Audio_.muted=true;const pmb
     btns.forEach(b=>{if(b)b.textContent=lbl;}); try{localStorage.setItem('vanguard_controls',shown?'1':'0');}catch(e){} }
   btns.forEach(b=>{if(b)b.addEventListener('click',ev=>{ev.stopPropagation();shown=!shown;applyCtrl();});});
   applyCtrl();
+})();
+
+/* mode select */
+(function(){
+  let m; try{ m=localStorage.getItem('vanguard_mode')||'normal'; }catch(e){ m='normal'; }
+  if(m!=='normal'&&m!=='hardcore'&&m!=='arcade') m='normal';
+  gameMode=m;
+  const wrap=document.getElementById('modeSel'); if(!wrap)return;
+  const btns=[...wrap.querySelectorAll('.modebtn')];
+  function apply(){ btns.forEach(b=>b.classList.toggle('sel',b.dataset.m===gameMode)); }
+  btns.forEach(b=>b.addEventListener('click',ev=>{ ev.stopPropagation(); gameMode=b.dataset.m; try{localStorage.setItem('vanguard_mode',gameMode);}catch(e){} apply(); Audio_.hit(); }));
+  apply();
 })();
 
 /* feedback */
