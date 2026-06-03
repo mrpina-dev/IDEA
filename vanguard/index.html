@@ -17,7 +17,7 @@ body{background:#000;display:flex;align-items:center;justify-content:center;min-
 #stage{position:relative;width:min(560px,100vw);aspect-ratio:2/3;max-height:100dvh;
   overflow:hidden;background:var(--bg0);
   box-shadow:0 0 0 1px rgba(0,255,65,.20),0 0 60px rgba(0,255,65,.08),0 24px 80px rgba(0,0,0,.85)}
-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#bg,#fx{position:absolute;inset:0;width:100%;height:100%;display:block}
 #fx{mix-blend-mode:screen}
 
 /* HUD */
@@ -208,7 +208,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
   <!-- GAME OVER / ENTER -->
   <div class="ovl hidden" id="ovlOver">
     <h2 class="ovh" id="overTitle">MISSION END</h2>
-    <canvas id="killerGlyph" width="64" height="64" style="margin:2px auto;display:block"></canvas>
+    <canvas id="killerGlyph" width="64" height="64" style="margin:2px auto;display:block;position:relative;width:64px;height:64px;pointer-events:none"></canvas>
     <div class="tag">FELLED BY <span id="felledBy" style="color:var(--white)">-</span></div>
     <div class="go-stat">SCORE <b id="finalScore">0</b></div>
     <div class="go-stat">REACHED SECTOR <b id="finalSector">I</b> &nbsp; ACCURACY <b id="finalAcc">0%</b></div>
@@ -252,7 +252,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=560,H=840; const VERSION='2513';
+const W=560,H=840; const VERSION='2514';
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
 const bg=bgC.getContext('2d'), fx=fxC.getContext('2d');
@@ -273,26 +273,59 @@ const ROMAN=['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII
 function roman(n){return ROMAN[(n-1)%ROMAN.length]+(n>ROMAN.length?'+':'');}
 
 /* ============================= audio ============================= */
-const Audio_={ctx:null,muted:false,
-  init(){ if(this.ctx)return; try{this.ctx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} },
+const Audio_={ctx:null,muted:false,master:null,music_:null,
+  init(){ if(this.ctx)return; try{ this.ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const m=this.ctx.createGain(); m.gain.value=0.9;
+    const lp=this.ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=5200;
+    m.connect(lp); lp.connect(this.ctx.destination); this.master=m;
+  }catch(e){} },
   resume(){ if(this.ctx&&this.ctx.state==='suspended')this.ctx.resume(); },
-  blip(freq,dur,type,vol){ if(!this.ctx||this.muted)return; const t=this.ctx.currentTime;
+  out(){ return this.master||this.ctx.destination; },
+  tone(freq,dur,type,vol,opt){ if(!this.ctx||this.muted)return; opt=opt||{}; const t=this.ctx.currentTime+(opt.delay||0);
     const o=this.ctx.createOscillator(),g=this.ctx.createGain();
     o.type=type||'square'; o.frequency.setValueAtTime(freq,t);
-    g.gain.setValueAtTime((vol||0.06),t); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
-    o.connect(g); g.connect(this.ctx.destination); o.start(t); o.stop(t+dur); },
-  noise(dur,vol){ if(!this.ctx||this.muted)return; const t=this.ctx.currentTime;
-    const n=this.ctx.createBufferSource(),buf=this.ctx.createBuffer(1,this.ctx.sampleRate*dur,this.ctx.sampleRate);
+    if(opt.glide) o.frequency.exponentialRampToValueAtTime(Math.max(1,opt.glide),t+dur);
+    if(opt.detune) o.detune.value=opt.detune;
+    const a=opt.attack||0.005; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(Math.max(0.0002,vol||0.05),t+a);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g); g.connect(this.out()); o.start(t); o.stop(t+dur+0.02); },
+  blip(freq,dur,type,vol){ this.tone(freq,dur,type,vol); },
+  noise(dur,vol,opt){ if(!this.ctx||this.muted)return; opt=opt||{}; const t=this.ctx.currentTime+(opt.delay||0);
+    const n=this.ctx.createBufferSource(),buf=this.ctx.createBuffer(1,Math.max(1,Math.floor(this.ctx.sampleRate*dur)),this.ctx.sampleRate);
     const d=buf.getChannelData(0); for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(1-i/d.length);
     n.buffer=buf; const g=this.ctx.createGain(); g.gain.setValueAtTime(vol||0.12,t); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
-    n.connect(g); g.connect(this.ctx.destination); n.start(t); },
-  fire(){ this.blip(660,0.05,'square',0.025); },
-  hit(){ this.blip(220,0.05,'sawtooth',0.03); },
-  kill(){ this.noise(0.18,0.10); this.blip(140,0.18,'sawtooth',0.04); },
-  big(){ this.noise(0.4,0.18); this.blip(90,0.4,'sawtooth',0.06); },
-  pickup(){ this.blip(880,0.08,'square',0.05); this.blip(1320,0.10,'square',0.04); },
-  beam(){ this.blip(180,0.5,'sawtooth',0.05); },
-  bomb(){ this.noise(0.5,0.22); }
+    if(opt.lp){ const f=this.ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=opt.lp; g.connect(f); f.connect(this.out()); }
+    else g.connect(this.out());
+    n.connect(g); n.start(t); n.stop(t+dur+0.02); },
+  fire(wt){ const v=0.022, r=rnd(-22,22);
+    if(wt==='lance'){ this.tone(880+r,0.05,'sawtooth',v,{glide:520}); }
+    else if(wt==='rapid'){ this.tone(1040+r,0.035,'square',v*0.8); }
+    else if(wt==='homing'){ this.tone(520+r,0.06,'triangle',v,{glide:760}); }
+    else { this.tone(660+r,0.05,'square',v); } },
+  hit(){ this.tone(200+rnd(-20,20),0.05,'sawtooth',0.028); },
+  kill(){ this.noise(0.18,0.10,{lp:3200}); this.tone(150+rnd(-30,30),0.2,'sawtooth',0.04,{glide:70}); },
+  big(){ this.noise(0.5,0.2,{lp:1800}); this.tone(90,0.45,'sawtooth',0.07,{glide:40}); this.tone(60,0.5,'sine',0.06,{glide:32}); },
+  pickup(){ this.tone(720,0.07,'square',0.045); this.tone(1080,0.09,'square',0.04,{delay:0.05}); this.tone(1440,0.10,'square',0.035,{delay:0.10}); },
+  power(){ [523,659,880].forEach((f,i)=>this.tone(f,0.16,'triangle',0.05,{delay:i*0.07})); },
+  beam(){ this.tone(150,0.4,'sawtooth',0.05,{glide:240}); },
+  bomb(){ this.noise(0.6,0.22,{lp:1200}); this.tone(70,0.6,'sine',0.08,{glide:30}); },
+  death(){ this.noise(0.9,0.22,{lp:1400}); this.tone(220,0.9,'sawtooth',0.07,{glide:32}); this.tone(110,1.0,'sine',0.06,{glide:24}); },
+  bossWarn(){ [0,0.18,0.36].forEach(d=>this.tone(160,0.16,'square',0.05,{delay:d,glide:120})); },
+  sector(){ this.tone(330,0.18,'triangle',0.04); this.tone(495,0.2,'triangle',0.04,{delay:0.1}); },
+  music(on){ if(!this.ctx)return;
+    if(on){ if(this.music_)return;
+      const f=this.ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=620; f.connect(this.out());
+      const g=this.ctx.createGain(); g.gain.value=0; g.connect(f);
+      const o1=this.ctx.createOscillator(); o1.type='sawtooth'; o1.frequency.value=55;
+      const o2=this.ctx.createOscillator(); o2.type='sawtooth'; o2.frequency.value=82.4; o2.detune.value=7;
+      const lfo=this.ctx.createOscillator(); lfo.type='sine'; lfo.frequency.value=0.07;
+      const lg=this.ctx.createGain(); lg.gain.value=180; lfo.connect(lg); lg.connect(f.frequency);
+      o1.connect(g); o2.connect(g); o1.start(); o2.start(); lfo.start();
+      g.gain.setTargetAtTime(this.muted?0:0.045, this.ctx.currentTime, 1.0);
+      this.music_={g,o1,o2,lfo,f}; }
+    else { if(!this.music_)return; const M=this.music_; this.music_=null; const t=this.ctx.currentTime;
+      try{ M.g.gain.setTargetAtTime(0,t,0.4); M.o1.stop(t+1.0); M.o2.stop(t+1.0); M.lfo.stop(t+1.0); }catch(e){} } },
+  applyMute(){ if(this.music_){ try{ this.music_.g.gain.setTargetAtTime(this.muted?0:0.045,this.ctx.currentTime,0.2); }catch(e){} } }
 };
 
 /* ============================= state ============================= */
@@ -564,7 +597,7 @@ const SECTOR_THEMES=[
 ];
 function sectorTheme(){ return SECTOR_THEMES[(((sector|0)-1)%SECTOR_THEMES.length+SECTOR_THEMES.length)%SECTOR_THEMES.length]; }
 let envGrid=[0,255,65], sectorBanner=0, bannerSec=1, lastSec=-1;
-function triggerBanner(){ sectorBanner=2.4; bannerSec=sector; }
+function triggerBanner(){ sectorBanner=2.4; bannerSec=sector; Audio_.sector(); }
 
 /* ============================= spawning ============================= */
 function makeEnemy(fk,variant,x,y,behavior){
@@ -629,7 +662,7 @@ function spawnBoss(){
     sweepState:0, sweepT:0, sweepAng:0, regenT:0, p3Cd:5.5,
     plates:0, plateMax:0, plateHp:0};
   if(fk==='mset'){ boss.plates=3; boss.plateMax=Math.round(hp*0.15); boss.plateHp=boss.plateMax; boss.r=62; }
-  if(fk==='ace'){ boss.r=64; }
+  if(fk==='ace'){ boss.r=64; } Audio_.bossWarn();
   document.getElementById('bossname').textContent='SECTOR BOSS · '+F.name;
 }
 
@@ -675,7 +708,7 @@ function startGame(){
   showOverlay(null);
   requestNonce(); fetchOnline();
   document.getElementById('touch').classList.toggle('hidden', !isTouch);
-  Audio_.init(); Audio_.resume();
+  Audio_.init(); Audio_.resume(); Audio_.music(true);
 }
 
 function nextSectorCheck(dt){
@@ -724,7 +757,7 @@ function playerHit(){
   shake=Math.max(shake,6);
   if(player.armor<=0){ explode(player.x,player.y,COL.green,true); Audio_.big(); shake=14;
     player.dead=true; player.respawn=1.4; player.lives--; player.drone=null;
-    if(player.lives<0){ deathSlow=1.1; startGameOver(); } }
+    if(player.lives<0){ deathSlow=1.1; Audio_.death(); startGameOver(); } }
 }
 
 /* ============================= effects ============================= */
@@ -769,7 +802,7 @@ function applyPod(p){
   if(p.type==='pwr'){
     player.buffs[p.buff]=8;
     pops.push({x:p.x,y:p.y-6,txt:{overdrive:'OVERDRIVE',scatter:'SCATTER',magnet:'MAGNET'}[p.buff],c:p.c,life:.8,max:.8});
-    Audio_.pickup(); return; }
+    Audio_.power(); return; }
   Audio_.pickup();
   if(p.type==='coin'){ player.coins+=60; addScore(60,p.x,p.y,COL.gold); }
   else if(p.type==='shield'){ player.shieldHits=Math.min(3,player.shieldHits+1); }
@@ -803,7 +836,7 @@ function firePrimary(){
       pbul.push({x,y,vx:Math.sin(a)*120,vy:-380,c:COL.gold,r:2,dmg:1,homing:true}); }
     player.fireCd=.2;
   }
-  Audio_.fire();
+  Audio_.fire(player.wtype);
   // Overdrive buff: boost dmg of shots fired this call + faster fire
   if(player.buffs && player.buffs.overdrive>0){
     pbul.slice(prevLen).forEach(b=>{ if(b.dmg) b.dmg*=1.3; });
@@ -1586,7 +1619,7 @@ function startGameOver(){
   gameOverT=1.9;
 }
 function endRun(){
-  state='over'; player.dead=true;
+  state='over'; player.dead=true; Audio_.music(false);
   document.getElementById('touch').classList.add('hidden');
   document.getElementById('bossname').style.display='none'; document.getElementById('bossbar').style.display='none';
   buildInitials(); showOverlay('ovlOver');
@@ -1720,7 +1753,7 @@ function doRestart(){ document.getElementById('ovlConfirm').classList.add('hidde
 el('restartBtn').addEventListener('click',e=>{ e.stopPropagation(); showRestartConfirm(); });
 el('confirmRestartBtn').addEventListener('click',e=>{ e.stopPropagation(); doRestart(); });
 el('cancelRestartBtn').addEventListener('click',e=>{ e.stopPropagation(); cancelRestart(); });
-function toTitle(){ state='title'; showOverlay('ovlTitle');
+function toTitle(){ state='title'; showOverlay('ovlTitle'); Audio_.music(false);
   document.getElementById('bossname').style.display='none'; document.getElementById('bossbar').style.display='none';
   document.getElementById('touch').classList.add('hidden'); boardRetries=0; renderBoard('titleBoard'); refreshBoard('titleBoard'); }
 el('quitBtn').addEventListener('click',toTitle);
@@ -1738,7 +1771,7 @@ function submitScore(){ const sc=pendingScore?pendingScore.score:window.scoreT; 
   state='board'; showOverlay('ovlBoard'); renderBoard('bigBoard',nm,sc);
   if(API_URL){ [1600,3800,6500].forEach(ms=>setTimeout(()=>fetchOnline(()=>{ mergeScore(nm,sc); renderBoard('bigBoard',nm,sc); }), ms)); } }
 
-function toggleMute(){ Audio_.muted=!Audio_.muted; const s='SOUND: '+(Audio_.muted?'OFF':'ON'); const pmb=document.getElementById('pauseMuteBtn'); if(pmb)pmb.textContent=s; try{localStorage.setItem('vanguard_mute',Audio_.muted?'1':'0');}catch(e){} }
+function toggleMute(){ Audio_.muted=!Audio_.muted; Audio_.applyMute(); const s='SOUND: '+(Audio_.muted?'OFF':'ON'); const pmb=document.getElementById('pauseMuteBtn'); if(pmb)pmb.textContent=s; try{localStorage.setItem('vanguard_mute',Audio_.muted?'1':'0');}catch(e){} }
 el('pauseMuteBtn').addEventListener('click',e=>{e.stopPropagation();toggleMute();});
 try{ if(localStorage.getItem('vanguard_mute')==='1'){Audio_.muted=true;const pmb=document.getElementById('pauseMuteBtn');if(pmb)pmb.textContent='SOUND: OFF';} }catch(e){}
 
