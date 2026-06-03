@@ -238,7 +238,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=560,H=840; const VERSION='2506';
+const W=560,H=840; const VERSION='2507';
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
 const bg=bgC.getContext('2d'), fx=fxC.getContext('2d');
@@ -288,6 +288,7 @@ let player=null, enemies=[], pbul=[], ebul=[], pods=[], parts=[], shards=[], rin
 let fleet=null, slots=[], refill=[], reconfTimer=0, volleyTimer=0, diveTimer=0;
 let sector, waveIdx, wavesPerSector, waveTimer, bossPending, sectorClearT, bossSpoils=0, bossFlash=0, sectorKills=0, killsForBoss=21, gameOverT=0, killer=null, lastHitBy=null;
 let runFactionSeq=[...FKEYS], waveFk=null;
+let hybridTimer=0;
 let shotsFired, shotsHit, runTime;
 let bgScroll=0; const stars=[
   Array.from({length:34},()=>({x:rnd(0,W),y:rnd(0,H),sp:14,sz:.6,al:.30,st:0})),
@@ -489,6 +490,42 @@ function drawMSET(ctx,e){ const r=e.r,v=e.variant,col=ctx.strokeStyle,lw=ctx.lin
   }
   ctx.restore();
 }
+// FOREMAN -- ACE x CSEE : orange heavy frame, blue circuitry/scanning turret
+function drawFOREMAN(ctx,e){ const r=e.r,ph=e.core,tell=e.tell||0,fl=e.fireFlash||0,aim=AIM(e),p=COL.ace,s=COL.csee,lw=ctx.lineWidth;
+  const hob=Math.sin(ph*1.7)*r*0.04; ctx.save(); ctx.translate(0,hob);
+  ctx.strokeStyle=p; ctx.shadowColor=p;
+  poly(ctx,[[0,r*1.0],[r*0.9,r*0.45],[r*0.9,-r*0.45],[0,-r*0.92],[-r*0.9,-r*0.45],[-r*0.9,r*0.45]],true); ctx.fillStyle=p+'1E'; ctx.fill(); ctx.stroke();
+  [[r*0.9,r*0.45],[r*0.9,-r*0.45],[-r*0.9,-r*0.45],[-r*0.9,r*0.45]].forEach(q=>dot(ctx,q[0],q[1],r*0.08,p));
+  ctx.save(); ctx.strokeStyle=s; ctx.shadowColor=s; ctx.lineWidth=lw*0.6; ctx.shadowBlur=8;
+  ctx.beginPath(); ctx.moveTo(-r*0.5,r*0.2); ctx.lineTo(-r*0.2,r*0.2); ctx.lineTo(-r*0.2,-r*0.1);
+  ctx.moveTo(r*0.5,r*0.2); ctx.lineTo(r*0.2,r*0.2); ctx.lineTo(r*0.2,-r*0.1);
+  ctx.moveTo(0,r*0.5); ctx.lineTo(0,r*0.2); ctx.stroke();
+  [[-r*0.5,r*0.2],[r*0.5,r*0.2],[0,r*0.5]].forEach(q=>dot(ctx,q[0],q[1],r*0.05,s)); ctx.restore();
+  ctx.save(); ctx.rotate(aim*0.6); ctx.strokeStyle=s; ctx.shadowColor=s; ctx.shadowBlur=(10+fl*40)+12*tell;
+  ctx.beginPath(); ctx.arc(0,-r*0.05,r*0.26,0,6.2832); ctx.fillStyle=s+'2E'; ctx.fill(); ctx.stroke();
+  dot(ctx,0,-r*0.05,r*(0.1+tell*0.08),fl>0?COL.white:s);
+  ctx.beginPath(); ctx.moveTo(0,r*0.21); ctx.lineTo(0,r*0.4+tell*r*0.2); ctx.stroke(); ctx.restore();
+  ctx.restore();
+}
+// VECTOR -- BMET x MAT : purple virion body, yellow broadcast dish + signal rings
+function drawVECTOR(ctx,e){ const r=e.r,ph=e.core,tell=e.tell||0,fl=e.fireFlash||0,aim=AIM(e),p=COL.bmet,s=COL.mat,lw=ctx.lineWidth;
+  const hob=Math.sin(ph*1.9)*r*0.04; ctx.save(); ctx.translate(0,hob);
+  ctx.strokeStyle=p; ctx.shadowColor=p; ctx.lineWidth=lw*0.85;
+  for(let i=0;i<8;i++){ const a=i/8*6.2832+ph*0.4; const r0=r*0.5,r1=r*0.82+Math.sin(ph*3+i)*r*0.06;
+    ctx.beginPath(); ctx.moveTo(Math.cos(a)*r0,Math.sin(a)*r0); ctx.lineTo(Math.cos(a)*r1,Math.sin(a)*r1); ctx.stroke(); }
+  ctx.lineWidth=lw; ctx.beginPath(); ctx.arc(0,r*0.05,r*0.5,0,6.2832); ctx.fillStyle=p+'24'; ctx.fill(); ctx.stroke();
+  dot(ctx,0,r*0.05,r*0.13,p);
+  ctx.save(); ctx.translate(0,-r*0.3); ctx.rotate(aim*0.8); ctx.strokeStyle=s; ctx.shadowColor=s; ctx.shadowBlur=(10+fl*44)+12*tell;
+  ctx.beginPath(); ctx.arc(0,-r*0.18,r*0.46,Math.PI*0.08,Math.PI*0.92,true); ctx.fillStyle=s+(tell>0.1?'33':'1E'); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0,-r*0.18); ctx.lineTo(0,-r*0.6); ctx.stroke(); dot(ctx,0,-r*0.6,r*(0.07+tell*0.05),fl>0?COL.white:s);
+  ctx.lineWidth=lw*0.7; ctx.save();
+  for(let i=0;i<3;i++){ const rr=(ph*0.8+i)%3; const aa=(0.35+tell*0.5)*(1-rr/3); if(aa>0.04){ ctx.globalAlpha=aa;
+    ctx.beginPath(); ctx.arc(0,-r*0.18,r*(0.5+rr*0.5),Math.PI*1.15,Math.PI*1.85); ctx.stroke(); } }
+  if(fl>0){ ctx.globalAlpha=1; ctx.lineWidth=lw*1.8; ctx.shadowBlur=26; ctx.shadowColor=COL.white; ctx.strokeStyle=COL.white;
+    ctx.beginPath(); ctx.arc(0,-r*0.18,r*0.95,Math.PI*1.1,Math.PI*1.9); ctx.stroke(); }
+  ctx.restore(); ctx.restore();
+  ctx.restore();
+}
 const FACTIONS={
   ace:  {c:COL.ace,  draw:drawACE,  pts:10, hp:[4,8,15], r:[15,21,30], name:'ACE BASTION'},
   bmet: {c:COL.bmet, draw:drawBMET, pts:20, hp:[4,8,15], r:[15,20,30], name:'BMET ORGANISM'},
@@ -496,7 +533,9 @@ const FACTIONS={
   mat:  {c:COL.mat,  draw:drawMAT,  pts:40, hp:[5,9,17], r:[15,20,30], name:'MAT BROADCASTER'},
   mset: {c:COL.mset, draw:drawMSET, pts:50, hp:[5,10,18], r:[15,21,30], name:'MSET MONOLITH'}
 };
-const FKEYS=Object.keys(FACTIONS);
+const FKEYS=['ace','bmet','csee','mat','mset'];
+FACTIONS.foreman={c:COL.ace,  draw:drawFOREMAN, pts:140, hp:[46,46,46], r:[30,30,30], name:'FOREMAN'};
+FACTIONS.vector ={c:COL.bmet, draw:drawVECTOR,  pts:140, hp:[42,42,42], r:[30,30,30], name:'VECTOR'};
 
 /* ============================= sector identity ============================= */
 const SECTOR_THEMES=[
@@ -604,6 +643,7 @@ function startGame(){
   state='play';
   enemies=[]; pbul=[]; ebul=[]; pods=[]; parts=[]; shards=[]; rings=[]; pops=[]; boss=null; barriers=[]; bossSpoils=0; bossFlash=0; gameOverT=0; killer=null; lastHitBy=null; hazards=[];
   runFactionSeq=[...FKEYS]; for(let _i=runFactionSeq.length-1;_i>0;_i--){const _j=Math.random()*_i|0;[runFactionSeq[_i],runFactionSeq[_j]]=[runFactionSeq[_j],runFactionSeq[_i]];} waveFk=null;
+  hybridTimer=rnd(6,10);
   fleet=null; slots=[]; refill=[]; reconfTimer=0; volleyTimer=2; diveTimer=2.6;
   sector=1; waveIdx=0; wavesPerSector=3; waveTimer=1.6; bossPending=false; sectorClearT=0;
   sectorKills=0; killsForBoss=100+sector*22;
@@ -632,7 +672,19 @@ function nextSectorCheck(dt){
     waveTimer-=dt;
     if(waveTimer<=0){ enemies.length=0; ebul.length=0; fleet=null; spawnBoss(); bossPending=false; }
   }
+  // Hybrid elite spawning (sector 4+ only, never during boss)
+  if(sector>=4&&!bossPending&&bossSpoils<=0){
+    hybridTimer-=dt;
+    if(hybridTimer<=0){
+      const ha=enemies.filter(e=>!e.dead&&(e.fk==='foreman'||e.fk==='vector')).length;
+      if(ha<2) spawnHybrid();
+      hybridTimer=rnd(11,17);
+    }
+  }
 }
+function spawnHybrid(){ const fk=Math.random()<0.5?'foreman':'vector';
+  const e=makeEnemy(fk,0, rnd(W*0.25,W*0.75), -50, fk);
+  e.hold=rnd(120,200); e.sigCd=rnd(1.8,3.0); e.lockT=0; e.lockX=0; e.lockY=0; e.buffR=190; e.altMove=false; enemies.push(e); }
 
 /* ============================= scoring ============================= */
 function addScore(pts,x,y,c){
@@ -732,7 +784,8 @@ function fireBomb(){
 }
 function killEnemy(e,silent){ if(e.dead)return; e.dead=true; e.dt=0; explode(e.x,e.y,e.c,e.variant>=2);
   addScore(e.pts,e.x,e.y,e.c); player.coins+=Math.ceil(e.pts*0.2); sectorKills++;
-  if(!silent)onKill(e); else { window.combo++; window.mult=clamp(1+Math.floor(window.combo/5),1,16);} 
+  if(e.fk==='foreman'||e.fk==='vector'){ player.coins+=40; dropPod(e.x,e.y,true); }
+  if(!silent)onKill(e); else { window.combo++; window.mult=clamp(1+Math.floor(window.combo/5),1,16);}
   dropPod(e.x,e.y, e.variant>=2); }
 
 /* ============================= update ============================= */
@@ -807,7 +860,7 @@ function update(dt){
   enemies.forEach(e=>{
     if(e.dead){ e.dt-=dt; return; }
     e.t+=dt; e.core+=dt*(1.1+e.spin); e.bob+=dt*1.7; if(e.flash>0)e.flash-=dt;
-    e.aimAng=Math.atan2(player.y-e.y,player.x-e.x); e.tell=e.fire<0.45?clamp(1-e.fire/0.45,0,1):0; if(e.fireFlash>0)e.fireFlash-=dt;
+    e.aimAng=Math.atan2(player.y-e.y,player.x-e.x); e.tell=e.fire<0.45?clamp(1-e.fire/0.45,0,1):0; if(e.fireFlash>0)e.fireFlash-=dt; if(e.buffed>0)e.buffed=Math.max(0,e.buffed-dt);
     if(e.hp<e.maxhp && Math.random()<0.04) parts.push({x:e.x+rnd(-e.r/2,e.r/2),y:e.y,vx:rnd(-10,10),vy:rnd(-40,-18),life:.4,max:.4,c:e.c,sz:1.2});
     if(e.state==='form'){
       const s=slots[e.slot], hx=fleet?fleet.x+(s?s.ox:0):e.x, hy=fleet?fleet.y+(s?s.oy:0):e.y;
@@ -833,6 +886,33 @@ function update(dt){
     } else if(e.state==='retreat'){
       e.x+=e.vx*dt; e.y+=e.vy*dt; e.vy-=dt*70; e.bank=e.vx*0.05;
       if(e.x<-60||e.x>W+60||e.y<-60){ e.dead=true; e.dt=0; e.gone=true; }
+    } else if(e.state==='foreman'){
+      if(e.y<e.hold){e.y+=dt*65;}else{e.y+=(e.hold-e.y)*Math.min(1,dt*0.5);}
+      e.x+=(player.x-e.x)*Math.min(1,dt*0.5); e.x=clamp(e.x,80,W-80); e.y=Math.min(e.y,H*0.5);
+      e.sigCd-=dt;
+      if(e.lockT>0){ e.lockT-=dt; e.tell=clamp(1-e.lockT/0.7,0,1);
+        if(e.lockT<=0){ const dx=e.lockX-e.x,dy=e.lockY-e.y,m=Math.hypot(dx,dy)||1;
+          ebul.push({x:e.x,y:e.y,vx:dx/m*430,vy:dy/m*430,c:COL.csee,r:6,streak:true,owner:e});
+          e.fireFlash=0.12; e.tell=0; }
+      } else if(e.sigCd<=0){ const sf=1/(1+sector*0.10);
+        if(!e.altMove){ e.lockX=player.x; e.lockY=player.y; e.lockT=0.7; e.tell=0; }
+        else { spawnBarrier(); e.tell=0; e.fireFlash=0.12; }
+        e.altMove=!e.altMove; e.sigCd=Math.max(1.4,(2.2+rnd(-0.3,0.3))*sf);
+      } else { e.tell=0; }
+    } else if(e.state==='vector'){
+      if(e.y<e.hold){e.y+=dt*60;}else{e.y+=(e.hold-e.y)*Math.min(1,dt*0.5);}
+      e.x+=Math.sin(e.core*0.7)*dt*28; e.x=clamp(e.x,80,W-80);
+      e.sigCd-=dt;
+      if(e.sigCd<=0){ const sf=1/(1+sector*0.10); e.tell=0; e.fireFlash=0.12;
+        const gap=Math.random()*6.2832,n=Math.min(22,16+sector);
+        for(let i=0;i<n;i++){ const a=i/n*6.2832; if(Math.abs(((a-gap+Math.PI)%(Math.PI*2))-Math.PI)<0.6)continue;
+          if(ebul.length<8+sector*4)ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*210,vy:Math.sin(a)*210,c:COL.mat,r:3.5,owner:e,split:true,splitSeek:true}); }
+        rings.push({x:e.x,y:e.y,r:e.r,vr:215,life:.7,max:.7,c:COL.mat});
+        e.sigCd=Math.max(1.8,(2.6+rnd(-0.4,0.4))*sf);
+      } else if(e.sigCd<0.8){ e.tell=clamp(1-e.sigCd/0.8,0,1); }
+      else { e.tell=0; }
+      for(const e2 of enemies){ if(e2.dead||e2===e||(e2.fk==='foreman'||e2.fk==='vector'))continue;
+        if(dist2(e2.x,e2.y,e.x,e.y)<e.buffR*e.buffR){ e2.buffed=0.25; e2.fire=Math.max(0,e2.fire-dt*0.3); } }
     } else if(e.state==='celebrate'){
       e.celT=(e.celT||0)+dt; const br=e.baseR||e.r;
       if(e.bx===undefined){ e.bx=e.x; e.by=e.y; }
@@ -885,7 +965,7 @@ function update(dt){
   for(let i=ebul.length-1;i>=0;i--){const b=ebul[i];b.x+=b.vx*dt;b.y+=b.vy*dt;
     if(b.seeker){const dx=player.x-b.x,dy=player.y-b.y,m=Math.hypot(dx,dy)||1;b.vx+=(dx/m*80-b.vx)*dt*1.4;b.vy+=(dy/m*80-b.vy)*dt*1.4;}
     if(b.y>H+12||b.y<-12||b.x<-12||b.x>W+12){ebul.splice(i,1);continue;}
-    if(b.split&&b.y>H*0.45){for(let k=-1;k<=1;k++){const a=Math.atan2(b.vy,b.vx)+k*0.38;ebul.push({x:b.x,y:b.y,vx:Math.cos(a)*185,vy:Math.sin(a)*185,c:b.c,r:2.5,owner:b.owner});}ebul.splice(i,1);continue;}
+    if(b.split&&b.y>H*0.45){for(let k=-1;k<=1;k++){const a=Math.atan2(b.vy,b.vx)+k*0.38;ebul.push({x:b.x,y:b.y,vx:Math.cos(a)*150,vy:Math.sin(a)*150,c:b.splitSeek?COL.bmet:b.c,r:2.5,owner:b.owner,seeker:!!b.splitSeek});}ebul.splice(i,1);continue;}
     if(!player.dead && player.inv<=0 && dist2(b.x,b.y,player.x,player.y-2)<13*13){ lastHitBy=b.owner||lastHitBy; ebul.splice(i,1); playerHit(); }
   }
 
@@ -1093,7 +1173,7 @@ function finishBoss(){ const b=boss; explode(b.x,b.y,b.c,true); Audio_.big(); sh
 function openRefit(){ state='refit'; document.getElementById('touch').classList.add('hidden');
   el('refitNext').textContent=roman(sector+1); buildRefit(); showOverlay('ovlRefit'); }
 function launchFromRefit(){ sector++; waveIdx=0; waveTimer=1.6; bossPending=false; fleet=null;
-  sectorKills=0; killsForBoss=100+sector*22;
+  sectorKills=0; killsForBoss=100+sector*22; hybridTimer=rnd(6,10);
   player.beamE=player.beamMax; triggerBanner(); state='play'; showOverlay(null);
   document.getElementById('touch').classList.toggle('hidden', !isTouch); }
 function refitItems(){ const u=player.up;
@@ -1156,6 +1236,14 @@ function drawBG(){
   bg.lineJoin='round';
   enemies.forEach(e=>{ if(e.dead)return; drawCraft(bg,e,e.draw); });
   if(boss){ drawCraft(bg,boss,boss.draw,true); drawBossFX(); }
+  // FOREMAN telegraph lines
+  enemies.forEach(e=>{ if(e.dead||e.lockT<=0||e.state!=='foreman')return; const k=clamp(1-e.lockT/0.7,0,1);
+    bg.save(); bg.globalAlpha=0.45+0.45*k; bg.strokeStyle=COL.csee; bg.shadowColor=COL.csee; bg.shadowBlur=8; bg.lineWidth=1.5;
+    bg.setLineDash([7,5]); bg.beginPath(); bg.moveTo(e.x,e.y); bg.lineTo(e.lockX,e.lockY); bg.stroke(); bg.setLineDash([]); bg.restore(); });
+  // VECTOR buff aura on nearby grunts
+  enemies.forEach(e=>{ if(e.dead||!e.buffed)return;
+    bg.save(); bg.globalAlpha=e.buffed*0.8; bg.strokeStyle=COL.mat; bg.shadowColor=COL.mat; bg.shadowBlur=10; bg.lineWidth=1.5;
+    bg.beginPath(); bg.arc(e.x,e.y,e.r+7,0,6.28); bg.stroke(); bg.restore(); });
 
   // pods
   pods.forEach(p=>{ drawPod(bg,p); });
