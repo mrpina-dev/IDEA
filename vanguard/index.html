@@ -208,6 +208,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
     <h2 class="ovh">LEADERBOARD</h2>
     <div class="board" id="bigBoard"></div>
     <button class="obtn" id="againBtn">PLAY AGAIN</button>
+    <button class="mini" id="menuBtn">MAIN MENU</button>
   </div>
 </div>
 
@@ -594,13 +595,13 @@ function update(dt){
   if(pl.inv>0)pl.inv-=dt; if(pl.dmgFlash>0)pl.dmgFlash-=dt;
   if(pl.dead){ pl.respawn-=dt; if(pl.respawn<=0 && pl.lives>=0){ resetPlayer(false); } }
   else {
-    // movement
-    let mx=0,my=0;
+    // movement (slowed while the beam is firing)
+    let mx=0,my=0; const spd=pl.speed*(pl.beamActive?0.5:1);
     if(ptr.active){ const tx=ptr.x, ty=ptr.y-46; const dx=tx-pl.x, dy=ty-pl.y, d=Math.hypot(dx,dy)||1;
-      const step=pl.speed*dt; if(d>step){ pl.x+=dx/d*step; pl.y+=dy/d*step; } else { pl.x=tx; pl.y=ty; } pl.vx=dx*0.05; }
+      const step=spd*dt; if(d>step){ pl.x+=dx/d*step; pl.y+=dy/d*step; } else { pl.x=tx; pl.y=ty; } pl.vx=dx*0.05; }
     else { if(keys.ArrowLeft||keys.a)mx-=1; if(keys.ArrowRight||keys.d)mx+=1;
       if(keys.ArrowUp||keys.w)my-=1; if(keys.ArrowDown||keys.s)my+=1;
-      const m=Math.hypot(mx,my)||1; pl.x+=mx/m*pl.speed*dt; pl.y+=my/m*pl.speed*dt; pl.vx=mx; }
+      const m=Math.hypot(mx,my)||1; pl.x+=mx/m*spd*dt; pl.y+=my/m*spd*dt; pl.vx=mx; }
     pl.x=clamp(pl.x,16,W-16); pl.y=clamp(pl.y,H*0.16,H-40);
     // beam (energy meter) has priority; otherwise the gun fires and the beam recharges
     if(pl.beamOn && pl.beamE>0.02 && !pl.beamLock){
@@ -839,7 +840,7 @@ function finishBoss(){ const b=boss; explode(b.x,b.y,b.c,true); Audio_.big(); sh
   pods.push({x:b.x,y:b.y,vy:34,type:'core',fk:b.fk,c:b.c,bob:rnd(0,6.28),r:16,spin:0});
   for(let i=0;i<4;i++) pods.push({x:b.x+rnd(-40,40),y:b.y+rnd(-10,20),vy:rnd(40,60),type:'coin',c:COL.gold,bob:rnd(0,6.28),r:11});
   document.getElementById('bossname').style.display='none'; document.getElementById('bossbar').style.display='none';
-  boss=null; fleet=null; bossSpoils=1.8;
+  boss=null; fleet=null; bossSpoils=2.8;
 }
 function openRefit(){ state='refit'; document.getElementById('touch').classList.add('hidden');
   el('refitNext').textContent=roman(sector+1); buildRefit(); showOverlay('ovlRefit'); }
@@ -1195,7 +1196,11 @@ function pauseToggle(){ if(state==='play'){ state='pause'; showOverlay('ovlPause
     if(boss){document.getElementById('bossbar').style.display='block';document.getElementById('bossname').style.display='block';} } }
 
 el('resumeBtn').addEventListener('click',pauseToggle);
-el('quitBtn').addEventListener('click',()=>{ state='title'; showOverlay('ovlTitle'); fetchOnline(()=>renderBoard('titleBoard')); document.getElementById('touch').classList.add('hidden'); });
+function toTitle(){ state='title'; showOverlay('ovlTitle');
+  document.getElementById('bossname').style.display='none'; document.getElementById('bossbar').style.display='none';
+  document.getElementById('touch').classList.add('hidden'); fetchOnline(()=>renderBoard('titleBoard')); }
+el('quitBtn').addEventListener('click',toTitle);
+el('menuBtn').addEventListener('click',toTitle);
 el('startCta').addEventListener('click',()=>{ if(state==='title')startGame(); });
 el('submitBtn').addEventListener('click',submitScore);
 el('againBtn').addEventListener('click',()=>{ startGame(); });
