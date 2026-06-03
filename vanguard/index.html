@@ -152,6 +152,9 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 .fbovl.hidden{display:none!important}
 .fbsel,.fbtxt{background:rgba(5,15,7,.9);border:1px solid rgba(0,255,65,.3);color:var(--white);font-family:'Share Tech Mono',monospace;font-size:11px;padding:6px 10px;border-radius:3px;width:100%;max-width:280px;box-sizing:border-box}
 .fbtxt{resize:vertical;min-height:72px}
+.keyrow{display:flex;justify-content:space-between;align-items:center;gap:12px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--white);letter-spacing:.06em}
+.keyrow .kb{font-family:'Chakra Petch',sans-serif;font-weight:700;min-width:60px;text-align:center;border:1px solid var(--cyan);color:var(--cyan);padding:5px 10px;border-radius:4px;cursor:pointer;background:rgba(0,240,255,.08)}
+.keyrow .kb.cap{border-color:var(--gold);color:var(--gold);animation:lockpulse .5s steps(2,start) infinite}
 </style>
 </head>
 <body>
@@ -227,6 +230,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
       <span class="k">BEAM</span> HOLD C/SPACE &nbsp; <span class="k">BOMB</span> X/SHIFT &nbsp; <span class="k">PARRY</span> Z &nbsp; <span class="k">SWITCH WEAPON</span> Q<br>
       <span class="k">PAUSE</span> P/ESC &nbsp; <span class="k">MUTE</span> M &nbsp; <span class="k">earn i¢ at REFIT after each boss</span></div>
     <button class="mini" id="ctrlsToggle">CONTROLS: ON</button>
+    <button class="mini" id="titleKeys">REMAP KEYS</button>
     <div class="tag" style="color:var(--cyan);letter-spacing:.12em;margin-top:2px">FOUND A BUG OR HAVE AN IDEA?</div>
     <button class="fbbtn" id="titleFeedback">SEND FEEDBACK</button>
   </div>
@@ -237,6 +241,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
     <button class="obtn" id="resumeBtn">RESUME</button>
     <button class="mini" id="pauseCtrlsToggle">CONTROLS: ON</button>
     <button class="mini" id="pauseMuteBtn">SOUND: ON</button>
+    <button class="mini" id="pauseKeys">REMAP KEYS</button>
     <button class="mini" id="restartBtn">RESTART RUN</button>
     <button class="mini" id="quitBtn">QUIT TO TITLE</button>
     <button class="fbbtn" id="pauseFeedback">SEND FEEDBACK</button>
@@ -286,6 +291,15 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
     <button class="mini" id="cancelRestartBtn">CANCEL</button>
   </div>
 
+  <!-- KEY REMAP -->
+  <div class="fbovl hidden" id="ovlKeys">
+    <h2 class="ovh">CONTROLS</h2>
+    <div class="tag">CLICK AN ACTION, THEN PRESS A KEY</div>
+    <div id="keyList" style="display:flex;flex-direction:column;gap:6px;width:100%;max-width:280px"></div>
+    <button class="obtn" id="keysDone">DONE</button>
+    <button class="mini" id="keysReset">RESET TO DEFAULTS</button>
+  </div>
+
   <!-- BOARD -->
   <div class="ovl hidden" id="ovlBoard">
     <h2 class="ovh">LEADERBOARD</h2>
@@ -300,7 +314,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=560,H=840; const VERSION='2525';
+const W=560,H=840; const VERSION='2526';
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
 const bg=bgC.getContext('2d'), fx=fxC.getContext('2d');
@@ -387,6 +401,10 @@ let runFactionSeq=[], waveFk=null;
 let hybridTimer=0;
 let gameMode='normal';
 let loadout='vanguard';
+const KEYS_DEFAULT={beam:'c', bomb:'x', parry:'z', weapon:'q', pause:'p', mute:'m'};
+let keybinds=Object.assign({},KEYS_DEFAULT);
+try{ const _sk=JSON.parse(localStorage.getItem('vanguard_keys')||'null'); if(_sk) keybinds=Object.assign({},KEYS_DEFAULT,_sk); }catch(e){}
+let rebindAction=null;
 let shotsFired, shotsHit, runTime, runKills=0, runBosses=0, deathSlow=0, killerInfo=null;
 let bgScroll=0; const stars=[
   Array.from({length:34},()=>({x:rnd(0,W),y:rnd(0,H),sp:14,sz:.6,al:.30,st:0})),
@@ -959,8 +977,9 @@ function update(dt){
     if(pl.parryCd>0)pl.parryCd-=dt;
     if(pl.parryT>0){ pl.parryT-=dt; pl.inv=Math.max(pl.inv,0.04);
       for(let i=ebul.length-1;i>=0;i--){ const b=ebul[i]; if(dist2(b.x,b.y,pl.x,pl.y)<48*48){
-        for(let q=0;q<3;q++)parts.push({x:b.x,y:b.y,vx:rnd(-90,90),vy:rnd(-90,90),life:.22,max:.22,c:COL.cyan,sz:1.7});
-        pbul.push({x:b.x,y:b.y,vx:0,vy:-700,c:COL.cyan,r:2.2,dmg:2.0});
+        for(let q=0;q<4;q++)parts.push({x:b.x,y:b.y,vx:rnd(-120,120),vy:rnd(-120,120),life:.25,max:.25,c:COL.cyan,sz:1.8});
+        const m=Math.hypot(b.vx,b.vy)||1, sp=Math.max(560,m*1.3);
+        pbul.push({x:b.x,y:b.y,vx:-b.vx/m*sp,vy:-b.vy/m*sp,c:COL.cyan,r:3.2,dmg:2.5,reflected:true});
         pl.beamE=Math.min(pl.beamMax,pl.beamE+0.12); addScore(40,b.x,b.y,COL.cyan);
         ebul.splice(i,1); } } }
     // movement (slowed while the beam is firing)
@@ -1121,7 +1140,12 @@ function update(dt){
     for(const bar of barriers){ if(Math.abs(b.x-bar.x)<bar.w/2 && Math.abs(b.y-bar.y)<bar.h/2+2){ hit=true;
       for(let k=0;k<2;k++)parts.push({x:b.x,y:b.y,vx:rnd(-40,40),vy:rnd(-10,30),life:.15,max:.15,c:bar.c,sz:1.3}); break; } }
     if(!hit) for(const e of enemies){ if(e.dead)continue;
-      if(dist2(e.x,e.y,b.x,b.y)<(e.r+2)*(e.r+2)){ e.hp-=b.dmg; e.flash=.1;
+      if(dist2(e.x,e.y,b.x,b.y)<(e.r+2)*(e.r+2)){
+        if(b.reflected && Math.random()<0.15){ const dx=player.x-e.x,dy=player.y-e.y,mm=Math.hypot(dx,dy)||1;
+          ebul.push({x:e.x,y:e.y,vx:dx/mm*300,vy:dy/mm*300,c:e.c,r:3,owner:e}); e.flash=.1; Audio_.hit();
+          for(let k=0;k<3;k++)parts.push({x:e.x,y:e.y,vx:rnd(-60,60),vy:rnd(-60,60),life:.18,max:.18,c:e.c,sz:1.6});
+          hit=true; break; }
+        e.hp-=b.dmg; e.flash=.1;
         for(let k=0;k<3;k++)parts.push({x:b.x,y:b.y,vx:rnd(-50,50),vy:rnd(-50,50),life:.18,max:.18,c:e.c,sz:1.5});
         if(e.hp<=0)killEnemy(e); if(!b.pierce){hit=true;} break; } }
     if(!hit && boss && !boss.entering && !boss.dying && dist2(boss.x,boss.y,b.x,b.y)<(boss.r)*(boss.r)){
@@ -1846,19 +1870,23 @@ window.addEventListener('pointercancel',()=>{ ptr.active=false; });
 
 window.addEventListener('keydown',e=>{ Audio_.init(); Audio_.resume();
   const k=e.key.length===1?e.key.toLowerCase():e.key; keys[k]=true; keys[e.key]=true;
+  if(rebindAction){ e.preventDefault(); const RES={w:1,a:1,s:1,d:1};
+    if(/^[a-z0-9]$/.test(k)&&!RES[k]){ for(const a in keybinds){ if(keybinds[a]===k&&a!==rebindAction) keybinds[a]=keybinds[rebindAction]; } keybinds[rebindAction]=k; saveKeys(); }
+    rebindAction=null; buildKeyList(); return; }
+  if(!document.getElementById('ovlKeys').classList.contains('hidden')) return;
   if(!document.getElementById('ovlFeedback').classList.contains('hidden')) return;
   if(!document.getElementById('ovlConfirm').classList.contains('hidden')){
     if(e.key==='Enter') doRestart(); else if(e.key==='Escape') cancelRestart();
     e.preventDefault(); return; }
   if((e.key===' '||e.key==='Enter')&&state==='title'){ startGame(); e.preventDefault(); return; }
   if(state==='play'){
-    if(k==='c'||e.key===' '){ if(!player.beamOn){player.beamOn=true; if(!player.beamLock)Audio_.beam();} e.preventDefault(); }
-    if(k==='x'||e.key==='Shift'){ fireBomb(); }
-    if(k==='z'){ tryParry(); }
-    if(k==='p'||e.key==='Escape'){ pauseToggle(); }
-    if(k==='q'){ switchWeapon(); }
+    if(k===keybinds.beam||e.key===' '){ if(!player.beamOn){player.beamOn=true; if(!player.beamLock)Audio_.beam();} e.preventDefault(); }
+    if(k===keybinds.bomb||e.key==='Shift'){ fireBomb(); }
+    if(k===keybinds.parry){ tryParry(); }
+    if(k===keybinds.pause||e.key==='Escape'){ pauseToggle(); }
+    if(k===keybinds.weapon){ switchWeapon(); }
   } else if(state==='pause'){
-    if(k==='p'||e.key==='Escape'){ pauseToggle(); }
+    if(k===keybinds.pause||e.key==='Escape'){ pauseToggle(); }
   } else if(state==='refit'){
     if(e.key==='Enter'){ launchFromRefit(); }
   } else if(state==='over'){
@@ -1868,10 +1896,10 @@ window.addEventListener('keydown',e=>{ Audio_.init(); Audio_.resume();
     else if(e.key==='ArrowLeft'){ selSlot=Math.max(0,selSlot-1); refreshInitials(); }
     else if(e.key==='ArrowRight'){ selSlot=Math.min(NAMELEN-1,selSlot+1); refreshInitials(); }
   }
-  if(k==='m'){ toggleMute(); }
+  if(k===keybinds.mute){ toggleMute(); }
 },{passive:false});
 window.addEventListener('keyup',e=>{ const k=e.key.length===1?e.key.toLowerCase():e.key; keys[k]=false; keys[e.key]=false;
-  if(k==='c'||e.key===' '){ if(player){player.beamOn=false; player.beamLock=false;} } });
+  if(k===keybinds.beam||e.key===' '){ if(player){player.beamOn=false; player.beamLock=false;} } });
 
 // touch buttons
 function bindHold(id,onDown,onUp){ const b=el(id);
@@ -1979,6 +2007,25 @@ try{ if(localStorage.getItem('vanguard_mute')==='1'){Audio_.muted=true;const pmb
     sendBtn.textContent='THANKS!'; sendBtn.disabled=true;
     setTimeout(closeFb,1400);
   });
+})();
+
+/* keybind remapping */
+const KEY_ACTIONS=[['beam','BEAM'],['bomb','BOMB'],['parry','PARRY'],['weapon','SWITCH WEAPON'],['pause','PAUSE'],['mute','MUTE']];
+function keyLabel(c){ return c===' '?'SPACE':(c||'?').toUpperCase(); }
+function saveKeys(){ try{localStorage.setItem('vanguard_keys',JSON.stringify(keybinds));}catch(e){} }
+function buildKeyList(){ const box=el('keyList'); if(!box)return; box.innerHTML='';
+  KEY_ACTIONS.forEach(p=>{ const act=p[0],lbl=p[1]; const row=document.createElement('div'); row.className='keyrow';
+    const nm=document.createElement('span'); nm.textContent=lbl;
+    const kb=document.createElement('button'); kb.className='kb'+(rebindAction===act?' cap':''); kb.textContent=rebindAction===act?'PRESS...':keyLabel(keybinds[act]);
+    kb.addEventListener('click',ev=>{ ev.stopPropagation(); rebindAction=act; buildKeyList(); });
+    row.appendChild(nm); row.appendChild(kb); box.appendChild(row); }); }
+function openKeys(){ rebindAction=null; el('ovlKeys').classList.remove('hidden'); buildKeyList(); }
+function closeKeys(){ rebindAction=null; el('ovlKeys').classList.add('hidden'); }
+(function(){
+  const done=el('keysDone'); if(done) done.addEventListener('click',e=>{e.stopPropagation();closeKeys();});
+  const rst=el('keysReset'); if(rst) rst.addEventListener('click',e=>{e.stopPropagation(); keybinds=Object.assign({},KEYS_DEFAULT); saveKeys(); buildKeyList();});
+  const tk=el('titleKeys'); if(tk) tk.addEventListener('click',e=>{e.stopPropagation();openKeys();});
+  const pk=el('pauseKeys'); if(pk) pk.addEventListener('click',e=>{e.stopPropagation();openKeys();});
 })();
 
 /* board mode tabs */
