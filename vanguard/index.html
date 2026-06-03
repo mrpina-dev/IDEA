@@ -280,7 +280,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=560,H=840; const VERSION='2519';
+const W=560,H=840; const VERSION='2520';
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
 const bg=bgC.getContext('2d'), fx=fxC.getContext('2d');
@@ -846,8 +846,8 @@ function firePrimary(){
   const prevLen=pbul.length;
   shotsFired++;
   if(player.wtype==='spread'){
-    const angs=[[0],[-.12,.12],[-.18,0,.18],[-.26,-.09,.09,.26],[-.32,-.16,0,.16,.32]][Math.min(lv,5)-1];
-    const dmg=0.8+lv*0.3;
+    const angs=[[-.10,.10],[-.16,0,.16],[-.24,-.08,.08,.24],[-.30,-.13,0,.13,.30],[-.34,-.18,-.06,.06,.18,.34]][Math.min(lv,5)-1];
+    const dmg=1.0+lv*0.3;
     angs.forEach(a=>pbul.push({x:x+Math.sin(a)*7,y,vx:Math.sin(a)*180,vy:-560,c,r:1.6,dmg}));
     player.fireCd=Math.max(.06,.185-lv*0.014);
   } else if(player.wtype==='rapid'){
