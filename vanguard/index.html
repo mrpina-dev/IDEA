@@ -243,7 +243,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=560,H=840; const VERSION='2510';
+const W=560,H=840; const VERSION='2511';
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
 const bg=bgC.getContext('2d'), fx=fxC.getContext('2d');
@@ -449,8 +449,8 @@ function drawMAT(ctx,e){ const r=e.r,v=e.variant,col=ctx.strokeStyle,lw=ctx.line
     ctx.beginPath(); ctx.ellipse(0,r*0.55,r*0.75,r*0.2,0,0,6.2832); ctx.stroke(); dot(ctx,0,-r*0.2,r*(0.14+tell*0.08),col);
     ctx.lineWidth=lw*0.7; ctx.save();
     for(let i=0;i<3;i++){ const rr=(ph*0.8+i)%3; const aa=(0.4+tell*0.5)*(1-rr/3); if(aa>0.04){ ctx.globalAlpha=aa;
-      ctx.beginPath(); ctx.arc(0,r*0.55,r*(0.5+rr*0.5),Math.PI*1.15,Math.PI*1.85); ctx.stroke(); } }
-    if(fl>0){ ctx.globalAlpha=1; ctx.shadowBlur=24; ctx.shadowColor=COL.white; ctx.lineWidth=lw*2; ctx.beginPath(); ctx.arc(0,r*0.55,r*1.1,Math.PI*1.1,Math.PI*1.9); ctx.stroke(); }
+      ctx.beginPath(); ctx.arc(0,r*0.55,r*(0.5+rr*0.5),Math.PI*0.15,Math.PI*0.85); ctx.stroke(); } }
+    if(fl>0){ ctx.globalAlpha=1; ctx.shadowBlur=24; ctx.shadowColor=COL.white; ctx.lineWidth=lw*2; ctx.beginPath(); ctx.arc(0,r*0.55,r*1.1,Math.PI*0.1,Math.PI*0.9); ctx.stroke(); }
     ctx.restore(); ctx.lineWidth=lw; ctx.restore(); thr(ctx,r);
   } else { // BROADCASTER -- DISH tracks player, charges, fires a broadcast pulse
     ctx.beginPath(); ctx.moveTo(-r*0.3,r*1.0); ctx.lineTo(0,r*0.1); ctx.lineTo(r*0.3,r*1.0); ctx.stroke();
@@ -1605,15 +1605,24 @@ function endRun(){
 
 /* leaderboard (local fallback + shared online board via Apps Script) */
 const API_URL='https://script.google.com/macros/s/AKfycbxFMp3q3BcQ4Lpwl_c4hqwzrDw0zi4AYhjxY0ieoZXWYYG1vb8nO6lZ0hoS18Co5o9_kA/exec';
-let onlineBoard=null, runNonce='';
-function jsonp(url,cb){ const id='vcb_'+Math.random().toString(36).slice(2); let done=false;
+let onlineBoard=null, runNonce='', boardRetries=0;
+function jsonp(url,cb,fail){ const id='vcb_'+Math.random().toString(36).slice(2); let done=false;
   const s=document.createElement('script');
   function cleanup(){ try{delete window[id];}catch(e){window[id]=undefined;} if(s.parentNode)s.parentNode.removeChild(s); }
   window[id]=d=>{ done=true; try{cb(d);}catch(e){} cleanup(); };
-  s.src=url.replace('callback=?','callback='+id); s.onerror=cleanup; document.head.appendChild(s);
-  setTimeout(()=>{ if(!done)cleanup(); },6000); }
-function fetchOnline(then){ if(!API_URL){ then&&then(); return; }
-  jsonp(API_URL+'?action=top&n=10&callback=?&cb='+Date.now(), rows=>{ if(Array.isArray(rows))onlineBoard=rows; then&&then(); }); }
+  s.src=url.replace('callback=?','callback='+id); s.onerror=()=>{ cleanup(); fail&&fail(); }; document.head.appendChild(s);
+  setTimeout(()=>{ if(!done){ cleanup(); fail&&fail(); } },6000); }
+function fetchOnline(then,fail){ if(!API_URL){ then&&then(); return; }
+  jsonp(API_URL+'?action=top&n=10&callback=?&cb='+Date.now(), rows=>{ if(Array.isArray(rows))onlineBoard=rows; then&&then(); }, fail); }
+function refreshBoard(target){
+  fetchOnline(
+    ()=>{ if(onlineBoard){ boardRetries=0; renderBoard(target); }
+          else if(++boardRetries<=4){ setTimeout(()=>refreshBoard(target), 600+boardRetries*700); }
+          else { onlineBoard=localBoard(); renderBoard(target); } },
+    ()=>{ if(++boardRetries<=4){ setTimeout(()=>refreshBoard(target), 600+boardRetries*700); }
+          else if(!onlineBoard){ onlineBoard=localBoard(); renderBoard(target); } }
+  );
+}
 function requestNonce(){ runNonce=''; if(!API_URL)return;
   jsonp(API_URL+'?action=nonce&callback=?&cb='+Date.now(), d=>{ if(d&&d.nonce)runNonce=d.nonce; }); }
 function localBoard(){ try{return JSON.parse(localStorage.getItem('vanguard_scores')||'[]');}catch(e){return [];} }
@@ -1623,7 +1632,9 @@ function boardRows(){ return (API_URL && onlineBoard)? onlineBoard : localBoard(
 function submitToServer(score,sec,acc){ if(!API_URL)return; try{ const img=new Image();
   img.src=API_URL+'?action=submit&name='+encodeURIComponent(curInitials)+'&score='+score+'&sector='+sec+'&acc='+acc+'&t='+Math.round(runTime)+'&nonce='+encodeURIComponent(runNonce)+'&cb='+Date.now(); }catch(e){} }
 function renderBoard(target,highlightName,highlightScore){
-  const b=boardRows(); const box=el(target);
+  const box=el(target); if(!box)return;
+  if(API_URL && !onlineBoard){ box.innerHTML='<div class="row"><span class="nm" style="color:var(--dim)">LOADING LEADERBOARD...</span></div>'; return; }
+  const b=boardRows();
   if(!b||!b.length){ box.innerHTML='<div class="row"><span class="nm" style="color:var(--dim)">NO SCORES YET - BE THE FIRST</span></div>'; return; }
   box.innerHTML=b.map((r,i)=>{ const me=(r.name===highlightName&&r.score===highlightScore);
     return '<div class="row'+(me?' me':'')+'"><span class="rk">'+(i+1)+'</span><span class="nm">'+r.name+'</span><span class="sc">'+(r.score).toLocaleString()+'</span></div>'; }).join('');
@@ -1693,7 +1704,7 @@ function pauseToggle(){ if(state==='play'){ state='pause'; showOverlay('ovlPause
 el('resumeBtn').addEventListener('click',pauseToggle);
 function toTitle(){ state='title'; showOverlay('ovlTitle');
   document.getElementById('bossname').style.display='none'; document.getElementById('bossbar').style.display='none';
-  document.getElementById('touch').classList.add('hidden'); fetchOnline(()=>renderBoard('titleBoard')); }
+  document.getElementById('touch').classList.add('hidden'); boardRetries=0; renderBoard('titleBoard'); refreshBoard('titleBoard'); }
 el('quitBtn').addEventListener('click',toTitle);
 el('menuBtn').addEventListener('click',toTitle);
 el('startCta').addEventListener('click',()=>{ if(state==='title')startGame(); });
@@ -1750,7 +1761,7 @@ try{ if(localStorage.getItem('vanguard_mute')==='1'){Audio_.muted=true;const pmb
 })();
 
 /* ============================= loop ============================= */
-renderBoard('titleBoard'); fetchOnline(()=>renderBoard('titleBoard'));
+renderBoard('titleBoard'); refreshBoard('titleBoard');
 function frame(now){ let dt=(now-last)/1000; last=now; if(dt>0.05)dt=0.05;
   try{
     for(let i=_delayed.length-1;i>=0;i--){ if(now>=_delayed[i].at){ explode(_delayed[i].x,_delayed[i].y,_delayed[i].c,true); _delayed.splice(i,1); } }
