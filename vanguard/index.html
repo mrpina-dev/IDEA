@@ -193,6 +193,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
     <button class="obtn" id="resumeBtn">RESUME</button>
     <button class="mini" id="pauseCtrlsToggle">CONTROLS: ON</button>
     <button class="mini" id="pauseMuteBtn">SOUND: ON</button>
+    <button class="mini" id="restartBtn">RESTART RUN</button>
     <button class="mini" id="quitBtn">QUIT TO TITLE</button>
   </div>
 
@@ -230,6 +231,14 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
     <button class="mini" id="fbCancel">CANCEL</button>
   </div>
 
+  <!-- RESTART CONFIRM -->
+  <div class="fbovl hidden" id="ovlConfirm">
+    <h2 class="ovh">RESTART RUN?</h2>
+    <div class="tag">THIS ENDS YOUR CURRENT RUN</div>
+    <button class="obtn sub" id="confirmRestartBtn">RESTART</button>
+    <button class="mini" id="cancelRestartBtn">CANCEL</button>
+  </div>
+
   <!-- BOARD -->
   <div class="ovl hidden" id="ovlBoard">
     <h2 class="ovh">LEADERBOARD</h2>
@@ -243,7 +252,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=560,H=840; const VERSION='2511';
+const W=560,H=840; const VERSION='2512';
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
 const bg=bgC.getContext('2d'), fx=fxC.getContext('2d');
@@ -1663,6 +1672,9 @@ window.addEventListener('pointercancel',()=>{ ptr.active=false; });
 
 window.addEventListener('keydown',e=>{ Audio_.init(); Audio_.resume();
   const k=e.key.length===1?e.key.toLowerCase():e.key; keys[k]=true; keys[e.key]=true;
+  if(!document.getElementById('ovlConfirm').classList.contains('hidden')){
+    if(e.key==='Enter') doRestart(); else if(e.key==='Escape') cancelRestart();
+    e.preventDefault(); return; }
   if((e.key===' '||e.key==='Enter')&&state==='title'){ startGame(); e.preventDefault(); return; }
   if(state==='play'){
     if(k==='c'||e.key===' '){ if(!player.beamOn){player.beamOn=true; if(!player.beamLock)Audio_.beam();} e.preventDefault(); }
@@ -1702,6 +1714,12 @@ function pauseToggle(){ if(state==='play'){ state='pause'; showOverlay('ovlPause
     if(boss){document.getElementById('bossbar').style.display='block';document.getElementById('bossname').style.display='block';} } }
 
 el('resumeBtn').addEventListener('click',pauseToggle);
+function showRestartConfirm(){ document.getElementById('ovlConfirm').classList.remove('hidden'); }
+function cancelRestart(){ document.getElementById('ovlConfirm').classList.add('hidden'); }
+function doRestart(){ document.getElementById('ovlConfirm').classList.add('hidden'); startGame(); }
+el('restartBtn').addEventListener('click',e=>{ e.stopPropagation(); showRestartConfirm(); });
+el('confirmRestartBtn').addEventListener('click',e=>{ e.stopPropagation(); doRestart(); });
+el('cancelRestartBtn').addEventListener('click',e=>{ e.stopPropagation(); cancelRestart(); });
 function toTitle(){ state='title'; showOverlay('ovlTitle');
   document.getElementById('bossname').style.display='none'; document.getElementById('bossbar').style.display='none';
   document.getElementById('touch').classList.add('hidden'); boardRetries=0; renderBoard('titleBoard'); refreshBoard('titleBoard'); }
