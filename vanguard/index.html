@@ -209,6 +209,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
   <div class="ovl" id="ovlTitle">
     <div class="title-wm"><div class="a">VANGUARD</div><div class="b">I D E A</div></div>
     <div class="tag">A BOSCO TECH ARCADE</div>
+    <div class="tag" id="gamesPlayed" style="color:var(--gold);letter-spacing:.18em">RUNS: 0</div>
     <div class="modes" id="modeSel">
       <button class="modebtn sel" data-m="normal">NORMAL</button>
       <button class="modebtn" data-m="hardcore">HARDCORE</button>
@@ -772,8 +773,11 @@ function applyUpgrades(){ const u=player.up;
 }
 
 /* ============================= start / waves ============================= */
+function getGames(){ try{ return parseInt(localStorage.getItem('vanguard_games')||'0',10)||0; }catch(e){ return 0; } }
+function updateGamesPlayed(){ const g=el('gamesPlayed'); if(g) g.textContent='RUNS: '+getGames().toLocaleString(); }
 function startGame(){
   state='play';
+  try{ localStorage.setItem('vanguard_games', getGames()+1); }catch(e){}
   enemies=[]; pbul=[]; ebul=[]; pods=[]; parts=[]; shards=[]; rings=[]; pops=[]; boss=null; barriers=[]; bossSpoils=0; bossFlash=0; gameOverT=0; killer=null; lastHitBy=null; hazards=[]; station=null;
   runFactionSeq=[...FKEYS]; for(let _i=runFactionSeq.length-1;_i>0;_i--){const _j=Math.random()*_i|0;[runFactionSeq[_i],runFactionSeq[_j]]=[runFactionSeq[_j],runFactionSeq[_i]];} waveFk=null;
   hybridTimer=rnd(6,10);
@@ -1835,7 +1839,7 @@ function jsonp(url,cb,fail){ const id='vcb_'+Math.random().toString(36).slice(2)
   s.src=url.replace('callback=?','callback='+id); s.onerror=()=>{ cleanup(); fail&&fail(); }; document.head.appendChild(s);
   setTimeout(()=>{ if(!done){ cleanup(); fail&&fail(); } },6000); }
 function fetchOnline(then,fail){ if(!API_URL){ then&&then(); return; }
-  jsonp(API_URL+'?action=top&n=10&mode='+boardMode+'&callback=?&cb='+Date.now(), rows=>{ if(Array.isArray(rows))onlineBoard=rows; then&&then(); }, fail); }
+  jsonp(API_URL+'?action=top&n=100&mode='+boardMode+'&callback=?&cb='+Date.now(), rows=>{ if(Array.isArray(rows))onlineBoard=rows; then&&then(); }, fail); }
 function refreshBoard(target){
   fetchOnline(
     ()=>{ if(onlineBoard){ boardRetries=0; renderBoard(target); }
@@ -1858,8 +1862,16 @@ function renderBoard(target,highlightName,highlightScore){
   if(API_URL && !onlineBoard){ box.innerHTML='<div class="row"><span class="nm" style="color:var(--dim)">LOADING LEADERBOARD...</span></div>'; return; }
   const b=boardRows();
   if(!b||!b.length){ box.innerHTML='<div class="row"><span class="nm" style="color:var(--dim)">NO SCORES YET - BE THE FIRST</span></div>'; return; }
-  box.innerHTML=b.map((r,i)=>{ const me=(r.name===highlightName&&r.score===highlightScore);
+  const hl=(highlightName!=null&&highlightScore!=null);
+  const top=b.slice(0,10);
+  let html=top.map((r,i)=>{ const me=(hl&&r.name===highlightName&&r.score===highlightScore);
     return '<div class="row'+(me?' me':'')+'"><span class="rk">'+(i+1)+'</span><span class="nm">'+r.name+'</span><span class="sc">'+(r.score).toLocaleString()+'</span></div>'; }).join('');
+  if(hl && !top.some(r=>r.name===highlightName&&r.score===highlightScore)){
+    let rank=1; for(const r of b){ if(r.score>highlightScore) rank++; }
+    html+='<div class="row" style="color:var(--dim);justify-content:center;letter-spacing:.3em;padding:1px 0">···</div>';
+    html+='<div class="row me"><span class="rk">'+rank+'</span><span class="nm">'+highlightName+'</span><span class="sc">'+(highlightScore).toLocaleString()+'</span></div>';
+  }
+  box.innerHTML=html;
 }
 
 /* initials entry */
@@ -1946,7 +1958,7 @@ el('confirmRestartBtn').addEventListener('click',e=>{ e.stopPropagation(); doRes
 el('cancelRestartBtn').addEventListener('click',e=>{ e.stopPropagation(); cancelRestart(); });
 function toTitle(){ state='title'; showOverlay('ovlTitle'); Audio_.music(false);
   document.getElementById('bossname').style.display='none'; document.getElementById('bossbar').style.display='none';
-  document.getElementById('touch').classList.add('hidden'); boardRetries=0; renderBoard('titleBoard'); refreshBoard('titleBoard'); }
+  document.getElementById('touch').classList.add('hidden'); boardRetries=0; renderBoard('titleBoard'); refreshBoard('titleBoard'); updateGamesPlayed(); }
 el('quitBtn').addEventListener('click',toTitle);
 el('menuBtn').addEventListener('click',toTitle);
 el('startCta').addEventListener('click',()=>{ if(state==='title')startGame(); });
@@ -1954,7 +1966,7 @@ el('submitBtn').addEventListener('click',submitScore);
 el('againBtn').addEventListener('click',()=>{ startGame(); });
 function mergeScore(name,score){ const b=(onlineBoard?onlineBoard.slice():[]);
   if(!b.some(r=>r.name===name&&r.score===score)) b.push({name,score});
-  b.sort((a,c)=>c.score-a.score); onlineBoard=b.slice(0,10); }
+  b.sort((a,c)=>c.score-a.score); onlineBoard=b.slice(0,100); }
 function submitScore(){ if(gameMode==='arcade'){ toTitle(); return; } const sc=pendingScore?pendingScore.score:window.scoreT; const nm=trimName(curInitials); curInitials=nm;
   boardMode=(gameMode==='hardcore')?'hardcore':'normal'; onlineBoard=null; boardRetries=0;
   document.querySelectorAll('.btab').forEach(b=>b.classList.toggle('sel',b.dataset.bm===boardMode));
@@ -2077,7 +2089,7 @@ function setBoardMode(m,target){ boardMode=m; onlineBoard=null; boardRetries=0;
 })();
 
 /* ============================= loop ============================= */
-renderBoard('titleBoard'); refreshBoard('titleBoard');
+renderBoard('titleBoard'); refreshBoard('titleBoard'); updateGamesPlayed();
 function frame(now){ let dt=(now-last)/1000; last=now; if(dt>0.05)dt=0.05;
   try{
     for(let i=_delayed.length-1;i>=0;i--){ if(now>=_delayed[i].at){ explode(_delayed[i].x,_delayed[i].y,_delayed[i].c,true); _delayed.splice(i,1); } }
