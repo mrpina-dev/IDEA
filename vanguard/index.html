@@ -101,6 +101,14 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 .obtn{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:13px;letter-spacing:.08em;color:var(--bg0);
   background:var(--green);border:none;padding:10px 22px;border-radius:6px;cursor:pointer;box-shadow:0 0 16px rgba(0,255,65,.5);pointer-events:auto}
 .obtn.sub{background:var(--gold);box-shadow:0 0 16px rgba(200,255,0,.5)}
+.refitwrap{display:flex;flex-direction:column;align-items:center;gap:14px;transform-origin:center top;will-change:transform,opacity,filter}
+@keyframes refitWarpIn{
+  0%{opacity:0;transform:translateY(-46px) scaleY(.04);filter:brightness(2.4)}
+  40%{opacity:1;transform:translateY(0) scaleY(.04);filter:brightness(2.4)}
+  62%{transform:translateY(0) scaleY(1.05);filter:brightness(1.5)}
+  100%{transform:translateY(0) scaleY(1);filter:none}
+}
+.refitwrap.warp{animation:refitWarpIn .5s cubic-bezier(.2,.7,.2,1) both}
 .mini{font-size:10px;color:var(--dim);letter-spacing:.1em;background:none;border:1px solid var(--dim);color:var(--dim);
   padding:6px 12px;border-radius:5px;cursor:pointer;pointer-events:auto;font-family:'Share Tech Mono',monospace}
 .modes{display:flex;gap:8px;justify-content:center;margin-top:2px}
@@ -211,10 +219,12 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 
   <!-- REFIT (post-boss upgrade shop) -->
   <div class="ovl hidden" id="ovlRefit">
-    <h2 class="ovh">REFIT</h2>
-    <div class="tag">SECTOR <span id="refitNext">II</span> AHEAD &nbsp;·&nbsp; BALANCE <b id="refitBal" style="color:var(--gold)">0</b> i¢</div>
-    <div class="shop" id="refitItems"></div>
-    <button class="obtn" id="launchBtn">LAUNCH</button>
+    <div class="refitwrap" id="refitWrap">
+      <h2 class="ovh">REFIT</h2>
+      <div class="tag">SECTOR <span id="refitNext">II</span> AHEAD &nbsp;·&nbsp; BALANCE <b id="refitBal" style="color:var(--gold)">0</b> i¢</div>
+      <div class="shop" id="refitItems"></div>
+      <button class="obtn" id="launchBtn">LAUNCH</button>
+    </div>
   </div>
 
   <!-- GAME OVER / ENTER -->
@@ -264,7 +274,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=560,H=840; const VERSION='2517';
+const W=560,H=840; const VERSION='2518';
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
 const bg=bgC.getContext('2d'), fx=fxC.getContext('2d');
@@ -1278,7 +1288,9 @@ function finishBoss(){ runBosses++; const b=boss; explode(b.x,b.y,b.c,true); Aud
   boss=null; fleet=null; bossSpoils=2.8;
 }
 function openRefit(){ state='refit'; document.getElementById('touch').classList.add('hidden');
-  el('refitNext').textContent=roman(sector+1); buildRefit(); showOverlay('ovlRefit'); }
+  el('refitNext').textContent=roman(sector+1); buildRefit(); showOverlay('ovlRefit');
+  const w=el('refitWrap'); if(w){ w.classList.remove('warp'); void w.offsetWidth; w.classList.add('warp'); }
+  Audio_.power(); }
 function launchFromRefit(){ sector++; waveIdx=0; waveTimer=1.6; bossPending=false; fleet=null;
   sectorKills=0; killsForBoss=100+sector*22; hybridTimer=rnd(6,10);
   player.beamE=player.beamMax; triggerBanner(); state='play'; showOverlay(null);
