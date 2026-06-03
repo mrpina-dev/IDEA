@@ -51,6 +51,9 @@ body{background:#000;display:flex;align-items:center;justify-content:center;min-
 .charge{height:6px;width:100%;background:rgba(200,255,0,.10);border:1px solid rgba(200,255,0,.3);position:relative;overflow:hidden}
 .charge i{position:absolute;left:0;top:0;bottom:0;width:0%;background:var(--gold);box-shadow:0 0 10px rgba(200,255,0,.9)}
 .charge.full i{background:var(--white)}
+.charge.locked{border-color:var(--ace);animation:lockpulse .5s steps(2,start) infinite}
+.charge.locked i{background:var(--ace);box-shadow:0 0 9px var(--ace)}
+@keyframes lockpulse{50%{opacity:.4}}
 #bossbar{position:absolute;top:96px;left:40px;right:40px;height:7px;border:1px solid rgba(255,46,46,.5);background:rgba(255,46,46,.1);display:none;z-index:5}
 #bossbar i{position:absolute;left:0;top:0;bottom:0;right:0;background:var(--mset);box-shadow:0 0 10px rgba(255,46,46,.9);transform-origin:left;transform:scaleX(1)}
 #bossname{position:absolute;top:82px;left:0;right:0;text-align:center;font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:11px;letter-spacing:.2em;color:var(--mset);text-shadow:0 0 10px rgba(255,46,46,.7);display:none;z-index:5}
@@ -179,7 +182,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
         <div id="buffhud" style="display:flex;gap:5px;margin-top:3px;flex-wrap:wrap"></div>
       </div>
       <div class="chwrap">
-        <div class="chlbl">BEAM</div>
+        <div class="chlbl" id="beamLbl">BEAM</div>
         <div class="charge" id="charge"><i></i></div>
       </div>
     </div>
@@ -280,7 +283,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=560,H=840; const VERSION='2521';
+const W=560,H=840; const VERSION='2522';
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
 const bg=bgC.getContext('2d'), fx=fxC.getContext('2d');
@@ -372,6 +375,7 @@ let bgScroll=0; const stars=[
   Array.from({length:16},()=>({x:rnd(0,W),y:rnd(0,H),sp:80,sz:1.3,al:.85,st:7}))
 ];
 let shake=0;
+let station=null;
 
 /* ============================= factions ============================= */
 function thr(ctx,r){ ctx.beginPath(); ctx.moveTo(-r*0.22,-r*0.78); ctx.lineTo(-r*0.22,-r*1.0);
@@ -724,7 +728,7 @@ function applyUpgrades(){ const u=player.up;
 /* ============================= start / waves ============================= */
 function startGame(){
   state='play';
-  enemies=[]; pbul=[]; ebul=[]; pods=[]; parts=[]; shards=[]; rings=[]; pops=[]; boss=null; barriers=[]; bossSpoils=0; bossFlash=0; gameOverT=0; killer=null; lastHitBy=null; hazards=[];
+  enemies=[]; pbul=[]; ebul=[]; pods=[]; parts=[]; shards=[]; rings=[]; pops=[]; boss=null; barriers=[]; bossSpoils=0; bossFlash=0; gameOverT=0; killer=null; lastHitBy=null; hazards=[]; station=null;
   runFactionSeq=[...FKEYS]; for(let _i=runFactionSeq.length-1;_i>0;_i--){const _j=Math.random()*_i|0;[runFactionSeq[_i],runFactionSeq[_j]]=[runFactionSeq[_j],runFactionSeq[_i]];} waveFk=null;
   hybridTimer=rnd(6,10);
   fleet=null; slots=[]; refill=[]; reconfTimer=0; volleyTimer=2; diveTimer=2.6;
@@ -1059,6 +1063,7 @@ function update(dt){
 
   /* ----- boss ----- */
   if(boss){ updateBoss(dt); }
+  if(station) updateStation(dt);
   if(bossFlash>0) bossFlash-=dt*1.8;
   if(bossSpoils>0){ bossSpoils-=dt; if(bossSpoils<=0){ for(let i=pods.length-1;i>=0;i--) applyPod(pods[i]); pods.length=0; if(gameOverT<=0) openRefit(); } }
 
@@ -1297,6 +1302,37 @@ function finishBoss(){ runBosses++; const b=boss; explode(b.x,b.y,b.c,true); Aud
   for(let i=0;i<4;i++) pods.push({x:b.x+rnd(-40,40),y:b.y+rnd(-10,20),vy:rnd(40,60),type:'coin',c:COL.gold,bob:rnd(0,6.28),r:11,magnet:true});
   document.getElementById('bossname').style.display='none'; document.getElementById('bossbar').style.display='none';
   boss=null; fleet=null; bossSpoils=2.8;
+  station={x:W*0.5, y:-130, tx:W*0.5, ty:H*0.42, phase:'arrive', t:0, beam:0, hum:rnd(0,6.28), vy:0};
+}
+function updateStation(dt){ const st=station; if(!st)return; st.t+=dt; st.hum+=dt*1.4;
+  const dockX=clamp(player?player.x:W/2,90,W-90), dockY=clamp((player?player.y:H*0.7)-150,150,H*0.52);
+  if(st.phase==='arrive'){ st.tx=dockX; st.ty=dockY;
+    st.x+=(st.tx-st.x)*Math.min(1,dt*3.0); st.y+=(st.ty-st.y)*Math.min(1,dt*3.2);
+    if(Math.abs(st.y-st.ty)<12) st.phase='dock'; }
+  else if(st.phase==='dock'){ st.tx=dockX; st.ty=dockY;
+    st.x+=(st.tx-st.x)*Math.min(1,dt*2.2); st.y+=(st.ty-st.y)*Math.min(1,dt*2.2);
+    st.beam=Math.min(1,st.beam+dt*2.4);
+    if(player && st.beam>0.5 && Math.random()<0.6) parts.push({x:player.x+rnd(-12,12),y:player.y+rnd(-12,2),vx:rnd(-18,18),vy:rnd(-34,-8),life:.45,max:.45,c:Math.random()<0.5?COL.cyan:COL.green,sz:1.4}); }
+  else if(st.phase==='depart'){ st.beam=Math.max(0,st.beam-dt*3.5); st.vy-=900*dt; st.y+=st.vy*dt;
+    if(st.y<-170) station=null; }
+}
+function drawStation(){ const st=station; if(!st)return; const x=st.x,y=st.y,r=34,hum=st.hum;
+  if(st.beam>0 && player && !player.dead){ const by0=y+r*0.5, by1=player.y-16, w0=10, w1=26;
+    bg.save(); bg.globalAlpha=st.beam*0.5; const g=bg.createLinearGradient(0,by0,0,by1);
+    g.addColorStop(0,'rgba(0,240,255,0.7)'); g.addColorStop(1,'rgba(0,240,255,0.05)');
+    bg.fillStyle=g; bg.beginPath(); bg.moveTo(x-w0,by0); bg.lineTo(x+w0,by0); bg.lineTo(player.x+w1,by1); bg.lineTo(player.x-w1,by1); bg.closePath(); bg.fill(); bg.restore(); }
+  bg.save(); bg.translate(x,y); bg.lineJoin='round'; bg.lineWidth=2.2; bg.strokeStyle=COL.green; bg.shadowColor=COL.green; bg.shadowBlur=14;
+  bg.beginPath(); for(let i=0;i<6;i++){ const a=i/6*6.2832; const px=Math.cos(a)*r, py=Math.sin(a)*r*0.58; i?bg.lineTo(px,py):bg.moveTo(px,py);} bg.closePath();
+  bg.fillStyle='rgba(0,255,65,0.08)'; bg.fill(); bg.stroke();
+  bg.lineWidth=1.4; bg.beginPath(); bg.moveTo(-r,0); bg.lineTo(-r*1.34,-r*0.2); bg.moveTo(r,0); bg.lineTo(r*1.34,-r*0.2); bg.stroke();
+  dot(bg,-r*1.34,-r*0.2,3,COL.gold); dot(bg,r*1.34,-r*0.2,3,COL.gold);
+  bg.strokeStyle=COL.cyan; bg.shadowColor=COL.cyan; bg.lineWidth=2;
+  bg.beginPath(); bg.arc(0,0,r*0.34,0,6.28); bg.stroke();
+  bg.save(); bg.rotate(hum*0.7); bg.beginPath(); bg.arc(0,0,r*0.52,0.3,2.5); bg.stroke(); bg.beginPath(); bg.arc(0,0,r*0.52,3.4,5.6); bg.stroke(); bg.restore();
+  for(let i=0;i<3;i++){ const lit=Math.sin(hum*3+i*2)>0; dot(bg,(i-1)*r*0.5, r*0.42, 2.4, lit?COL.gold:COL.dim); }
+  bg.beginPath(); bg.moveTo(-r*0.3,r*0.5); bg.lineTo(0,r*0.66); bg.lineTo(r*0.3,r*0.5); bg.stroke();
+  dot(bg,0,r*0.62,3*(0.6+0.4*Math.sin(hum*4)),COL.white);
+  bg.shadowBlur=0; bg.restore();
 }
 function openRefit(){ state='refit'; document.getElementById('touch').classList.add('hidden');
   el('refitNext').textContent=roman(sector+1); buildRefit(); showOverlay('ovlRefit');
@@ -1304,6 +1340,7 @@ function openRefit(){ state='refit'; document.getElementById('touch').classList.
   Audio_.power(); }
 function launchFromRefit(){ sector++; waveIdx=0; waveTimer=1.6; bossPending=false; fleet=null;
   sectorKills=0; killsForBoss=80+sector*16; hybridTimer=rnd(6,10);
+  if(station){ station.phase='depart'; station.vy=-60; }
   player.beamE=player.beamMax; triggerBanner(); state='play'; showOverlay(null);
   document.getElementById('touch').classList.toggle('hidden', !isTouch); }
 function refitItems(){ const u=player.up;
@@ -1392,8 +1429,10 @@ function drawBG(){
   // pods
   pods.forEach(p=>{ drawPod(bg,p); });
 
+  // station (post-boss repair rig)
+  if(station) drawStation();
   // player
-  if(state==='play' && player && !player.dead){ drawDrone(); drawShip(); }
+  if((state==='play'||(state==='refit'&&station)) && player && !player.dead){ drawDrone(); drawShip(); }
 
   // score pops
   bg.font="700 14px 'Chakra Petch',system-ui,sans-serif"; bg.textAlign='center';
@@ -1535,6 +1574,7 @@ function drawShip(){
   }
   if(inv||pl.shieldHits>0){ bg.save(); bg.translate(x,y); bg.beginPath(); bg.arc(0,2,24,0,6.28);
     bg.strokeStyle='rgba(0,240,255,'+(0.4+0.3*Math.sin(t*14))+')'; bg.shadowColor=COL.cyan; bg.shadowBlur=12; bg.lineWidth=1.5; bg.stroke(); bg.shadowBlur=0; bg.restore(); }
+  if(pl.beamLock && pl.beamOn){ bg.save(); bg.globalAlpha=0.55+0.45*Math.sin(t*12); bg.fillStyle=COL.ace; bg.shadowColor=COL.ace; bg.shadowBlur=8; bg.font="700 9px 'Share Tech Mono',monospace"; bg.textAlign='center'; bg.fillText('↻ RELEASE',x,y-36); bg.globalAlpha=1; bg.shadowBlur=0; bg.textAlign='start'; bg.restore(); }
 }
 function drawDrone(){ if(!player.drone)return; const x=player.x+58,y=player.y+24;
   bg.save(); bg.translate(x,y);
@@ -1629,7 +1669,9 @@ function hud(dt){
   { const ci=el('charge').querySelector('i'); const rr=Math.min(1,player.beamE/player.beamMax);
     ci.style.width=(rr*100).toFixed(0)+'%';
     const cc=rr>=0.999?COL.cyan:rr>0.66?COL.green:rr>0.33?COL.gold:COL.ace; ci.style.background=cc; ci.style.boxShadow='0 0 9px '+cc;
-    el('charge').classList.toggle('full',player.beamActive); }
+    el('charge').classList.toggle('full',player.beamActive);
+    const locked=player.beamLock&&player.beamOn; el('charge').classList.toggle('locked',locked);
+    const bl=el('beamLbl'); if(bl){ bl.textContent=locked?'RELEASE':'BEAM'; bl.style.color=locked?'var(--ace)':''; } }
   el('secNum').textContent=roman(sector); el('secName').textContent=SECTORS[(sector-1)%SECTORS.length];
   if(sector!==lastSec){ lastSec=sector; const acc=sectorTheme().accent;
     el('secNum').style.color=acc; el('secName').style.color=acc; el('secNum').style.textShadow='0 0 10px '+acc; }
