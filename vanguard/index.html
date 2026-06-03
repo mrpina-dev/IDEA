@@ -14,7 +14,7 @@
 html,body{height:100%}
 body{background:#000;display:flex;align-items:center;justify-content:center;min-height:100dvh;
   font-family:'Share Tech Mono',monospace;overflow:hidden;color:var(--white);user-select:none}
-#stage{position:relative;width:min(480px,100vw);aspect-ratio:48/72;max-height:100dvh;
+#stage{position:relative;width:min(560px,100vw);aspect-ratio:2/3;max-height:100dvh;
   overflow:hidden;background:var(--bg0);
   box-shadow:0 0 0 1px rgba(0,255,65,.20),0 0 60px rgba(0,255,65,.08),0 24px 80px rgba(0,0,0,.85)}
 canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
@@ -118,6 +118,13 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 .shopbtn .sm{font-size:10px;color:var(--gold)}
 .shopbtn.off{opacity:.4;border-color:rgba(74,122,82,.5);cursor:default}
 .shopbtn.off .sn{color:var(--dim)}
+.shopbtn .sd{font-size:9px;color:var(--dim);line-height:1.3;margin-top:1px}
+.ctrlsp{background:rgba(2,10,4,.85);border:1px solid rgba(0,255,65,.2);border-radius:4px;padding:8px 12px;font-size:10px;line-height:1.9;letter-spacing:.04em;color:var(--white);text-align:left;max-width:290px}
+.ctrlsp .k{color:var(--cyan);letter-spacing:.08em}
+.fbovl{position:absolute;inset:0;z-index:12;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;gap:8px;background:rgba(2,10,4,.94)}
+.fbovl.hidden{display:none!important}
+.fbsel,.fbtxt{background:rgba(5,15,7,.9);border:1px solid rgba(0,255,65,.3);color:var(--white);font-family:'Share Tech Mono',monospace;font-size:11px;padding:6px 10px;border-radius:3px;width:100%;max-width:280px;box-sizing:border-box}
+.fbtxt{resize:vertical;min-height:72px}
 </style>
 </head>
 <body>
@@ -172,15 +179,18 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
     <div class="board" id="titleBoard"></div>
     <div class="cta" id="startCta">PRESS ENTER / TAP TO LAUNCH</div>
     <div class="legend" id="legend"></div>
-    <div class="panel"><span class="k">MOVE</span> WASD / ARROWS / DRAG &nbsp; <span class="k">FIRE</span> AUTO<br>
-      <span class="k">BEAM</span> HOLD C &nbsp; <span class="k">BOMB</span> X &nbsp; <span class="k">PAUSE</span> P<br>
-      <span class="k">earn i¢, spend it at REFIT after each boss</span></div>
+    <div class="ctrlsp" id="ctrlsPanel"><span class="k">MOVE</span> WASD / ARROWS / DRAG &nbsp; <span class="k">FIRE</span> AUTO<br>
+      <span class="k">BEAM</span> HOLD C/SPACE &nbsp; <span class="k">BOMB</span> X/SHIFT &nbsp; <span class="k">SWITCH WEAPON</span> Q<br>
+      <span class="k">PAUSE</span> P/ESC &nbsp; <span class="k">MUTE</span> M &nbsp; <span class="k">earn i¢ at REFIT after each boss</span></div>
+    <button class="mini" id="ctrlsToggle">CONTROLS: ON</button>
+    <button class="mini" id="titleFeedback">FEEDBACK</button>
   </div>
 
   <!-- PAUSE -->
   <div class="ovl hidden" id="ovlPause">
     <h2 class="ovh">PAUSED</h2>
     <button class="obtn" id="resumeBtn">RESUME</button>
+    <button class="mini" id="pauseCtrlsToggle">CONTROLS: ON</button>
     <button class="mini" id="pauseMuteBtn">SOUND: ON</button>
     <button class="mini" id="quitBtn">QUIT TO TITLE</button>
   </div>
@@ -201,6 +211,18 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
     <div class="tag" id="enterHint">ENTER INITIALS</div>
     <div class="initials" id="initials"></div>
     <button class="obtn sub" id="submitBtn">SUBMIT</button>
+    <button class="mini" id="overFeedback">FEEDBACK</button>
+  </div>
+
+  <!-- FEEDBACK MODAL -->
+  <div class="fbovl hidden" id="ovlFeedback">
+    <h2 class="ovh">SEND FEEDBACK</h2>
+    <div class="tag">HELP IMPROVE VANGUARD</div>
+    <select id="fbCat" class="fbsel"><option value="balance">Balance</option><option value="bug">Bug</option><option value="idea">Idea</option><option value="other">Other</option></select>
+    <textarea id="fbMsg" class="fbtxt" maxlength="500" placeholder="What's on your mind?"></textarea>
+    <div class="tag"><span id="fbCount">0</span> / 500</div>
+    <button class="obtn" id="fbSend">SEND</button>
+    <button class="mini" id="fbCancel">CANCEL</button>
   </div>
 
   <!-- BOARD -->
@@ -216,7 +238,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=480,H=720;
+const W=560,H=840; const VERSION='2506';
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
 const bg=bgC.getContext('2d'), fx=fxC.getContext('2d');
@@ -265,6 +287,7 @@ const keys={};
 let player=null, enemies=[], pbul=[], ebul=[], pods=[], parts=[], shards=[], rings=[], pops=[], boss=null, barriers=[];
 let fleet=null, slots=[], refill=[], reconfTimer=0, volleyTimer=0, diveTimer=0;
 let sector, waveIdx, wavesPerSector, waveTimer, bossPending, sectorClearT, bossSpoils=0, bossFlash=0, sectorKills=0, killsForBoss=21, gameOverT=0, killer=null, lastHitBy=null;
+let runFactionSeq=[...FKEYS], waveFk=null;
 let shotsFired, shotsHit, runTime;
 let bgScroll=0; const stars=[
   Array.from({length:34},()=>({x:rnd(0,W),y:rnd(0,H),sp:14,sz:.6,al:.30,st:0})),
@@ -473,10 +496,8 @@ function buildFormation(){
     widths.forEach((w,r)=>{for(let c=0;c<w;c++) slots.push({ox:(c-(w-1)/2)*dx,oy:r*dy});}); }
   else { const dy=40; for(let i=0;i<6;i++){ slots.push({ox:-90-i*4,oy:i*dy}); slots.push({ox:90+i*4,oy:i*dy}); } }
   slots=slots.slice(0,N);
-  const fkPool=[]; const th=sectorTheme(); const nF=Math.min(sector+1,5);
-  for(let i=0;i<N;i++) fkPool.push( (th.fk && Math.random()<0.55) ? th.fk : FKEYS[(Math.random()*nF)|0] );
-  for(let i=fkPool.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;const tmp=fkPool[i];fkPool[i]=fkPool[j];fkPool[j]=tmp;}
-  slots.forEach((s,i)=>{ s.fk=fkPool[i]; });
+  const fk=waveFk||runFactionSeq[0]||FKEYS[0];
+  slots.forEach(s=>{ s.fk=fk; });
 }
 function spawnFormationOccupant(i,fromTop){
   const s=slots[i]; const rr=Math.random();
@@ -488,6 +509,7 @@ function slotFilled(i){ for(const e of enemies) if(!e.dead && e.slot===i) return
 
 function spawnWave(){
   waveIdx++;
+  waveFk=runFactionSeq.length?runFactionSeq[(waveIdx-1)%runFactionSeq.length]:FKEYS[0];
   const pool=['formation','stream','sweep'].filter(t=>t!==spawnWave._last);
   const type=pick(pool); spawnWave._last=type;
   if(type==='formation'){
@@ -495,12 +517,12 @@ function spawnWave(){
     buildFormation(); refill=new Array(slots.length).fill(0); reconfTimer=10; volleyTimer=1.6; diveTimer=2.2;
     for(let i=0;i<slots.length;i++) spawnFormationOccupant(i,false);
   } else if(type==='stream'){
-    const fk=factionForSector(); const n=10+Math.min(sector*2,14); const baseX=rnd(80,W-80); const dir=Math.random()<.5?1:-1;
+    const fk=waveFk; const n=10+Math.min(sector*2,14); const baseX=rnd(80,W-80); const dir=Math.random()<.5?1:-1;
     for(let i=0;i<n;i++){ const e=makeEnemy(fk,0, baseX, -30-i*54, 'weave');
       e.vy=110+sector*8; e.amp=rnd(40,90); e.freq=rnd(1.2,2.0); e.phase=i*0.5; e.baseX=baseX; e.wdir=dir;
       e.fire=0.8+i*0.2; enemies.push(e); }
   } else { // sweep
-    const fk=factionForSector(); const n=8+Math.min(sector,8); const side=Math.random()<.5?-1:1; const y0=rnd(110,260);
+    const fk=waveFk; const n=8+Math.min(sector,8); const side=Math.random()<.5?-1:1; const y0=rnd(110,260);
     for(let i=0;i<n;i++){ const e=makeEnemy(fk,0, side<0?-30-i*42:W+30+i*42, y0+i*8, 'strafe');
       e.vx=side*(165+sector*10); e.vy=22; e.fire=0.4+i*0.18; enemies.push(e); }
   }
@@ -546,6 +568,7 @@ function applyUpgrades(){ const u=player.up;
 function startGame(){
   state='play';
   enemies=[]; pbul=[]; ebul=[]; pods=[]; parts=[]; shards=[]; rings=[]; pops=[]; boss=null; barriers=[]; bossSpoils=0; bossFlash=0; gameOverT=0; killer=null; lastHitBy=null;
+  runFactionSeq=[...FKEYS]; for(let _i=runFactionSeq.length-1;_i>0;_i--){const _j=Math.random()*_i|0;[runFactionSeq[_i],runFactionSeq[_j]]=[runFactionSeq[_j],runFactionSeq[_i]];} waveFk=null;
   fleet=null; slots=[]; refill=[]; reconfTimer=0; volleyTimer=2; diveTimer=2.6;
   sector=1; waveIdx=0; wavesPerSector=3; waveTimer=1.6; bossPending=false; sectorClearT=0;
   sectorKills=0; killsForBoss=100+sector*22;
@@ -753,22 +776,23 @@ function update(dt){
     if(e.state==='form'){
       const s=slots[e.slot], hx=fleet?fleet.x+(s?s.ox:0):e.x, hy=fleet?fleet.y+(s?s.oy:0):e.y;
       e.x+=(hx-e.x)*Math.min(1,dt*6); e.y+=(hy+Math.sin(e.bob)*3-e.y)*Math.min(1,dt*6); e.bank=(hx-e.x)*0.4;
-      e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.18,rnd(0.55,1.3)/(1+sector*0.12)); if(Math.random()<0.85) enemyAimShot(e); }
+      e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(2.0,3.0)/(1+sector*0.07)); if(Math.random()<0.85) enemyAimShot(e); }
     } else if(e.state==='reenter'){
-      const s=slots[e.slot], hx=fleet?fleet.x+(s?s.ox:0):W/2, hy=fleet?fleet.y+(s?s.oy:0):80;
-      e.x+=(hx-e.x)*Math.min(1,dt*3.2); e.y+=(hy-e.y)*Math.min(1,dt*3.2);
-      if(Math.abs(e.x-hx)<3&&Math.abs(e.y-hy)<3) e.state='form';
+      if(!fleet){ e.dead=true; e.dt=0; e.gone=true; }
+      else { const s=slots[e.slot], hx=fleet.x+(s?s.ox:0), hy=fleet.y+(s?s.oy:0);
+        e.x+=(hx-e.x)*Math.min(1,dt*3.2); e.y+=(hy-e.y)*Math.min(1,dt*3.2);
+        if(Math.abs(e.x-hx)<3&&Math.abs(e.y-hy)<3) e.state='form'; }
     } else if(e.state==='dive'){
       e.vy+=240*dt; if(e.y<H*0.62) e.vx+=(player.x-e.x)*dt*1.6; e.vx*=0.99; e.x+=e.vx*dt; e.y+=e.vy*dt; e.bank=e.vx*0.05;
-      e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.18,.3/(1+sector*0.12)); enemyAimShot(e); }
+      e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(1.8,2.8)/(1+sector*0.07)); enemyAimShot(e); }
       if(e.y>H+40){ e.dead=true; e.dt=0; e.gone=true; }
     } else if(e.state==='weave'){
       e.y+=e.vy*dt; e.x=e.baseX+Math.sin(e.t*e.freq+e.phase)*e.amp*e.wdir; e.bank=Math.cos(e.t*e.freq+e.phase)*8*e.wdir;
-      e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.18,rnd(1.0,2.0)/(1+sector*0.12)); if(e.y>0&&e.y<H*0.7) enemyAimShot(e); }
+      e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(2.5,3.5)/(1+sector*0.07)); if(e.y>0&&e.y<H*0.7) enemyAimShot(e); }
       if(e.y>H+40){ e.dead=true; e.dt=0; e.gone=true; }
     } else if(e.state==='strafe'){
       e.x+=e.vx*dt; e.y+=e.vy*dt; e.bank=e.vx*0.04;
-      e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.18,rnd(0.8,1.6)/(1+sector*0.12)); if(e.x>0&&e.x<W) enemyShot(e,0,1); }
+      e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(2.0,3.0)/(1+sector*0.07)); if(e.x>0&&e.x<W) enemyShot(e,0,1); }
       if(e.x<-50||e.x>W+50){ e.dead=true; e.dt=0; e.gone=true; }
     } else if(e.state==='retreat'){
       e.x+=e.vx*dt; e.y+=e.vy*dt; e.vy-=dt*70; e.bank=e.vx*0.05;
@@ -782,7 +806,7 @@ function update(dt){
       e.r=br*(1+0.18*Math.abs(Math.sin(e.celT*7)));
       if(Math.random()<0.6) parts.push({x:e.x+rnd(-br,br),y:e.y-rnd(0,br),vx:rnd(-55,55),vy:rnd(-120,-30),life:.6,max:.6,c:e.c,sz:1.9});
     } else { // free
-      e.y+=e.vy*dt; e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.18,rnd(1,2)/(1+sector*0.12)); enemyAimShot(e); }
+      e.y+=e.vy*dt; e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(2.0,3.5)/(1+sector*0.07)); enemyAimShot(e); }
       if(e.y>H+40){ e.dead=true; e.dt=0; e.gone=true; }
     }
     // contact with player
@@ -849,9 +873,11 @@ function update(dt){
 }
 
 /* enemy shots */
-function enemyShot(e,ang,spdMul){ const sp=(255+sector*14)*(spdMul||1);
+function enemyShot(e,ang,spdMul){ if(ebul.length>=8+sector*4) return; if(sector<=2&&Math.random()<0.5) return;
+  const sp=(255+sector*14)*(spdMul||1);
   ebul.push({x:e.x,y:e.y+e.r*0.6,vx:Math.sin(ang||0)*sp,vy:Math.cos(ang||0)*sp,c:e.c,r:3,owner:e}); }
-function enemyAimShot(e){ const dx=player.x-e.x,dy=player.y-e.y,m=Math.hypot(dx,dy)||1,sp=270+sector*14;
+function enemyAimShot(e){ if(ebul.length>=8+sector*4) return; if(sector<=2&&Math.random()<0.5) return;
+  const dx=player.x-e.x,dy=player.y-e.y,m=Math.hypot(dx,dy)||1,sp=270+sector*14;
   ebul.push({x:e.x,y:e.y,vx:dx/m*sp,vy:dy/m*sp,c:e.c,r:3,owner:e}); }
 
 /* boss */
@@ -965,16 +991,16 @@ function launchFromRefit(){ sector++; waveIdx=0; waveTimer=1.6; bossPending=fals
   document.getElementById('touch').classList.toggle('hidden', !isTouch); }
 function refitItems(){ const u=player.up;
   return [
-    {name:'ENGINE',      lv:u.speed,           mx:10, cost:300+(u.speed-1)*180,       can:u.speed<10,            buy:()=>u.speed++},
-    {name:'GUN POWER',   lv:u.gun,             mx:8,  cost:400+(u.gun-1)*250,         can:u.gun<8,               buy:()=>u.gun++},
-    {name:'BEAM POWER',  lv:u.beamPow,         mx:8,  cost:320+(u.beamPow-1)*220,     can:u.beamPow<8,           buy:()=>u.beamPow++},
-    {name:'BEAM CELL',   lv:u.beamCap,         mx:8,  cost:280+(u.beamCap-1)*200,     can:u.beamCap<8,           buy:()=>u.beamCap++},
-    {name:'BEAM PIERCE', lv:u.beamPierce,      mx:5,  cost:400+(u.beamPierce-1)*280,  can:u.beamPierce<5,        buy:()=>u.beamPierce++},
-    {name:'WEAPON: '+nextWeaponName(), lv:0,  mx:0, cost:weaponCost(),          can:true,                 buy:buyWeapon},
-    {name:'BOMB +1',    lv:player.bombs,      mx:6, cost:200,                   can:player.bombs<6,       buy:()=>player.bombs++},
-    {name:'SHIELD +1',  lv:player.shieldHits, mx:3, cost:350,                   can:player.shieldHits<3,  buy:()=>player.shieldHits++},
-    {name:player.drone?'DRONE READY':'DRONE', lv:0, mx:0, cost:600,             can:!player.drone,        buy:()=>{player.drone={ph:0};}},
-    {name:'EXTRA LIFE', lv:0,                 mx:0, cost:2500,                  can:player.lives<4,       buy:()=>player.lives++}
+    {name:'ENGINE',      desc:'Ship movement speed.',                              lv:u.speed,           mx:10, cost:300+(u.speed-1)*180,       can:u.speed<10,            buy:()=>u.speed++},
+    {name:'GUN POWER',   desc:'Primary weapon damage and fire rate.',              lv:u.gun,             mx:8,  cost:400+(u.gun-1)*250,         can:u.gun<8,               buy:()=>u.gun++},
+    {name:'BEAM POWER',  desc:'Beam damage per second.',                           lv:u.beamPow,         mx:8,  cost:320+(u.beamPow-1)*220,     can:u.beamPow<8,           buy:()=>u.beamPow++},
+    {name:'BEAM CELL',   desc:'Beam duration before it must recharge.',            lv:u.beamCap,         mx:8,  cost:280+(u.beamCap-1)*200,     can:u.beamCap<8,           buy:()=>u.beamCap++},
+    {name:'BEAM PIERCE', desc:'How many enemies the beam cuts through.',           lv:u.beamPierce,      mx:5,  cost:400+(u.beamPierce-1)*280,  can:u.beamPierce<5,        buy:()=>u.beamPierce++},
+    {name:'WEAPON: '+nextWeaponName(), desc:'Unlock the next weapon type. Switch anytime with Q.', lv:0, mx:0, cost:weaponCost(), can:true, buy:buyWeapon},
+    {name:'BOMB +1',     desc:'Raises your max bomb count.',                       lv:player.bombs,      mx:6, cost:200,                   can:player.bombs<6,       buy:()=>player.bombs++},
+    {name:'SHIELD +1',   desc:'Adds a shield that absorbs one hit.',               lv:player.shieldHits, mx:3, cost:350,                   can:player.shieldHits<3,  buy:()=>player.shieldHits++},
+    {name:player.drone?'DRONE READY':'DRONE', desc:'Deploys a wingman drone that fires with you.', lv:0, mx:0, cost:600, can:!player.drone, buy:()=>{player.drone={ph:0};}},
+    {name:'EXTRA LIFE',  desc:'One more life (max 4).',                            lv:0,                 mx:0, cost:2500,                  can:player.lives<4,       buy:()=>player.lives++}
   ];
 }
 function nextWeapon(){ const i=WEAPONS.indexOf(player.wtype); return WEAPONS[(i+1)%WEAPONS.length]; }
@@ -989,7 +1015,7 @@ function buildRefit(){ el('refitBal').textContent=player.coins.toLocaleString();
     const maxed=(it.mx>0 && it.lv>=it.mx);
     const afford=!maxed && it.can && player.coins>=it.cost;
     const meta = maxed?'MAX' : it.cost===0?'SWAP' : (it.mx>0?('Lv'+it.lv+' \u2192 i\u00a2'+it.cost):('i\u00a2'+it.cost));
-    return '<button class="shopbtn'+(afford?'':' off')+'" data-i="'+i+'"><span class="sn">'+it.name+'</span><span class="sm">'+meta+'</span></button>';
+    return '<button class="shopbtn'+(afford?'':' off')+'" data-i="'+i+'"><span class="sn">'+it.name+'</span><span class="sm">'+meta+'</span>'+(it.desc?'<span class="sd">'+it.desc+'</span>':'')+'</button>';
   }).join('');
   [...el('refitItems').children].forEach(b=>b.addEventListener('click',()=>{
     const it=refitItems()[+b.dataset.i]; const maxed=(it.mx>0 && it.lv>=it.mx);
@@ -1270,7 +1296,7 @@ function renderBoard(target,highlightName,highlightScore){
 
 /* initials entry */
 let curInitials='AAA', selSlot=0, pendingScore=null;
-function buildInitials(){ curInitials='AAA'; selSlot=0; const box=el('initials'); box.innerHTML='';
+function buildInitials(){ try{curInitials=localStorage.getItem('vanguard_lastInitials')||'AAA';}catch(e){curInitials='AAA';} selSlot=0; const box=el('initials'); box.innerHTML='';
   for(let i=0;i<3;i++){ const d=document.createElement('div'); d.className='slot'+(i===0?' sel':''); d.textContent='A'; d.dataset.i=i;
     d.addEventListener('pointerdown',ev=>{ev.preventDefault(); selSlot=i; cycleSlot(i); refreshInitials();}); box.appendChild(d); } refreshInitials(); }
 function cycleSlot(i){ let ch=curInitials.charCodeAt(i)-65; ch=(ch+1)%26; curInitials=curInitials.substring(0,i)+String.fromCharCode(65+ch)+curInitials.substring(i+1); }
@@ -1342,7 +1368,8 @@ function mergeScore(name,score){ const b=(onlineBoard?onlineBoard.slice():[]);
   if(!b.some(r=>r.name===name&&r.score===score)) b.push({name,score});
   b.sort((a,c)=>c.score-a.score); onlineBoard=b.slice(0,10); }
 function submitScore(){ const sc=pendingScore?pendingScore.score:window.scoreT; const nm=curInitials;
-  saveLocal(nm, sc); submitToServer(sc, pendingScore?pendingScore.sector:sector, pendingScore?pendingScore.acc:0);
+  saveLocal(nm, sc); try{localStorage.setItem('vanguard_lastInitials',nm);}catch(e){}
+  submitToServer(sc, pendingScore?pendingScore.sector:sector, pendingScore?pendingScore.acc:0);
   mergeScore(nm,sc);
   state='board'; showOverlay('ovlBoard'); renderBoard('bigBoard',nm,sc);
   if(API_URL){ [1600,3800,6500].forEach(ms=>setTimeout(()=>fetchOnline(()=>{ mergeScore(nm,sc); renderBoard('bigBoard',nm,sc); }), ms)); } }
@@ -1354,6 +1381,38 @@ try{ if(localStorage.getItem('vanguard_mute')==='1'){Audio_.muted=true;const pmb
 /* legend on title */
 (function(){ const items=[['IDEA (you)',COL.green],['ACE',COL.ace],['BMET',COL.bmet],['CSEE',COL.csee],['MAT',COL.mat],['MSET',COL.mset]];
   el('legend').innerHTML=items.map(it=>'<span><i style="background:'+it[1]+';box-shadow:0 0 6px '+it[1]+'"></i>'+it[0]+'</span>').join(''); })();
+
+/* controls toggle */
+(function(){
+  const panel=document.getElementById('ctrlsPanel');
+  const btns=[document.getElementById('ctrlsToggle'),document.getElementById('pauseCtrlsToggle')];
+  let shown; try{shown=localStorage.getItem('vanguard_controls')!=='0';}catch(e){shown=true;}
+  function applyCtrl(){ panel.style.display=shown?'':'none'; const lbl=(shown?'HIDE':'SHOW')+' CONTROLS';
+    btns.forEach(b=>{if(b)b.textContent=lbl;}); try{localStorage.setItem('vanguard_controls',shown?'1':'0');}catch(e){} }
+  btns.forEach(b=>{if(b)b.addEventListener('click',ev=>{ev.stopPropagation();shown=!shown;applyCtrl();});});
+  applyCtrl();
+})();
+
+/* feedback */
+(function(){
+  const modal=document.getElementById('ovlFeedback');
+  const msg=document.getElementById('fbMsg');
+  const cnt=document.getElementById('fbCount');
+  const sendBtn=document.getElementById('fbSend');
+  function openFb(){ modal.classList.remove('hidden'); msg.value=''; cnt.textContent='0'; sendBtn.textContent='SEND'; sendBtn.disabled=false; }
+  function closeFb(){ modal.classList.add('hidden'); }
+  document.getElementById('titleFeedback').addEventListener('click',e=>{e.stopPropagation();openFb();});
+  document.getElementById('overFeedback').addEventListener('click',e=>{e.stopPropagation();openFb();});
+  document.getElementById('fbCancel').addEventListener('click',closeFb);
+  msg.addEventListener('input',()=>cnt.textContent=msg.value.length);
+  sendBtn.addEventListener('click',()=>{
+    const cat=document.getElementById('fbCat').value;
+    const txt=msg.value.trim().slice(0,500);
+    if(API_URL){ try{ new Image().src=API_URL+'?action=feedback&cat='+encodeURIComponent(cat)+'&msg='+encodeURIComponent(txt)+'&ver='+VERSION+'&name='+encodeURIComponent(curInitials||'---')+'&cb='+Date.now(); }catch(e){} }
+    sendBtn.textContent='THANKS!'; sendBtn.disabled=true;
+    setTimeout(closeFb,1400);
+  });
+})();
 
 /* ============================= loop ============================= */
 renderBoard('titleBoard'); fetchOnline(()=>renderBoard('titleBoard'));
