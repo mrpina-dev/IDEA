@@ -214,14 +214,9 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
       <button class="modebtn" data-m="hardcore">HARDCORE</button>
       <button class="modebtn" data-m="arcade">ARCADE</button>
     </div>
-    <div class="lbl" style="color:var(--dim);letter-spacing:.22em">LOADOUT</div>
-    <div class="modes" id="loadSel">
-      <button class="modebtn sel" data-l="vanguard">VANGUARD</button>
-      <button class="modebtn" data-l="gunner">GUNNER</button>
-      <button class="modebtn" data-l="striker">STRIKER</button>
-      <button class="modebtn" data-l="warden">WARDEN</button>
-    </div>
-    <div class="tag" id="loadDesc" style="min-height:12px">Balanced standard rig.</div>
+    <div class="lbl" style="color:var(--dim);letter-spacing:.22em">STARTING BUILD</div>
+    <button class="fbbtn" id="outfitBtn" style="border-color:var(--gold);color:var(--gold);background:rgba(200,255,0,.12);text-shadow:0 0 8px rgba(200,255,0,.5);box-shadow:0 0 12px rgba(200,255,0,.2)">CONFIGURE BUILD</button>
+    <div class="tag" id="buildSummary" style="min-height:12px">No upgrades selected.</div>
     <div class="btabs" id="titleBoardTabs"><button class="btab sel" data-bm="normal">NORMAL</button><button class="btab" data-bm="hardcore">HARDCORE</button></div>
     <div class="board" id="titleBoard"></div>
     <div class="cta" id="startCta">PRESS ENTER / TAP TO LAUNCH</div>
@@ -300,6 +295,15 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
     <button class="mini" id="keysReset">RESET TO DEFAULTS</button>
   </div>
 
+  <!-- STARTING BUILD OUTFIT -->
+  <div class="ovl hidden" id="ovlOutfit">
+    <h2 class="ovh">STARTING BUILD</h2>
+    <div class="tag">SPEND YOUR STARTING i¢ &nbsp;·&nbsp; BUDGET <b id="outfitBudget" style="color:var(--gold)">0</b> i¢</div>
+    <div class="shop" id="outfitItems"></div>
+    <button class="obtn" id="outfitDone">DONE</button>
+    <button class="mini" id="outfitReset">RESET BUILD</button>
+  </div>
+
   <!-- BOARD -->
   <div class="ovl hidden" id="ovlBoard">
     <h2 class="ovh">LEADERBOARD</h2>
@@ -314,7 +318,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=560,H=840; const VERSION='2526';
+const W=560,H=840; const VERSION='2527';
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
 const bg=bgC.getContext('2d'), fx=fxC.getContext('2d');
@@ -400,7 +404,10 @@ let sector, waveIdx, wavesPerSector, waveTimer, bossPending, sectorClearT, bossS
 let runFactionSeq=[], waveFk=null;
 let hybridTimer=0;
 let gameMode='normal';
-let loadout='vanguard';
+const START_BUDGET=1000;
+function freshBuild(){ return { up:{gun:1,beamPow:1,beamCap:1,speed:1,beamPierce:1,beamSpool:1,flank:0,armor:0}, unlocked:{spread:1,lance:0,homing:0,rapid:0}, wtype:'spread', bombs:2, shieldHits:0, drone:null, spent:0 }; }
+let startBuild=freshBuild();
+try{ const _sb=JSON.parse(localStorage.getItem('vanguard_build')||'null'); if(_sb&&_sb.up){ startBuild=freshBuild(); startBuild.up=Object.assign(startBuild.up,_sb.up); startBuild.unlocked=Object.assign(startBuild.unlocked,_sb.unlocked||{}); startBuild.wtype=_sb.wtype||'spread'; startBuild.bombs=_sb.bombs||2; startBuild.shieldHits=_sb.shieldHits||0; startBuild.drone=_sb.drone?{ph:0}:null; startBuild.spent=_sb.spent||0; } }catch(e){}
 const KEYS_DEFAULT={beam:'c', bomb:'x', parry:'z', weapon:'q', pause:'p', mute:'m'};
 let keybinds=Object.assign({},KEYS_DEFAULT);
 try{ const _sk=JSON.parse(localStorage.getItem('vanguard_keys')||'null'); if(_sk) keybinds=Object.assign({},KEYS_DEFAULT,_sk); }catch(e){}
@@ -776,7 +783,7 @@ function startGame(){
   shotsFired=0; shotsHit=0; runTime=0; window.scoreT=0; window.scoreD=0; window.combo=0; window.mult=1; window.comboT=0;
   runKills=0; runBosses=0; deathSlow=0; killerInfo=null; window.maxCombo=0;
   resetPlayer(true);
-  if(LOADOUTS[loadout]) LOADOUTS[loadout].apply(player);
+  { const b=startBuild; player.up=Object.assign(player.up,b.up); player.unlocked=Object.assign(player.unlocked,b.unlocked); player.wtype=b.wtype||'spread'; player.bombs=b.bombs; player.shieldHits=b.shieldHits; if(b.drone)player.drone={ph:0}; }
   applyUpgrades(); player.armor=player.maxArmor; player.beamE=player.beamMax;
   if(gameMode==='hardcore'){ player.lives=0; } else if(gameMode==='arcade'){ player.lives=8; player.coins=9000; }
   envGrid=[0,255,65]; lastSec=-1; triggerBanner();
@@ -862,12 +869,23 @@ function dropPod(x,y,fromBoss){
   pods.push(pod);
 }
 const WEAPONS=['spread','lance','homing','rapid'];
-const LOADOUTS={
-  vanguard:{name:'VANGUARD', desc:'Balanced standard rig.', apply:p=>{}},
-  gunner:{name:'GUNNER', desc:'Starts with a heavier forward gun.', apply:p=>{ p.up.gun=3; }},
-  striker:{name:'STRIKER', desc:'Piercing lance plus side guns.', apply:p=>{ p.unlocked.lance=1; p.wtype='lance'; p.up.flank=1; }},
-  warden:{name:'WARDEN', desc:'Tougher hull, a shield, an extra bomb.', apply:p=>{ p.up.armor=2; p.shieldHits=1; p.bombs=3; }}
-};
+function outfitOffers(){ const b=startBuild, u=b.up; return [
+  {grp:'WEAPONS', label:'GUN POWER', lv:u.gun, cost:400+(u.gun-1)*250, can:u.gun<8, buy:()=>u.gun++},
+  {grp:'WEAPONS', label:'FLANK GUNS', lv:u.flank, cost:[450,700,1000][u.flank]||0, can:u.flank<3, buy:()=>u.flank++},
+  {grp:'WEAPONS', label:'LANCE', lv:b.unlocked.lance, cost:600, can:!b.unlocked.lance, buy:()=>{b.unlocked.lance=1;b.wtype='lance';}},
+  {grp:'WEAPONS', label:'HOMING', lv:b.unlocked.homing, cost:750, can:!b.unlocked.homing, buy:()=>{b.unlocked.homing=1;b.wtype='homing';}},
+  {grp:'WEAPONS', label:'RAPID', lv:b.unlocked.rapid, cost:350, can:!b.unlocked.rapid, buy:()=>{b.unlocked.rapid=1;b.wtype='rapid';}},
+  {grp:'BEAM', label:'BEAM POWER', lv:u.beamPow, cost:320+(u.beamPow-1)*220, can:u.beamPow<8, buy:()=>u.beamPow++},
+  {grp:'BEAM', label:'BEAM CELL', lv:u.beamCap, cost:280+(u.beamCap-1)*200, can:u.beamCap<8, buy:()=>u.beamCap++},
+  {grp:'BEAM', label:'BEAM PIERCE', lv:u.beamPierce, cost:400+(u.beamPierce-1)*280, can:u.beamPierce<5, buy:()=>u.beamPierce++},
+  {grp:'BEAM', label:'BEAM SPOOL', lv:u.beamSpool, cost:300+(u.beamSpool-1)*210, can:u.beamSpool<6, buy:()=>u.beamSpool++},
+  {grp:'DEFENSE', label:'HULL ARMOR', lv:u.armor, cost:400+u.armor*250, can:u.armor<4, buy:()=>u.armor++},
+  {grp:'DEFENSE', label:'SHIELD +1', lv:b.shieldHits, cost:350, can:b.shieldHits<3, buy:()=>b.shieldHits++},
+  {grp:'SYSTEMS', label:'ENGINE', lv:u.speed, cost:300+(u.speed-1)*180, can:u.speed<10, buy:()=>u.speed++},
+  {grp:'SYSTEMS', label:'BOMB +1', lv:b.bombs, cost:200, can:b.bombs<6, buy:()=>b.bombs++},
+  {grp:'SYSTEMS', label:'DRONE', lv:b.drone?1:0, cost:600, can:!b.drone, buy:()=>{b.drone={ph:0};}}
+];}
+function buildCount(){ const u=startBuild.up,b=startBuild; return (u.gun-1)+(u.beamPow-1)+(u.beamCap-1)+(u.beamPierce-1)+(u.beamSpool-1)+(u.speed-1)+u.flank+u.armor+b.shieldHits+(b.bombs-2)+(b.drone?1:0)+b.unlocked.lance+b.unlocked.homing+b.unlocked.rapid; }
 const WCOL={spread:COL.green,lance:COL.cyan,homing:COL.gold,rapid:COL.mat};
 function applyPod(p){
   if(p.type==='core'){ const jack=150+sector*30; player.coins+=jack; addScore(jack,p.x,p.y,p.c);
@@ -1872,8 +1890,9 @@ window.addEventListener('keydown',e=>{ Audio_.init(); Audio_.resume();
   const k=e.key.length===1?e.key.toLowerCase():e.key; keys[k]=true; keys[e.key]=true;
   if(rebindAction){ e.preventDefault(); const RES={w:1,a:1,s:1,d:1};
     if(/^[a-z0-9]$/.test(k)&&!RES[k]){ for(const a in keybinds){ if(keybinds[a]===k&&a!==rebindAction) keybinds[a]=keybinds[rebindAction]; } keybinds[rebindAction]=k; saveKeys(); }
-    rebindAction=null; buildKeyList(); return; }
+    rebindAction=null; buildKeyList(); refreshControlsHint(); return; }
   if(!document.getElementById('ovlKeys').classList.contains('hidden')) return;
+  if(!document.getElementById('ovlOutfit').classList.contains('hidden')) return;
   if(!document.getElementById('ovlFeedback').classList.contains('hidden')) return;
   if(!document.getElementById('ovlConfirm').classList.contains('hidden')){
     if(e.key==='Enter') doRestart(); else if(e.key==='Escape') cancelRestart();
@@ -1976,15 +1995,29 @@ try{ if(localStorage.getItem('vanguard_mute')==='1'){Audio_.muted=true;const pmb
   apply();
 })();
 
-/* loadout select */
+/* starting build (outfit) */
+function saveBuild(){ try{ const b=startBuild; localStorage.setItem('vanguard_build',JSON.stringify({up:b.up,unlocked:b.unlocked,wtype:b.wtype,bombs:b.bombs,shieldHits:b.shieldHits,drone:!!b.drone,spent:b.spent})); }catch(e){} }
+function refreshBuildSummary(){ const s=el('buildSummary'); if(!s)return; const n=buildCount(); s.textContent=n>0?(n+' upgrade'+(n>1?'s':'')+' · '+startBuild.spent.toLocaleString()+' i¢ spent'):'No upgrades selected.'; }
+function buildOutfit(){ const box=el('outfitItems'); if(!box)return; const rem=START_BUDGET-startBuild.spent;
+  const bd=el('outfitBudget'); if(bd) bd.textContent=rem.toLocaleString();
+  const offers=outfitOffers(); const order=['WEAPONS','BEAM','DEFENSE','SYSTEMS']; let html='';
+  order.forEach(g=>{ const rows=offers.map((o,i)=>[o,i]).filter(p=>p[0].grp===g); if(!rows.length)return; html+='<div class="shophdr">'+g+'</div>';
+    rows.forEach(p=>{ const o=p[0],i=p[1]; const maxed=!o.can; const afford=!maxed&&rem>=o.cost;
+      const meta=maxed?(o.lv>0?'OWNED':'MAX'):('i¢'+o.cost);
+      html+='<button class="shopbtn'+(afford?'':' off')+'" data-i="'+i+'"><span class="sn">'+o.label+(o.lv>0?(' · '+o.lv):'')+'</span><span class="sm">'+meta+'</span></button>'; }); });
+  box.innerHTML=html;
+  [...box.querySelectorAll('.shopbtn')].forEach(btn=>btn.addEventListener('click',()=>{ const o=outfitOffers()[+btn.dataset.i];
+    if(!o.can||(START_BUDGET-startBuild.spent)<o.cost){ Audio_.hit(); return; }
+    startBuild.spent+=o.cost; o.buy(); saveBuild(); Audio_.pickup(); buildOutfit(); refreshBuildSummary(); }));
+}
+function openOutfit(){ el('ovlOutfit').classList.remove('hidden'); buildOutfit(); }
+function closeOutfit(){ el('ovlOutfit').classList.add('hidden'); refreshBuildSummary(); }
+function resetBuild(){ startBuild=freshBuild(); saveBuild(); buildOutfit(); refreshBuildSummary(); }
 (function(){
-  let l; try{ l=localStorage.getItem('vanguard_loadout')||'vanguard'; }catch(e){ l='vanguard'; }
-  if(!LOADOUTS[l]) l='vanguard'; loadout=l;
-  const wrap=document.getElementById('loadSel'); if(!wrap)return;
-  const btns=[...wrap.querySelectorAll('.modebtn')]; const desc=document.getElementById('loadDesc');
-  function apply(){ btns.forEach(b=>b.classList.toggle('sel',b.dataset.l===loadout)); if(desc&&LOADOUTS[loadout]) desc.textContent=LOADOUTS[loadout].desc; }
-  btns.forEach(b=>b.addEventListener('click',ev=>{ ev.stopPropagation(); loadout=b.dataset.l; try{localStorage.setItem('vanguard_loadout',loadout);}catch(e){} apply(); Audio_.hit(); }));
-  apply();
+  const ob=el('outfitBtn'); if(ob) ob.addEventListener('click',e=>{e.stopPropagation();openOutfit();});
+  const od=el('outfitDone'); if(od) od.addEventListener('click',e=>{e.stopPropagation();closeOutfit();});
+  const orr=el('outfitReset'); if(orr) orr.addEventListener('click',e=>{e.stopPropagation();resetBuild();});
+  refreshBuildSummary();
 })();
 
 /* feedback */
@@ -2021,11 +2054,16 @@ function buildKeyList(){ const box=el('keyList'); if(!box)return; box.innerHTML=
     row.appendChild(nm); row.appendChild(kb); box.appendChild(row); }); }
 function openKeys(){ rebindAction=null; el('ovlKeys').classList.remove('hidden'); buildKeyList(); }
 function closeKeys(){ rebindAction=null; el('ovlKeys').classList.add('hidden'); }
+function refreshControlsHint(){ const p=el('ctrlsPanel'); if(!p)return; const kl=c=>keyLabel(keybinds[c]);
+  p.innerHTML='<span class="k">MOVE</span> WASD / ARROWS / DRAG &nbsp; <span class="k">FIRE</span> AUTO<br>'+
+    '<span class="k">BEAM</span> HOLD '+kl('beam')+'/SPACE &nbsp; <span class="k">BOMB</span> '+kl('bomb')+'/SHIFT &nbsp; <span class="k">PARRY</span> '+kl('parry')+' &nbsp; <span class="k">SWITCH</span> '+kl('weapon')+'<br>'+
+    '<span class="k">PAUSE</span> '+kl('pause')+'/ESC &nbsp; <span class="k">MUTE</span> '+kl('mute')+' &nbsp; <span class="k">earn i¢ at REFIT after each boss</span>'; }
 (function(){
   const done=el('keysDone'); if(done) done.addEventListener('click',e=>{e.stopPropagation();closeKeys();});
-  const rst=el('keysReset'); if(rst) rst.addEventListener('click',e=>{e.stopPropagation(); keybinds=Object.assign({},KEYS_DEFAULT); saveKeys(); buildKeyList();});
+  const rst=el('keysReset'); if(rst) rst.addEventListener('click',e=>{e.stopPropagation(); keybinds=Object.assign({},KEYS_DEFAULT); saveKeys(); buildKeyList(); refreshControlsHint();});
   const tk=el('titleKeys'); if(tk) tk.addEventListener('click',e=>{e.stopPropagation();openKeys();});
   const pk=el('pauseKeys'); if(pk) pk.addEventListener('click',e=>{e.stopPropagation();openKeys();});
+  refreshControlsHint();
 })();
 
 /* board mode tabs */
