@@ -90,6 +90,10 @@ body{background:#000;display:flex;align-items:center;justify-content:center;min-
 .board .rk{color:var(--dim);width:30px;text-align:left}
 .board .nm{flex:1;text-align:left;padding-left:8px}
 .board .sc{font-family:'Chakra Petch',sans-serif;font-weight:700}
+.btabs{display:flex;gap:6px;justify-content:center;margin-bottom:2px}
+.btab{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.14em;background:none;border:1px solid var(--dim);color:var(--dim);padding:3px 10px;border-radius:4px;cursor:pointer;pointer-events:auto}
+.btab.sel{border-color:var(--green);color:var(--green);text-shadow:0 0 8px rgba(0,255,65,.5)}
+.btab[data-bm=hardcore].sel{border-color:var(--mset);color:var(--mset);text-shadow:0 0 8px rgba(255,46,46,.6)}
 h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;letter-spacing:.1em;color:var(--green);text-shadow:0 0 14px rgba(0,255,65,.6)}
 .go-stat{font-size:12px;color:var(--white);letter-spacing:.06em}
 .go-stat b{font-family:'Chakra Petch',sans-serif;color:var(--gold)}
@@ -197,6 +201,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
       <button class="modebtn" data-m="hardcore">HARDCORE</button>
       <button class="modebtn" data-m="arcade">ARCADE</button>
     </div>
+    <div class="btabs" id="titleBoardTabs"><button class="btab sel" data-bm="normal">NORMAL</button><button class="btab" data-bm="hardcore">HARDCORE</button></div>
     <div class="board" id="titleBoard"></div>
     <div class="cta" id="startCta">PRESS ENTER / TAP TO LAUNCH</div>
     <div class="legend" id="legend"></div>
@@ -264,6 +269,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
   <!-- BOARD -->
   <div class="ovl hidden" id="ovlBoard">
     <h2 class="ovh">LEADERBOARD</h2>
+    <div class="btabs" id="bigBoardTabs"><button class="btab sel" data-bm="normal">NORMAL</button><button class="btab" data-bm="hardcore">HARDCORE</button></div>
     <div class="board" id="bigBoard"></div>
     <button class="obtn" id="againBtn">PLAY AGAIN</button>
     <button class="mini" id="menuBtn">MAIN MENU</button>
@@ -274,7 +280,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=560,H=840; const VERSION='2518';
+const W=560,H=840; const VERSION='2519';
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
 const bg=bgC.getContext('2d'), fx=fxC.getContext('2d');
@@ -1689,6 +1695,7 @@ function endRun(){
 /* leaderboard (local fallback + shared online board via Apps Script) */
 const API_URL='https://script.google.com/macros/s/AKfycbxFMp3q3BcQ4Lpwl_c4hqwzrDw0zi4AYhjxY0ieoZXWYYG1vb8nO6lZ0hoS18Co5o9_kA/exec';
 let onlineBoard=null, runNonce='', boardRetries=0;
+let boardMode='normal';
 function jsonp(url,cb,fail){ const id='vcb_'+Math.random().toString(36).slice(2); let done=false;
   const s=document.createElement('script');
   function cleanup(){ try{delete window[id];}catch(e){window[id]=undefined;} if(s.parentNode)s.parentNode.removeChild(s); }
@@ -1696,7 +1703,7 @@ function jsonp(url,cb,fail){ const id='vcb_'+Math.random().toString(36).slice(2)
   s.src=url.replace('callback=?','callback='+id); s.onerror=()=>{ cleanup(); fail&&fail(); }; document.head.appendChild(s);
   setTimeout(()=>{ if(!done){ cleanup(); fail&&fail(); } },6000); }
 function fetchOnline(then,fail){ if(!API_URL){ then&&then(); return; }
-  jsonp(API_URL+'?action=top&n=10&callback=?&cb='+Date.now(), rows=>{ if(Array.isArray(rows))onlineBoard=rows; then&&then(); }, fail); }
+  jsonp(API_URL+'?action=top&n=10&mode='+boardMode+'&callback=?&cb='+Date.now(), rows=>{ if(Array.isArray(rows))onlineBoard=rows; then&&then(); }, fail); }
 function refreshBoard(target){
   fetchOnline(
     ()=>{ if(onlineBoard){ boardRetries=0; renderBoard(target); }
@@ -1713,7 +1720,7 @@ function saveLocal(name,score){ const b=localBoard(); b.push({name,score}); b.so
   const top=b.slice(0,10); try{localStorage.setItem('vanguard_scores',JSON.stringify(top));}catch(e){} return top; }
 function boardRows(){ return (API_URL && onlineBoard)? onlineBoard : localBoard(); }
 function submitToServer(score,sec,acc){ if(!API_URL)return; try{ const img=new Image();
-  img.src=API_URL+'?action=submit&name='+encodeURIComponent(curInitials)+'&score='+score+'&sector='+sec+'&acc='+acc+'&t='+Math.round(runTime)+'&mode='+gameMode+'&nonce='+encodeURIComponent(runNonce)+'&cb='+Date.now(); }catch(e){} }
+  img.src=API_URL+'?action=submit&name='+encodeURIComponent(curInitials)+'&score='+score+'&sector='+sec+'&acc='+acc+'&t='+Math.round(runTime)+'&mode='+gameMode+'&ver='+encodeURIComponent(VERSION)+'&nonce='+encodeURIComponent(runNonce)+'&cb='+Date.now(); }catch(e){} }
 function renderBoard(target,highlightName,highlightScore){
   const box=el(target); if(!box)return;
   if(API_URL && !onlineBoard){ box.innerHTML='<div class="row"><span class="nm" style="color:var(--dim)">LOADING LEADERBOARD...</span></div>'; return; }
@@ -1806,6 +1813,8 @@ function mergeScore(name,score){ const b=(onlineBoard?onlineBoard.slice():[]);
   if(!b.some(r=>r.name===name&&r.score===score)) b.push({name,score});
   b.sort((a,c)=>c.score-a.score); onlineBoard=b.slice(0,10); }
 function submitScore(){ if(gameMode==='arcade'){ toTitle(); return; } const sc=pendingScore?pendingScore.score:window.scoreT; const nm=curInitials;
+  boardMode=(gameMode==='hardcore')?'hardcore':'normal'; onlineBoard=null; boardRetries=0;
+  document.querySelectorAll('.btab').forEach(b=>b.classList.toggle('sel',b.dataset.bm===boardMode));
   saveLocal(nm, sc); try{localStorage.setItem('vanguard_lastInitials',nm);}catch(e){}
   submitToServer(sc, pendingScore?pendingScore.sector:sector, pendingScore?pendingScore.acc:0);
   mergeScore(nm,sc);
@@ -1862,6 +1871,16 @@ try{ if(localStorage.getItem('vanguard_mute')==='1'){Audio_.muted=true;const pmb
     sendBtn.textContent='THANKS!'; sendBtn.disabled=true;
     setTimeout(closeFb,1400);
   });
+})();
+
+/* board mode tabs */
+function setBoardMode(m,target){ boardMode=m; onlineBoard=null; boardRetries=0;
+  document.querySelectorAll('.btab').forEach(b=>b.classList.toggle('sel',b.dataset.bm===m));
+  renderBoard(target); refreshBoard(target); }
+(function(){
+  function bind(row,target){ if(!row)return; row.querySelectorAll('.btab').forEach(b=>b.addEventListener('click',ev=>{ ev.stopPropagation(); setBoardMode(b.dataset.bm,target); Audio_.hit(); })); }
+  bind(document.getElementById('bigBoardTabs'),'bigBoard');
+  bind(document.getElementById('titleBoardTabs'),'titleBoard');
 })();
 
 /* ============================= loop ============================= */
