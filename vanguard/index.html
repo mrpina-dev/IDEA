@@ -1150,13 +1150,13 @@ function spawnWave(){
     spawnWave._lastArch=arch;
     const cfg={
       pincer:{holdY:H*0.30,sweep:30,phRate:0.5,descend:6,advancing:false,squeeze:true,spread:1.3,spreadTarget:0.55,volleyMul:1.0,diveMul:1.7,diveCount:1},
-      siege:{holdY:H*0.60,sweep:24,phRate:0.4,descend:24,advancing:true,squeeze:false,volleyMul:0.7,diveMul:2.0,diveCount:1},
+      siege:{holdY:H*0.60,sweep:24,phRate:0.4,descend:24,advancing:true,squeeze:false,volleyMul:0.7,diveMul:3.0,diveCount:2},
       swarm:{holdY:H*0.42,sweep:120,phRate:0.9,descend:8,advancing:false,squeeze:false,volleyMul:1.5,diveMul:0.6,diveCount:3},
       flank:{holdY:H*0.34,sweep:18,phRate:0.4,descend:6,advancing:false,squeeze:false,volleyMul:0.9,diveMul:1.7,diveCount:1},
       spear:{holdY:H*0.26,sweep:40,phRate:0.7,descend:6,advancing:false,squeeze:false,volleyMul:1.1,diveMul:0.7,diveCount:2}
     }[arch];
     fleet=Object.assign({x:W/2,y:96,ph:0,life:11,retiring:false,arch},cfg);
-    if(arch==='siege'){ fleet.barrageT=2.2; fleet.barrageCharge=0; fleet.gapCol=(Math.random()*6)|0; fleet.cols=6; }
+    if(arch==='siege'){ fleet.barrageT=1.0; fleet.barrageCharge=0; fleet.gapCol=(Math.random()*6)|0; fleet.cols=6; fleet.life=20; }
     else { fleet.spPhase='idle'; fleet.spT=3.0; fleet.spLast=''; fleet.spMove=''; fleet.spCharge=0; fleet.spFireT=0; fleet.spSweepX=0; fleet.spGapX=0; fleet.spLX=0; fleet.spLY=0; }
     buildFormation(fleet.arch);
     fleet.panic=0;
@@ -1576,7 +1576,7 @@ function update(dt){
             if(bottom){ const e=bottom, ang=clamp((player.x-e.x)/320,-0.3,0.3), sp=200+sector*8;
               ebul.push({x:e.x,y:e.y+e.r*0.6,vx:Math.sin(ang)*sp,vy:Math.cos(ang)*sp,c:e.c,r:3.2,owner:e}); e.fireFlash=0.12;
               if(sector>=3){ const sp2=sp*0.85; ebul.push({x:e.x,y:e.y+e.r*0.6,vx:Math.sin(ang)*sp2,vy:Math.cos(ang)*sp2,c:e.c,r:3.2,owner:e}); } } }
-          Audio_.blast(); fleet.barrageT=Math.max(1.3,2.7-sector*0.08);
+          Audio_.blast(); fleet.barrageT=Math.max(1.4,2.4-sector*0.08);
         }
       } else { enemies.forEach(e=>{ if(e.state==='form') e.barrageGlow=0; }); fleet.barrageT-=dt; if(fleet.barrageT<=0){ fleet.barrageCharge=0.55; Audio_.whine(); } }
     }
