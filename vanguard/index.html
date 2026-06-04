@@ -564,22 +564,44 @@ function drawCSEE(ctx,e){ const r=e.r,v=e.variant,col=ctx.strokeStyle,lw=ctx.lin
     ctx.lineWidth=lw;
     ctx.save(); ctx.rotate(aim); ctx.beginPath(); ctx.rect(-r*0.1,r*0.5,r*0.2,r*0.4+tell*r*0.2); ctx.fillStyle=col+'44'; ctx.fill(); ctx.stroke(); ctx.restore();
     const g=Math.max(0.4+0.4*Math.sin(ph*3),tell); ctx.save(); ctx.shadowBlur=(8+fl*40)+14*g; ctx.shadowColor=fl>0?COL.white:col; dot(ctx,0,0,r*(0.12+tell*0.08),fl>0?COL.white:col); ctx.restore();
-  } else if(v===1){ // RELAY -- arc intensifies with charge, discharges on fire
-    ctx.beginPath(); ctx.rect(-r*0.4,-r*0.5,r*0.8,r*1.2); ctx.fillStyle=col+'1E'; ctx.fill(); ctx.stroke();
-    ctx.lineWidth=lw*0.6; for(let i=0;i<3;i++){ const y=-r*0.2+i*r*0.34; ctx.beginPath(); ctx.moveTo(-r*0.4,y); ctx.lineTo(r*0.4,y); ctx.stroke(); }
-    ctx.lineWidth=lw; ctx.beginPath(); ctx.moveTo(-r*0.22,-r*0.5); ctx.lineTo(-r*0.22,-r*0.86); ctx.moveTo(r*0.22,-r*0.5); ctx.lineTo(r*0.22,-r*0.86); ctx.stroke();
-    const a=clamp(0.3+0.5*Math.abs(Math.sin(ph*4))+tell*0.6,0,1); ctx.save(); ctx.globalAlpha=a; ctx.shadowBlur=10+tell*16; ctx.shadowColor=col; ctx.lineWidth=lw*(0.8+tell);
-    ctx.beginPath(); ctx.moveTo(-r*0.22,-r*0.86); ctx.lineTo(-r*0.06,-r*0.66-tell*r*0.1); ctx.lineTo(r*0.06,-r*0.96); ctx.lineTo(r*0.22,-r*0.78); ctx.stroke(); ctx.restore(); ctx.lineWidth=lw;
-    if(fl>0){ ctx.save(); ctx.shadowBlur=30; ctx.shadowColor=COL.white; ctx.strokeStyle=COL.white; ctx.beginPath(); ctx.moveTo(0,r*0.5); ctx.lineTo(0,r*1.1); ctx.stroke(); ctx.restore(); }
-    dot(ctx,0,r*0.5,r*0.1,col); thr(ctx,r);
-  } else { // MAINFRAME -- aiming antenna dish + charging lock + blinking ports
-    ctx.beginPath(); ctx.rect(-r*0.6,-r*0.9,r*1.2,r*1.8); ctx.fillStyle=col+'18'; ctx.fill(); ctx.stroke();
-    ctx.lineWidth=lw*0.6; for(let i=0;i<5;i++){ const y=-r*0.74+i*r*0.36; ctx.beginPath(); ctx.moveTo(-r*0.6,y); ctx.lineTo(r*0.6,y); ctx.stroke();
-      for(let j=0;j<3;j++){ const lit=Math.sin(ph*4+i+j)>0.3; dot(ctx,-r*0.4+j*r*0.4,y+r*0.18,r*0.05,lit?col:col+'55'); } }
-    ctx.lineWidth=lw; ctx.save(); ctx.translate(0,-r*0.9); ctx.rotate(aim*0.8);
-    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,-r*0.34); ctx.stroke();
-    ctx.beginPath(); ctx.arc(0,-r*0.34,r*0.2,Math.PI,0); ctx.fillStyle=col+(tell>0?'55':'22'); ctx.fill(); ctx.stroke();
-    if(tell>0){ ctx.save(); ctx.shadowBlur=18*tell; ctx.shadowColor=col; dot(ctx,0,-r*0.34,r*0.07,fl>0?COL.white:col); ctx.restore(); } ctx.restore();
+  } else if(v===1){ // RELAY -- forward arc weapon
+    const gc=fl>0?COL.white:col;
+    ctx.beginPath(); ctx.moveTo(-r*0.22,-r*0.5); ctx.lineTo(-r*0.22,-r*1.0); ctx.moveTo(r*0.22,-r*0.5); ctx.lineTo(r*0.22,-r*1.0); ctx.stroke();
+    ctx.beginPath(); ctx.rect(-r*0.4,-r*0.5,r*0.8,r*1.0); ctx.fillStyle=col+'1E'; ctx.fill(); ctx.stroke();
+    ctx.lineWidth=lw*0.6; for(let i=0;i<3;i++){ const y=-r*0.2+i*r*0.28; ctx.beginPath(); ctx.moveTo(-r*0.4,y); ctx.lineTo(r*0.4,y); ctx.stroke(); }
+    ctx.lineWidth=lw;
+    ctx.beginPath(); ctx.moveTo(-r*0.22,r*0.5); ctx.lineTo(-r*0.22,r*0.86); ctx.moveTo(r*0.22,r*0.5); ctx.lineTo(r*0.22,r*0.86); ctx.stroke();
+    const a=clamp(0.3+0.5*Math.abs(Math.sin(ph*4))+tell*0.6,0,1);
+    ctx.save(); ctx.globalAlpha=a; ctx.shadowBlur=10+a*20+fl*24; ctx.shadowColor=gc; ctx.strokeStyle=gc; ctx.lineWidth=lw*(0.8+a*0.5+tell*0.6);
+    ctx.beginPath(); ctx.moveTo(-r*0.22,r*0.86); ctx.lineTo(-r*0.05,r*0.68); ctx.lineTo(r*0.05,r*1.0); ctx.lineTo(r*0.22,r*0.86); ctx.stroke();
+    if(fl>0){ ctx.beginPath(); ctx.moveTo(0,r*0.9); ctx.lineTo(0,r*1.5); ctx.stroke(); }
+    ctx.restore(); ctx.lineWidth=lw; ctx.strokeStyle=col;
+    const pulse=Math.max(0.5+0.5*Math.sin(ph*2.6),tell);
+    ctx.save(); ctx.shadowBlur=14*pulse; ctx.shadowColor=gc; dot(ctx,0,-r*0.08,r*(0.09+pulse*0.02),COL.white); ctx.restore();
+  } else { // TOROID -- electromagnetic coil
+    const gc=fl>0?COL.white:col;
+    const n=20; ctx.lineWidth=lw*0.5; ctx.shadowBlur=6;
+    for(let i=0;i<n;i++){ const aa=(i/n)*Math.PI*2+ph*0.3; ctx.beginPath(); ctx.moveTo(Math.cos(aa)*r*0.47,Math.sin(aa)*r*0.47); ctx.lineTo(Math.cos(aa)*r*0.93,Math.sin(aa)*r*0.93); ctx.stroke(); }
+    ctx.lineWidth=lw; ctx.shadowBlur=13;
+    ctx.beginPath(); ctx.arc(0,0,r*0.93,0,Math.PI*2,false); ctx.arc(0,0,r*0.47,0,Math.PI*2,true); ctx.fillStyle=col+'1E'; ctx.fill();
+    ctx.beginPath(); ctx.arc(0,0,r*0.93,0,Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(0,0,r*0.47,0,Math.PI*2); ctx.stroke();
+    const fa=clamp(0.4+0.3*Math.sin(ph*1.4)+tell*0.5,0,1);
+    ctx.save(); ctx.globalAlpha=fa; ctx.shadowBlur=8+fl*20; ctx.shadowColor=gc; ctx.strokeStyle=gc; ctx.lineWidth=lw*0.7;
+    ctx.beginPath(); ctx.arc(-r*0.1,0,r*0.28,-Math.PI*0.6,Math.PI*0.6); ctx.stroke();
+    ctx.beginPath(); ctx.arc(r*0.1,0,r*0.28,Math.PI*0.4,Math.PI*1.6); ctx.stroke();
+    ctx.restore(); ctx.lineWidth=lw; ctx.shadowBlur=13; ctx.strokeStyle=col;
+    const t1a=-Math.PI/2-0.35,t2a=-Math.PI/2+0.35;
+    const t1x=Math.cos(t1a)*r*0.93,t1y=Math.sin(t1a)*r*0.93, t2x=Math.cos(t2a)*r*0.93,t2y=Math.sin(t2a)*r*0.93;
+    ctx.beginPath(); ctx.moveTo(t1x-r*0.04,t1y); ctx.lineTo(t1x+r*0.04,t1y); ctx.moveTo(t2x-r*0.04,t2y); ctx.lineTo(t2x+r*0.04,t2y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,r*0.93); ctx.lineTo(0,r*1.1); ctx.stroke();
+    ctx.beginPath(); ctx.arc(0,r*1.1,r*0.055,0,Math.PI*2); ctx.fillStyle=col+'44'; ctx.fill(); ctx.stroke();
+    const pulse=Math.max(0.5+0.5*Math.sin(ph*2.6),tell);
+    ctx.save(); ctx.shadowBlur=(16+fl*30)*pulse; ctx.shadowColor=gc;
+    ctx.beginPath(); ctx.arc(0,0,r*0.26,0,Math.PI*2); ctx.fillStyle=col+'22'; ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.arc(0,0,r*0.16,0,Math.PI*2); ctx.fillStyle=col+'2E'; ctx.fill();
+    dot(ctx,0,0,r*0.08,COL.white);
+    ctx.restore();
   }
   ctx.restore();
 }
@@ -692,7 +714,7 @@ const FACTIONS={
 const FKEYS=['ace','bmet','csee','mat','mset'];
 FACTIONS.foreman={c:COL.ace,  draw:drawFOREMAN, pts:140, hp:[46,46,46], r:[30,30,30], name:'FOREMAN'};
 FACTIONS.vector ={c:COL.bmet, draw:drawVECTOR,  pts:140, hp:[42,42,42], r:[30,30,30], name:'VECTOR'};
-const TYPENAMES={ace:['SAWHORSE','TRUSS','CLINKER'],bmet:['SPORE','PHAGE','STRATUM'],csee:['NODE','RELAY','MAINFRAME'],mat:['LENS','EMITTER','BROADCASTER'],mset:['INGOT','LATTICE','CRUCIBLE'],foreman:['FOREMAN'],vector:['VECTOR']};
+const TYPENAMES={ace:['SAWHORSE','TRUSS','CLINKER'],bmet:['SPORE','PHAGE','STRATUM'],csee:['NODE','RELAY','TOROID'],mat:['LENS','EMITTER','BROADCASTER'],mset:['INGOT','LATTICE','CRUCIBLE'],foreman:['FOREMAN'],vector:['VECTOR']};
 function killerName(e){ const a=TYPENAMES[e.fk]; return a?(a[Math.min(e.variant,a.length-1)]):'ENEMY'; }
 
 /* ============================= sector identity ============================= */
@@ -1269,8 +1291,8 @@ function cseeAttack(e){
   e.fireFlash=0.12;
   const dx=player.x-e.x,dy=player.y-e.y,m=Math.hypot(dx,dy)||1,base=Math.atan2(dy,dx);
   if(e.variant===0){ const sp=340+sector*12; ebul.push({x:e.x,y:e.y,vx:dx/m*sp,vy:dy/m*sp,c:e.c,r:2.8,owner:e}); }
-  else if(e.variant===1){ const sp=310+sector*10; for(let k=0;k<3;k++){ const a=base+rnd(-0.07,0.07); ebul.push({x:e.x+Math.cos(base)*k*10,y:e.y+Math.sin(base)*k*10,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:2.5,owner:e}); } }
-  else { const sp=380+sector*12; for(let k=0;k<3;k++){ ebul.push({x:e.x,y:e.y+k*6,vx:dx/m*sp,vy:dy/m*sp,c:e.c,r:3,owner:e}); } }
+  else if(e.variant===1){ const sp=320+sector*11; for(let k=0;k<3;k++){ const a=base+rnd(-0.05,0.05); ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:2.6,owner:e}); } }
+  else { rings.push({x:e.x,y:e.y,r:e.r*0.5,vr:230,life:.7,max:.7,c:e.c,harm:true}); const n=Math.min(10,6+Math.floor(sector/3)); for(let i=0;i<n;i++){ const a=e.core+i/n*6.2832; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*180,vy:Math.sin(a)*180,c:e.c,r:3,owner:e}); } }
 }
 function matAttack(e){
   if(ebul.length>=8+sector*4)return; if(sector<=2&&Math.random()<0.5)return;
