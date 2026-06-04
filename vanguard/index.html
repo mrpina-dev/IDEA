@@ -1657,41 +1657,43 @@ function aceAttack(e){
   if(ebul.length>=8+sector*4)return; if(sector<=2&&Math.random()<0.5)return;
   e.fireFlash=0.12;
   const dx=player.x-e.x,dy=player.y-e.y,m=Math.hypot(dx,dy)||1,base=Math.atan2(dy,dx);
-  if(e.variant===0){ const sp=300+sector*10; ebul.push({x:e.x,y:e.y,vx:dx/m*sp,vy:dy/m*sp,c:e.c,r:3,owner:e}); }
-  else if(e.variant===1){ const sp=240+sector*9; for(const s of [-1,1]){ const a=base+s*0.06; ebul.push({x:e.x+s*e.r*0.7,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:3,owner:e}); } }
-  else { const sp=170+sector*7; for(let k=-1;k<=1;k++){ const a=base+k*0.2; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:4,owner:e}); } }
+  if(e.variant===0){ /* SAWHORSE: one heavy aimed dart */ const sp=260+sector*9; ebul.push({x:e.x,y:e.y,vx:dx/m*sp,vy:dy/m*sp,c:e.c,r:4,owner:e}); }
+  else if(e.variant===1){ /* TRUSS: braced parallel pair */ const sp=300+sector*10, ux=dx/m, uy=dy/m, px=-uy, py=ux;
+    for(const s of [-1,1]){ ebul.push({x:e.x+s*0.5*e.r*px,y:e.y+s*0.5*e.r*py,vx:ux*sp,vy:uy*sp,c:e.c,r:3,owner:e}); } }
+  else { /* CLINKER: debris hazard + two slow darts */ if(hazards.length<12) hazards.push({x:clamp(player.x,40,W-40),y:player.y,r:26,life:2.0,max:2.0,c:e.c});
+    const sp=180+sector*7; for(const s of [-1,1]){ const a=base+s*0.07; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:4,owner:e}); } }
 }
 function bmetAttack(e){
   if(ebul.length>=8+sector*4)return; if(sector<=2&&Math.random()<0.5)return;
   e.fireFlash=0.12;
   const dx=player.x-e.x,dy=player.y-e.y,m=Math.hypot(dx,dy)||1,base=Math.atan2(dy,dx);
-  if(e.variant===0){ const sp=150+sector*6, n=4; for(let i=0;i<n;i++){ const a=base+(i-(n-1)/2)*0.7; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:3.2,split:true,owner:e}); } }
-  else if(e.variant===1){ const sp=300+sector*10; ebul.push({x:e.x,y:e.y,vx:dx/m*sp,vy:dy/m*sp,c:COL.bmet,r:4,owner:e}); }
-  else { if(hazards.length<8) hazards.push({x:clamp(e.x,40,W-40),y:H*0.72,r:28,life:2.4,max:2.4,c:e.c}); const sp=120+sector*5; for(let k=-1;k<=1;k++){ const a=base+k*0.18; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:4.5,owner:e}); } }
+  if(e.variant===0){ /* SPORE: soft puff of 4 slow spores */ const sp=120+sector*5, n=4; for(let i=0;i<n;i++){ const a=base+rnd(-0.25,0.25); ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:3.2,owner:e}); } }
+  else if(e.variant===1){ /* PHAGE: lone homing seeker */ const sp=130+sector*5; ebul.push({x:e.x,y:e.y,vx:dx/m*sp,vy:dy/m*sp,c:e.c,r:3.4,seeker:true,homeT:1.5,owner:e}); }
+  else { /* STRATUM: horizontal layer drifting down */ const vy=160+sector*6, n=5; for(let i=0;i<n;i++){ const x=clamp(e.x-80+i*40,20,W-20); ebul.push({x,y:e.y,vx:0,vy,c:e.c,r:3.5,owner:e}); } }
 }
 function cseeAttack(e){
   if(ebul.length>=8+sector*4)return; if(sector<=2&&Math.random()<0.5)return;
   e.fireFlash=0.12;
   const dx=player.x-e.x,dy=player.y-e.y,m=Math.hypot(dx,dy)||1,base=Math.atan2(dy,dx);
-  if(e.variant===0){ const sp=340+sector*12; ebul.push({x:e.x,y:e.y,vx:dx/m*sp,vy:dy/m*sp,c:e.c,r:2.8,owner:e}); }
-  else if(e.variant===1){ const sp=320+sector*11; for(let k=0;k<3;k++){ const a=base+rnd(-0.05,0.05); ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:2.6,owner:e}); } }
-  else { rings.push({x:e.x,y:e.y,r:e.r*0.5,vr:230,life:.7,max:.7,c:e.c,harm:true}); const n=Math.min(10,6+Math.floor(sector/3)); for(let i=0;i<n;i++){ const a=e.core+i/n*6.2832; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*180,vy:Math.sin(a)*180,c:e.c,r:3,owner:e}); } }
+  if(e.variant===0){ /* NODE: one fast precise packet */ const sp=360+sector*13; ebul.push({x:e.x,y:e.y,vx:dx/m*sp,vy:dy/m*sp,c:e.c,r:2.8,owner:e}); }
+  else if(e.variant===1){ /* RELAY: rapid 3-round stream */ const sp=330+sector*12; for(let k=0;k<3;k++){ const a=base+rnd(-0.04,0.04), s=sp+rnd(-20,20); ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,c:e.c,r:2.6,owner:e}); } }
+  else { /* TOROID: clean full-circle ring */ const sp=170+sector*6, n=10+Math.floor(sector/3); for(let i=0;i<n;i++){ const a=e.core+i/n*6.2832; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:3,owner:e}); } }
 }
 function matAttack(e){
   if(ebul.length>=8+sector*4)return; if(sector<=2&&Math.random()<0.5)return;
   e.fireFlash=0.12;
   const dx=player.x-e.x,dy=player.y-e.y,m=Math.hypot(dx,dy)||1,base=Math.atan2(dy,dx);
-  if(e.variant===0){ const sp=360+sector*12; ebul.push({x:e.x,y:e.y,vx:dx/m*sp,vy:dy/m*sp,c:e.c,r:2.6,owner:e}); }
-  else if(e.variant===1){ const sp=300+sector*10; for(let k=-1;k<=1;k++){ const a=base+k*0.12; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:3,owner:e}); } }
-  else { rings.push({x:e.x,y:e.y,r:e.r*0.6,vr:170,life:1.0,max:1.0,c:e.c,harm:true}); const n=Math.min(8,5+Math.floor(sector/3)); for(let i=0;i<n;i++){ const a=base+(i-(n-1)/2)*0.5; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*150,vy:Math.sin(a)*150,c:e.c,r:2.8,owner:e}); } }
+  if(e.variant===0){ /* LENS: one very fast thin streak */ const sp=420+sector*14; ebul.push({x:e.x,y:e.y,vx:dx/m*sp,vy:dy/m*sp,c:e.c,r:2.4,owner:e}); }
+  else if(e.variant===1){ /* PROJECTOR: wide fan of 5 */ const sp=300+sector*10, n=5; for(let i=0;i<n;i++){ const a=base-0.5+(i/(n-1))*1.0; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:3,owner:e}); } }
+  else { /* BROADCASTER: omnidirectional pulse */ const sp=200+sector*7, n=10; for(let i=0;i<n;i++){ const a=e.core+i/n*6.2832; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:2.8,owner:e}); } }
 }
 function msetAttack(e){
   if(ebul.length>=8+sector*4)return; if(sector<=2&&Math.random()<0.5)return;
   e.fireFlash=0.12;
   const dx=player.x-e.x,dy=player.y-e.y,m=Math.hypot(dx,dy)||1,base=Math.atan2(dy,dx);
-  if(e.variant===0){ const sp=200+sector*8, n=3; for(let i=0;i<n;i++){ const a=base+(i-(n-1)/2)*0.14; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:2.6,owner:e}); } }
-  else if(e.variant===1){ rings.push({x:e.x,y:e.y,r:e.r*0.5,vr:160,life:.6,max:.6,c:e.c,harm:true}); const sp=240+sector*9; ebul.push({x:e.x,y:e.y,vx:dx/m*sp,vy:dy/m*sp,c:e.c,r:4.5,owner:e}); }
-  else { const sp=300+sector*11; for(const s of [-1,1]){ ebul.push({x:e.x+s*e.r*0.9,y:e.y-e.r*0.5,vx:dx/m*sp,vy:dy/m*sp,c:e.c,r:3,owner:e}); } }
+  if(e.variant===0){ /* TORCH: tight fast forward jet */ const sp=320+sector*11, n=3; for(let i=0;i<n;i++){ const a=base+(i-(n-1)/2)*0.1; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:2.6,owner:e}); } }
+  else if(e.variant===1){ /* PENDULUM: sweeping arc of 5 */ const sp=240+sector*8, n=5; for(let i=0;i<n;i++){ const a=base-0.4+(i/(n-1))*0.8; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:3,owner:e}); } }
+  else { /* DENDRITE: branching fork */ const sp=260+sector*9; for(const off of [-0.22,0,0.22]){ const a=base+off; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:3.2,split:true,owner:e}); } }
 }
 function factionFire(e){
   switch(e.fk){
