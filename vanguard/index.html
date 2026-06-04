@@ -376,6 +376,7 @@ const Audio_={ctx:null,muted:false,master:null,music_:null,
   pickup(){ this.tone(720,0.07,'square',0.045); this.tone(1080,0.09,'square',0.04,{delay:0.05}); this.tone(1440,0.10,'square',0.035,{delay:0.10}); },
   power(){ [523,659,880].forEach((f,i)=>this.tone(f,0.16,'triangle',0.05,{delay:i*0.07})); },
   parry(){ this.tone(880,0.06,'square',0.05,{glide:1320}); this.tone(1760,0.06,'triangle',0.04,{delay:0.02}); },
+  parryHit(){ this.tone(1320,0.05,'square',0.06,{glide:2640}); this.tone(660,0.13,'triangle',0.05,{delay:0.01,glide:990}); this.noise(0.06,0.05,{lp:6000}); },
   beam(){ this.tone(150,0.4,'sawtooth',0.05,{glide:240}); },
   bomb(){ this.noise(0.6,0.22,{lp:1200}); this.tone(70,0.6,'sine',0.08,{glide:30}); },
   thump(f){ f=f||120; this.tone(f,0.16,'sine',0.06,{glide:f*0.4}); this.noise(0.05,0.05,{lp:1400}); },
@@ -419,7 +420,7 @@ const KEYS_DEFAULT={beam:'c', bomb:'x', parry:'z', weapon:'q', pause:'p', mute:'
 let keybinds=Object.assign({},KEYS_DEFAULT);
 try{ const _sk=JSON.parse(localStorage.getItem('vanguard_keys')||'null'); if(_sk) keybinds=Object.assign({},KEYS_DEFAULT,_sk); }catch(e){}
 let rebindAction=null;
-let shotsFired, shotsHit, runTime, runKills=0, runBosses=0, deathSlow=0, killerInfo=null;
+let shotsFired, shotsHit, runTime, runKills=0, runBosses=0, deathSlow=0, killerInfo=null, hitStop=0;
 let bgScroll=0; const stars=[
   Array.from({length:34},()=>({x:rnd(0,W),y:rnd(0,H),sp:14,sz:.6,al:.30,st:0})),
   Array.from({length:24},()=>({x:rnd(0,W),y:rnd(0,H),sp:34,sz:.9,al:.5,st:6})),
@@ -1143,7 +1144,7 @@ function spawnBoss(forceFk){
     gx:W/2, gy:140, moveMode:'track', moveT:1.0, dodgeCd:0,
     sigCd:Math.max(0.4,2.6/(1+sector*0.10)), ramState:0, ramT:0, ramVy:0, blinkCd:Math.max(0.8,3.2/(1+sector*0.10)), lockT:0, lockX:0, lockY:0,
     sweepState:0, sweepT:0, sweepAng:0, regenT:0, p3Cd:5.5,
-    plates:0, plateMax:0, plateHp:0};
+    plates:0, plateMax:0, plateHp:0, boltCd:rnd(2.6,3.6), boltWind:0, boltTell:0};
   if(fk==='mset'){ boss.plates=3; boss.plate0=3; boss.plateMax=Math.round(hp*0.15); boss.plateHp=boss.plateMax; boss.r=62; }
   if(fk==='ace'){ boss.r=64; } Audio_.bossWarn();
   document.getElementById('bossname').textContent='SECTOR BOSS · '+F.name;
@@ -1187,7 +1188,7 @@ function updateGamesPlayed(){ const g=el('gamesPlayed'); if(g) g.textContent='RU
 function startGame(){
   state='play';
   try{ localStorage.setItem('vanguard_games', getGames()+1); }catch(e){}
-  enemies=[]; pbul=[]; ebul=[]; pods=[]; parts=[]; shards=[]; rings=[]; pops=[]; boss=null; barriers=[]; bossSpoils=0; bossFlash=0; gameOverT=0; killer=null; lastHitBy=null; hazards=[]; station=null;
+  enemies=[]; pbul=[]; ebul=[]; pods=[]; parts=[]; shards=[]; rings=[]; pops=[]; boss=null; barriers=[]; bossSpoils=0; bossFlash=0; hitStop=0; gameOverT=0; killer=null; lastHitBy=null; hazards=[]; station=null;
   runFactionSeq=[...FKEYS]; for(let _i=runFactionSeq.length-1;_i>0;_i--){const _j=Math.random()*_i|0;[runFactionSeq[_i],runFactionSeq[_j]]=[runFactionSeq[_j],runFactionSeq[_i]];} waveFk=null;
   hybridTimer=rnd(6,10);
   fleet=null; slots=[]; refill=[]; reconfTimer=0; volleyTimer=2; diveTimer=2.6;
@@ -1370,7 +1371,7 @@ function firePrimary(){
   }
 }
 function tryParry(){ if(state!=='play'||!player||player.dead||player.parryCd>0||player.parryT>0)return;
-  player.parryT=0.22; player.parryCd=0.95; Audio_.parry(); player.inv=Math.max(player.inv,0.22);
+  player.parryT=0.22; player.parryCd=0.95; player.parryHit=false; Audio_.parry(); player.inv=Math.max(player.inv,0.22);
   rings.push({x:player.x,y:player.y,r:10,vr:150,life:.3,max:.3,c:COL.cyan}); shake=Math.max(shake,3);
 }
 function fireBomb(){
@@ -1408,12 +1409,20 @@ function update(dt){
     // parry: brief active window clears and reflects nearby fire
     if(pl.parryCd>0)pl.parryCd-=dt;
     if(pl.parryT>0){ pl.parryT-=dt; pl.inv=Math.max(pl.inv,0.04);
+      let caught=0, gotBolt=0;
       for(let i=ebul.length-1;i>=0;i--){ const b=ebul[i]; if(dist2(b.x,b.y,pl.x,pl.y)<48*48){
-        for(let q=0;q<4;q++)parts.push({x:b.x,y:b.y,vx:rnd(-120,120),vy:rnd(-120,120),life:.25,max:.25,c:COL.cyan,sz:1.8});
-        const m=Math.hypot(b.vx,b.vy)||1, sp=Math.max(560,m*1.3);
-        pbul.push({x:b.x,y:b.y,vx:-b.vx/m*sp,vy:-b.vy/m*sp,c:COL.cyan,r:3.2,dmg:2.5,reflected:true});
-        pl.beamE=Math.min(pl.beamMax,pl.beamE+0.12); addScore(40,b.x,b.y,COL.cyan);
-        ebul.splice(i,1); } } }
+        const heavy=!!b.parryBolt;
+        for(let q=0;q<(heavy?9:4);q++)parts.push({x:b.x,y:b.y,vx:rnd(-160,160),vy:rnd(-160,160),life:.25,max:.25,c:heavy?COL.white:COL.cyan,sz:1.8});
+        const m=Math.hypot(b.vx,b.vy)||1, sp=heavy?760:Math.max(560,m*1.3);
+        let rvx=-b.vx/m*sp, rvy=-b.vy/m*sp;
+        if(heavy && boss){ const dx=boss.x-b.x, dy=boss.y-b.y, mm=Math.hypot(dx,dy)||1; rvx=dx/mm*sp; rvy=dy/mm*sp; }
+        const dmg=heavy ? (boss?Math.max(20,boss.maxhp*0.07):24) : 2.5;
+        pbul.push({x:b.x,y:b.y,vx:rvx,vy:rvy,c:heavy?COL.white:COL.cyan,r:heavy?5:3.2,dmg,reflected:true});
+        pl.beamE=Math.min(pl.beamMax,pl.beamE+(heavy?0.4:0.12)); addScore(heavy?300:40,b.x,b.y,heavy?COL.white:COL.cyan);
+        caught++; if(heavy)gotBolt++; ebul.splice(i,1); } }
+      if(caught>0 && !pl.parryHit){ pl.parryHit=true; hitStop=Math.max(hitStop,gotBolt?0.10:0.06);
+        bossFlash=Math.max(bossFlash,gotBolt?0.6:0.32); shake=Math.max(shake,gotBolt?10:5); pl.inv=Math.max(pl.inv,0.3);
+        pl.armor=Math.min(pl.maxArmor,pl.armor+(gotBolt?1:0)); Audio_.parryHit(); } }
     // movement (slowed while the beam is firing)
     let mx=0,my=0; const spd=pl.speed*(pl.beamActive?0.5:1);
     if(ptr.active){ const tx=ptr.x, ty=ptr.y-46; const dx=tx-pl.x, dy=ty-pl.y, d=Math.hypot(dx,dy)||1;
@@ -1800,6 +1809,11 @@ function updateBoss(dt){
       shards.push({x:b.x,y:b.y,vx:Math.cos(a)*200,vy:Math.sin(a)*200,rot:a,vr:6,len:12,life:1.0,max:1.0,c:b.c}); } Audio_.hit(); b.sigCd=Math.max(0.3,(rnd(2.2,3.0)-phase*0.3)*sf); }
   }
 
+  /* parryable bolt: a telegraphed slow orb the player can parry back for heavy damage */
+  if(b.boltWind>0){ b.boltWind-=dt; b.boltTell=clamp(1-b.boltWind/0.7,0,1);
+    if(b.boltWind<=0){ b.boltTell=0; const my=b.y+b.r*0.4, dx=player.x-b.x, dy=player.y-my, m=Math.hypot(dx,dy)||1, sp=175+sector*6;
+      ebul.push({x:b.x,y:my,vx:dx/m*sp,vy:dy/m*sp,c:COL.white,r:8,parryBolt:true,shape:'bolt',owner:b}); Audio_.whine(0.22); } }
+  else { b.boltCd-=dt; if(b.boltCd<=0 && b.ramState!==2 && b.sweepState!==2){ b.boltCd=Math.max(2.2,rnd(3.6,4.8)-phase*0.4); b.boltWind=0.7; Audio_.thump(170); } }
   /* adaptive base attack: react to where the player is */
   b.fire-=dt;
   if(b.fire<=0 && b.ramState!==2 && b.sweepState!==2 && !(b.fk==='bmet'&&b.spiralN>0) && b.fk!=='csee'){ const dx=pdx, dy=pdy;
@@ -2050,6 +2064,10 @@ function drawCraft(ctx,e,drawFn,isBoss){
   ctx.shadowBlur=0; ctx.restore();
 }
 function drawBossFX(){ const b=boss; if(!b) return; bg.save();
+  if(b.boltTell>0){ const k=b.boltTell, my=b.y+b.r*0.4; bg.globalAlpha=k; bg.fillStyle=COL.white; bg.shadowColor=COL.cyan; bg.shadowBlur=20;
+    bg.beginPath(); bg.arc(b.x,my,4+10*k,0,6.28); bg.fill();
+    bg.strokeStyle=COL.cyan; bg.lineWidth=2; bg.globalAlpha=k*0.8; bg.beginPath(); bg.arc(b.x,my,18-12*k,0,6.28); bg.stroke();
+    bg.globalAlpha=1; bg.shadowBlur=0; }
   if(b.plates>0){ for(let i=0;i<b.plates;i++){ const a0=-Math.PI/2 + (i-(b.plates-1)/2)*0.9;
       bg.strokeStyle=b.c; bg.shadowColor=b.c; bg.shadowBlur=10; bg.lineWidth=7; bg.globalAlpha=0.9;
       bg.beginPath(); bg.arc(b.x,b.y,b.r*1.18,a0-0.34,a0+0.34); bg.stroke(); }
@@ -2177,6 +2195,10 @@ function drawFX(){
       fx.fillStyle=COL.white; fx.beginPath(); fx.ellipse(0,0,b.r*1.0,b.r*0.3,0,0,6.28); fx.fill(); }
     else if(sh==='shard'){ const ang=Math.atan2(b.vy,b.vx); fx.translate(b.x,b.y); fx.rotate(ang);
       fx.beginPath(); fx.moveTo(b.r*1.8,0); fx.lineTo(0,b.r*0.85); fx.lineTo(-b.r*0.7,b.r*0.3); fx.lineTo(-b.r*0.7,-b.r*0.3); fx.lineTo(0,-b.r*0.85); fx.closePath(); fx.fill(); }
+    else if(sh==='bolt'){ const pz=1+Math.sin(t*12)*0.14; fx.shadowBlur=22;
+      fx.fillStyle=COL.white; fx.beginPath(); fx.arc(b.x,b.y,b.r*pz,0,6.28); fx.fill();
+      fx.fillStyle=COL.cyan; fx.beginPath(); fx.arc(b.x,b.y,b.r*0.45,0,6.28); fx.fill();
+      fx.strokeStyle=COL.cyan; fx.lineWidth=2.5; fx.globalAlpha=0.85; fx.beginPath(); fx.arc(b.x,b.y,b.r*1.6*pz,0,6.28); fx.stroke(); fx.globalAlpha=1; }
     else { fx.beginPath(); fx.arc(b.x,b.y,b.r,0,6.28); fx.fill();
       fx.fillStyle=COL.white; fx.beginPath(); fx.arc(b.x,b.y,b.r*0.45,0,6.28); fx.fill(); }
     fx.restore(); });
@@ -2573,7 +2595,9 @@ function frame(now){ let dt=(now-last)/1000; last=now; if(dt>0.05)dt=0.05;
   try{
     for(let i=_delayed.length-1;i>=0;i--){ if(now>=_delayed[i].at){ explode(_delayed[i].x,_delayed[i].y,_delayed[i].c,true); _delayed.splice(i,1); } }
     if(deathSlow>0) deathSlow=Math.max(0,deathSlow-dt);
-    update(deathSlow>0?dt*0.4:dt); drawBG(); drawFX(); hud(dt);
+    if(hitStop>0){ hitStop=Math.max(0,hitStop-dt); }
+    else { update(deathSlow>0?dt*0.4:dt); }
+    drawBG(); drawFX(); hud(dt);
   }catch(err){ console.error('VANGUARD frame error:',err); }
   requestAnimationFrame(frame);
 }
