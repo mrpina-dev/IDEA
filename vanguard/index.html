@@ -58,6 +58,17 @@ body{background:#000;display:flex;align-items:center;justify-content:center;min-
 #bossbar i{position:absolute;left:0;top:0;bottom:0;right:0;background:var(--mset);box-shadow:0 0 10px rgba(255,46,46,.9);transform-origin:left;transform:scaleX(1)}
 #bossname{position:absolute;top:82px;left:0;right:0;text-align:center;font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:11px;letter-spacing:.2em;color:var(--mset);text-shadow:0 0 10px rgba(255,46,46,.7);display:none;z-index:5}
 
+/* hull + style meter */
+.hull{display:flex;gap:3px;margin-bottom:7px;min-height:9px}
+.hull .hseg{width:16px;height:7px;background:rgba(0,255,65,.10);border:1px solid rgba(0,255,65,.30);border-radius:2px;position:relative;overflow:hidden}
+.hull .hseg.on{background:var(--green);box-shadow:0 0 7px rgba(0,255,65,.8)}
+.hull .hseg.rep i{position:absolute;left:0;bottom:0;top:0;width:0;background:var(--gold);box-shadow:0 0 6px var(--gold)}
+.stylemeter{position:absolute;top:128px;right:8px;display:flex;flex-direction:column;align-items:center;gap:3px;width:46px;z-index:5}
+.stylemeter .sg{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:30px;line-height:1;color:var(--dim);text-shadow:0 0 14px var(--dim);transform-origin:50% 50%}
+.stylemeter .sm{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:12px;color:var(--dim)}
+.stylemeter .strack{width:8px;height:150px;background:rgba(0,255,65,.08);border:1px solid rgba(0,255,65,.2);position:relative;overflow:hidden;border-radius:3px}
+.stylemeter .strack i{position:absolute;left:0;right:0;bottom:0;height:0%;background:var(--dim);transition:height .12s ease-out}
+
 /* CRT */
 .crt{position:absolute;inset:0;z-index:6;pointer-events:none;
   background:radial-gradient(120% 120% at 50% 42%,rgba(0,0,0,0) 56%,rgba(0,0,0,.55) 100%),
@@ -168,6 +179,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
     <div class="top">
       <div>
         <div class="lives" id="lives"></div>
+        <div class="hull" id="hull"></div>
         <div class="lbl">SECTOR</div>
         <div class="sector"><span class="num" id="secNum">I</span> · <span id="secName">THERMOPYLAE</span></div>
         <div id="bossProg" style="font:600 11px 'Share Tech Mono',monospace;letter-spacing:1px;margin-top:3px;color:var(--dim)"></div>
@@ -175,10 +187,10 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
       <div class="right">
         <div class="lbl">SCORE</div>
         <div class="score" id="score">0000000</div>
-        <div class="combo">STYLE <b id="combo">D</b></div>
         <div class="coins">i¢ <b id="coins">0</b></div>
       </div>
     </div>
+    <div class="stylemeter" id="stylemeter"><div class="sg" id="styleGrade">D</div><div class="sm" id="styleMult">x1</div><div class="strack"><i id="styleFill"></i></div></div>
     <div id="bossname">FLAGSHIP</div>
     <div id="bossbar"><i></i></div>
     <div class="bottom">
@@ -319,7 +331,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=560,H=840; const VERSION='2531';
+const W=560,H=840; const VERSION='2532';
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
 const bg=bgC.getContext('2d'), fx=fxC.getContext('2d');
@@ -2598,13 +2610,19 @@ function drawFX(){
 /* ============================= HUD ============================= */
 const el=id=>document.getElementById(id);
 const shipGlyph='<svg width="16" height="16" viewBox="0 0 16 16"><path d="M8 1 L14 14 L8 11 L2 14 Z" fill="none" stroke="#00FF41" stroke-width="1.4"/></svg>';
-let lastLives=-1,lastTarget=0,lastCombo=-1,lastWname='',lastWlvl=-1,lastBombs=-1,lastDrone=null,lastCoins=-1;
+let lastLives=-1,lastTarget=0,lastCombo=-1,lastWname='',lastWlvl=-1,lastBombs=-1,lastDrone=null,lastCoins=-1,lastHull=-1,lastMaxHull=-1,lastRepair=-1;
 function hud(dt){
   if(state!=='play'){ return; }
   window.scoreD += (window.scoreT-window.scoreD)*Math.min(1,dt*7); if(window.scoreT-window.scoreD<1)window.scoreD=window.scoreT;
   el('score').textContent=String(Math.round(window.scoreD)).padStart(7,'0');
   if(window.scoreT!==lastTarget){ lastTarget=window.scoreT; const s=el('score'); s.classList.remove('pop'); void s.offsetWidth; s.classList.add('pop'); }
-  { const rk=styleRankObj(); if(rk.g!==lastCombo){ const up=STYLE_RANKS.indexOf(rk)>STYLE_RANKS.findIndex(k=>k.g===lastCombo); lastCombo=rk.g; const c=el('combo'); c.textContent=rk.g+'  x'+rk.mult; c.style.color=rk.c; c.style.textShadow='0 0 10px '+rk.c; if(up){ c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop'); } } }
+  { const rk=styleRankObj(), idx=STYLE_RANKS.indexOf(rk), last=STYLE_RANKS.length-1;
+    const span=(idx<last)?(STYLE_RANKS[idx+1].min-rk.min):1;
+    const prog=(idx<last)?clamp(((window.style||0)-rk.min)/span,0,1):1;
+    const sf=el('styleFill'); if(sf){ sf.style.height=(prog*100).toFixed(0)+'%'; sf.style.background=rk.c; sf.style.boxShadow='0 0 8px '+rk.c; }
+    if(rk.g!==lastCombo){ const up=idx>STYLE_RANKS.findIndex(k=>k.g===lastCombo); lastCombo=rk.g;
+      const g=el('styleGrade'); if(g){ g.textContent=rk.g; g.style.color=rk.c; g.style.textShadow='0 0 14px '+rk.c; if(up){ g.classList.remove('pop'); void g.offsetWidth; g.classList.add('pop'); } }
+      const m=el('styleMult'); if(m){ m.textContent='x'+rk.mult; m.style.color=rk.c; } } }
   { const ci=el('charge').querySelector('i'); const rr=Math.min(1,player.beamE/player.beamMax);
     ci.style.width=(rr*100).toFixed(0)+'%';
     const cc=rr>=0.999?COL.cyan:rr>0.66?COL.green:rr>0.33?COL.gold:COL.ace; ci.style.background=cc; ci.style.boxShadow='0 0 9px '+cc;
@@ -2620,6 +2638,12 @@ function hud(dt){
   else { const N=8, f=clamp(Math.round(N*sectorKills/Math.max(1,killsForBoss)),0,N);
     bp.textContent='BOSS ▸ '+'▰'.repeat(f)+'▱'.repeat(N-f); bp.style.color=f>=N?COL.gold:'var(--dim)'; }
   if(player.lives!==lastLives){ lastLives=player.lives; const lv=Math.max(0,player.lives); el('lives').innerHTML=lv<=5?shipGlyph.repeat(lv):shipGlyph+'<span style="font-size:10px;color:#00FF41;vertical-align:middle;letter-spacing:.04em">x'+lv+'</span>'; }
+  if(player.armor!==lastHull||player.maxArmor!==lastMaxHull||Math.abs((player.repair||0)-lastRepair)>0.02){
+    lastHull=player.armor; lastMaxHull=player.maxArmor; lastRepair=player.repair||0;
+    const frac=player.maxArmor?player.armor/player.maxArmor:0; const col=frac<=0.25?COL.mset:frac<=0.45?COL.gold:COL.green;
+    let s=''; for(let i=0;i<player.maxArmor;i++){ const on=i<player.armor, rep=(i===player.armor)&&(player.repair>0);
+      s+='<span class="hseg'+(on?' on':'')+(rep?' rep':'')+'"'+(on?(' style="background:'+col+';box-shadow:0 0 7px '+col+'"'):'')+'>'+(rep?('<i style="width:'+Math.round(player.repair*100)+'%"></i>'):'')+'</span>'; }
+    el('hull').innerHTML=s; }
   if(player.wtype!==lastWname){ lastWname=player.wtype; const oc=WEAPONS.filter(w=>player.unlocked[w]).length; el('wname').textContent=player.wtype.toUpperCase()+(oc>1?'  ⇄Q':''); }
   if(player.wlevel!==lastWlvl){ lastWlvl=player.wlevel; el('wlvl').textContent='Lv.'+player.wlevel;
     let s=''; for(let i=0;i<5;i++) s+='<i class="seg'+(i<player.wlevel?' on':'')+'"></i>'; el('pbar').innerHTML=s; }
