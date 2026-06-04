@@ -896,6 +896,7 @@ function drawBossAmplifier(ctx,e){
   const r=e.r, col=ctx.strokeStyle, lw=ctx.lineWidth;
   const ph=e.core, tell=e.tell||0, fl=e.fireFlash||0;
   const gc = fl>0 ? COL.white : col;
+  const phase=e.phase||0;
   ctx.save(); ctx.translate(0, Math.sin(ph*1.6)*r*0.03);
   /* vacuum tube bank (tail) */
   [-0.39,-0.13,0.13,0.39].forEach((tx,i)=>{ const x=tx*r, top=-0.92*r, h=0.30*r, w=0.10*r;
@@ -907,7 +908,6 @@ function drawBossAmplifier(ctx,e){
     dot(ctx,x,top+h*0.5,0.025*r,gc); ctx.restore(); ctx.strokeStyle=col;
   });
   /* chassis (amp head) */
-  const phase=e.phase||0;
   const cx0=0.62*r, cTop=-0.55*r, cBot=0.18*r;
   ctx.beginPath(); ctx.moveTo(-cx0,cTop); ctx.lineTo(cx0,cTop); ctx.lineTo(cx0,cBot); ctx.lineTo(-cx0,cBot); ctx.closePath();
   ctx.fillStyle=col+'1E'; ctx.fill(); ctx.stroke();
@@ -1752,15 +1752,17 @@ function updateBoss(dt){
     else if(b.bloomSplit!==phase && b.tT<=0){ b.bloomSplit=phase;
       for(const lp of [[-1.067*b.r,-0.074*b.r],[1.067*b.r,-0.074*b.r],[-0.874*b.r,0.452*b.r],[0.874*b.r,0.452*b.r]])
         hazards.push({x:clamp(b.x+lp[0],30,W-30),y:b.y+lp[1],r:24,life:3.5,max:3.5,c:b.c});
-      rings.push({x:b.x,y:b.y,r:b.r*0.5,vr:260,life:.6,max:.6,c:b.c,harm:true}); }
+      rings.push({x:b.x,y:b.y,r:b.r*0.5,vr:260,life:.6,max:.6,c:b.c,harm:true});
+      for(let i=0;i<2+phase;i++){ const e=makeEnemy('bmet',0,b.x+rnd(-50,50),b.y+rnd(-20,20),'dive'); e.vy=60; e.vx=rnd(-70,70); e.hp=2; e.maxhp=2; e.fire=0.6; enemies.push(e); } }
     if(b.regenT>0) b.regenT-=dt; else if(b.hp<b.maxhp){ const rr=0.045+(phase>=2?0.025:0); b.hp=Math.min(b.maxhp,b.hp+dt*b.maxhp*rr);
       if(Math.random()<0.3+phase*0.15) parts.push({x:b.x+rnd(-b.r/2,b.r/2),y:b.y+rnd(-b.r/2,b.r/2),vx:0,vy:-20,life:.4,max:.4,c:COL.green,sz:1.4}); }
     if(b.pulseSeq>0){ b.pulseCd=(b.pulseCd||0)-dt; if(b.pulseCd<=0){ b.pulseCd=0.28; b.pulseSeq--; rings.push({x:b.x,y:b.y,r:b.r*0.5,vr:220,life:.7,max:.7,c:b.c,harm:true}); Audio_.hit(); shake=Math.max(shake,5); } }
-    if(b.sigCd<=0){ const rr=Math.random();
-      if(rr<0.32){ const n=Math.min(7,2+phase+Math.floor(sector/4)); for(let i=0;i<n;i++){ const e=makeEnemy('bmet',0,b.x+rnd(-40,40),b.y+18,'dive'); e.vy=70+phase*12; e.vx=rnd(-40,40); e.hp=2; e.maxhp=2; e.fire=0.5; enemies.push(e); } Audio_.pickup(); }
-      else if(rr<0.62){ const gap=Math.random()*6.2832,cnt=Math.min(18,10+phase*4+Math.floor(sector/3));
-        for(let i=0;i<cnt;i++){const a=i/cnt*6.2832;if(Math.abs(((a-gap+Math.PI)%(Math.PI*2))-Math.PI)<(0.7-phase*0.1))continue;ebul.push({x:b.x,y:b.y,vx:Math.cos(a)*(160+sector*7),vy:Math.sin(a)*(160+sector*7),c:b.c,r:3.5});}
-        rings.push({x:b.x,y:b.y,r:b.r*0.4,vr:160,life:.5,max:.5,c:b.c}); }
+    if(b.spiralN>0){ b.spiralCd=(b.spiralCd||0)-dt; if(b.spiralCd<=0){ b.spiralCd=0.05; b.spiralN--; b.spiralAng=(b.spiralAng||0)+(b.spiralDir||1)*0.40;
+      const arms=2+phase; for(let a=0;a<arms;a++){ const ang=b.spiralAng+a*(6.2832/arms); ebul.push({x:b.x,y:b.y,vx:Math.cos(ang)*(150+sector*5),vy:Math.sin(ang)*(150+sector*5),c:b.c,r:3.2}); }
+      if(b.spiralN%5===0) Audio_.hit(); } }
+    if(b.sigCd<=0 && !(b.spiralN>0)){ const rr=Math.random();
+      if(rr<0.30){ const n=Math.min(7,2+phase+Math.floor(sector/4)); for(let i=0;i<n;i++){ const e=makeEnemy('bmet',0,b.x+rnd(-40,40),b.y+18,'dive'); e.vy=70+phase*12; e.vx=rnd(-40,40); e.hp=2; e.maxhp=2; e.fire=0.5; enemies.push(e); } Audio_.pickup(); }
+      else if(rr<0.66){ b.spiralN=20+phase*6; b.spiralCd=0; b.spiralAng=Math.atan2(player.y-b.y,player.x-b.x); b.spiralDir=Math.random()<0.5?1:-1; rings.push({x:b.x,y:b.y,r:b.r*0.4,vr:150,life:.5,max:.5,c:b.c}); }
       else { for(let i=0;i<(phase>=1?3:2);i++) hazards.push({x:clamp(player.x+rnd(-120,120),30,W-30),y:rnd(H*0.44,H*0.68),r:26,life:3.2,max:3.2,c:b.c});
         if(phase>=2){ const dx=player.x-b.x,dy=player.y-b.y,m=Math.hypot(dx,dy)||1,sp=260+sector*10; ebul.push({x:b.x,y:b.y,vx:dx/m*sp,vy:dy/m*sp,c:b.c,r:4}); } }
       b.sigCd=Math.max(0.4,(rnd(2.8,4.0)-phase*0.6)*sf); }
@@ -1797,7 +1799,7 @@ function updateBoss(dt){
 
   /* adaptive base attack: react to where the player is */
   b.fire-=dt;
-  if(b.fire<=0 && b.ramState!==2 && b.sweepState!==2){ const dx=pdx, dy=pdy;
+  if(b.fire<=0 && b.ramState!==2 && b.sweepState!==2 && !(b.fk==='bmet'&&b.spiralN>0)){ const dx=pdx, dy=pdy;
     const ext=Math.min(2,Math.floor(sector/3));
     if(Math.abs(dx)<70){ b.fire=Math.max(0.18,(0.7-phase*0.1)*sf); for(let i=-(2+ext);i<=(2+ext);i++) ebul.push({x:b.x+i*14,y:b.y+b.r*0.4,vx:i*30,vy:250+sector*8,c:b.c,r:3}); }
     else { b.fire=Math.max(0.18,(0.62-phase*0.1)*sf); const sp=250+sector*10, spread=Math.min(4,(phase>=1?2:1)+ext);
