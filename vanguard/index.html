@@ -394,7 +394,7 @@ const Audio_={ctx:null,muted:false,master:null,
     if(this._bgmTrack===track && this._bgm && !this._bgm.paused) return;
     this._bgmTrack=track;
     if(!this._bgm){ try{ this._bgm=new Audio(); this._bgm.loop=true; this._bgm.preload='auto'; this._bgm.volume=0; }catch(e){ return; } }
-    const a=this._bgm, A=this, src='audio/'+track+'.mp3';
+    const a=this._bgm, A=this, src='audio/'+track+'.ogg';
     const swap=()=>{ try{ a.src=src; a.currentTime=0; const p=a.play(); if(p&&p.catch)p.catch(()=>{}); }catch(e){} A._mfade(A.muted?0:A.musicVol,null); };
     if(a.src && !a.paused){ this._mfade(0,swap); } else { swap(); }
   },
