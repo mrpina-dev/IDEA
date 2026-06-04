@@ -889,10 +889,63 @@ function drawBossBloom(ctx,e){
   dot(ctx,-0.05*r,-0.03*r,0.016*r,col); dot(ctx,0.045*r,0.03*r,0.013*r,col);
   ctx.restore();
 }
+// THE AMPLIFIER -- CSEE sector boss : tube amp, the speaker cone is the weak point
+function drawBossAmplifier(ctx,e){
+  const r=e.r, col=ctx.strokeStyle, lw=ctx.lineWidth;
+  const ph=e.core, tell=e.tell||0, fl=e.fireFlash||0;
+  const gc = fl>0 ? COL.white : col;
+  ctx.save(); ctx.translate(0, Math.sin(ph*1.6)*r*0.03);
+  /* vacuum tube bank (tail) */
+  [-0.39,-0.13,0.13,0.39].forEach((tx,i)=>{ const x=tx*r, top=-0.92*r, h=0.30*r, w=0.10*r;
+    ctx.beginPath(); ctx.moveTo(x-w,top+w); ctx.quadraticCurveTo(x-w,top,x,top); ctx.quadraticCurveTo(x+w,top,x+w,top+w);
+    ctx.lineTo(x+w,top+h); ctx.lineTo(x-w,top+h); ctx.closePath(); ctx.fillStyle=col+'18'; ctx.fill(); ctx.stroke();
+    const glow=0.5+0.5*Math.sin(ph*3.4+i*1.4);
+    ctx.save(); ctx.shadowBlur=(6+fl*18)*glow; ctx.shadowColor=gc; ctx.strokeStyle=gc;
+    ctx.beginPath(); ctx.moveTo(x,top+0.05*r); ctx.lineTo(x,top+h-0.04*r); ctx.stroke();
+    dot(ctx,x,top+h*0.5,0.025*r,gc); ctx.restore(); ctx.strokeStyle=col;
+  });
+  /* chassis (amp head) */
+  const cx0=0.62*r, cTop=-0.55*r, cBot=0.18*r;
+  ctx.beginPath(); ctx.moveTo(-cx0,cTop); ctx.lineTo(cx0,cTop); ctx.lineTo(cx0,cBot); ctx.lineTo(-cx0,cBot); ctx.closePath();
+  ctx.fillStyle=col+'1E'; ctx.fill(); ctx.stroke();
+  /* transformer block + laminations */
+  ctx.beginPath(); ctx.rect(-0.16*r,cTop-0.04*r,0.32*r,0.30*r); ctx.fillStyle=col+'2A'; ctx.fill(); ctx.stroke();
+  ctx.lineWidth=lw*0.5;
+  for(let i=0;i<3;i++){ const y=cTop+0.02*r+i*0.085*r; ctx.beginPath(); ctx.moveTo(-0.16*r,y); ctx.lineTo(0.16*r,y); ctx.stroke(); }
+  /* side vent slats */
+  for(const s of [-1,1]){ for(let i=0;i<4;i++){ const y=cTop+0.06*r+i*0.075*r;
+    ctx.beginPath(); ctx.moveTo(s*0.62*r,y); ctx.lineTo(s*0.48*r,y); ctx.stroke(); } }
+  ctx.lineWidth=lw;
+  /* knob row */
+  [-0.34,0,0.34].forEach(kx=>{ const x=kx*r, y=0.0*r;
+    ctx.beginPath(); ctx.arc(x,y,0.06*r,0,6.2832); ctx.fillStyle=col+'22'; ctx.fill(); ctx.stroke();
+    const a=ph*0.6+kx*3; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+Math.cos(a)*0.06*r,y+Math.sin(a)*0.06*r); ctx.stroke(); });
+  /* output jack guns */
+  for(const s of [-1,1]){ const x=s*0.5*r, y=cBot;
+    ctx.beginPath(); ctx.arc(x,y,0.05*r,0,6.2832); ctx.fillStyle=col+'22'; ctx.fill(); ctx.stroke();
+    ctx.save(); ctx.shadowBlur=fl*16; ctx.shadowColor=gc; ctx.strokeStyle=gc;
+    ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x,y+0.14*r); ctx.stroke(); ctx.restore(); ctx.strokeStyle=col; }
+  /* speaker cone (nose + command core / weak point) */
+  const sx=0, sy=0.60*r, R=0.42*r;
+  const pulse=Math.max(0.5+0.5*Math.sin(ph*2.4),tell);
+  ctx.beginPath(); ctx.arc(sx,sy,R,0,6.2832); ctx.fillStyle=col+'14'; ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.arc(sx,sy,R*0.74,0,6.2832); ctx.stroke();
+  ctx.lineWidth=lw*0.5;
+  for(let i=0;i<12;i++){ const a=i/12*6.2832; ctx.beginPath();
+    ctx.moveTo(sx+Math.cos(a)*R*0.30,sy+Math.sin(a)*R*0.30); ctx.lineTo(sx+Math.cos(a)*R*0.92,sy+Math.sin(a)*R*0.92); ctx.stroke(); }
+  ctx.lineWidth=lw;
+  ctx.beginPath(); ctx.arc(sx,sy,R*0.30,0,6.2832); ctx.fillStyle=col+'1E'; ctx.fill(); ctx.stroke();
+  if(tell>0||fl>0){ ctx.save(); ctx.globalAlpha=Math.max(tell,fl); ctx.strokeStyle=gc; ctx.shadowColor=gc; ctx.shadowBlur=10;
+    for(let k=1;k<=2;k++){ ctx.beginPath(); ctx.arc(sx,sy,R+k*0.16*r,Math.PI*0.15,Math.PI*0.85); ctx.stroke(); } ctx.restore(); ctx.strokeStyle=col; }
+  ctx.save(); ctx.shadowBlur=(12+fl*30)*pulse; ctx.shadowColor=gc;
+  ctx.beginPath(); ctx.ellipse(sx,sy,R*0.20,R*0.24,0,0,6.2832); ctx.fillStyle=gc; ctx.fill(); ctx.restore();
+  ctx.restore();
+}
 function drawBoss(ctx,e){
   switch(e.fk){
     case 'ace': drawBossRaising(ctx,e); break;
     case 'bmet': drawBossBloom(ctx,e); break;
+    case 'csee': drawBossAmplifier(ctx,e); break;
     default: { const F=FACTIONS[e.fk]; (F&&F.draw?F.draw:drawACE)(ctx,e); }
   }
 }
