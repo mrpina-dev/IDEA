@@ -941,11 +941,64 @@ function drawBossAmplifier(ctx,e){
   ctx.beginPath(); ctx.ellipse(sx,sy,R*0.20,R*0.24,0,0,6.2832); ctx.fillStyle=gc; ctx.fill(); ctx.restore();
   ctx.restore();
 }
+// THE FRAME -- MAT sector boss : cinematic camera, the lens stares at the player
+function drawBossFrame(ctx,e){
+  const r=e.r, col=ctx.strokeStyle, lw=ctx.lineWidth;
+  const ph=e.core, tell=e.tell||0, fl=e.fireFlash||0;
+  const gc = fl>0 ? COL.white : col;
+  ctx.save(); ctx.translate(0, Math.sin(ph*1.5)*r*0.03);
+  /* support arms + glowing tips (tail) */
+  for(const s of [-1,1]){ const tipx=s*0.55*r, tipy=-0.90*r;
+    ctx.beginPath(); ctx.moveTo(s*0.28*r,-0.5*r); ctx.lineTo(tipx,tipy); ctx.stroke();
+    const tg=0.5+0.5*Math.sin(ph*2.6+s);
+    ctx.save(); ctx.shadowBlur=8*tg+fl*16; ctx.shadowColor=gc;
+    ctx.beginPath(); ctx.arc(tipx,tipy,0.10*r,0,6.2832); ctx.fillStyle=col+'22'; ctx.fill(); ctx.stroke();
+    dot(ctx,tipx,tipy,0.04*r,gc); ctx.restore(); }
+  ctx.beginPath(); ctx.moveTo(-0.55*r,-0.78*r); ctx.lineTo(0.55*r,-0.78*r); ctx.stroke();
+  /* viewfinder eyepiece */
+  ctx.beginPath(); ctx.rect(-0.46*r,-0.58*r,0.16*r,0.12*r); ctx.fillStyle=col+'1E'; ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-0.46*r,-0.52*r); ctx.lineTo(-0.56*r,-0.52*r); ctx.stroke();
+  /* camera body */
+  const bx=0.42*r, bTop=-0.50*r, bBot=0.30*r;
+  ctx.beginPath(); ctx.rect(-bx,bTop,bx*2,bBot-bTop); ctx.fillStyle=col+'1E'; ctx.fill(); ctx.stroke();
+  /* film magazine */
+  ctx.beginPath(); ctx.arc(-0.30*r,-0.22*r,0.20*r,0,6.2832); ctx.fillStyle=col+'18'; ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.arc(-0.30*r,-0.22*r,0.07*r,0,6.2832); ctx.stroke();
+  ctx.save(); ctx.lineWidth=lw*0.5;
+  for(let i=0;i<4;i++){ const a=ph*0.5+i*1.57; ctx.beginPath(); ctx.moveTo(-0.30*r,-0.22*r); ctx.lineTo(-0.30*r+Math.cos(a)*0.18*r,-0.22*r+Math.sin(a)*0.18*r); ctx.stroke(); }
+  ctx.restore();
+  /* record light + control panel */
+  const rec=Math.sin(ph*3)>0;
+  ctx.save(); ctx.shadowBlur=rec?10:0; ctx.shadowColor=COL.white;
+  dot(ctx,0.30*r,-0.40*r,0.035*r,rec?COL.white:col); ctx.restore();
+  for(let i=0;i<3;i++){ ctx.beginPath(); ctx.rect((0.12+i*0.10)*r,-0.30*r,0.06*r,0.06*r); ctx.stroke(); }
+  /* I/O port guns */
+  for(const s of [-1,1]){ const x=s*0.40*r, y=bBot;
+    ctx.beginPath(); ctx.arc(x,y,0.05*r,0,6.2832); ctx.fillStyle=col+'22'; ctx.fill(); ctx.stroke();
+    ctx.save(); ctx.shadowBlur=fl*16; ctx.shadowColor=gc; ctx.strokeStyle=gc;
+    ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x,y+0.13*r); ctx.stroke(); ctx.restore(); ctx.strokeStyle=col; }
+  /* lens assembly + aperture cockpit (nose, weak point) */
+  const lx=0, ly=0.58*r, R=0.45*r;
+  const pulse=Math.max(0.5+0.5*Math.sin(ph*2.4),tell);
+  ctx.beginPath(); ctx.moveTo(-R*0.9,ly+R*0.2); ctx.lineTo(-R*1.1,ly+R*0.95); ctx.lineTo(R*1.1,ly+R*0.95); ctx.lineTo(R*0.9,ly+R*0.2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(lx,ly,R,0,6.2832); ctx.fillStyle=col+'12'; ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.arc(lx,ly,R*0.82,0,6.2832); ctx.stroke();
+  ctx.beginPath(); ctx.arc(lx,ly,R*0.64,0,6.2832); ctx.stroke();
+  ctx.lineWidth=lw*0.7; const irisR=R*0.50, openR=R*(0.18+0.05*Math.sin(ph*2))*(1-tell*0.4);
+  for(let i=0;i<8;i++){ const a=i/8*6.2832+ph*0.2, a2=a+0.785;
+    ctx.beginPath(); ctx.moveTo(lx+Math.cos(a)*openR,ly+Math.sin(a)*openR); ctx.lineTo(lx+Math.cos(a2)*irisR,ly+Math.sin(a2)*irisR); ctx.stroke(); }
+  ctx.lineWidth=lw;
+  ctx.save(); ctx.shadowBlur=(12+fl*30)*pulse; ctx.shadowColor=gc;
+  ctx.beginPath(); ctx.arc(lx,ly,openR,0,6.2832); ctx.fillStyle=col+'2A'; ctx.fill();
+  dot(ctx,lx,ly,openR*0.55,COL.white); ctx.restore();
+  ctx.restore();
+}
 function drawBoss(ctx,e){
   switch(e.fk){
     case 'ace': drawBossRaising(ctx,e); break;
     case 'bmet': drawBossBloom(ctx,e); break;
     case 'csee': drawBossAmplifier(ctx,e); break;
+    case 'mat': drawBossFrame(ctx,e); break;
     default: { const F=FACTIONS[e.fk]; (F&&F.draw?F.draw:drawACE)(ctx,e); }
   }
 }
