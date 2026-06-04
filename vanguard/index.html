@@ -901,12 +901,13 @@ function drawBossAmplifier(ctx,e){
   [-0.39,-0.13,0.13,0.39].forEach((tx,i)=>{ const x=tx*r, top=-0.92*r, h=0.30*r, w=0.10*r;
     ctx.beginPath(); ctx.moveTo(x-w,top+w); ctx.quadraticCurveTo(x-w,top,x,top); ctx.quadraticCurveTo(x+w,top,x+w,top+w);
     ctx.lineTo(x+w,top+h); ctx.lineTo(x-w,top+h); ctx.closePath(); ctx.fillStyle=col+'18'; ctx.fill(); ctx.stroke();
-    const glow=0.5+0.5*Math.sin(ph*3.4+i*1.4);
+    const glow=Math.min(1, 0.5+0.5*Math.sin(ph*3.4+i*1.4)+phase*0.18);
     ctx.save(); ctx.shadowBlur=(6+fl*18)*glow; ctx.shadowColor=gc; ctx.strokeStyle=gc;
     ctx.beginPath(); ctx.moveTo(x,top+0.05*r); ctx.lineTo(x,top+h-0.04*r); ctx.stroke();
     dot(ctx,x,top+h*0.5,0.025*r,gc); ctx.restore(); ctx.strokeStyle=col;
   });
   /* chassis (amp head) */
+  const phase=e.phase||0;
   const cx0=0.62*r, cTop=-0.55*r, cBot=0.18*r;
   ctx.beginPath(); ctx.moveTo(-cx0,cTop); ctx.lineTo(cx0,cTop); ctx.lineTo(cx0,cBot); ctx.lineTo(-cx0,cBot); ctx.closePath();
   ctx.fillStyle=col+'1E'; ctx.fill(); ctx.stroke();
@@ -921,14 +922,14 @@ function drawBossAmplifier(ctx,e){
   /* knob row */
   [-0.34,0,0.34].forEach(kx=>{ const x=kx*r, y=0.0*r;
     ctx.beginPath(); ctx.arc(x,y,0.06*r,0,6.2832); ctx.fillStyle=col+'22'; ctx.fill(); ctx.stroke();
-    const a=ph*0.6+kx*3; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+Math.cos(a)*0.06*r,y+Math.sin(a)*0.06*r); ctx.stroke(); });
+    const a=ph*(0.6+phase*0.9)+kx*3; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+Math.cos(a)*0.06*r,y+Math.sin(a)*0.06*r); ctx.stroke(); });
   /* output jack guns */
   for(const s of [-1,1]){ const x=s*0.5*r, y=cBot;
     ctx.beginPath(); ctx.arc(x,y,0.05*r,0,6.2832); ctx.fillStyle=col+'22'; ctx.fill(); ctx.stroke();
     ctx.save(); ctx.shadowBlur=fl*16; ctx.shadowColor=gc; ctx.strokeStyle=gc;
     ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x,y+0.14*r); ctx.stroke(); ctx.restore(); ctx.strokeStyle=col; }
   /* speaker cone (nose + command core / weak point) */
-  const sx=0, sy=0.60*r, R=0.42*r;
+  const sx=0, sy=0.60*r+(phase>=2?Math.sin(ph*9)*0.02*r:0), R=0.42*r*(1+(phase>=2?0.03*Math.sin(ph*8):0));
   const pulse=Math.max(0.5+0.5*Math.sin(ph*2.4),tell);
   ctx.beginPath(); ctx.arc(sx,sy,R,0,6.2832); ctx.fillStyle=col+'14'; ctx.fill(); ctx.stroke();
   ctx.beginPath(); ctx.arc(sx,sy,R*0.74,0,6.2832); ctx.stroke();
@@ -1698,7 +1699,7 @@ function updateBoss(dt){
   const beamUnder = player.beamActive && Math.abs(player.x-b.x)<30;
   if(b.dodgeCd<=0 && (beamUnder || (Math.abs(pdx)<22 && Math.random()<0.02))){
     b.gx = clamp(b.x + (b.x<player.x?-1:1)*rnd(75,125),70,W-70); b.dodgeCd=0.8; }
-  const ease=((b.fk==='ace'||b.fk==='mset')?2.0 : b.fk==='csee'?3.6 : 3.0)*(1+sector*0.06);
+  const ease=((b.fk==='ace'||b.fk==='mset')?2.0 : b.fk==='csee'?1.8 : 3.0)*(1+sector*0.06);
   if(b.ramState===0 && b.sweepState!==2){ b.x+=(b.gx-b.x)*Math.min(1,dt*ease); b.y+=(b.gy-b.y)*Math.min(1,dt*ease); }
 
   /* phase-3 desperation (hp < 38%) */
@@ -1710,9 +1711,14 @@ function updateBoss(dt){
       const nn=Math.min(8,3+Math.floor(sector/2));
       for(let i=0;i<nn;i++){const e=makeEnemy('bmet',0,b.x+rnd(-80,80),b.y+24,'dive');e.vy=85;e.vx=rnd(-50,50);e.hp=2;e.maxhp=2;e.fire=0.4;enemies.push(e);}
       b.hp=Math.min(b.maxhp,b.hp+b.maxhp*0.05); Audio_.pickup(); shake=Math.max(shake,6);
-    } else if(b.fk==='csee'){ // triple lock-on burst
-      for(let k=-1;k<=1;k++){const tx=player.x+k*55,ty=player.y,dx=tx-b.x,dy=ty-b.y,m=Math.hypot(dx,dy)||1,sp=560;
-        for(let j=-1;j<=1;j++){const a=Math.atan2(dy,dx)+j*0.03;ebul.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:b.c,r:3.5});}} Audio_.beam();
+    } else if(b.fk==='csee'){ // THE AMPLIFIER: DROP THE BASS
+      const ry=b.y+0.60*b.r;
+      rings.push({x:b.x,y:ry,r:b.r*0.5,vr:440,life:.7,max:.7,c:b.c,harm:true});
+      rings.push({x:b.x,y:ry,r:b.r*0.5,vr:270,life:.65,max:.65,c:COL.white,harm:true});
+      rings.push({x:b.x,y:ry,r:b.r*0.5,vr:160,life:.6,max:.6,c:b.c,harm:true});
+      const n=Math.min(18,12+Math.floor(sector/3));
+      for(let i=0;i<n;i++){const a=i/n*6.2832; ebul.push({x:b.x,y:b.y,vx:Math.cos(a)*310,vy:Math.sin(a)*310,c:b.c,r:4});}
+      b.fireFlash=0.2; Audio_.big(); shake=Math.max(shake,12); bossFlash=Math.max(bossFlash,0.35);
     } else if(b.fk==='mat'){ // wide sweep volley
       const sp=330; for(let i=0;i<9;i++){const a=-Math.PI/2+(i/8)*Math.PI;ebul.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:b.c,r:4});}
       rings.push({x:b.x,y:b.y,r:b.r*0.5,vr:240,life:.7,max:.7,c:b.c}); Audio_.beam();
@@ -1752,12 +1758,22 @@ function updateBoss(dt){
         if(phase>=2){ const dx=player.x-b.x,dy=player.y-b.y,m=Math.hypot(dx,dy)||1,sp=260+sector*10; ebul.push({x:b.x,y:b.y,vx:dx/m*sp,vy:dy/m*sp,c:b.c,r:4}); } }
       b.sigCd=Math.max(0.4,(rnd(2.8,4.0)-phase*0.6)*sf); }
   } else if(b.fk==='csee'){
+    if(b.fireFlash>0) b.fireFlash=Math.max(0,(b.fireFlash||0)-dt);
+    b.tell = b.blinkCd<=0.6 ? clamp(1-b.blinkCd/0.6,0,1) : 0;
     b.blinkCd-=dt;
-    if(b.lockT>0){ b.lockT-=dt; if(b.lockT<=0){ const dx=b.lockX-b.x,dy=b.lockY-b.y,m=Math.hypot(dx,dy)||1,sp=540;
-      for(let k=-1;k<=1;k++){ const a=Math.atan2(dy,dx)+k*0.045; ebul.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:b.c,r:3}); } Audio_.beam(); } }
-    if(b.blinkCd<=0){ b.x=clamp(player.x+rnd(-80,80),70,W-70); b.gx=b.x; b.y=clamp(rnd(108,180),90,200); b.gy=b.y;
-      for(let k=0;k<12;k++) parts.push({x:b.x,y:b.y,vx:rnd(-130,130),vy:rnd(-130,130),life:.25,max:.25,c:b.c,sz:1.6}); b.blinkCd=Math.max(0.8,(rnd(2.8,4.0)-phase*0.4)*sf); }
-    if(b.sigCd<=0){ b.lockX=player.x; b.lockY=player.y; b.lockT=0.7; b.sigCd=Math.max(0.3,(rnd(2.2,3.0)-phase*0.3)*sf); }
+    if(b.lockT>0){ b.lockT-=dt; if(b.lockT<=0){
+      const dx=player.x-b.x, dy=player.y-b.y, m=Math.hypot(dx,dy)||1, sp=520+sector*12;
+      for(let k=-2;k<=2;k++){const a=Math.atan2(dy,dx)+k*0.06; ebul.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:b.c,r:2.8});}
+      b.fireFlash=0.14; Audio_.beam(); } }
+    if(b.blinkCd<=0){
+      const nRings=1+phase, ry=b.y+0.60*b.r;
+      for(let k=0;k<nRings;k++) rings.push({x:b.x,y:ry,r:b.r*(0.5+k*0.3),vr:280+phase*40,life:0.8+k*0.1,max:0.8+k*0.1,c:b.c,harm:true});
+      if(phase>=1){ const gap=Math.atan2(player.y-b.y,player.x-b.x), n=Math.min(14,8+sector);
+        for(let i=0;i<n;i++){const a=i/n*6.2832; if(Math.abs(((a-gap+Math.PI)%(Math.PI*2))-Math.PI)<0.65)continue;
+          ebul.push({x:b.x,y:ry,vx:Math.cos(a)*(180+sector*6),vy:Math.sin(a)*(180+sector*6),c:b.c,r:3});} }
+      b.fireFlash=0.12; Audio_.hit(); shake=Math.max(shake,4+phase*2);
+      b.blinkCd=Math.max(0.8,(rnd(2.6,3.6)-phase*0.5)*sf); }
+    if(b.sigCd<=0){ b.lockT=0.55; b.sigCd=Math.max(0.3,(rnd(2.0,3.0)-phase*0.4)*sf); }
   } else if(b.fk==='mat'){
     if(b.sweepState===1){ b.sweepT-=dt; if(b.sweepT<=0){ b.sweepState=2; b.sweepT=1.3; b.sweepAng=0.45; } }
     else if(b.sweepState===2){ b.sweepT-=dt; b.sweepAng+=dt*1.6;
