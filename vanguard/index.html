@@ -960,6 +960,7 @@ function drawBossFrame(ctx,e){
   const r=e.r, col=ctx.strokeStyle, lw=ctx.lineWidth;
   const ph=e.core, tell=e.tell||0, fl=e.fireFlash||0;
   const gc = fl>0 ? COL.white : col;
+  const phase=e.phase||0;
   ctx.save(); ctx.translate(0, Math.sin(ph*1.5)*r*0.03);
   /* support arms + glowing tips (tail) */
   for(const s of [-1,1]){ const tipx=s*0.55*r, tipy=-0.90*r;
@@ -982,7 +983,7 @@ function drawBossFrame(ctx,e){
   for(let i=0;i<4;i++){ const a=ph*0.5+i*1.57; ctx.beginPath(); ctx.moveTo(-0.30*r,-0.22*r); ctx.lineTo(-0.30*r+Math.cos(a)*0.18*r,-0.22*r+Math.sin(a)*0.18*r); ctx.stroke(); }
   ctx.restore();
   /* record light + control panel */
-  const rec=Math.sin(ph*3)>0;
+  const rec=phase>=2?true:Math.sin(ph*3)>0;
   ctx.save(); ctx.shadowBlur=rec?10:0; ctx.shadowColor=COL.white;
   dot(ctx,0.30*r,-0.40*r,0.035*r,rec?COL.white:col); ctx.restore();
   for(let i=0;i<3;i++){ ctx.beginPath(); ctx.rect((0.12+i*0.10)*r,-0.30*r,0.06*r,0.06*r); ctx.stroke(); }
@@ -1003,7 +1004,7 @@ function drawBossFrame(ctx,e){
     ctx.beginPath(); ctx.moveTo(lx+Math.cos(a)*openR,ly+Math.sin(a)*openR); ctx.lineTo(lx+Math.cos(a2)*irisR,ly+Math.sin(a2)*irisR); ctx.stroke(); }
   ctx.lineWidth=lw;
   ctx.save(); ctx.shadowBlur=(12+fl*30)*pulse; ctx.shadowColor=gc;
-  ctx.beginPath(); ctx.arc(lx,ly,openR,0,6.2832); ctx.fillStyle=col+'2A'; ctx.fill();
+  ctx.beginPath(); ctx.arc(lx,ly,openR,0,6.2832); ctx.fillStyle=col+(phase>=2?'5A':phase>=1?'40':'2A'); ctx.fill();
   dot(ctx,lx,ly,openR*0.55,COL.white); ctx.restore();
   ctx.restore();
 }
@@ -1143,7 +1144,7 @@ function spawnBoss(forceFk){
     flash:0, dead:false, dying:false, deathT:0, salvo:0,
     gx:W/2, gy:140, moveMode:'track', moveT:1.0, dodgeCd:0,
     sigCd:Math.max(0.4,2.6/(1+sector*0.10)), ramState:0, ramT:0, ramVy:0, blinkCd:Math.max(0.8,3.2/(1+sector*0.10)), lockT:0, lockX:0, lockY:0,
-    sweepState:0, sweepT:0, sweepAng:0, regenT:0, p3Cd:5.5,
+    sweepState:0, sweepT:0, sweepAng:0, sweepDir:1, focusState:0, focusT:0, focusX:0, focusY:0, regenT:0, p3Cd:5.5,
     plates:0, plateMax:0, plateHp:0, boltCd:rnd(2.6,3.6), boltWind:0, boltTell:0};
   if(fk==='mset'){ boss.plates=3; boss.plate0=3; boss.plateMax=Math.round(hp*0.15); boss.plateHp=boss.plateMax; boss.r=62; }
   if(fk==='ace'){ boss.r=64; } Audio_.bossWarn();
@@ -1740,9 +1741,9 @@ function updateBoss(dt){
     } else if(b.fk==='csee'){ // THE AMPLIFIER: DROP THE BASS
       ampShockwave(2); b.beatT=0.4;
       b.fireFlash=0.22; Audio_.wub(); Audio_.big(); shake=Math.max(shake,14); bossFlash=Math.max(bossFlash,0.45);
-    } else if(b.fk==='mat'){ // wide sweep volley
-      const sp=330; for(let i=0;i<9;i++){const a=-Math.PI/2+(i/8)*Math.PI;ebul.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:b.c,r:4});}
-      rings.push({x:b.x,y:b.y,r:b.r*0.5,vr:240,life:.7,max:.7,c:b.c}); Audio_.beam();
+    } else if(b.fk==='mat'){ // FRAME: overexposure flare
+      const n=14, sp=300; for(let i=0;i<n;i++){const a=-Math.PI/2+(i/(n-1))*Math.PI;ebul.push({x:b.x,y:b.y+b.r*0.4,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:b.c,r:4});}
+      rings.push({x:b.x,y:b.y,r:b.r*0.5,vr:300,life:.6,max:.6,c:b.c}); bossFlash=Math.max(bossFlash,0.4); Audio_.blast(); shake=Math.max(shake,10);
     } else if(b.fk==='mset'){ // dense nova
       const n=Math.min(26,16+Math.floor(sector/2));
       for(let i=0;i<n;i++){const a=b.core+i/n*6.2832;ebul.push({x:b.x,y:b.y,vx:Math.cos(a)*260,vy:Math.sin(a)*260+50,c:b.c,r:4});}
@@ -1796,13 +1797,27 @@ function updateBoss(dt){
       else { ampWaveWall(phase,b.gapCol); b.gapCol=(b.gapCol+(Math.random()<0.5?1:5))%6; }
     }
   } else if(b.fk==='mat'){
-    if(b.sweepState===1){ b.sweepT-=dt; if(b.sweepT<=0){ b.sweepState=2; b.sweepT=1.3; b.sweepAng=0.45; } }
-    else if(b.sweepState===2){ b.sweepT-=dt; b.sweepAng+=dt*1.6;
+    if(b.sweepState!==1 && b.focusState!==1) b.tell=Math.max(0,(b.tell||0)-dt*3);
+    if(b.sweepState===1){ b.sweepT-=dt; b.tell=clamp(1-b.sweepT/0.9,0,1); if(b.sweepT<=0){ b.sweepState=2; b.sweepT=1.3; b.sweepAng=(b.sweepDir||1)>0?0.30:Math.PI-0.30; b.tell=0; b.sweepEmit=0; } }
+    else if(b.sweepState===2){ b.sweepT-=dt; b.sweepAng+=dt*1.6*(b.sweepDir||1);
       let pa=Math.atan2(player.y-b.y,player.x-b.x); let d=Math.abs(pa-b.sweepAng); if(d>Math.PI)d=2*Math.PI-d;
       if(player.y>b.y-10 && d<0.11 && !player.dead && player.inv<=0) playerHit();
+      b.sweepEmit=(b.sweepEmit||0)-dt; if(b.sweepEmit<=0 && phase>=1){ b.sweepEmit=0.15; const sp=150+sector*6; ebul.push({x:b.x,y:b.y,vx:Math.cos(b.sweepAng)*sp,vy:Math.sin(b.sweepAng)*sp,c:b.c,r:3}); }
       if(b.sweepT<=0) b.sweepState=0; }
-    if(b.sweepState===0 && b.sigCd<=0){ if(Math.random()<0.6){ b.sweepState=1; b.sweepT=0.9; Audio_.beam(); }
-      else { const m=Math.hypot(pdx,pdy)||1,sp=360; const mshots=Math.min(2,1+Math.floor(sector/4)); for(let k=-mshots;k<=mshots;k++){const a=Math.atan2(pdy,pdx)+k*0.12; ebul.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:b.c,r:3});} } b.sigCd=Math.max(0.4,(rnd(2.8,3.8)-phase*0.4)*sf); }
+    if(b.focusState===1){ b.focusT-=dt; b.tell=clamp(1-b.focusT/0.8,0,1);
+      if(b.focusT<=0){ b.focusState=0; b.tell=0; b.fireFlash=0.16; Audio_.blast();
+        const dx=b.focusX-b.x, dy=b.focusY-(b.y+b.r*0.4), m=Math.hypot(dx,dy)||1, base=Math.atan2(dy,dx), sp=320+sector*10, n=5+phase*2;
+        for(let i=0;i<n;i++){ const a=base+rnd(-0.10,0.10); ebul.push({x:b.x,y:b.y+b.r*0.4,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:b.c,r:3.4}); }
+        shake=Math.max(shake,6); } }
+    if(b.sweepState===0 && b.focusState!==1 && b.sigCd<=0){ const rr=Math.random();
+      if(rr<0.32){ b.sweepState=1; b.sweepT=0.9; b.sweepDir=Math.random()<0.5?1:-1; Audio_.beam(); }
+      else if(rr<0.60){ b.focusState=1; b.focusT=0.8; b.focusX=player.x; b.focusY=player.y; Audio_.whine(0.8); }
+      else if(phase>=1 && rr<0.82){ b.fireFlash=0.2; bossFlash=Math.max(bossFlash,0.3); Audio_.blast(); shake=Math.max(shake,7);
+        const n=Math.min(16,9+phase*3+Math.floor(sector/4)), sp=230+sector*8, off=Math.random()*0.4;
+        for(let i=0;i<n;i++){ const a=-Math.PI/2+(i/(n-1))*Math.PI+off; ebul.push({x:b.x,y:b.y+b.r*0.4,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:b.c,r:3.4}); }
+        rings.push({x:b.x,y:b.y+b.r*0.4,r:b.r*0.4,vr:300,life:.5,max:.5,c:b.c}); }
+      else { const m=Math.hypot(pdx,pdy)||1,sp=360; const mshots=Math.min(2,1+Math.floor(sector/4)); for(let k=-mshots;k<=mshots;k++){const a=Math.atan2(pdy,pdx)+k*0.12; ebul.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:b.c,r:3});} }
+      b.sigCd=Math.max(0.4,(rnd(2.6,3.6)-phase*0.4)*sf); }
   } else if(b.fk==='mset'){
     if(b.sigCd<=0 && b.plates===0){ const n=Math.min(20,10+phase*4+Math.floor(sector/3)); for(let i=0;i<n;i++){ const a=(i/n)*6.28+b.core;
       ebul.push({x:b.x,y:b.y,vx:Math.cos(a)*240,vy:Math.sin(a)*240,c:b.c,r:3});
@@ -2076,6 +2091,10 @@ function drawBossFX(){ const b=boss; if(!b) return; bg.save();
     bg.setLineDash([6,6]); bg.beginPath(); bg.moveTo(b.x,b.y); bg.lineTo(b.lockX,b.lockY); bg.stroke(); bg.setLineDash([]);
     bg.beginPath(); bg.arc(b.lockX,b.lockY,10+6*Math.sin(t*30),0,6.28); bg.stroke(); bg.globalAlpha=1; bg.shadowBlur=0; }
   if(b.fk==='mat'){
+    if(b.focusState===1){ const k=b.tell||0, fs=44-28*k; bg.save(); bg.globalAlpha=0.45+0.55*k; bg.strokeStyle=b.c; bg.shadowColor=b.c; bg.shadowBlur=12; bg.lineWidth=2;
+      for(const cc of [[-1,-1],[1,-1],[1,1],[-1,1]]){ const cx=b.focusX+cc[0]*fs, cy=b.focusY+cc[1]*fs;
+        bg.beginPath(); bg.moveTo(cx,cy); bg.lineTo(cx-cc[0]*11,cy); bg.moveTo(cx,cy); bg.lineTo(cx,cy-cc[1]*11); bg.stroke(); }
+      bg.beginPath(); bg.arc(b.focusX,b.focusY,2.5,0,6.28); bg.fillStyle=b.c; bg.fill(); bg.globalAlpha=1; bg.shadowBlur=0; bg.restore(); }
     if(b.sweepState===1){ const k=1-b.sweepT/0.9; bg.globalAlpha=k; bg.fillStyle=b.c; bg.shadowColor=b.c; bg.shadowBlur=22;
       bg.beginPath(); bg.arc(b.x,b.y,6+18*k,0,6.28); bg.fill(); bg.globalAlpha=1; bg.shadowBlur=0; }
     else if(b.sweepState===2){ const len=900; bg.save(); bg.translate(b.x,b.y); bg.rotate(b.sweepAng);
