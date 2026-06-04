@@ -841,6 +841,7 @@ function drawBossBloom(ctx,e){
   const ph=e.core, tell=e.tell||0, fl=e.fireFlash||0;
   const gc = fl>0 ? COL.white : col;
   const breathe = 1 + 0.03*Math.sin(ph*1.6);
+  const phase=e.phase||0;
   ctx.save(); ctx.translate(0, Math.sin(ph*1.4)*r*0.035);
   /* tail tendril + drifting bubbles */
   ctx.beginPath(); ctx.moveTo(-0.07*r,-0.55*r); ctx.bezierCurveTo(-0.13*r,-0.78*r,0.06*r,-0.86*r,-0.03*r,-1.04*r); ctx.stroke();
@@ -860,7 +861,7 @@ function drawBossBloom(ctx,e){
   ctx.bezierCurveTo(1.126*r,0.393*r,1.215*r,0.141*r,1.067*r,-0.074*r);
   ctx.bezierCurveTo(0.933*r,-0.274*r,0.667*r,-0.348*r,0.444*r,-0.296*r);
   ctx.bezierCurveTo(0.400*r,-0.481*r,0.296*r,-0.689*r,0,-0.689*r);
-  ctx.closePath(); ctx.fillStyle=col+'1E'; ctx.fill(); ctx.stroke();
+  ctx.closePath(); if(phase<2){ ctx.fillStyle=col+(phase>=1?'0A':'1E'); ctx.fill(); } ctx.stroke();
   ctx.lineWidth=lw*0.5; ctx.globalAlpha=0.45;
   ctx.beginPath(); ctx.moveTo(-0.44*r,-0.30*r); ctx.quadraticCurveTo(-0.07*r,-0.04*r,-0.30*r,0.35*r); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(0.44*r,-0.30*r); ctx.quadraticCurveTo(0.07*r,-0.04*r,0.30*r,0.35*r); ctx.stroke();
@@ -1704,10 +1705,11 @@ function updateBoss(dt){
   if(phase===2 && sector>=2){ b.p3Cd-=dt; if(b.p3Cd<=0){ b.p3Cd=Math.max(3.0,rnd(4,7)*sf);
     if(b.fk==='ace'){ // THE RAISING: full-width double crush with offset gaps
       aceCrush(); b.gx=clamp(player.x,90,W-90); b.gy=110;
-    } else if(b.fk==='bmet'){ // swarm burst + heal attempt
-      const nn=Math.min(5,2+Math.floor(sector/2));
-      for(let i=0;i<nn;i++){const e=makeEnemy('bmet',0,b.x+rnd(-70,70),b.y+24,'dive');e.vy=80;e.hp=2;e.maxhp=2;e.fire=0.4;enemies.push(e);}
-      b.hp=Math.min(b.maxhp,b.hp+b.maxhp*0.03); Audio_.pickup();
+    } else if(b.fk==='bmet'){ // BLOOM: triple core pulse + minion cascade + regen surge
+      b.pulseSeq=3; b.pulseCd=0; b.regenT=0;
+      const nn=Math.min(8,3+Math.floor(sector/2));
+      for(let i=0;i<nn;i++){const e=makeEnemy('bmet',0,b.x+rnd(-80,80),b.y+24,'dive');e.vy=85;e.vx=rnd(-50,50);e.hp=2;e.maxhp=2;e.fire=0.4;enemies.push(e);}
+      b.hp=Math.min(b.maxhp,b.hp+b.maxhp*0.05); Audio_.pickup(); shake=Math.max(shake,6);
     } else if(b.fk==='csee'){ // triple lock-on burst
       for(let k=-1;k<=1;k++){const tx=player.x+k*55,ty=player.y,dx=tx-b.x,dy=ty-b.y,m=Math.hypot(dx,dy)||1,sp=560;
         for(let j=-1;j<=1;j++){const a=Math.atan2(dy,dx)+j*0.03;ebul.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:b.c,r:3.5});}} Audio_.beam();
@@ -1733,9 +1735,22 @@ function updateBoss(dt){
       else { spawnBarrier(); if(phase>=1) spawnBarrier(); }
       b.sigCd=Math.max(0.4,(rnd(2.4,3.4)-phase*0.5)*sf); }
   } else if(b.fk==='bmet'){
-    if(b.regenT>0) b.regenT-=dt; else if(b.hp<b.maxhp){ b.hp=Math.min(b.maxhp,b.hp+dt*b.maxhp*0.045);
-      if(Math.random()<0.3) parts.push({x:b.x+rnd(-b.r/2,b.r/2),y:b.y+rnd(-b.r/2,b.r/2),vx:0,vy:-20,life:.4,max:.4,c:COL.green,sz:1.4}); }
-    if(b.sigCd<=0){ const n=Math.min(6,2+phase+Math.floor(sector/4)); for(let i=0;i<n;i++){ const e=makeEnemy('bmet',0,b.x+rnd(-34,34),b.y+18,'dive'); e.vy=70; e.vx=rnd(-30,30); e.hp=2; e.maxhp=2; e.fire=0.5; enemies.push(e); } Audio_.pickup(); b.sigCd=Math.max(0.4,(rnd(3.0,4.2)-phase*0.5)*sf); }
+    if(b.bloomSplit==null) b.bloomSplit=phase;
+    else if(b.bloomSplit!==phase && b.tT<=0){ b.bloomSplit=phase;
+      for(const lp of [[-1.067*b.r,-0.074*b.r],[1.067*b.r,-0.074*b.r],[-0.874*b.r,0.452*b.r],[0.874*b.r,0.452*b.r]])
+        hazards.push({x:clamp(b.x+lp[0],30,W-30),y:b.y+lp[1],r:24,life:3.5,max:3.5,c:b.c});
+      rings.push({x:b.x,y:b.y,r:b.r*0.5,vr:260,life:.6,max:.6,c:b.c,harm:true}); }
+    if(b.regenT>0) b.regenT-=dt; else if(b.hp<b.maxhp){ const rr=0.045+(phase>=2?0.025:0); b.hp=Math.min(b.maxhp,b.hp+dt*b.maxhp*rr);
+      if(Math.random()<0.3+phase*0.15) parts.push({x:b.x+rnd(-b.r/2,b.r/2),y:b.y+rnd(-b.r/2,b.r/2),vx:0,vy:-20,life:.4,max:.4,c:COL.green,sz:1.4}); }
+    if(b.pulseSeq>0){ b.pulseCd=(b.pulseCd||0)-dt; if(b.pulseCd<=0){ b.pulseCd=0.28; b.pulseSeq--; rings.push({x:b.x,y:b.y,r:b.r*0.5,vr:220,life:.7,max:.7,c:b.c,harm:true}); Audio_.hit(); shake=Math.max(shake,5); } }
+    if(b.sigCd<=0){ const rr=Math.random();
+      if(rr<0.32){ const n=Math.min(7,2+phase+Math.floor(sector/4)); for(let i=0;i<n;i++){ const e=makeEnemy('bmet',0,b.x+rnd(-40,40),b.y+18,'dive'); e.vy=70+phase*12; e.vx=rnd(-40,40); e.hp=2; e.maxhp=2; e.fire=0.5; enemies.push(e); } Audio_.pickup(); }
+      else if(rr<0.62){ const gap=Math.random()*6.2832,cnt=Math.min(18,10+phase*4+Math.floor(sector/3));
+        for(let i=0;i<cnt;i++){const a=i/cnt*6.2832;if(Math.abs(((a-gap+Math.PI)%(Math.PI*2))-Math.PI)<(0.7-phase*0.1))continue;ebul.push({x:b.x,y:b.y,vx:Math.cos(a)*(160+sector*7),vy:Math.sin(a)*(160+sector*7),c:b.c,r:3.5});}
+        rings.push({x:b.x,y:b.y,r:b.r*0.4,vr:160,life:.5,max:.5,c:b.c}); }
+      else { for(let i=0;i<(phase>=1?3:2);i++) hazards.push({x:clamp(player.x+rnd(-120,120),30,W-30),y:rnd(H*0.44,H*0.68),r:26,life:3.2,max:3.2,c:b.c});
+        if(phase>=2){ const dx=player.x-b.x,dy=player.y-b.y,m=Math.hypot(dx,dy)||1,sp=260+sector*10; ebul.push({x:b.x,y:b.y,vx:dx/m*sp,vy:dy/m*sp,c:b.c,r:4}); } }
+      b.sigCd=Math.max(0.4,(rnd(2.8,4.0)-phase*0.6)*sf); }
   } else if(b.fk==='csee'){
     b.blinkCd-=dt;
     if(b.lockT>0){ b.lockT-=dt; if(b.lockT<=0){ const dx=b.lockX-b.x,dy=b.lockY-b.y,m=Math.hypot(dx,dy)||1,sp=540;
