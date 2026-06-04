@@ -127,7 +127,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 .modebtn{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;background:rgba(0,20,8,.5);border:1px solid var(--dim);color:var(--dim);padding:6px 12px;border-radius:5px;cursor:pointer;pointer-events:auto}
 .modebtn.sel{border-color:var(--green);color:var(--green);box-shadow:0 0 10px rgba(0,255,65,.4);text-shadow:0 0 8px rgba(0,255,65,.6)}
 .modebtn[data-m=hardcore].sel{border-color:var(--mset);color:var(--mset);box-shadow:0 0 10px rgba(255,46,46,.4);text-shadow:0 0 8px rgba(255,46,46,.6)}
-.modebtn[data-m=arcade].sel{border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 10px rgba(0,240,255,.4);text-shadow:0 0 8px rgba(0,240,255,.6)}
+.modebtn[data-m=dev].sel{border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 10px rgba(0,240,255,.4);text-shadow:0 0 8px rgba(0,240,255,.6)}
 
 .legend{display:flex;flex-wrap:wrap;gap:8px 14px;justify-content:center;max-width:320px;font-size:10px;letter-spacing:.04em}
 .legend span{display:inline-flex;align-items:center;gap:5px;color:var(--white)}
@@ -213,7 +213,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
     <div class="modes" id="modeSel">
       <button class="modebtn sel" data-m="normal">NORMAL</button>
       <button class="modebtn" data-m="hardcore">HARDCORE</button>
-      <button class="modebtn" data-m="arcade">ARCADE</button>
+      <button class="modebtn" data-m="dev">DEV</button>
     </div>
     <div class="lbl" style="color:var(--dim);letter-spacing:.22em">STARTING BUILD</div>
     <button class="fbbtn" id="outfitBtn" style="border-color:var(--gold);color:var(--gold);background:rgba(200,255,0,.12);text-shadow:0 0 8px rgba(200,255,0,.5);box-shadow:0 0 12px rgba(200,255,0,.2)">CONFIGURE BUILD</button>
@@ -1121,8 +1121,8 @@ function spawnWave(){
   }
 }
 
-function spawnBoss(){
-  const fk=sectorTheme().fk || factionForSector(); const F=FACTIONS[fk];
+function spawnBoss(forceFk){
+  const fk=forceFk || sectorTheme().fk || factionForSector(); const F=FACTIONS[fk];
   const hp=280+sector*110 - Math.max(0,(4-sector))*24;
   boss={fk,c:F.c,draw:drawBoss,variant:2, x:W/2, y:-90, ty:128, r:60, name:F.name,
     hp:hp, maxhp:hp, core:0, phase:0, lastPhase:0, ph:0, fire:Math.max(0.18,1.0/(1+sector*0.10)), sweep:0, entering:true,
@@ -1181,7 +1181,7 @@ function startGame(){
   resetPlayer(true);
   { const b=startBuild; player.up=Object.assign(player.up,b.up); player.unlocked=Object.assign(player.unlocked,b.unlocked); player.wtype=b.wtype||'spread'; player.bombs=b.bombs; player.shieldHits=b.shieldHits; if(b.drone)player.drone={ph:0}; }
   applyUpgrades(); player.armor=player.maxArmor; player.beamE=player.beamMax;
-  if(gameMode==='hardcore'){ player.lives=0; } else if(gameMode==='arcade'){ player.lives=8; player.coins=9000; }
+  if(gameMode==='hardcore'){ player.lives=0; } else if(gameMode==='dev'){ player.lives=99; player.coins=99999; }
   envGrid=[0,255,65]; lastSec=-1; triggerBanner();
   showOverlay(null);
   requestNonce(); fetchOnline();
@@ -1228,6 +1228,7 @@ function addScore(pts,x,y,c){
 function onKill(e){ Audio_.kill(); window.combo++; window.comboT=1.4; window.mult=clamp(1+Math.floor(window.combo/5),1,16);
   shotsHit++; }
 function playerHit(){
+  if(window.__devGod)return;
   if(player.inv>0||player.dead)return;
   if(player.shieldHits>0){ player.shieldHits--; player.dmgFlash=.18; player.inv=0.4; Audio_.hit(); return; }
   player.armor--; player.inv=0.6; player.dmgFlash=.2; window.combo=0; window.comboT=0; window.mult=1; Audio_.hit();
@@ -2194,9 +2195,9 @@ function endRun(){
   document.getElementById('touch').classList.add('hidden');
   document.getElementById('bossname').style.display='none'; document.getElementById('bossbar').style.display='none';
   buildInitials(); showOverlay('ovlOver');
-  { const arc=(gameMode==='arcade');
+  { const arc=(gameMode==='dev');
     el('initials').style.display=arc?'none':'flex';
-    el('enterHint').textContent=arc?'PRACTICE RUN - NOT RANKED':'ENTER INITIALS';
+    el('enterHint').textContent=arc?'DEV RUN - NOT RANKED':'ENTER INITIALS';
     el('submitBtn').textContent=arc?'MAIN MENU':'SUBMIT';
     el('overTitle').textContent=(gameMode==='hardcore')?'HARDCORE END':'MISSION END'; }
   try{
@@ -2360,7 +2361,7 @@ el('againBtn').addEventListener('click',()=>{ startGame(); });
 function mergeScore(name,score){ const b=(onlineBoard?onlineBoard.slice():[]);
   if(!b.some(r=>r.name===name&&r.score===score)) b.push({name,score});
   b.sort((a,c)=>c.score-a.score); onlineBoard=b.slice(0,100); }
-function submitScore(){ if(gameMode==='arcade'){ toTitle(); return; } const sc=pendingScore?pendingScore.score:window.scoreT; const nm=trimName(curInitials); curInitials=nm;
+function submitScore(){ if(gameMode==='dev'){ toTitle(); return; } const sc=pendingScore?pendingScore.score:window.scoreT; const nm=trimName(curInitials); curInitials=nm;
   boardMode=(gameMode==='hardcore')?'hardcore':'normal'; onlineBoard=null; boardRetries=0;
   document.querySelectorAll('.btab').forEach(b=>b.classList.toggle('sel',b.dataset.bm===boardMode));
   saveLocal(nm, sc); try{localStorage.setItem('vanguard_lastInitials',nm);}catch(e){}
@@ -2391,7 +2392,7 @@ try{ if(localStorage.getItem('vanguard_mute')==='1'){Audio_.muted=true;const pmb
 /* mode select */
 (function(){
   let m; try{ m=localStorage.getItem('vanguard_mode')||'normal'; }catch(e){ m='normal'; }
-  if(m!=='normal'&&m!=='hardcore'&&m!=='arcade') m='normal';
+  if(m!=='normal'&&m!=='hardcore'&&m!=='dev') m='normal';
   gameMode=m;
   const wrap=document.getElementById('modeSel'); if(!wrap)return;
   const btns=[...wrap.querySelectorAll('.modebtn')];
@@ -2492,6 +2493,76 @@ function frame(now){ let dt=(now-last)/1000; last=now; if(dt>0.05)dt=0.05;
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
+
+/* ============================= dev mode ============================= */
+(function(){
+  const css=document.createElement('style'); css.textContent=
+   '#devPanel{position:absolute;top:118px;left:8px;z-index:11;width:152px;max-height:64%;overflow:auto;background:rgba(2,10,4,.92);border:1px solid rgba(0,240,255,.4);border-radius:6px;padding:6px;font-family:"Share Tech Mono",monospace;color:var(--white);pointer-events:auto;display:none}'
+   +'#devPanel h4{font-size:8px;letter-spacing:.16em;color:var(--cyan);margin:7px 0 3px;border-bottom:1px solid rgba(0,240,255,.25);padding-bottom:2px}'
+   +'#devPanel h4:first-child{margin-top:0}'
+   +'#devPanel .dgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px}'
+   +'#devPanel button{font-family:"Share Tech Mono",monospace;font-size:8px;letter-spacing:.02em;background:rgba(0,20,8,.6);border:1px solid rgba(0,255,65,.35);color:var(--white);border-radius:3px;padding:3px 2px;cursor:pointer;pointer-events:auto}'
+   +'#devPanel button:active{background:rgba(0,255,65,.2)}'
+   +'#devPanel button.on{border-color:var(--gold);color:var(--gold)}'
+   +'#devPanel .drow{display:flex;gap:4px;align-items:center;justify-content:space-between}'
+   +'#devTab{position:absolute;top:118px;left:8px;z-index:11;font:700 9px "Chakra Petch",sans-serif;background:rgba(0,240,255,.12);border:1px solid var(--cyan);color:var(--cyan);border-radius:4px;padding:3px 8px;cursor:pointer;pointer-events:auto;display:none}';
+  document.head.appendChild(css);
+  const panel=document.createElement('div'); panel.id='devPanel';
+  const tab=document.createElement('div'); tab.id='devTab'; tab.textContent='DEV ▸';
+  function mk(label,fn){ const b=document.createElement('button'); b.textContent=label;
+    b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();fn(b);}); return b; }
+  function hdr(t){ const h=document.createElement('h4'); h.textContent=t; return h; }
+  function devEnemy(fk,v){ const e=makeEnemy(fk,v, rnd(W*0.3,W*0.7), 120, 'free'); e.vy=0; enemies.push(e); }
+  function devHybrid(fk){ const e=makeEnemy(fk,0, rnd(W*0.3,W*0.7), 90, fk);
+    e.hold=rnd(120,200); e.sigCd=2; e.lockT=0; e.lockX=0; e.lockY=0; e.buffR=190; e.altMove=false; enemies.push(e); }
+  function clearField(){ enemies.length=0; ebul.length=0; pbul.length=0; boss=null; bossPending=false; bossSpoils=0;
+    document.getElementById('bossbar').style.display='none'; document.getElementById('bossname').style.display='none'; }
+  function devBoss(fk){ clearField(); spawnBoss(fk); }
+  panel.appendChild(hdr('SPAWN'));
+  const grid=document.createElement('div'); grid.className='dgrid';
+  FKEYS.forEach(fk=>{ for(let v=0;v<3;v++){ const nm=(TYPENAMES[fk]&&TYPENAMES[fk][v])||(fk+v);
+    grid.appendChild(mk(nm,()=>{ if(state==='play')devEnemy(fk,v); })); } });
+  panel.appendChild(grid);
+  panel.appendChild(hdr('HYBRIDS'));
+  const hg=document.createElement('div'); hg.className='dgrid';
+  hg.appendChild(mk('FOREMAN',()=>{ if(state==='play')devHybrid('foreman'); }));
+  hg.appendChild(mk('VECTOR',()=>{ if(state==='play')devHybrid('vector'); }));
+  panel.appendChild(hg);
+  panel.appendChild(hdr('BOSS'));
+  const bgr=document.createElement('div'); bgr.className='dgrid';
+  [['ace','RAISE'],['bmet','BLOOM'],['csee','AMP'],['mat','FRAME'],['mset','SCOPE']].forEach(p=>{
+    bgr.appendChild(mk(p[1],()=>{ if(state==='play')devBoss(p[0]); })); });
+  panel.appendChild(bgr);
+  panel.appendChild(hdr('SECTOR'));
+  const sr=document.createElement('div'); sr.className='drow';
+  const sv=document.createElement('span'); sv.style.fontSize='10px'; sv.style.color='var(--gold)'; sv.textContent='S1';
+  function setSec(d){ sector=clamp(sector+d,1,20); killsForBoss=80+sector*16; triggerBanner(); sv.textContent='S'+sector; }
+  sr.appendChild(mk('-',()=>{ if(state==='play')setSec(-1); }));
+  sr.appendChild(sv);
+  sr.appendChild(mk('+',()=>{ if(state==='play')setSec(1); }));
+  panel.appendChild(sr);
+  panel.appendChild(hdr('TOOLS'));
+  const tg=document.createElement('div'); tg.className='dgrid';
+  const godBtn=mk('GOD',()=>{ window.__devGod=!window.__devGod; godBtn.classList.toggle('on',!!window.__devGod); });
+  tg.appendChild(godBtn);
+  tg.appendChild(mk('HEAL',()=>{ if(player){player.armor=player.maxArmor;player.shieldHits=Math.max(player.shieldHits,1);player.beamE=player.beamMax;player.lives=Math.max(player.lives,3);} }));
+  tg.appendChild(mk('+5K',()=>{ if(player)player.coins+=5000; }));
+  tg.appendChild(mk('KILL BOSS',()=>{ if(boss&&!boss.dying)startBossDeath(); }));
+  tg.appendChild(mk('CLEAR',()=>{ clearField(); }));
+  tg.appendChild(mk('CLR FIRE',()=>{ ebul.length=0; }));
+  panel.appendChild(tg);
+  panel.addEventListener('pointerdown',e=>e.stopPropagation());
+  document.getElementById('stage').appendChild(panel);
+  document.getElementById('stage').appendChild(tab);
+  let shown=true;
+  tab.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();shown=true;});
+  window.addEventListener('keydown',e=>{ if((e.key==='`'||e.key==='~')&&gameMode==='dev'){ shown=!shown; } });
+  (function vis(){ const active=(state==='play'&&gameMode==='dev');
+    panel.style.display=(active&&shown)?'block':'none';
+    tab.style.display=(active&&!shown)?'block':'none';
+    if(active)sv.textContent='S'+sector;
+    requestAnimationFrame(vis); })();
+})();
 })();
 </script>
 </body>
