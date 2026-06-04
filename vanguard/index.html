@@ -1116,7 +1116,7 @@ function buildFormation(arch){
   if(arch==='pincer'){ const oys=[0,44,88,132,176];
     for(const side of [-1,1]){ for(let i=0;i<5;i++){ slots.push({ox:side*140+rnd(-8,8),oy:oys[i],sx:side<0?-40:W+40,sy:-40}); } } }
   else if(arch==='siege'){ const cols=6,rows=2,dx=72,dy=46;
-    for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){ const ox=(c-(cols-1)/2)*dx, oy=r*dy; slots.push({ox,oy,sx:W/2+ox,sy:-40-oy}); } }
+    for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){ const ox=(c-(cols-1)/2)*dx, oy=r*dy; slots.push({ox,oy,col:c,sx:W/2+ox,sy:-40-oy}); } }
   else if(arch==='swarm'){ const cols=4,rows=3,dx=58,dy=46;
     for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){ const ox=(c-(cols-1)/2)*dx+rnd(-18,18), oy=r*dy+rnd(-18,18); slots.push({ox,oy,sx:W/2+ox+rnd(-30,30),sy:-40-oy-rnd(0,60)}); } }
   else if(arch==='flank'){ const oys=[0,46,92,138,184];
@@ -1154,6 +1154,7 @@ function spawnWave(){
       spear:{holdY:H*0.26,sweep:40,phRate:0.7,descend:6,advancing:false,squeeze:false,volleyMul:1.1,diveMul:0.7,diveCount:2}
     }[arch];
     fleet=Object.assign({x:W/2,y:96,ph:0,life:11,retiring:false,arch},cfg);
+    if(arch==='siege'){ fleet.barrageT=2.2; fleet.barrageCharge=0; fleet.gapCol=(Math.random()*6)|0; fleet.cols=6; }
     buildFormation(fleet.arch); refill=new Array(slots.length).fill(0); reconfTimer=999; volleyTimer=1.6*fleet.volleyMul; diveTimer=2.2*fleet.diveMul;
     for(let i=0;i<slots.length;i++) spawnFormationOccupant(i,true);
   } else if(type==='stream'){
@@ -1503,9 +1504,25 @@ function update(dt){
     if(fleet.squeeze){ fleet.spread += (fleet.spreadTarget-fleet.spread)*Math.min(1,dt*0.4); slots.forEach(s=>{ if(s.bx!==undefined) s.ox = s.bx*fleet.spread; }); }
     volleyTimer-=dt;
     if(volleyTimer<=0){ volleyTimer=(rnd(0.6,1.1)-Math.min(sector*0.07,0.8))*fleet.volleyMul;
-      let maxoy=0; slots.forEach(s=>{if(s.oy>maxoy)maxoy=s.oy;});
-      enemies.forEach(e=>{ if(!e.dead&&e.state==='form'){ const s=slots[e.slot];
-        if(s&&Math.abs(s.oy-maxoy)<2){ for(let q=-2;q<=2;q++) enemyShot(e,q*0.16,1); } } });
+      if(fleet.arch!=='siege'){
+        let maxoy=0; slots.forEach(s=>{if(s.oy>maxoy)maxoy=s.oy;});
+        enemies.forEach(e=>{ if(!e.dead&&e.state==='form'){ const s=slots[e.slot];
+          if(s&&Math.abs(s.oy-maxoy)<2){ for(let q=-2;q<=2;q++) enemyShot(e,q*0.16,1); } } });
+      }
+    }
+    if(fleet.arch==='siege'){
+      if(fleet.barrageCharge>0){ fleet.barrageCharge-=dt;
+        enemies.forEach(e=>{ if(!e.dead&&e.state==='form') e.barrageGlow=0.9; });
+        if(fleet.barrageCharge<=0){
+          fleet.gapCol=(fleet.gapCol+2)%fleet.cols; const lane1=fleet.gapCol, lane2=(fleet.gapCol+1)%fleet.cols;
+          for(let c=0;c<fleet.cols;c++){ if(c===lane1||c===lane2) continue;
+            let bottom=null,bo=-1; enemies.forEach(e=>{ if(e.dead||e.state!=='form')return; const s=slots[e.slot]; if(!s||s.col!==c)return; if(s.oy>bo){bo=s.oy;bottom=e;} });
+            if(bottom){ const e=bottom, ang=clamp((player.x-e.x)/320,-0.3,0.3), sp=200+sector*8;
+              ebul.push({x:e.x,y:e.y+e.r*0.6,vx:Math.sin(ang)*sp,vy:Math.cos(ang)*sp,c:e.c,r:3.2,owner:e}); e.fireFlash=0.12;
+              if(sector>=3){ const sp2=sp*0.85; ebul.push({x:e.x,y:e.y+e.r*0.6,vx:Math.sin(ang)*sp2,vy:Math.cos(ang)*sp2,c:e.c,r:3.2,owner:e}); } } }
+          Audio_.blast(); fleet.barrageT=Math.max(1.3,2.7-sector*0.08);
+        }
+      } else { enemies.forEach(e=>{ if(e.state==='form') e.barrageGlow=0; }); fleet.barrageT-=dt; if(fleet.barrageT<=0){ fleet.barrageCharge=0.55; Audio_.whine(); } }
     }
     diveTimer-=dt;
     if(diveTimer<=0){ diveTimer=(rnd(0.7,1.4)-Math.min(sector*0.07,0.9))*fleet.diveMul;
@@ -1519,7 +1536,7 @@ function update(dt){
   enemies.forEach(e=>{
     if(e.dead){ e.dt-=dt; return; }
     e.t+=dt; e.core+=dt*(1.1+e.spin); e.bob+=dt*1.7; if(e.flash>0)e.flash-=dt;
-    e.aimAng=Math.atan2(player.y-e.y,player.x-e.x); e.tell=e.fire<0.45?clamp(1-e.fire/0.45,0,1):0; if(e.fireFlash>0)e.fireFlash-=dt; if(e.buffed>0)e.buffed=Math.max(0,e.buffed-dt);
+    e.aimAng=Math.atan2(player.y-e.y,player.x-e.x); e.tell=Math.max(e.barrageGlow||0, e.fire<0.45?clamp(1-e.fire/0.45,0,1):0); if(e.fireFlash>0)e.fireFlash-=dt; if(e.buffed>0)e.buffed=Math.max(0,e.buffed-dt);
     if(e.hp<e.maxhp && Math.random()<0.04) parts.push({x:e.x+rnd(-e.r/2,e.r/2),y:e.y,vx:rnd(-10,10),vy:rnd(-40,-18),life:.4,max:.4,c:e.c,sz:1.2});
     if(e.state==='form'){
       const s=slots[e.slot], hx=fleet?fleet.x+(s?s.ox:0):e.x, hy=fleet?fleet.y+(s?s.oy:0):e.y;
