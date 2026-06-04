@@ -834,9 +834,65 @@ function drawBossRaising(ctx,e){
   ctx.restore();
 }
 // boss render dispatch: bespoke art per faction, unported bosses fall through to scaled variant-2
+// THE BLOOM -- BMET sector boss : toxic algal bloom, central core is the weak point
+function drawBossBloom(ctx,e){
+  const r=e.r, col=ctx.strokeStyle, lw=ctx.lineWidth;
+  const ph=e.core, tell=e.tell||0, fl=e.fireFlash||0;
+  const gc = fl>0 ? COL.white : col;
+  const breathe = 1 + 0.03*Math.sin(ph*1.6);
+  ctx.save(); ctx.translate(0, Math.sin(ph*1.4)*r*0.035);
+  /* tail tendril + drifting bubbles */
+  ctx.beginPath(); ctx.moveTo(-0.07*r,-0.55*r); ctx.bezierCurveTo(-0.13*r,-0.78*r,0.06*r,-0.86*r,-0.03*r,-1.04*r); ctx.stroke();
+  ctx.save(); ctx.globalAlpha=0.7; ctx.lineWidth=lw*0.8;
+  ctx.beginPath(); ctx.moveTo(0.07*r,-0.55*r); ctx.bezierCurveTo(0.13*r,-0.78*r,-0.05*r,-0.84*r,0.05*r,-1.0*r); ctx.stroke(); ctx.restore(); ctx.lineWidth=lw;
+  for(let i=0;i<5;i++){ const drift=(ph*0.5+i*0.37)%1; const by=-0.85*r-drift*0.55*r; const bx=Math.sin(ph*1.3+i*1.7)*0.06*r+(i-2)*0.02*r;
+    ctx.save(); ctx.globalAlpha=0.5*(1-drift); ctx.beginPath(); ctx.arc(bx,by,(0.03-i*0.003)*r,0,6.2832); ctx.fillStyle=col; ctx.fill(); ctx.restore(); }
+  /* organic mass + side lobes */
+  ctx.save(); ctx.scale(breathe,breathe);
+  ctx.beginPath(); ctx.moveTo(0,-0.689*r);
+  ctx.bezierCurveTo(-0.296*r,-0.689*r,-0.400*r,-0.481*r,-0.444*r,-0.296*r);
+  ctx.bezierCurveTo(-0.667*r,-0.348*r,-0.933*r,-0.274*r,-1.067*r,-0.074*r);
+  ctx.bezierCurveTo(-1.215*r,0.141*r,-1.126*r,0.393*r,-0.874*r,0.452*r);
+  ctx.bezierCurveTo(-0.770*r,0.630*r,-0.519*r,0.719*r,-0.296*r,0.630*r);
+  ctx.bezierCurveTo(-0.163*r,0.793*r,0.163*r,0.793*r,0.296*r,0.630*r);
+  ctx.bezierCurveTo(0.519*r,0.719*r,0.770*r,0.630*r,0.874*r,0.452*r);
+  ctx.bezierCurveTo(1.126*r,0.393*r,1.215*r,0.141*r,1.067*r,-0.074*r);
+  ctx.bezierCurveTo(0.933*r,-0.274*r,0.667*r,-0.348*r,0.444*r,-0.296*r);
+  ctx.bezierCurveTo(0.400*r,-0.481*r,0.296*r,-0.689*r,0,-0.689*r);
+  ctx.closePath(); ctx.fillStyle=col+'1E'; ctx.fill(); ctx.stroke();
+  ctx.lineWidth=lw*0.5; ctx.globalAlpha=0.45;
+  ctx.beginPath(); ctx.moveTo(-0.44*r,-0.30*r); ctx.quadraticCurveTo(-0.07*r,-0.04*r,-0.30*r,0.35*r); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0.44*r,-0.30*r); ctx.quadraticCurveTo(0.07*r,-0.04*r,0.30*r,0.35*r); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-0.87*r,0.45*r); ctx.quadraticCurveTo(-0.15*r,0.27*r,-0.30*r,0.63*r); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0.87*r,0.45*r); ctx.quadraticCurveTo(0.15*r,0.27*r,0.30*r,0.63*r); ctx.stroke();
+  ctx.globalAlpha=1; ctx.lineWidth=lw; ctx.restore();
+  /* lower fringe filaments */
+  ctx.lineWidth=lw*0.9; ctx.lineCap='round';
+  [[-0.30,0.63,-0.40,1.0],[-0.12,0.72,-0.16,1.08],[0,0.74,0,1.12],[0.12,0.72,0.16,1.08],[0.30,0.63,0.40,1.0]].forEach((f,i)=>{
+    const sw=Math.sin(ph*1.5+i*0.9)*0.05*r;
+    ctx.beginPath(); ctx.moveTo(f[0]*r,f[1]*r); ctx.quadraticCurveTo(f[0]*r+sw,(f[1]+f[3])*0.5*r,f[2]*r+sw,f[3]*r); ctx.stroke(); });
+  ctx.lineCap='butt'; ctx.lineWidth=lw;
+  /* bioluminescent hotspots */
+  [[-0.58,-0.04,0.052,1],[-0.30,-0.26,0.037,0],[0.33,-0.24,0.044,1],[0.58,-0.02,0.052,1],[-0.33,0.35,0.037,0],[0.24,0.38,0.044,1],[-0.02,-0.48,0.030,0],[-0.84,0.13,0.030,0],[0.86,0.11,0.030,0]].forEach((s,i)=>{
+    const tw=0.55+0.45*Math.sin(ph*2.2+i*1.3);
+    ctx.save(); ctx.shadowBlur=8*tw; ctx.shadowColor=col;
+    ctx.beginPath(); ctx.arc(s[0]*r,s[1]*r,s[2]*r,0,6.2832); ctx.fillStyle=col+'55'; ctx.fill();
+    if(s[3]){ dot(ctx,s[0]*r,s[1]*r,s[2]*r*0.42,COL.white); }
+    ctx.restore(); });
+  /* command core (weak point) */
+  const pulse=Math.max(0.5+0.5*Math.sin(ph*2.2),tell);
+  ctx.beginPath(); ctx.arc(0,0,0.22*r,0,6.2832); ctx.fillStyle=col+'12'; ctx.fill();
+  ctx.beginPath(); ctx.arc(0,0,0.16*r,0,6.2832); ctx.stroke();
+  ctx.beginPath(); ctx.arc(0,0,0.10*r,0,6.2832); ctx.fillStyle=col+'22'; ctx.fill(); ctx.stroke();
+  ctx.save(); ctx.shadowBlur=(12+fl*30)*pulse; ctx.shadowColor=gc;
+  ctx.beginPath(); ctx.ellipse(0,0,0.066*r,0.082*r,0,0,6.2832); ctx.fillStyle=gc; ctx.fill(); ctx.restore();
+  dot(ctx,-0.05*r,-0.03*r,0.016*r,col); dot(ctx,0.045*r,0.03*r,0.013*r,col);
+  ctx.restore();
+}
 function drawBoss(ctx,e){
   switch(e.fk){
     case 'ace': drawBossRaising(ctx,e); break;
+    case 'bmet': drawBossBloom(ctx,e); break;
     default: { const F=FACTIONS[e.fk]; (F&&F.draw?F.draw:drawACE)(ctx,e); }
   }
 }
