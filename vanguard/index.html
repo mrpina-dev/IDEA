@@ -993,12 +993,53 @@ function drawBossFrame(ctx,e){
   dot(ctx,lx,ly,openR*0.55,COL.white); ctx.restore();
   ctx.restore();
 }
+// THE SCOPE -- MSET sector boss : scanning electron microscope, sample chamber is the core
+function drawBossScope(ctx,e){
+  const r=e.r, col=ctx.strokeStyle, lw=ctx.lineWidth;
+  const ph=e.core, tell=e.tell||0, fl=e.fireFlash||0;
+  const gc = fl>0 ? COL.white : col;
+  ctx.save(); ctx.translate(0, Math.sin(ph*1.4)*r*0.025);
+  /* electron gun (tail) */
+  ctx.beginPath(); ctx.moveTo(-0.12*r,-0.82*r); ctx.quadraticCurveTo(0,-1.02*r,0.12*r,-0.82*r); ctx.closePath();
+  ctx.fillStyle=col+'1E'; ctx.fill(); ctx.stroke();
+  const fil=0.5+0.5*Math.sin(ph*4);
+  ctx.save(); ctx.shadowBlur=(6+fl*16)*fil; ctx.shadowColor=gc; dot(ctx,0,-0.86*r,0.035*r,gc); ctx.restore();
+  /* column */
+  ctx.beginPath(); ctx.rect(-0.20*r,-0.82*r,0.40*r,1.0*r); ctx.fillStyle=col+'1E'; ctx.fill(); ctx.stroke();
+  /* lens stages */
+  [[-0.5,0.34],[-0.18,0.30],[0.12,0.26]].forEach(s=>{ const y=s[0]*r, w=s[1]*r;
+    ctx.beginPath(); ctx.rect(-w,y-0.05*r,w*2,0.10*r); ctx.fillStyle=col+'2A'; ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.arc(0,y,0.06*r,0,6.2832); ctx.stroke(); });
+  /* sample chamber (nose) */
+  const chTop=0.22*r, chBot=0.86*r;
+  ctx.beginPath(); ctx.rect(-0.50*r,chTop,1.0*r,chBot-chTop); ctx.fillStyle=col+'18'; ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-0.10*r,chTop); ctx.lineTo(-0.05*r,0.42*r); ctx.lineTo(0.05*r,0.42*r); ctx.lineTo(0.10*r,chTop); ctx.closePath(); ctx.fillStyle=col+'22'; ctx.fill(); ctx.stroke();
+  for(const s of [-1,1]){ const x=s*0.50*r, y=0.42*r;
+    ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+s*0.16*r,y+0.10*r); ctx.stroke();
+    ctx.save(); ctx.shadowBlur=fl*16; ctx.shadowColor=gc; ctx.strokeStyle=gc;
+    ctx.beginPath(); ctx.moveTo(s*0.30*r,0.60*r); ctx.lineTo(s*0.30*r,0.78*r); ctx.stroke(); ctx.restore(); ctx.strokeStyle=col; }
+  /* sample focal point / command core */
+  const fy=0.56*r;
+  const pulse=Math.max(0.5+0.5*Math.sin(ph*2.4),tell);
+  ctx.beginPath(); ctx.arc(0,fy,0.16*r,0,6.2832); ctx.fillStyle=col+'14'; ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.arc(0,fy,0.09*r,0,6.2832); ctx.stroke();
+  ctx.save(); ctx.shadowBlur=(12+fl*30)*pulse; ctx.shadowColor=gc;
+  ctx.beginPath(); ctx.ellipse(0,fy,0.055*r,0.07*r,0,0,6.2832); ctx.fillStyle=gc; ctx.fill(); ctx.restore();
+  /* electron beam (weapon, fires down) */
+  const beam=Math.max(tell,fl,0.18);
+  ctx.save(); ctx.globalAlpha=0.4+0.6*beam; ctx.strokeStyle=gc; ctx.shadowColor=gc; ctx.shadowBlur=8+fl*20; ctx.lineWidth=lw*(0.6+beam*0.8);
+  ctx.beginPath(); ctx.moveTo(0,-0.82*r); ctx.lineTo(0,fy); ctx.stroke();
+  if(tell>0||fl>0){ ctx.beginPath(); ctx.moveTo(0,fy); ctx.lineTo(0,1.0*r+fl*0.4*r); ctx.stroke(); }
+  ctx.restore(); ctx.lineWidth=lw; ctx.strokeStyle=col;
+  ctx.restore();
+}
 function drawBoss(ctx,e){
   switch(e.fk){
     case 'ace': drawBossRaising(ctx,e); break;
     case 'bmet': drawBossBloom(ctx,e); break;
     case 'csee': drawBossAmplifier(ctx,e); break;
     case 'mat': drawBossFrame(ctx,e); break;
+    case 'mset': drawBossScope(ctx,e); break;
     default: { const F=FACTIONS[e.fk]; (F&&F.draw?F.draw:drawACE)(ctx,e); }
   }
 }
