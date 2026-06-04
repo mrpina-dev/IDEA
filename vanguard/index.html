@@ -369,14 +369,19 @@ const Audio_={ctx:null,muted:false,master:null,music_:null,
     else if(wt==='rapid'){ this.tone(1040+r,0.035,'square',v*0.8); }
     else if(wt==='homing'){ this.tone(520+r,0.06,'triangle',v,{glide:760}); }
     else { this.tone(660+r,0.05,'square',v); } },
-  hit(){ this.tone(200+rnd(-20,20),0.05,'sawtooth',0.028); },
+  hit(){ this.tone(240+rnd(-20,20),0.06,'square',0.03,{glide:120}); this.noise(0.04,0.05,{lp:3500}); },
   kill(){ this.noise(0.18,0.10,{lp:3200}); this.tone(150+rnd(-30,30),0.2,'sawtooth',0.04,{glide:70}); },
-  big(){ this.noise(0.5,0.2,{lp:1800}); this.tone(90,0.45,'sawtooth',0.07,{glide:40}); this.tone(60,0.5,'sine',0.06,{glide:32}); },
+  big(){ this.noise(0.45,0.28,{lp:2200}); this.noise(0.12,0.18,{lp:6000}); this.tone(120,0.5,'sawtooth',0.09,{glide:38}); this.tone(70,0.6,'sine',0.09,{glide:28}); this.tone(45,0.7,'sine',0.07,{glide:22}); },
   pickup(){ this.tone(720,0.07,'square',0.045); this.tone(1080,0.09,'square',0.04,{delay:0.05}); this.tone(1440,0.10,'square',0.035,{delay:0.10}); },
   power(){ [523,659,880].forEach((f,i)=>this.tone(f,0.16,'triangle',0.05,{delay:i*0.07})); },
   parry(){ this.tone(880,0.06,'square',0.05,{glide:1320}); this.tone(1760,0.06,'triangle',0.04,{delay:0.02}); },
   beam(){ this.tone(150,0.4,'sawtooth',0.05,{glide:240}); },
   bomb(){ this.noise(0.6,0.22,{lp:1200}); this.tone(70,0.6,'sine',0.08,{glide:30}); },
+  thump(f){ f=f||120; this.tone(f,0.16,'sine',0.06,{glide:f*0.4}); this.noise(0.05,0.05,{lp:1400}); },
+  whine(d){ d=d||0.7; this.tone(300,d,'sawtooth',0.04,{glide:1400}); this.tone(450,d,'square',0.025,{glide:2100}); },
+  blast(){ this.noise(0.18,0.14,{lp:2600}); this.tone(330,0.18,'sawtooth',0.05,{glide:120}); this.tone(660,0.1,'square',0.03,{glide:220}); },
+  wub(){ this.tone(160,0.4,'sawtooth',0.08,{glide:45}); this.tone(80,0.5,'sine',0.08,{glide:34}); this.noise(0.3,0.12,{lp:900}); },
+  phase(){ this.tone(160,0.45,'sawtooth',0.06,{glide:1100}); this.noise(0.35,0.16,{lp:3200}); this.tone(70,0.6,'sine',0.1,{glide:26,delay:0.18}); this.noise(0.18,0.18,{lp:6000,delay:0.18}); },
   death(){ this.noise(0.9,0.22,{lp:1400}); this.tone(220,0.9,'sawtooth',0.07,{glide:32}); this.tone(110,1.0,'sine',0.06,{glide:24}); },
   bossWarn(){ [0,0.18,0.36].forEach(d=>this.tone(160,0.16,'square',0.05,{delay:d,glide:120})); },
   sector(){ this.tone(330,0.18,'triangle',0.04); this.tone(495,0.2,'triangle',0.04,{delay:0.1}); },
@@ -901,8 +906,8 @@ function drawBossAmplifier(ctx,e){
   /* vacuum tube bank (tail) */
   [-0.39,-0.13,0.13,0.39].forEach((tx,i)=>{ const x=tx*r, top=-0.92*r, h=0.30*r, w=0.10*r;
     ctx.beginPath(); ctx.moveTo(x-w,top+w); ctx.quadraticCurveTo(x-w,top,x,top); ctx.quadraticCurveTo(x+w,top,x+w,top+w);
-    ctx.lineTo(x+w,top+h); ctx.lineTo(x-w,top+h); ctx.closePath(); ctx.fillStyle=col+'18'; ctx.fill(); ctx.stroke();
-    const glow=Math.min(1, 0.5+0.5*Math.sin(ph*3.4+i*1.4)+phase*0.18);
+    ctx.lineTo(x+w,top+h); ctx.lineTo(x-w,top+h); ctx.closePath(); ctx.fillStyle=col+(phase>=1?'3A':'18'); ctx.fill(); ctx.stroke();
+    const glow=Math.min(1, 0.5+0.5*Math.sin(ph*3.4+i*1.4)+phase*0.4);
     ctx.save(); ctx.shadowBlur=(6+fl*18)*glow; ctx.shadowColor=gc; ctx.strokeStyle=gc;
     ctx.beginPath(); ctx.moveTo(x,top+0.05*r); ctx.lineTo(x,top+h-0.04*r); ctx.stroke();
     dot(ctx,x,top+h*0.5,0.025*r,gc); ctx.restore(); ctx.strokeStyle=col;
@@ -910,7 +915,7 @@ function drawBossAmplifier(ctx,e){
   /* chassis (amp head) */
   const cx0=0.62*r, cTop=-0.55*r, cBot=0.18*r;
   ctx.beginPath(); ctx.moveTo(-cx0,cTop); ctx.lineTo(cx0,cTop); ctx.lineTo(cx0,cBot); ctx.lineTo(-cx0,cBot); ctx.closePath();
-  ctx.fillStyle=col+'1E'; ctx.fill(); ctx.stroke();
+  ctx.fillStyle=col+(phase>=2?'40':phase>=1?'30':'1E'); ctx.fill(); ctx.stroke();
   /* transformer block + laminations */
   ctx.beginPath(); ctx.rect(-0.16*r,cTop-0.04*r,0.32*r,0.30*r); ctx.fillStyle=col+'2A'; ctx.fill(); ctx.stroke();
   ctx.lineWidth=lw*0.5;
@@ -940,6 +945,10 @@ function drawBossAmplifier(ctx,e){
   ctx.beginPath(); ctx.arc(sx,sy,R*0.30,0,6.2832); ctx.fillStyle=col+'1E'; ctx.fill(); ctx.stroke();
   if(tell>0||fl>0){ ctx.save(); ctx.globalAlpha=Math.max(tell,fl); ctx.strokeStyle=gc; ctx.shadowColor=gc; ctx.shadowBlur=10;
     for(let k=1;k<=2;k++){ ctx.beginPath(); ctx.arc(sx,sy,R+k*0.16*r,Math.PI*0.15,Math.PI*0.85); ctx.stroke(); } ctx.restore(); ctx.strokeStyle=col; }
+  if(phase>=2){ ctx.save(); ctx.strokeStyle=COL.white; ctx.shadowColor=col; ctx.shadowBlur=8; ctx.lineWidth=lw*0.7;
+    for(let i=0;i<5;i++){ const a=i/5*6.2832+0.3; ctx.beginPath(); ctx.moveTo(sx,sy);
+      ctx.lineTo(sx+Math.cos(a)*R*0.55,sy+Math.sin(a)*R*0.55); ctx.lineTo(sx+Math.cos(a+0.22)*R*0.95,sy+Math.sin(a+0.22)*R*0.95); ctx.stroke(); }
+    ctx.restore(); }
   ctx.save(); ctx.shadowBlur=(12+fl*30)*pulse; ctx.shadowColor=gc;
   ctx.beginPath(); ctx.ellipse(sx,sy,R*0.20,R*0.24,0,0,6.2832); ctx.fillStyle=gc; ctx.fill(); ctx.restore();
   ctx.restore();
@@ -1683,10 +1692,10 @@ function updateBoss(dt){
 
   const phase = b.hp<b.maxhp*0.38?2 : b.hp<b.maxhp*0.72?1:0; b.phase=phase;
   const sf=(1+Math.max(0,(3-sector))*0.28)/(1+sector*0.10); // sector aggression scaling factor (eased early)
-  if(phase!==b.lastPhase){ b.lastPhase=phase; b.flash=.3; shake=Math.max(shake,10); b.tT=0.8; bossFlash=Math.max(bossFlash,0.25);
-    rings.push({x:b.x,y:b.y,r:b.r,vr:300,life:.6,max:.6,c:b.c}); rings.push({x:b.x,y:b.y,r:b.r*0.4,vr:180,life:.5,max:.5,c:COL.white});
-    for(let i=0;i<26;i++){const a=rnd(0,6.28),sp=rnd(80,300);parts.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:.6,max:.6,c:b.c,sz:2.2});}
-    if(b.fk==='ace') Audio_.big(); }
+  if(phase!==b.lastPhase){ b.lastPhase=phase; b.flash=.5; shake=Math.max(shake,16); b.tT=1.0; bossFlash=Math.max(bossFlash,0.5);
+    rings.push({x:b.x,y:b.y,r:b.r,vr:340,life:.7,max:.7,c:b.c}); rings.push({x:b.x,y:b.y,r:b.r*0.5,vr:220,life:.6,max:.6,c:COL.white}); rings.push({x:b.x,y:b.y,r:b.r*0.2,vr:120,life:.5,max:.5,c:b.c});
+    for(let i=0;i<40;i++){const a=rnd(0,6.28),sp=rnd(80,360);parts.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:.7,max:.7,c:Math.random()<0.4?COL.white:b.c,sz:rnd(1.6,2.8)});}
+    Audio_.phase(); }
   if(b.tT>0){ b.tT-=dt; b.x+=(b.gx-b.x)*Math.min(1,dt*1.5); b.y+=(b.gy-b.y)*Math.min(1,dt*1.5);
     document.querySelector('#bossbar i').style.transform='scaleX('+bossHpFrac()+')'; return; }
   const pdx=player.x-b.x, pdy=player.y-b.y; b.sweep+=dt;
@@ -1719,13 +1728,8 @@ function updateBoss(dt){
       for(let i=0;i<nn;i++){const e=makeEnemy('bmet',0,b.x+rnd(-80,80),b.y+24,'dive');e.vy=85;e.vx=rnd(-50,50);e.hp=2;e.maxhp=2;e.fire=0.4;enemies.push(e);}
       b.hp=Math.min(b.maxhp,b.hp+b.maxhp*0.05); Audio_.pickup(); shake=Math.max(shake,6);
     } else if(b.fk==='csee'){ // THE AMPLIFIER: DROP THE BASS
-      const ry=b.y+0.60*b.r;
-      rings.push({x:b.x,y:ry,r:b.r*0.5,vr:440,life:.7,max:.7,c:b.c,harm:true});
-      rings.push({x:b.x,y:ry,r:b.r*0.5,vr:270,life:.65,max:.65,c:COL.white,harm:true});
-      rings.push({x:b.x,y:ry,r:b.r*0.5,vr:160,life:.6,max:.6,c:b.c,harm:true});
-      const n=Math.min(18,12+Math.floor(sector/3));
-      for(let i=0;i<n;i++){const a=i/n*6.2832; ebul.push({x:b.x,y:b.y,vx:Math.cos(a)*310,vy:Math.sin(a)*310,c:b.c,r:4});}
-      b.fireFlash=0.2; Audio_.big(); shake=Math.max(shake,12); bossFlash=Math.max(bossFlash,0.35);
+      ampShockwave(2); b.beatT=0.4;
+      b.fireFlash=0.22; Audio_.wub(); Audio_.big(); shake=Math.max(shake,14); bossFlash=Math.max(bossFlash,0.45);
     } else if(b.fk==='mat'){ // wide sweep volley
       const sp=330; for(let i=0;i<9;i++){const a=-Math.PI/2+(i/8)*Math.PI;ebul.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:b.c,r:4});}
       rings.push({x:b.x,y:b.y,r:b.r*0.5,vr:240,life:.7,max:.7,c:b.c}); Audio_.beam();
@@ -1768,21 +1772,19 @@ function updateBoss(dt){
       b.sigCd=Math.max(0.4,(rnd(2.8,4.0)-phase*0.6)*sf); }
   } else if(b.fk==='csee'){
     if(b.fireFlash>0) b.fireFlash=Math.max(0,(b.fireFlash||0)-dt);
-    b.tell = b.blinkCd<=0.6 ? clamp(1-b.blinkCd/0.6,0,1) : 0;
-    b.blinkCd-=dt;
-    if(b.lockT>0){ b.lockT-=dt; if(b.lockT<=0){
-      const dx=player.x-b.x, dy=player.y-b.y, m=Math.hypot(dx,dy)||1, sp=520+sector*12;
-      for(let k=-2;k<=2;k++){const a=Math.atan2(dy,dx)+k*0.06; ebul.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:b.c,r:2.8});}
-      b.fireFlash=0.14; Audio_.beam(); } }
-    if(b.blinkCd<=0){
-      const nRings=1+phase, ry=b.y+0.60*b.r;
-      for(let k=0;k<nRings;k++) rings.push({x:b.x,y:ry,r:b.r*(0.5+k*0.3),vr:280+phase*40,life:0.8+k*0.1,max:0.8+k*0.1,c:b.c,harm:true});
-      if(phase>=1){ const gap=Math.atan2(player.y-b.y,player.x-b.x), n=Math.min(14,8+sector);
-        for(let i=0;i<n;i++){const a=i/n*6.2832; if(Math.abs(((a-gap+Math.PI)%(Math.PI*2))-Math.PI)<0.65)continue;
-          ebul.push({x:b.x,y:ry,vx:Math.cos(a)*(180+sector*6),vy:Math.sin(a)*(180+sector*6),c:b.c,r:3});} }
-      b.fireFlash=0.12; Audio_.hit(); shake=Math.max(shake,4+phase*2);
-      b.blinkCd=Math.max(0.8,(rnd(2.6,3.6)-phase*0.5)*sf); }
-    if(b.sigCd<=0){ b.lockT=0.55; b.sigCd=Math.max(0.3,(rnd(2.0,3.0)-phase*0.4)*sf); }
+    if(b.lockT>0){ b.lockT-=dt; b.tell=clamp(1-b.lockT/0.8,0,1);
+      if(b.lockT<=0){ b.tell=0; b.fireFlash=0.18; Audio_.blast();
+        const ang=Math.atan2(b.lockY-(b.y+0.55*b.r),b.lockX-b.x), sp=300+sector*10, spread=0.55+phase*0.12, n=9+phase*2;
+        for(let i=0;i<n;i++){ const a=ang-spread+(i/(n-1))*spread*2; ebul.push({x:b.x,y:b.y+0.55*b.r,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:b.c,r:3.4}); }
+        shake=Math.max(shake,7); } }
+    if(b.beatN==null){ b.beatN=0; b.beatT=0.6; b.gapCol=2; }
+    b.beatT-=dt;
+    if(b.beatT<=0){ const beatLen=[0.85,0.68,0.52][phase]; b.beatT=beatLen; b.beatN++; Audio_.thump(112); b.fireFlash=Math.max(b.fireFlash,0.06);
+      const n=b.beatN;
+      if(phase>=1 && n%4===0){ ampShockwave(phase); }
+      else if(n%3===0 && b.lockT<=0){ b.lockX=player.x; b.lockY=player.y; b.lockT=0.80-phase*0.12; Audio_.whine(b.lockT); }
+      else { ampWaveWall(phase,b.gapCol); b.gapCol=(b.gapCol+(Math.random()<0.5?1:5))%6; }
+    }
   } else if(b.fk==='mat'){
     if(b.sweepState===1){ b.sweepT-=dt; if(b.sweepT<=0){ b.sweepState=2; b.sweepT=1.3; b.sweepAng=0.45; } }
     else if(b.sweepState===2){ b.sweepT-=dt; b.sweepAng+=dt*1.6;
@@ -1799,7 +1801,7 @@ function updateBoss(dt){
 
   /* adaptive base attack: react to where the player is */
   b.fire-=dt;
-  if(b.fire<=0 && b.ramState!==2 && b.sweepState!==2 && !(b.fk==='bmet'&&b.spiralN>0)){ const dx=pdx, dy=pdy;
+  if(b.fire<=0 && b.ramState!==2 && b.sweepState!==2 && !(b.fk==='bmet'&&b.spiralN>0) && b.fk!=='csee'){ const dx=pdx, dy=pdy;
     const ext=Math.min(2,Math.floor(sector/3));
     if(Math.abs(dx)<70){ b.fire=Math.max(0.18,(0.7-phase*0.1)*sf); for(let i=-(2+ext);i<=(2+ext);i++) ebul.push({x:b.x+i*14,y:b.y+b.r*0.4,vx:i*30,vy:250+sector*8,c:b.c,r:3}); }
     else { b.fire=Math.max(0.18,(0.62-phase*0.1)*sf); const sp=250+sector*10, spread=Math.min(4,(phase>=1?2:1)+ext);
@@ -1823,6 +1825,16 @@ function aceCrush(){ const w=Math.min(22,15+Math.floor(sector/2));
     for(let i=0;i<=w;i++){ const x=20+i*((W-40)/w); if(Math.abs(x-gap)<48)continue;
       ebul.push({x,y:oy-30,vx:0,vy:230+sector*9,c:wi?COL.white:COL.ace,r:5}); } });
   Audio_.big(); shake=Math.max(shake,14); bossFlash=Math.max(bossFlash,0.3); }
+function ampWaveWall(phase,gapCol){ const cols=6;
+  for(let c=0;c<cols;c++){ if(Math.abs(c-gapCol)<1.4) continue;
+    const x=30+c*((W-60)/(cols-1)), y0=-20-Math.abs(Math.sin(c*0.9))*70, sp=200+sector*8+phase*30;
+    ebul.push({x,y:y0,vx:0,vy:sp,c:COL.csee,r:3.4});
+    if(phase>=1) ebul.push({x,y:y0-46,vx:0,vy:sp,c:COL.csee,r:3.4}); } }
+function ampShockwave(phase){ const b=boss; if(!b) return; const cx=b.x, cy=b.y+0.55*b.r, gap=Math.atan2(player.y-cy,player.x-cx), n=24+phase*6, sp=180+sector*7;
+  for(let i=0;i<n;i++){ const a=i/n*6.2832; if(Math.abs(((a-gap+Math.PI)%(Math.PI*2))-Math.PI)<0.55) continue;
+    ebul.push({x:cx,y:cy,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:COL.csee,r:3.6}); }
+  rings.push({x:cx,y:cy,r:b.r*0.4,vr:sp,life:.6,max:.6,c:COL.csee});
+  Audio_.wub(); shake=Math.max(shake,9); bossFlash=Math.max(bossFlash,0.18); }
 function damageBoss(dmg){ const b=boss; if(!b||b.dying||b.entering||b.tT>0) return; b.flash=.08;
   if(b.fk==='bmet') b.regenT=1.6;
   if(b.plates>0){ b.plateHp-=dmg;
