@@ -1157,6 +1157,7 @@ function spawnWave(){
     }[arch];
     fleet=Object.assign({x:W/2,y:96,ph:0,life:11,retiring:false,arch},cfg);
     if(arch==='siege'){ fleet.barrageT=2.2; fleet.barrageCharge=0; fleet.gapCol=(Math.random()*6)|0; fleet.cols=6; }
+    else { fleet.spPhase='idle'; fleet.spT=3.0; fleet.spLast=''; fleet.spMove=''; fleet.spCharge=0; fleet.spFireT=0; fleet.spSweepX=0; fleet.spGapX=0; fleet.spLX=0; fleet.spLY=0; }
     buildFormation(fleet.arch);
     fleet.panic=0;
     let anchorIdx=-1;
@@ -1518,9 +1519,48 @@ function update(dt){
     if(fleet.life!==undefined){ fleet.life-=dt; if(fleet.life<=0 && !fleet.retiring){ fleet.retiring=true; fleet.descend=120; } }
     if(!fleet.retiring){ if(fleet.advancing){ if(fleet.y>fleet.holdY){ fleet.retiring=true; fleet.descend=130; } } else if(fleet.y>fleet.holdY){ fleet.descend=0; } }
     if(fleet.squeeze){ fleet.spread += (fleet.spreadTarget-fleet.spread)*Math.min(1,dt*0.4); slots.forEach(s=>{ if(s.bx!==undefined) s.ox = s.bx*fleet.spread; }); }
+    /* coordinated set-piece controller (non-siege) */
+    if(fleet.arch!=='siege' && !panicking){
+      if(fleet.spPhase==='idle'){ enemies.forEach(e=>{ if(e.state==='form') e.barrageGlow=0; });
+        fleet.spT-=dt;
+        if(fleet.spT<=0){ const sig={pincer:'converge',swarm:'rolling',spear:'curtain',flank:'converge'}[fleet.arch];
+          const opts=['rolling','converge','curtain'].filter(m=>m!==fleet.spLast);
+          let move; if(sig && opts.includes(sig) && Math.random()<0.6) move=sig; else move=opts[(Math.random()*opts.length)|0];
+          fleet.spMove=move; fleet.spLast=move; fleet.spPhase='charge'; fleet.spCharge=0.6; fleet.spDidFire=false;
+          enemies.forEach(e=>{ if(e.state==='form') e.spFired=false; });
+          if(move==='converge'){ fleet.spLX=player.x; fleet.spLY=player.y; }
+          if(move==='curtain'){ fleet.spGapX=rnd(120,W-120); }
+          Audio_.whine(); }
+      } else if(fleet.spPhase==='charge'){ fleet.spCharge-=dt;
+        enemies.forEach(e=>{ if(!e.dead&&e.state==='form') e.barrageGlow=0.9; });
+        if(fleet.spCharge<=0){ fleet.spPhase='fire'; fleet.spFireT=(fleet.spMove==='rolling'?0.6:0.12); fleet.spDidFire=false; if(fleet.spMove==='rolling') fleet.spSweepX=-20; Audio_.blast(); }
+      } else { enemies.forEach(e=>{ if(e.state==='form') e.barrageGlow=0; }); fleet.spFireT-=dt;
+        const forms=enemies.filter(e=>!e.dead&&e.state==='form');
+        if(fleet.spMove==='rolling'){ fleet.spSweepX += (W+40)/0.6*dt;
+          forms.forEach(e=>{ if(!e.spFired && e.x<=fleet.spSweepX){ const ang=clamp((player.x-e.x)/360,-0.25,0.25), sp=210+sector*8;
+            ebul.push({x:e.x,y:e.y+e.r*0.6,vx:Math.sin(ang)*sp,vy:Math.cos(ang)*sp,c:e.c,r:3,owner:e}); e.fireFlash=0.12; e.spFired=true; } });
+          if(fleet.spFireT<=0 || forms.every(e=>e.spFired)){ fleet.spPhase='idle'; fleet.spT=Math.max(2.6,4.2-sector*0.12); }
+        } else if(fleet.spMove==='converge'){
+          if(!fleet.spDidFire){ fleet.spDidFire=true;
+            const sorted=forms.slice().sort((a,b)=>{ const sa=slots[a.slot],sb=slots[b.slot]; return (sb?sb.oy:0)-(sa?sa.oy:0); });
+            const boltSrc=[]; const anchor=forms.find(e=>e.role==='anchor'); if(anchor) boltSrc.push(anchor);
+            for(const e of sorted){ if(boltSrc.length>=2)break; if(!boltSrc.includes(e)) boltSrc.push(e); }
+            forms.forEach(e=>{ const dx=fleet.spLX-e.x, dy=fleet.spLY-e.y, m=Math.hypot(dx,dy)||1;
+              if(boltSrc.includes(e)){ const sp=220; ebul.push({x:e.x,y:e.y,vx:dx/m*sp,vy:dy/m*sp,c:COL.white,r:8,parryBolt:true,shape:'bolt',owner:e}); }
+              else { const sp=240+sector*9; ebul.push({x:e.x,y:e.y,vx:dx/m*sp,vy:dy/m*sp,c:e.c,r:3,owner:e}); }
+              e.fireFlash=0.12; }); }
+          if(fleet.spFireT<=0){ fleet.spPhase='idle'; fleet.spT=Math.max(2.6,4.2-sector*0.12); }
+        } else {
+          if(!fleet.spDidFire){ fleet.spDidFire=true;
+            forms.forEach(e=>{ if(Math.abs(e.x-fleet.spGapX)<=75)return; const ang=clamp((player.x-e.x)/320,-0.3,0.3), sp=200+sector*8;
+              ebul.push({x:e.x,y:e.y+e.r*0.6,vx:Math.sin(ang)*sp,vy:Math.cos(ang)*sp,c:e.c,r:3.2,owner:e}); e.fireFlash=0.12; }); }
+          if(fleet.spFireT<=0){ fleet.spPhase='idle'; fleet.spT=Math.max(2.6,4.2-sector*0.12); }
+        }
+      }
+    }
     volleyTimer-=dt;
     if(volleyTimer<=0){ volleyTimer=(rnd(0.6,1.1)-Math.min(sector*0.07,0.8))*fleet.volleyMul;
-      if(fleet.arch!=='siege' && !panicking){
+      if(fleet.arch!=='siege' && !panicking && fleet.spPhase==='idle'){
         let maxoy=0; slots.forEach(s=>{if(s.oy>maxoy)maxoy=s.oy;});
         enemies.forEach(e=>{ if(!e.dead&&e.state==='form'){ const s=slots[e.slot];
           if(s&&Math.abs(s.oy-maxoy)<2){ for(let q=-2;q<=2;q++) enemyShot(e,q*0.16,1); } } });
@@ -1542,7 +1582,7 @@ function update(dt){
     }
     diveTimer-=dt;
     if(diveTimer<=0){ diveTimer=(rnd(0.7,1.4)-Math.min(sector*0.07,0.9))*fleet.diveMul;
-      if(!panicking){
+      if(!panicking && !(fleet.arch!=='siege' && fleet.spPhase!=='idle')){
         const pool=enemies.filter(e=>!e.dead&&e.state==='form'&&e.role!=='anchor');
         const groups=[pool.filter(e=>e.role==='rusher'),pool.filter(e=>e.role==='grunt'),pool.filter(e=>e.role==='zoner')];
         const count=Math.min(pool.length, fleet.diveCount + (sector>=4?1:0));
@@ -2211,6 +2251,21 @@ function drawBG(){
     bg.globalAlpha=0.3; bg.lineWidth=1.2; bg.shadowBlur=6;
     for(const e2 of enemies){ if(e2.dead||e2===e||!(e2.buffed>0))continue; if(dist2(e2.x,e2.y,e.x,e.y)<e.buffR*e.buffR){ bg.beginPath(); bg.moveTo(e.x,e.y); bg.lineTo(e2.x,e2.y); bg.stroke(); } }
     bg.globalAlpha=1; bg.shadowBlur=0; bg.restore(); });
+  // FORMATION SET-PIECE telegraphs (during charge)
+  if(fleet && fleet.arch!=='siege' && fleet.spPhase==='charge'){
+    if(fleet.spMove==='converge'){ bg.save();
+      bg.globalAlpha=0.22; bg.strokeStyle=COL.white; bg.lineWidth=1;
+      enemies.forEach(e=>{ if(e.dead||e.state!=='form')return; bg.beginPath(); bg.moveTo(e.x,e.y); bg.lineTo(fleet.spLX,fleet.spLY); bg.stroke(); });
+      bg.globalAlpha=0.5+0.3*Math.sin(t*8); bg.strokeStyle=COL.mat; bg.shadowColor=COL.mat; bg.shadowBlur=10; bg.lineWidth=2;
+      bg.beginPath(); bg.arc(fleet.spLX,fleet.spLY,14,0,6.28); bg.stroke();
+      bg.beginPath(); bg.moveTo(fleet.spLX-20,fleet.spLY); bg.lineTo(fleet.spLX+20,fleet.spLY); bg.moveTo(fleet.spLX,fleet.spLY-20); bg.lineTo(fleet.spLX,fleet.spLY+20); bg.stroke();
+      bg.globalAlpha=1; bg.shadowBlur=0; bg.restore(); }
+    else if(fleet.spMove==='curtain'){ bg.save(); bg.globalAlpha=0.10+0.04*Math.sin(t*6); bg.fillStyle=COL.green;
+      bg.fillRect(fleet.spGapX-75,0,150,H);
+      bg.globalAlpha=0.3; bg.strokeStyle=COL.green; bg.lineWidth=1.5;
+      bg.beginPath(); bg.moveTo(fleet.spGapX-75,0); bg.lineTo(fleet.spGapX-75,H); bg.moveTo(fleet.spGapX+75,0); bg.lineTo(fleet.spGapX+75,H); bg.stroke();
+      bg.globalAlpha=1; bg.restore(); }
+  }
 
   // pods
   pods.forEach(p=>{ drawPod(bg,p); });
