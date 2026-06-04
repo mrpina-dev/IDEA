@@ -432,43 +432,60 @@ const AIM=e=>clamp((e.aimAng==null?Math.PI/2:e.aimAng)-Math.PI/2,-1.0,1.0);
 function drawACE(ctx,e){ const r=e.r,v=e.variant,col=ctx.strokeStyle,lw=ctx.lineWidth;
   const ph=e.core,tell=e.tell||0,fl=e.fireFlash||0; const hob=Math.sin(ph*1.8)*r*0.05;
   ctx.save(); ctx.translate(0,hob);
-  if(v===0){ // RIVETER — hex bolt drone: spinning hex, counter-rotating bolt ring, pulsing barrels
-    ctx.save(); ctx.rotate(ph*0.35);
-    ctx.beginPath(); for(let i=0;i<6;i++){ const a=i/6*6.2832+Math.PI/6; const x=Math.cos(a)*r*0.82,y=Math.sin(a)*r*0.82; i?ctx.lineTo(x,y):ctx.moveTo(x,y);} ctx.closePath();
-    ctx.fillStyle=col+'22'; ctx.fill(); ctx.stroke(); ctx.restore();
-    ctx.save(); ctx.rotate(-ph*0.7);
-    ctx.beginPath(); ctx.arc(0,0,r*0.34,0,6.2832); ctx.stroke(); ctx.restore();
-    ctx.beginPath(); ctx.rect(-r*0.16,r*0.66,r*0.32,r*0.46); ctx.fillStyle=col+'33'; ctx.fill(); ctx.stroke();
-    const gp=Math.max(0.5+0.5*Math.sin(ph*2.8),tell); const gcol=fl>0?COL.white:col; ctx.save(); ctx.shadowBlur=(8+fl*28)*gp; ctx.shadowColor=gcol;
-    ctx.lineWidth=lw*(0.7+tell*0.3); ctx.beginPath();
-    for(let i=-1;i<=1;i++){ const cx=i*r*0.3; ctx.moveTo(cx-r*0.13,-r*0.5); ctx.lineTo(cx,-r*0.64); ctx.lineTo(cx+r*0.13,-r*0.5);} ctx.stroke(); ctx.lineWidth=lw; ctx.restore();
+  if(v===0){ // SAWHORSE — timber ramming interceptor
+    const flex=Math.sin(ph*1.9)*r*0.05;
     thr(ctx,r);
-  } else if(v===1){ // DERRICK — crane: pendulum wrecking ball, rocking jib
-    const sw=Math.sin(ph*1.6)*0.3;
-    poly(ctx,[[-r*0.34,r*0.9],[0,-r*0.7],[r*0.34,r*0.9]],false); ctx.stroke();
-    ctx.lineWidth=lw*0.6; ctx.beginPath();
-    ctx.moveTo(-r*0.25,r*0.5); ctx.lineTo(r*0.25,r*0.5);
-    ctx.moveTo(-r*0.13,r*0.0); ctx.lineTo(r*0.13,r*0.0); ctx.stroke(); ctx.lineWidth=lw;
-    ctx.save(); ctx.rotate(sw*0.1);
-    ctx.beginPath(); ctx.moveTo(0,-r*0.66); ctx.lineTo(r*1.02,-r*0.42); ctx.moveTo(0,-r*0.48); ctx.lineTo(r*0.86,-r*0.34); ctx.stroke(); ctx.restore();
-    const bx2=r*0.92+Math.sin(sw)*r*0.86, by2=-r*0.4+Math.cos(sw)*r*0.86;
-    ctx.beginPath(); ctx.moveTo(r*0.92,-r*0.4); ctx.lineTo(bx2,by2); ctx.stroke();
-    ctx.beginPath(); ctx.arc(bx2,by2,r*0.18,0,6.2832); ctx.fillStyle=col+'44'; ctx.fill(); ctx.stroke();
-    ctx.beginPath(); ctx.rect(-r*0.74,-r*0.62,r*0.34,r*0.3); ctx.fillStyle=col+'33'; ctx.fill(); ctx.stroke();
-    dot(ctx,0,-r*0.66,r*0.08,col); thr(ctx,r);
-  } else { // BULWARK — armored dropship: pulsing aperture, slow heavy hover
-    const pu=Math.max(0.5+0.5*Math.sin(ph*2.0),tell); const gcol2=fl>0?COL.white:col;
-    const hull=[[0,r*1.0],[r*0.86,r*0.5],[r*1.0,-r*0.18],[r*0.6,-r*0.66],[-r*0.6,-r*0.66],[-r*1.0,-r*0.18],[-r*0.86,r*0.5]];
-    poly(ctx,hull,true); ctx.fillStyle=col+'1E'; ctx.fill(); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(0,r*0.86); ctx.lineTo(0,-r*0.6);
-    ctx.moveTo(-r*0.7,-r*0.2); ctx.lineTo(r*0.7,-r*0.2);
-    ctx.moveTo(-r*0.52,r*0.36); ctx.lineTo(r*0.52,r*0.36); ctx.stroke();
-    ctx.save(); ctx.shadowBlur=(10+fl*20)*pu; ctx.shadowColor=gcol2;
-    ctx.beginPath(); ctx.rect(-r*0.24,-r*0.08,r*0.48,r*0.4); ctx.fillStyle=col+'2E'; ctx.fill(); ctx.stroke(); ctx.restore();
-    [[-r*0.7,-r*0.2],[r*0.7,-r*0.2],[-r*0.52,r*0.36],[r*0.52,r*0.36]].forEach(p=>dot(ctx,p[0],p[1],r*0.08,col));
-    ctx.lineWidth=lw*0.7; ctx.beginPath();
-    for(let i=-1;i<=1;i++){ const cx=i*r*0.34; ctx.moveTo(cx-r*0.14,r*0.62); ctx.lineTo(cx,r*0.74); ctx.lineTo(cx+r*0.14,r*0.62);} ctx.stroke(); ctx.lineWidth=lw;
-    thr(ctx,r);
+    poly(ctx,[[-0.17*r,-0.62*r],[0.17*r,-0.62*r],[0.2*r,0.4*r],[0,0.96*r],[-0.2*r,0.4*r]],true);
+    ctx.fillStyle=col+'1E'; ctx.fill(); ctx.stroke();
+    ctx.lineWidth=lw*0.5;
+    ctx.beginPath(); ctx.moveTo(-0.05*r,-0.5*r); ctx.lineTo(-0.03*r,0.6*r);
+    ctx.moveTo(0.06*r,-0.5*r); ctx.lineTo(0.04*r,0.6*r); ctx.stroke();
+    ctx.lineWidth=lw;
+    for(const s of [-1,1]){ const tx=s*0.95*r, ty=-0.42*r-flex;
+      ctx.beginPath(); ctx.moveTo(s*0.15*r,-0.04*r); ctx.lineTo(tx,ty); ctx.stroke();
+      ctx.beginPath(); ctx.arc(tx,ty,0.1*r,0,6.2832); ctx.stroke();
+      ctx.beginPath(); ctx.arc(tx,ty,0.045*r,0,6.2832); ctx.stroke(); }
+    const pulse=Math.max(0.5+0.5*Math.sin(ph*2.4),tell); const gc=fl>0?COL.white:col;
+    ctx.save(); ctx.shadowBlur=(8+fl*26)*pulse; ctx.shadowColor=gc;
+    ctx.beginPath(); ctx.arc(0,0.1*r,0.17*r,0,6.2832); ctx.fillStyle=col+'22'; ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(0,0.1*r,0.07*r,0.1*r,0,0,6.2832); ctx.fillStyle=gc; ctx.fill();
+    ctx.restore();
+  } else if(v===1){ // TRUSS — king-post delta gunship
+    const br=Math.sin(ph*2.0)*r*0.03; const gc=fl>0?COL.white:col;
+    ctx.beginPath(); ctx.rect(-0.16*r,-0.86*r,0.32*r,0.2*r); ctx.fillStyle=col+'22'; ctx.fill(); ctx.stroke();
+    poly(ctx,[[-0.78*r-br,-0.46*r],[0.78*r+br,-0.46*r],[0,0.92*r]],true);
+    ctx.fillStyle=col+'16'; ctx.fill(); ctx.stroke();
+    ctx.lineWidth=lw*0.6;
+    ctx.beginPath(); ctx.moveTo(0,0.92*r); ctx.lineTo(0,-0.46*r);
+    ctx.moveTo(0,0.92*r); ctx.lineTo(-0.4*r,-0.46*r);
+    ctx.moveTo(0,0.92*r); ctx.lineTo(0.4*r,-0.46*r); ctx.stroke();
+    ctx.lineWidth=lw;
+    for(const s of [-1,1]){ ctx.beginPath(); ctx.moveTo(s*0.7*r,-0.4*r); ctx.lineTo(s*0.7*r,-0.14*r); ctx.stroke();
+      dot(ctx,s*0.7*r,-0.14*r,0.05*r,gc); }
+    if(fl>0){ ctx.save(); ctx.shadowBlur=18; ctx.shadowColor=COL.white; ctx.strokeStyle=COL.white;
+      for(const s of [-1,1]){ ctx.beginPath(); ctx.arc(s*0.7*r,-0.1*r,0.08*r,0,6.2832); ctx.stroke(); } ctx.restore(); }
+    const pulse=Math.max(0.5+0.5*Math.sin(ph*2.4),tell);
+    ctx.save(); ctx.shadowBlur=(8+fl*22)*pulse; ctx.shadowColor=gc;
+    ctx.beginPath(); ctx.arc(0,0.16*r,0.15*r,0,6.2832); ctx.fillStyle=col+'22'; ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(0,0.16*r,0.06*r,0.09*r,0,0,6.2832); ctx.fillStyle=gc; ctx.fill();
+    ctx.restore();
+  } else { // CLINKER — overlapping-plank armored hull
+    const aim=AIM(e), gc=fl>0?COL.white:col;
+    ctx.beginPath();
+    for(let i=-1;i<=1;i++){ const tx=i*0.34*r; ctx.moveTo(tx-0.06*r,-0.7*r); ctx.lineTo(tx,-0.92*r); ctx.lineTo(tx+0.06*r,-0.7*r); } ctx.stroke();
+    const courses=[[-0.62,0.62,-0.66],[-0.78,0.78,-0.4],[-0.9,0.9,-0.12],[-0.84,0.84,0.16],[-0.74,0.74,0.42]];
+    courses.forEach((cc,i)=>{ const sh=Math.sin(ph*1.4+i*0.6)*r*0.015; const y0=cc[2]*r+sh, y1=y0+0.3*r;
+      poly(ctx,[[cc[0]*r,y0],[cc[1]*r,y0],[cc[1]*r*0.92,y1],[cc[0]*r*0.92,y1]],true);
+      ctx.fillStyle=col+'14'; ctx.fill(); ctx.stroke(); });
+    poly(ctx,[[-0.7*r,0.72*r],[0.7*r,0.72*r],[0,1.0*r]],true); ctx.fillStyle=col+'18'; ctx.fill(); ctx.stroke();
+    for(const s of [-1,1]){ ctx.save(); ctx.translate(s*0.62*r,-0.34*r); ctx.rotate(aim*0.4);
+      ctx.beginPath(); ctx.arc(0,0,0.12*r,0,6.2832); ctx.fillStyle=col+'22'; ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,0.2*r); ctx.stroke(); ctx.restore(); }
+    const pulse=Math.max(0.5+0.5*Math.sin(ph*2.0),tell);
+    ctx.save(); ctx.shadowBlur=(10+fl*30)*pulse; ctx.shadowColor=gc;
+    ctx.beginPath(); ctx.arc(0,0,0.2*r,0,6.2832); ctx.fillStyle=(fl>0?COL.white:col)+'2E'; ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(0,0,0.08*r,0.12*r,0,0,6.2832); ctx.fillStyle=gc; ctx.fill();
+    ctx.restore();
   }
   ctx.restore();
 }
@@ -661,7 +678,7 @@ const FACTIONS={
 const FKEYS=['ace','bmet','csee','mat','mset'];
 FACTIONS.foreman={c:COL.ace,  draw:drawFOREMAN, pts:140, hp:[46,46,46], r:[30,30,30], name:'FOREMAN'};
 FACTIONS.vector ={c:COL.bmet, draw:drawVECTOR,  pts:140, hp:[42,42,42], r:[30,30,30], name:'VECTOR'};
-const TYPENAMES={ace:['RIVETER','DERRICK','BULWARK'],bmet:['SPORE','PHAGE','PATHOGEN'],csee:['NODE','RELAY','MAINFRAME'],mat:['LENS','EMITTER','BROADCASTER'],mset:['INGOT','LATTICE','CRUCIBLE'],foreman:['FOREMAN'],vector:['VECTOR']};
+const TYPENAMES={ace:['SAWHORSE','TRUSS','CLINKER'],bmet:['SPORE','PHAGE','PATHOGEN'],csee:['NODE','RELAY','MAINFRAME'],mat:['LENS','EMITTER','BROADCASTER'],mset:['INGOT','LATTICE','CRUCIBLE'],foreman:['FOREMAN'],vector:['VECTOR']};
 function killerName(e){ const a=TYPENAMES[e.fk]; return a?(a[Math.min(e.variant,a.length-1)]):'ENEMY'; }
 
 /* ============================= sector identity ============================= */
@@ -1221,9 +1238,9 @@ function aceAttack(e){
   if(ebul.length>=8+sector*4)return; if(sector<=2&&Math.random()<0.5)return;
   e.fireFlash=0.12;
   const dx=player.x-e.x,dy=player.y-e.y,m=Math.hypot(dx,dy)||1,base=Math.atan2(dy,dx);
-  if(e.variant===0){ const sp=210+sector*8; for(let k=0;k<2;k++){ const a=base+rnd(-0.05,0.05); ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:2.6,owner:e}); } }
-  else if(e.variant===1){ const sp=95+sector*5; ebul.push({x:e.x,y:e.y,vx:dx/m*sp,vy:dy/m*sp,c:e.c,r:6.5,owner:e}); }
-  else { if(Math.random()<0.4) spawnBarrier(); const sp=150+sector*6; for(let k=-1;k<=1;k++){ const a=base+k*0.22; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:4,owner:e}); } }
+  if(e.variant===0){ const sp=300+sector*10; ebul.push({x:e.x,y:e.y,vx:dx/m*sp,vy:dy/m*sp,c:e.c,r:3,owner:e}); }
+  else if(e.variant===1){ const sp=240+sector*9; for(const s of [-1,1]){ const a=base+s*0.06; ebul.push({x:e.x+s*e.r*0.7,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:3,owner:e}); } }
+  else { const sp=170+sector*7; for(let k=-1;k<=1;k++){ const a=base+k*0.2; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:4,owner:e}); } }
 }
 function bmetAttack(e){
   if(ebul.length>=8+sector*4)return; if(sector<=2&&Math.random()<0.5)return;
