@@ -319,7 +319,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=560,H=840; const VERSION='2527';
+const W=560,H=840; const VERSION='2530';
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
 const bg=bgC.getContext('2d'), fx=fxC.getContext('2d');
@@ -1103,7 +1103,7 @@ function triggerBanner(){ sectorBanner=2.4; bannerSec=sector; Audio_.sector(); }
 function makeEnemy(fk,variant,x,y,behavior){
   const F=FACTIONS[fk];
   return {fk,c:F.c,draw:F.draw,variant,pts:F.pts*(variant===2?6:variant===1?2:1),
-    r:F.r[variant]+rnd(-1,1), x,y, hp:Math.round(F.hp[variant]*(1+sector*0.28)), maxhp:Math.round(F.hp[variant]*(1+sector*0.28)),
+    r:F.r[variant]+rnd(-1,1), x,y, hp:Math.round(F.hp[variant]*(1+sector*0.22)), maxhp:Math.round(F.hp[variant]*(1+sector*0.22)),
     core:rnd(0,6.28), spin:rnd(-.4,.4), bob:rnd(0,6.28), flash:0, dead:false, dt:0, gone:false,
     state:behavior||'free', slot:-1, vx:0, vy:rnd(40,70), fire:rnd(.6,1.6), bank:0, t:0};
 }
@@ -1202,9 +1202,9 @@ function resetPlayer(full){
   if(!player||full){ player={x:W/2,y:H-130, vx:0,vy:0,
     up:{gun:1,beamPow:1,beamCap:1,speed:1,beamPierce:1,beamSpool:1,flank:0,armor:0},
     wtype:'spread', unlocked:{spread:1,lance:0,homing:0,rapid:0},
-    fireCd:0, beamOn:false, beamLock:false, beamActive:false, beamE:1, beamMax:1, beamDps:46, beamWind:0,
-    speed:184, wlevel:1, bombs:2, shieldHits:0, drone:null,
-    inv:1.4, armor:4, maxArmor:4, dmgFlash:0, lives:3, dead:false, respawn:0, coins:0,
+    fireCd:0, beamOn:false, beamLock:false, beamActive:false, beamE:1, beamMax:1, beamDps:46, beamWind:0, beamCoolT:0,
+    speed:184, wlevel:1, pdmg:1, bombs:2, shieldHits:0, drone:null,
+    inv:1.4, armor:4, maxArmor:4, dmgFlash:0, lives:3, dead:false, respawn:0, coins:0, repair:0,
     parryT:0, parryCd:0,
     buffs:{overdrive:0,scatter:0,magnet:0}};
     applyUpgrades(); player.beamE=player.beamMax; }
@@ -1216,11 +1216,13 @@ function resetPlayer(full){
 function applyUpgrades(){ const u=player.up;
   player.speed     = 200 + u.speed*52;          // L1 252 ... L10 720
   player.wlevel    = u.gun;                      // 1..8
+  player.pdmg      = 1 + (u.gun-1)*0.30;         // global primary damage mult L1 1.0 ... L8 3.1
   player.beamMax   = 0.9 + u.beamCap*0.55;       // L1 1.45s ... L8 5.3s
-  player.beamDps   = 16 + u.beamPow*16;          // L1 32/s ... L8 144/s (weak starter)
+  player.beamDps   = 16 + u.beamPow*16;          // L1 32/s ... L8 144/s
   player.beamPierce  = [1,2,3,5,99][Math.min(4,(u.beamPierce||1)-1)];
-  player.beamWindup  = Math.max(0.08, 0.42 - (u.beamSpool||1)*0.055);
-  player.beamRecharge= 0.20 + (u.beamSpool||1)*0.05;
+  player.beamWindup  = Math.max(0.12, 0.50 - (u.beamSpool||1)*0.06);   // SPOOL: spin-up only
+  player.beamCool    = Math.max(0.35, 0.95 - (u.beamSpool||1)*0.07);   // SPOOL: post-fire lockout before recharge
+  player.beamRecharge= 0.16 + u.beamCap*0.06;                          // CELL: recharge rate
   player.maxArmor    = 4 + (u.armor||0);
   if(player.beamE>player.beamMax) player.beamE=player.beamMax;
 }
@@ -1369,48 +1371,45 @@ function applyPod(p){
 
 /* ============================= weapons ============================= */
 function firePrimary(){
-  const lv=player.wlevel, x=player.x, y=player.y-20, c=COL.green;
+  const lv=player.wlevel, x=player.x, y=player.y-20, pm=player.pdmg||1;
   const prevLen=pbul.length;
   shotsFired++;
-  if(player.wtype==='spread'){
-    const angs=[[-.10,.10],[-.16,0,.16],[-.24,-.08,.08,.24],[-.30,-.13,0,.13,.30],[-.34,-.18,-.06,.06,.18,.34]][Math.min(lv,5)-1];
-    const dmg=1.0+lv*0.3;
-    angs.forEach(a=>pbul.push({x:x+Math.sin(a)*7,y,vx:Math.sin(a)*180,vy:-560,c,r:1.6,dmg}));
-    player.fireCd=Math.max(.06,.185-lv*0.014);
-  } else if(player.wtype==='rapid'){
-    const streams=lv<3?1:lv<5?2:3; const sp=10;
+  if(player.wtype==='spread'){           // SHOTGUN: wide fan, melts point-blank, chips at range
+    const pellets=[3,3,4,4,5,6,7,7][Math.min(lv,8)-1]; const dmg=0.85*pm, spread=0.12;
+    for(let i=0;i<pellets;i++){ const a=(i-(pellets-1)/2)*spread+rnd(-0.015,0.015);
+      pbul.push({x:x+Math.sin(a)*7,y,vx:Math.sin(a)*300,vy:-600,c:COL.green,r:1.7,dmg}); }
+    player.fireCd=.19;
+  } else if(player.wtype==='rapid'){     // NAILGUN: pinpoint sustained, single-target king
+    const streams=lv<3?1:lv<6?2:3; const sp=9; const dmg=0.55*pm;
     for(let i=0;i<streams;i++){ const ox=(i-(streams-1)/2)*sp;
-      pbul.push({x:x+ox,y,vx:0,vy:-720,c,r:1.3,dmg:0.8}); }
-    player.fireCd=.07;
-  } else if(player.wtype==='lance'){
-    const cols=lv<3?1:lv<5?2:3; const sp=10;
+      pbul.push({x:x+ox,y,vx:0,vy:-760,c:COL.green,r:1.3,dmg}); }
+    player.fireCd=.055;
+  } else if(player.wtype==='lance'){     // RAILPIERCER: high per-hit, pierces, anti-line/boss
+    const cols=lv<4?1:lv<7?2:3; const sp=11; const dmg=3.0*pm;
     for(let i=0;i<cols;i++){ const ox=(i-(cols-1)/2)*sp;
-      pbul.push({x:x+ox,y,vx:0,vy:-680,c:COL.cyan,r:2.4,dmg:1.4,pierce:true,len:14}); }
-    player.fireCd=.2;
-  } else { // homing
-    const n=lv<2?1:lv<4?2:3;
+      pbul.push({x:x+ox,y,vx:0,vy:-720,c:COL.cyan,r:2.5,dmg,pierce:true,len:15}); }
+    player.fireCd=.26;
+  } else {                                // TRACKER: hands-free, damage while dodging
+    const n=lv<2?1:lv<4?2:3; const dmg=1.6*pm;
     for(let i=0;i<n;i++){ const a=(i-(n-1)/2)*0.4;
-      pbul.push({x,y,vx:Math.sin(a)*120,vy:-380,c:COL.gold,r:2,dmg:1,homing:true}); }
-    player.fireCd=.2;
+      pbul.push({x,y,vx:Math.sin(a)*120,vy:-380,c:COL.gold,r:2,dmg,homing:true}); }
+    player.fireCd=.18;
   }
   Audio_.fire(player.wtype);
-  // Overdrive buff: boost dmg of shots fired this call + faster fire
   if(player.buffs && player.buffs.overdrive>0){
     pbul.slice(prevLen).forEach(b=>{ if(b.dmg) b.dmg*=1.3; });
     player.fireCd*=0.6;
   }
-  // Scatter buff: extra wide spread independent of flank
   if(player.buffs && player.buffs.scatter>0){
-    [-0.4,-0.8,0.4,0.8].forEach(a=>pbul.push({x:player.x,y:player.y-20,vx:Math.sin(a)*480,vy:-Math.cos(a)*480,c,r:1.5,dmg:0.6}));
+    [-0.4,-0.8,0.4,0.8].forEach(a=>pbul.push({x:player.x,y:player.y-20,vx:Math.sin(a)*480,vy:-Math.cos(a)*480,c:COL.green,r:1.5,dmg:0.6*pm}));
   }
-  // Flank guns upgrade: side and rear coverage
   if(player.up.flank>0){
     const fa=[];
     if(player.up.flank>=1){ fa.push(-0.55,0.55); }
     if(player.up.flank>=2){ fa.push(-0.95,0.95); }
     if(player.up.flank>=3){ fa.push(-2.45,2.45); }
-    const fd=(player.buffs&&player.buffs.overdrive>0)?0.78:0.6;
-    fa.forEach(a=>pbul.push({x:player.x,y:player.y-20,vx:Math.sin(a)*480,vy:-Math.cos(a)*480,c,r:1.5,dmg:fd}));
+    const fd=(0.55*pm)*((player.buffs&&player.buffs.overdrive>0)?1.3:1);
+    fa.forEach(a=>pbul.push({x:player.x,y:player.y-20,vx:Math.sin(a)*480,vy:-Math.cos(a)*480,c:COL.green,r:1.5,dmg:fd}));
   }
 }
 function tryParry(){ if(state!=='play'||!player||player.dead||player.parryCd>0||player.parryT>0)return;
@@ -1428,7 +1427,10 @@ function fireBomb(){
     parts.push({x:player.x,y:player.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:.5,max:.5,c:COL.green,sz:2});}
 }
 function killEnemy(e,silent){ if(e.dead)return; runKills++; e.dead=true; e.dt=0; explode(e.x,e.y,e.c,e.variant>=2);
-  addScore(e.pts,e.x,e.y,e.c); player.coins+=Math.ceil(e.pts*0.2); sectorKills++;
+  addScore(e.pts,e.x,e.y,e.c); player.coins+=Math.ceil(e.pts*0.32); sectorKills++;
+  if(player && !player.dead && dist2(e.x,e.y,player.x,player.y)<80*80){ player.repair=Math.min(1,(player.repair||0)+0.34);
+    if(player.repair>=1 && player.armor<player.maxArmor){ player.repair=0; player.armor++; Audio_.power();
+      rings.push({x:player.x,y:player.y,r:8,vr:120,life:.4,max:.4,c:COL.green}); } }
   if(e.fk==='foreman'||e.fk==='vector'){ player.coins+=40; dropPod(e.x,e.y,true); }
   if(e.role==='anchor'){ for(const e2 of enemies){ if(!e2.dead) e2.buffed=0; }
     if(e.slot>=0 && slots[e.slot]) slots[e.slot].role='grunt'; // stays dead as anchor; slot refills as a normal unit
@@ -1488,7 +1490,7 @@ function update(dt){
       pl.beamActive=true; // active for speed reduction even during spool
       if(pl.beamWind>=(pl.beamWindup||0.37)){
         // Fully spooled — drain energy and deal damage
-        pl.beamE-=dt; if(pl.beamE<=0.02){ pl.beamE=0; pl.beamLock=true; pl.beamWind=0; }
+        pl.beamE-=dt; pl.beamCoolT=pl.beamCool||0.6; if(pl.beamE<=0.02){ pl.beamE=0; pl.beamLock=true; pl.beamWind=0; }
         const bx=pl.x;
         const col=enemies.filter(e=>!e.dead && Math.abs(e.x-bx)<24 && e.y<pl.y-18).sort((a,b)=>b.y-a.y);
         const np=pl.beamPierce;
@@ -1500,7 +1502,8 @@ function update(dt){
       }
     } else {
       pl.beamActive=false; pl.beamWind=0;
-      if(pl.beamE<pl.beamMax) pl.beamE=Math.min(pl.beamMax, pl.beamE+dt*(pl.beamRecharge||0.25));
+      if(pl.beamCoolT>0) pl.beamCoolT-=dt;
+      else if(pl.beamE<pl.beamMax) pl.beamE=Math.min(pl.beamMax, pl.beamE+dt*(pl.beamRecharge||0.25));
       pl.fireCd-=dt; if(pl.fireCd<=0) firePrimary();
     }
     // damage embers
@@ -2166,9 +2169,9 @@ function refitItems(){ const u=player.up;
     {name:'ENGINE',      desc:'Ship movement speed.',                              lv:u.speed,           mx:10, cost:300+(u.speed-1)*180,       can:u.speed<10,            buy:()=>u.speed++},
     {name:'GUN POWER',   desc:'Primary weapon damage and fire rate.',              lv:u.gun,             mx:8,  cost:400+(u.gun-1)*250,         can:u.gun<8,               buy:()=>u.gun++},
     {name:'BEAM POWER',  desc:'Beam damage per second.',                           lv:u.beamPow,         mx:8,  cost:320+(u.beamPow-1)*220,     can:u.beamPow<8,           buy:()=>u.beamPow++},
-    {name:'BEAM CELL',   desc:'Beam duration before it must recharge.',            lv:u.beamCap,         mx:8,  cost:280+(u.beamCap-1)*200,     can:u.beamCap<8,           buy:()=>u.beamCap++},
+    {name:'BEAM CELL',   desc:'Beam duration and recharge speed.',                 lv:u.beamCap,         mx:8,  cost:280+(u.beamCap-1)*200,     can:u.beamCap<8,           buy:()=>u.beamCap++},
     {name:'BEAM PIERCE', desc:'How many enemies the beam cuts through.',           lv:u.beamPierce,      mx:5,  cost:400+(u.beamPierce-1)*280,  can:u.beamPierce<5,        buy:()=>u.beamPierce++},
-    {name:'BEAM SPOOL',  desc:'Faster beam spin-up and recharge.',                lv:u.beamSpool||1,    mx:6,  cost:300+((u.beamSpool||1)-1)*210, can:(u.beamSpool||1)<6,  buy:()=>{u.beamSpool=(u.beamSpool||1)+1;}},
+    {name:'BEAM SPOOL',  desc:'Faster beam spin-up, shorter cooldown.',           lv:u.beamSpool||1,    mx:6,  cost:300+((u.beamSpool||1)-1)*210, can:(u.beamSpool||1)<6,  buy:()=>{u.beamSpool=(u.beamSpool||1)+1;}},
     {name:'FLANK GUNS',  desc:'Adds wide side shots, then rear cover.',           lv:u.flank||0,        mx:3,  cost:[450,700,1000][Math.min(u.flank||0,2)], can:(u.flank||0)<3, buy:()=>{u.flank=(u.flank||0)+1;}},
     ...['spread|SPREAD|0|Balanced forward fan.','rapid|RAPID|350|Fast narrow stream, high fire rate.','lance|LANCE|600|Piercing bolts, good vs lines and bosses.','homing|HOMING|750|Auto-tracking shots, no aiming needed.'].map(s=>{const p=s.split('|'),w=p[0],owned=!!player.unlocked[w],active=player.wtype===w;return {name:p[1],grp:'WEAPONS',desc:p[3],lv:0,mx:0,meta:active?'EQUIPPED':owned?'EQUIP':('i¢'+p[2]),cost:owned?0:+p[2],can:!active,buy:()=>{player.unlocked[w]=1;player.wtype=w;}};}),
     {name:'BOMB +1',     desc:'Raises your max bomb count.',                       lv:player.bombs,      mx:6, cost:200,                   can:player.bombs<6,       buy:()=>player.bombs++},
