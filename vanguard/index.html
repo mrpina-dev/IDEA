@@ -341,7 +341,7 @@ const ROMAN=['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII
 function roman(n){return ROMAN[(n-1)%ROMAN.length]+(n>ROMAN.length?'+':'');}
 
 /* ============================= audio ============================= */
-const Audio_={ctx:null,muted:false,master:null,music_:null,
+const Audio_={ctx:null,muted:false,master:null,
   init(){ if(this.ctx)return; try{ this.ctx=new (window.AudioContext||window.webkitAudioContext)();
     const m=this.ctx.createGain(); m.gain.value=0.9;
     const lp=this.ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=5200;
@@ -387,54 +387,23 @@ const Audio_={ctx:null,muted:false,master:null,music_:null,
   death(){ this.noise(0.9,0.22,{lp:1400}); this.tone(220,0.9,'sawtooth',0.07,{glide:32}); this.tone(110,1.0,'sine',0.06,{glide:24}); },
   bossWarn(){ [0,0.18,0.36].forEach(d=>this.tone(160,0.16,'square',0.05,{delay:d,glide:120})); },
   sector(){ this.tone(330,0.18,'triangle',0.04); this.tone(495,0.2,'triangle',0.04,{delay:0.1}); },
-  music(on,track){ if(!this.ctx)return;
-    if(this._mus){ clearInterval(this._mus.timer); this._mus=null; }
-    if(!on) return;
-    const T=this.MUSIC[track]||this.MUSIC.ambient, A=this;
-    const st={step:0, next:this.ctx.currentTime+0.08, T};
-    st.timer=setInterval(function(){ if(!A.ctx){clearInterval(st.timer);return;} const ahead=A.ctx.currentTime+0.18;
-      while(st.next<ahead){ if(!A.muted) A._step(st.T, st.step, st.next); st.step++; st.next+=st.T.spb; } },30);
-    this._mus=st; },
-  _step(T,s,t){ const L=T.scale.length;
-    const note=(deg,oct)=>{ if(deg==null)return null; let o=(oct||0)+Math.floor(deg/L), d=((deg%L)+L)%L; return T.root*Math.pow(2,o)*Math.pow(2,T.scale[d]/12); };
-    const bd=T.bass[s%T.bass.length]; if(bd!=null) this._mnote(note(bd,-1), T.spb*1.6, T.bassType, (T.lv||0.05)*1.1, t);
-    const ld=T.lead[s%T.lead.length]; if(ld!=null) this._mnote(note(ld,0), T.spb*1.2, T.leadType, (T.lv||0.05)*0.7, t);
-    const dr=T.drum[s%T.drum.length]; if(dr) this._mdrum(dr,t); },
-  _mnote(freq,dur,type,vol,t){ if(freq==null||!this.ctx)return; const o=this.ctx.createOscillator(),g=this.ctx.createGain();
-    o.type=type||'square'; o.frequency.setValueAtTime(freq,t); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(vol,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
-    o.connect(g); g.connect(this.out()); o.start(t); o.stop(t+dur+0.03); },
-  _mdrum(kind,t){ if(!this.ctx)return; const o=this.out();
-    if(kind==='k'){ const osc=this.ctx.createOscillator(),g=this.ctx.createGain(); osc.type='sine'; osc.frequency.setValueAtTime(150,t); osc.frequency.exponentialRampToValueAtTime(45,t+0.12); g.gain.setValueAtTime(0.11,t); g.gain.exponentialRampToValueAtTime(0.0001,t+0.15); osc.connect(g); g.connect(o); osc.start(t); osc.stop(t+0.17); }
-    else { const dur=kind==='s'?0.11:0.03, vol=kind==='s'?0.06:0.028, lp=kind==='s'?4200:9000;
-      const n=this.ctx.createBufferSource(),buf=this.ctx.createBuffer(1,Math.max(1,Math.floor(this.ctx.sampleRate*dur)),this.ctx.sampleRate); const d=buf.getChannelData(0); for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(1-i/d.length);
-      n.buffer=buf; const g=this.ctx.createGain(); g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.0001,t+dur); const f=this.ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=lp; n.connect(g); g.connect(f); f.connect(o); n.start(t); n.stop(t+dur+0.02); } },
-  MUSIC:{
-    ambient:{ spb:0.36, root:130.81, scale:[0,3,5,7,10], bassType:'triangle', leadType:'sine', lv:0.045,
-      bass:[0,null,null,null,5,null,null,null,3,null,null,null,7,null,null,null],
-      lead:[null,null,null,null,null,null,7,null,null,null,null,null,null,5,null,null],
-      drum:[null,null,'h',null,null,null,'h',null,null,null,'h',null,null,null,'h',null] },
-    boss_ace:{ spb:0.16, root:98.0, scale:[0,2,3,5,7,8,10], bassType:'sawtooth', leadType:'square', lv:0.05,
-      bass:[0,0,null,0,0,null,3,null,5,5,null,5,3,null,null,0],
-      lead:[null,null,7,null,8,null,7,5,null,null,3,null,5,7,null,null],
-      drum:['k','h','s','h','k','h','s','h','k','h','s','h','k','s','s','h'] },
-    boss_bmet:{ spb:0.20, root:110.0, scale:[0,2,3,5,7,9,10], bassType:'triangle', leadType:'triangle', lv:0.05,
-      bass:[0,null,null,0,null,null,5,null,3,null,null,3,null,null,7,null],
-      lead:[null,null,3,null,5,null,null,7,null,null,5,3,null,2,null,null],
-      drum:['k',null,'h',null,'s',null,'h',null,'k',null,'h',null,'s',null,'h','h'] },
-    boss_csee:{ spb:0.13, root:130.81, scale:[0,3,5,7,10], bassType:'sawtooth', leadType:'square', lv:0.05,
-      bass:[0,null,0,null,5,null,5,null,3,null,3,null,7,null,7,null],
-      lead:[0,3,5,7,10,7,5,3,0,5,7,10,12,10,7,5],
-      drum:['k','h','h','s','k','h','h','s','k','h','h','s','k','s','h','s'] },
-    boss_mat:{ spb:0.17, root:87.31, scale:[0,2,3,5,7,8,11], bassType:'sawtooth', leadType:'sawtooth', lv:0.05,
-      bass:[0,null,null,null,5,null,null,null,3,null,null,null,7,null,null,5],
-      lead:[7,null,8,null,11,null,7,null,5,null,3,null,5,7,8,null],
-      drum:['k','h','s','h','k','h','s','h','k','h','s','h','k','h','s','s'] },
-    boss_mset:{ spb:0.15, root:146.83, scale:[0,1,3,5,7,8,10], bassType:'sawtooth', leadType:'square', lv:0.05,
-      bass:[0,null,0,null,1,null,0,null,3,null,3,null,5,null,3,null],
-      lead:[null,7,null,8,null,10,null,8,null,7,null,5,null,3,null,1],
-      drum:['k','h','h','s','k','h','h','s','k','h','h','s','k','s','h','s'] },
+  _bgm:null, _bgmTrack:null, musicVol:0.45, _bgmTimer:null,
+  music(on,track){
+    if(!on){ this._bgmTrack=null; if(this._bgm){ this._mfade(0,()=>{ try{this._bgm.pause();}catch(e){} }); } return; }
+    track=track||'ambient';
+    if(this._bgmTrack===track && this._bgm && !this._bgm.paused) return;
+    this._bgmTrack=track;
+    if(!this._bgm){ try{ this._bgm=new Audio(); this._bgm.loop=true; this._bgm.preload='auto'; this._bgm.volume=0; }catch(e){ return; } }
+    const a=this._bgm, A=this, src='audio/'+track+'.mp3';
+    const swap=()=>{ try{ a.src=src; a.currentTime=0; const p=a.play(); if(p&&p.catch)p.catch(()=>{}); }catch(e){} A._mfade(A.muted?0:A.musicVol,null); };
+    if(a.src && !a.paused){ this._mfade(0,swap); } else { swap(); }
   },
-  applyMute(){ if(this.music_){ try{ this.music_.g.gain.setTargetAtTime(this.muted?0:0.045,this.ctx.currentTime,0.2); }catch(e){} } }
+  _mfade(target,done){ const a=this._bgm, A=this; if(!a){ if(done)done(); return; } if(this._bgmTimer){clearInterval(this._bgmTimer);this._bgmTimer=null;}
+    this._bgmTimer=setInterval(function(){ let v=a.volume||0;
+      if(Math.abs(v-target)<0.045){ try{a.volume=Math.max(0,Math.min(1,target));}catch(e){} clearInterval(A._bgmTimer); A._bgmTimer=null; if(done)done(); return; }
+      try{ a.volume=Math.max(0,Math.min(1, v+(target>v?0.045:-0.045))); }catch(e){} },30);
+  },
+  applyMute(){ if(this._bgmTimer){clearInterval(this._bgmTimer);this._bgmTimer=null;} if(this._bgm){ try{ this._bgm.volume=this.muted?0:this.musicVol; }catch(e){} } },
 };
 
 /* ============================= state ============================= */
