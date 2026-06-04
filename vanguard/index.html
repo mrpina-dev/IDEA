@@ -1134,9 +1134,13 @@ function spawnBoss(forceFk){
     sigCd:Math.max(0.4,2.6/(1+sector*0.10)), ramState:0, ramT:0, ramVy:0, blinkCd:Math.max(0.8,3.2/(1+sector*0.10)), lockT:0, lockX:0, lockY:0,
     sweepState:0, sweepT:0, sweepAng:0, regenT:0, p3Cd:5.5,
     plates:0, plateMax:0, plateHp:0};
-  if(fk==='mset'){ boss.plates=3; boss.plateMax=Math.round(hp*0.15); boss.plateHp=boss.plateMax; boss.r=62; }
+  if(fk==='mset'){ boss.plates=3; boss.plate0=3; boss.plateMax=Math.round(hp*0.15); boss.plateHp=boss.plateMax; boss.r=62; }
   if(fk==='ace'){ boss.r=64; } Audio_.bossWarn();
   document.getElementById('bossname').textContent='SECTOR BOSS · '+F.name;
+  { const nm=document.getElementById('bossname'); nm.style.color=F.c; nm.style.textShadow='0 0 10px '+F.c;
+    const bb=document.getElementById('bossbar'), bi=bb.querySelector('i');
+    bb.style.borderColor=F.c; bb.style.background=F.c+'1A';
+    bi.style.background=F.c; bi.style.boxShadow='0 0 10px '+F.c; bi.style.transform='scaleX(1)'; }
 }
 
 /* ============================= player ============================= */
@@ -1662,6 +1666,9 @@ function factionFire(e){
 }
 
 /* boss */
+function bossHpFrac(){ const b=boss; if(!b) return 0;
+  if(b.plates>0 && b.plateMax>0){ const cur=b.hp+(b.plates-1)*b.plateMax+b.plateHp, tot=b.maxhp+(b.plate0||3)*b.plateMax; return clamp(cur/tot,0,1); }
+  return clamp(b.hp/b.maxhp,0,1); }
 function updateBoss(dt){
   const b=boss; b.core+=dt*1.5; if(b.flash>0)b.flash-=dt;
   // entering
@@ -1681,7 +1688,7 @@ function updateBoss(dt){
     for(let i=0;i<26;i++){const a=rnd(0,6.28),sp=rnd(80,300);parts.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:.6,max:.6,c:b.c,sz:2.2});}
     if(b.fk==='ace') Audio_.big(); }
   if(b.tT>0){ b.tT-=dt; b.x+=(b.gx-b.x)*Math.min(1,dt*1.5); b.y+=(b.gy-b.y)*Math.min(1,dt*1.5);
-    document.querySelector('#bossbar i').style.transform='scaleX('+clamp(b.hp/b.maxhp,0,1)+')'; return; }
+    document.querySelector('#bossbar i').style.transform='scaleX('+bossHpFrac()+')'; return; }
   const pdx=player.x-b.x, pdy=player.y-b.y; b.sweep+=dt;
 
   /* reactive movement: read the player, pick a mode, ease toward a goal */
@@ -1800,7 +1807,7 @@ function updateBoss(dt){
 
   if(!player.dead && player.inv<=0 && dist2(b.x,b.y,player.x,player.y)<(b.r+10)*(b.r+10)) playerHit();
   for(let i=barriers.length-1;i>=0;i--){ barriers[i].life-=dt; if(barriers[i].life<=0) barriers.splice(i,1); }
-  document.querySelector('#bossbar i').style.transform='scaleX('+clamp(b.hp/b.maxhp,0,1)+')';
+  document.querySelector('#bossbar i').style.transform='scaleX('+bossHpFrac()+')';
 }
 function spawnBarrier(){ const y=rnd(H*0.42,H*0.58), w=rnd(120,180), x=clamp(player.x+rnd(-60,60),w/2+8,W-w/2-8);
   barriers.push({x,y,w,h:12,life:4.2,max:4.2,c:boss?boss.c:COL.ace}); Audio_.hit(); }
@@ -2567,6 +2574,9 @@ requestAnimationFrame(frame);
   function clearField(){ enemies.length=0; ebul.length=0; pbul.length=0; boss=null; bossPending=false; bossSpoils=0;
     document.getElementById('bossbar').style.display='none'; document.getElementById('bossname').style.display='none'; }
   function devBoss(fk){ clearField(); spawnBoss(fk); }
+  function devHurt(){ if(!boss||boss.dying||boss.entering) return;
+    if(boss.plates>0){ boss.plateHp=0; damageBoss(1); return; }
+    boss.hp=Math.max(boss.maxhp*0.04, boss.hp-boss.maxhp*0.22); }
   panel.appendChild(hdr('SPAWN'));
   const grid=document.createElement('div'); grid.className='dgrid';
   FKEYS.forEach(fk=>{ for(let v=0;v<3;v++){ const nm=(TYPENAMES[fk]&&TYPENAMES[fk][v])||(fk+v);
@@ -2597,6 +2607,7 @@ requestAnimationFrame(frame);
   tg.appendChild(mk('HEAL',()=>{ if(player){player.armor=player.maxArmor;player.shieldHits=Math.max(player.shieldHits,1);player.beamE=player.beamMax;player.lives=Math.max(player.lives,3);} }));
   tg.appendChild(mk('+5K',()=>{ if(player)player.coins+=5000; }));
   tg.appendChild(mk('KILL BOSS',()=>{ if(boss&&!boss.dying)startBossDeath(); }));
+  tg.appendChild(mk('HURT -22%',()=>{ if(state==='play')devHurt(); }));
   tg.appendChild(mk('CLEAR',()=>{ clearField(); }));
   tg.appendChild(mk('CLR FIRE',()=>{ ebul.length=0; }));
   panel.appendChild(tg);
