@@ -518,25 +518,39 @@ function drawBMET(ctx,e){ const r=e.r,v=e.variant,col=ctx.strokeStyle,lw=ctx.lin
       ctx.beginPath(); ctx.moveTo(s*sx,r*0.6); ctx.lineTo(s*(r*0.4+o*r*0.18),r*0.9); ctx.lineTo(s*(r*0.52+o*r*0.24),ty); ctx.stroke(); } }
     ctx.lineWidth=lw;
     ctx.save(); ctx.rotate((e.aimAng||0)*0.12); ctx.shadowBlur=14*pulse; dot(ctx,0,-r*0.34,r*(0.12+tell*0.04),fl>0?COL.white:col); ctx.restore();
-  } else { // PATHOGEN — multi-nucleus organism: orbiting nuclei, opening claws
-    ctx.beginPath(); ctx.moveTo(0,r*1.08);
-    ctx.bezierCurveTo(r*0.96,r*0.6, r*0.86,-r*0.5, r*0.3,-r*0.86);
-    ctx.bezierCurveTo(r*0.1,-r*1.04, -r*0.4,-r*0.96, -r*0.62,-r*0.6);
-    ctx.bezierCurveTo(-r*1.0,-r*0.2, -r*0.86,r*0.66, 0,r*1.08);
+  } else { // STRATUM -- geological anticline fold
+    const g=Math.max(0.5+0.5*Math.sin(ph*2.4),tell), gc=fl>0?COL.white:col;
+    ctx.beginPath();
+    ctx.moveTo(-0.79*r,-0.72*r);
+    ctx.bezierCurveTo(-0.77*r,-0.93*r,-0.37*r,-1.09*r,0,-1.12*r);
+    ctx.bezierCurveTo(0.37*r,-1.09*r,0.77*r,-0.93*r,0.79*r,-0.72*r);
+    ctx.lineTo(0.6*r,0.79*r);
+    ctx.bezierCurveTo(0.42*r,0.95*r,0.23*r,1.05*r,0,1.07*r);
+    ctx.bezierCurveTo(-0.23*r,1.05*r,-0.42*r,0.95*r,-0.6*r,0.79*r);
     ctx.closePath(); ctx.fillStyle=col+'1E'; ctx.fill(); ctx.stroke();
-    const claw=r*(0.1+0.06*Math.sin(ph*2.8));
-    ctx.lineWidth=lw*0.85;
-    [[r*0.9,r*0.1],[r*0.2,-r*0.92],[-r*0.72,-r*0.5],[-r*0.7,r*0.5],[r*0.42,r*0.86]].forEach(([hx,hy],ii)=>{ const a=Math.atan2(hy,hx);
-      const tx=Math.cos(a)*r*0.26, ty=Math.sin(a)*r*0.26;
-      const cl=r*(0.1+0.06*Math.sin(ph*2.8+ii*1.2));
-      ctx.beginPath(); ctx.moveTo(hx,hy); ctx.lineTo(hx+tx,hy+ty);
-      ctx.lineTo(hx+tx-Math.cos(a-0.8)*cl, hy+ty-Math.sin(a-0.8)*cl); ctx.stroke(); });
+    ctx.lineWidth=lw*0.55;
+    [[-0.7,-0.77,0,-1.09,0.7,-0.77],[-0.58,-0.63,0,-0.95,0.58,-0.63],[-0.47,-0.49,0,-0.81,0.47,-0.49],[-0.37,-0.35,0,-0.67,0.37,-0.35]].forEach(a=>{
+      ctx.beginPath(); ctx.moveTo(a[0]*r,a[1]*r); ctx.quadraticCurveTo(a[2]*r,a[3]*r,a[4]*r,a[5]*r); ctx.stroke(); });
+    ctx.lineWidth=lw*0.7;
+    [[-0.73,-0.28,-0.83,-0.53],[-0.67,0.19,-0.77,-0.07]].forEach(w=>{ for(const s of [-1,1]){
+      ctx.beginPath(); ctx.moveTo(s*w[0]*r,w[1]*r); ctx.quadraticCurveTo(s*(w[0]-0.06)*r,(w[1]+w[3])*0.5*r,s*w[2]*r,w[3]*r); ctx.stroke();
+      dot(ctx,s*w[2]*r,w[3]*r,0.03*r,col); }});
     ctx.lineWidth=lw;
-    const n1x=-r*0.2+Math.cos(ph*0.9)*r*0.07, n1y=-r*0.1+Math.sin(ph*0.9)*r*0.07;
-    const n2x=r*0.3+Math.cos(ph*1.1+2.1)*r*0.05, n2y=r*0.32+Math.sin(ph*1.1+2.1)*r*0.05;
-    ctx.beginPath(); ctx.arc(n1x,n1y,r*0.26,0,6.2832); ctx.fillStyle=col+'33'; ctx.fill(); ctx.stroke();
-    ctx.beginPath(); ctx.arc(n2x,n2y,r*0.2,0,6.2832); ctx.fillStyle=col+'33'; ctx.fill(); ctx.stroke();
-    ctx.save(); ctx.shadowBlur=18*pulse; dot(ctx,n1x,n1y,r*(0.1+tell*0.04),fl>0?COL.white:col); ctx.restore();
+    ctx.beginPath();
+    ctx.moveTo(-0.07*r,-1.1*r); ctx.lineTo(0,-1.34*r); ctx.lineTo(0.07*r,-1.1*r);
+    ctx.moveTo(-0.62*r,-0.78*r); ctx.lineTo(-0.66*r,-1.0*r);
+    ctx.moveTo(0.62*r,-0.78*r); ctx.lineTo(0.66*r,-1.0*r);
+    ctx.stroke();
+    ctx.beginPath(); ctx.arc(0,0.95*r,0.1*r,0,6.2832); ctx.stroke();
+    ctx.beginPath(); ctx.arc(0,0.95*r,0.055*r,0,6.2832); ctx.stroke();
+    dot(ctx,0,0.95*r,0.025*r,col);
+    ctx.save(); ctx.shadowBlur=(8+fl*30)*g; ctx.shadowColor=gc; ctx.strokeStyle=gc; ctx.lineWidth=lw*0.9;
+    ctx.beginPath(); ctx.moveTo(0,-1.05*r); ctx.lineTo(0,0.92*r); ctx.stroke(); ctx.restore();
+    ctx.save(); ctx.shadowBlur=(10+fl*30)*pulse; ctx.shadowColor=gc;
+    ctx.beginPath(); ctx.arc(0,0,0.2*r,0,6.2832); ctx.fillStyle=col+'14'; ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.arc(0,0,0.1*r,0,6.2832); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(0,0,0.06*r,0.075*r,0,0,6.2832); ctx.fillStyle=gc; ctx.fill();
+    ctx.restore();
   }
   ctx.restore();
 }
@@ -678,7 +692,7 @@ const FACTIONS={
 const FKEYS=['ace','bmet','csee','mat','mset'];
 FACTIONS.foreman={c:COL.ace,  draw:drawFOREMAN, pts:140, hp:[46,46,46], r:[30,30,30], name:'FOREMAN'};
 FACTIONS.vector ={c:COL.bmet, draw:drawVECTOR,  pts:140, hp:[42,42,42], r:[30,30,30], name:'VECTOR'};
-const TYPENAMES={ace:['SAWHORSE','TRUSS','CLINKER'],bmet:['SPORE','PHAGE','PATHOGEN'],csee:['NODE','RELAY','MAINFRAME'],mat:['LENS','EMITTER','BROADCASTER'],mset:['INGOT','LATTICE','CRUCIBLE'],foreman:['FOREMAN'],vector:['VECTOR']};
+const TYPENAMES={ace:['SAWHORSE','TRUSS','CLINKER'],bmet:['SPORE','PHAGE','STRATUM'],csee:['NODE','RELAY','MAINFRAME'],mat:['LENS','EMITTER','BROADCASTER'],mset:['INGOT','LATTICE','CRUCIBLE'],foreman:['FOREMAN'],vector:['VECTOR']};
 function killerName(e){ const a=TYPENAMES[e.fk]; return a?(a[Math.min(e.variant,a.length-1)]):'ENEMY'; }
 
 /* ============================= sector identity ============================= */
@@ -1245,10 +1259,10 @@ function aceAttack(e){
 function bmetAttack(e){
   if(ebul.length>=8+sector*4)return; if(sector<=2&&Math.random()<0.5)return;
   e.fireFlash=0.12;
-  const dx=player.x-e.x,dy=player.y-e.y,m=Math.hypot(dx,dy)||1;
-  if(e.variant===0){ const sp=170+sector*7; ebul.push({x:e.x,y:e.y,vx:dx/m*sp,vy:dy/m*sp,c:e.c,r:4,split:true,owner:e}); }
-  else if(e.variant===1){ const n=(sector>=6?2:1), sp=66+sector*3, base=Math.atan2(dy,dx); for(let k=0;k<n;k++){ const a=base+rnd(-0.4,0.4); ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:COL.bmet,r:3.5,seeker:true,homeT:1.6,owner:e}); } }
-  else { if(hazards.length<8) hazards.push({x:e.x,y:e.y+e.r,r:30,life:2.5,max:2.5,c:e.c}); for(let i=0;i<5;i++){ const a=e.core*1.5+i/5*6.2832; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*120,vy:Math.sin(a)*120+50,c:e.c,r:3,owner:e}); } }
+  const dx=player.x-e.x,dy=player.y-e.y,m=Math.hypot(dx,dy)||1,base=Math.atan2(dy,dx);
+  if(e.variant===0){ const sp=150+sector*6, n=4; for(let i=0;i<n;i++){ const a=base+(i-(n-1)/2)*0.7; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:3.2,split:true,owner:e}); } }
+  else if(e.variant===1){ const sp=300+sector*10; ebul.push({x:e.x,y:e.y,vx:dx/m*sp,vy:dy/m*sp,c:COL.bmet,r:4,owner:e}); }
+  else { if(hazards.length<8) hazards.push({x:clamp(e.x,40,W-40),y:H*0.72,r:28,life:2.4,max:2.4,c:e.c}); const sp=120+sector*5; for(let k=-1;k<=1;k++){ const a=base+k*0.18; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:4.5,owner:e}); } }
 }
 function cseeAttack(e){
   if(ebul.length>=8+sector*4)return; if(sector<=2&&Math.random()<0.5)return;
