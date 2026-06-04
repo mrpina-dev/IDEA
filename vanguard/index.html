@@ -1775,15 +1775,25 @@ function updateBoss(dt){
       for(let i=0;i<2+phase;i++){ const e=makeEnemy('bmet',0,b.x+rnd(-50,50),b.y+rnd(-20,20),'dive'); e.vy=60; e.vx=rnd(-70,70); e.hp=2; e.maxhp=2; e.fire=0.6; enemies.push(e); } }
     if(b.regenT>0) b.regenT-=dt; else if(b.hp<b.maxhp){ const rr=0.045+(phase>=2?0.025:0); b.hp=Math.min(b.maxhp,b.hp+dt*b.maxhp*rr);
       if(Math.random()<0.3+phase*0.15) parts.push({x:b.x+rnd(-b.r/2,b.r/2),y:b.y+rnd(-b.r/2,b.r/2),vx:0,vy:-20,life:.4,max:.4,c:COL.green,sz:1.4}); }
-    if(b.pulseSeq>0){ b.pulseCd=(b.pulseCd||0)-dt; if(b.pulseCd<=0){ b.pulseCd=0.28; b.pulseSeq--; rings.push({x:b.x,y:b.y,r:b.r*0.5,vr:220,life:.7,max:.7,c:b.c,harm:true}); Audio_.hit(); shake=Math.max(shake,5); } }
+    if(b.pulseSeq>0){ b.pulseCd=(b.pulseCd||0)-dt; if(b.pulseCd<=0){ b.pulseCd=0.32; b.pulseSeq--;
+      const n=Math.min(22,14+phase*3+Math.floor(sector/3)), off=Math.random()*0.5;
+      for(let i=0;i<n;i++){ const a=i/n*6.2832+off; ebul.push({x:b.x,y:b.y,vx:Math.cos(a)*(170+phase*40),vy:Math.sin(a)*(170+phase*40),c:b.c,r:3,shape:'spore'}); }
+      rings.push({x:b.x,y:b.y,r:b.r*0.5,vr:220,life:.6,max:.6,c:b.c}); Audio_.hit(); shake=Math.max(shake,5); } }
+    if(b.burstT>0){ b.burstT-=dt; b.tell=clamp(1-b.burstT/0.8,0,1);
+      if(b.burstT<=0){ b.tell=0; b.fireFlash=0.2; Audio_.wub(); shake=Math.max(shake,8); bossFlash=Math.max(bossFlash,0.25);
+        const n=Math.min(30,18+phase*5+Math.floor(sector/2)), gaps=2+phase, base=Math.random()*6.2832;
+        for(let i=0;i<n;i++){ const a=i/n*6.2832; let ok=true; for(let g=0;g<gaps;g++){ if(Math.abs(((a-(base+g*6.2832/gaps)+Math.PI)%(Math.PI*2))-Math.PI)<0.34){ok=false;break;} } if(!ok)continue;
+          ebul.push({x:b.x,y:b.y,vx:Math.cos(a)*(160+sector*6),vy:Math.sin(a)*(160+sector*6),c:b.c,r:3.5,shape:'spore'}); }
+        rings.push({x:b.x,y:b.y,r:b.r*0.4,vr:260,life:.6,max:.6,c:b.c}); } }
     if(b.spiralN>0){ b.spiralCd=(b.spiralCd||0)-dt; if(b.spiralCd<=0){ b.spiralCd=0.05; b.spiralN--; b.spiralAng=(b.spiralAng||0)+(b.spiralDir||1)*0.40;
       const arms=2+phase; for(let a=0;a<arms;a++){ const ang=b.spiralAng+a*(6.2832/arms); ebul.push({x:b.x,y:b.y,vx:Math.cos(ang)*(150+sector*5),vy:Math.sin(ang)*(150+sector*5),c:b.c,r:3.2}); }
       if(b.spiralN%5===0) Audio_.hit(); } }
-    if(b.sigCd<=0 && !(b.spiralN>0)){ const rr=Math.random();
-      if(rr<0.30){ const n=Math.min(7,2+phase+Math.floor(sector/4)); for(let i=0;i<n;i++){ const e=makeEnemy('bmet',0,b.x+rnd(-40,40),b.y+18,'dive'); e.vy=70+phase*12; e.vx=rnd(-40,40); e.hp=2; e.maxhp=2; e.fire=0.5; enemies.push(e); } Audio_.pickup(); }
-      else if(rr<0.66){ b.spiralN=20+phase*6; b.spiralCd=0; b.spiralAng=Math.atan2(player.y-b.y,player.x-b.x); b.spiralDir=Math.random()<0.5?1:-1; rings.push({x:b.x,y:b.y,r:b.r*0.4,vr:150,life:.5,max:.5,c:b.c}); }
-      else { for(let i=0;i<(phase>=1?3:2);i++) hazards.push({x:clamp(player.x+rnd(-120,120),30,W-30),y:rnd(H*0.44,H*0.68),r:26,life:3.2,max:3.2,c:b.c});
-        if(phase>=2){ const dx=player.x-b.x,dy=player.y-b.y,m=Math.hypot(dx,dy)||1,sp=260+sector*10; ebul.push({x:b.x,y:b.y,vx:dx/m*sp,vy:dy/m*sp,c:b.c,r:4}); } }
+    if(b.sigCd<=0 && !(b.spiralN>0) && !(b.burstT>0)){ const rr=Math.random();
+      if(rr<0.24){ const n=Math.min(7,2+phase+Math.floor(sector/4)); for(let i=0;i<n;i++){ const e=makeEnemy('bmet',0,b.x+rnd(-40,40),b.y+18,'dive'); e.vy=70+phase*12; e.vx=rnd(-40,40); e.hp=2; e.maxhp=2; e.fire=0.5; enemies.push(e); } Audio_.pickup(); }
+      else if(rr<0.50){ b.spiralN=20+phase*6; b.spiralCd=0; b.spiralAng=Math.atan2(player.y-b.y,player.x-b.x); b.spiralDir=Math.random()<0.5?1:-1; rings.push({x:b.x,y:b.y,r:b.r*0.4,vr:150,life:.5,max:.5,c:b.c}); }
+      else if(rr<0.74){ b.burstT=0.8; Audio_.whine(0.8); }
+      else if(phase>=1 && rr<0.88){ for(let i=0;i<2+phase;i++){ const a=Math.atan2(player.y-b.y,player.x-b.x)+rnd(-0.5,0.5); ebul.push({x:b.x,y:b.y,vx:Math.cos(a)*120,vy:Math.sin(a)*120,c:COL.bmet,r:3,shape:'spore',seeker:true,homeT:1.6}); } Audio_.hit(); }
+      else { for(let i=0;i<(phase>=1?3:2);i++) hazards.push({x:clamp(player.x+rnd(-120,120),30,W-30),y:rnd(H*0.44,H*0.68),r:26,life:3.2,max:3.2,c:b.c}); }
       b.sigCd=Math.max(0.4,(rnd(2.8,4.0)-phase*0.6)*sf); }
   } else if(b.fk==='csee'){
     if(b.fireFlash>0) b.fireFlash=Math.max(0,(b.fireFlash||0)-dt);
@@ -2140,6 +2150,9 @@ function drawBossFX(){ const b=boss; if(!b) return; bg.save();
     if(b.scanState===2){ const sx=clamp(b.scanX,20,W-20); bg.save(); bg.globalAlpha=0.7; bg.strokeStyle=COL.white; bg.shadowColor=b.c; bg.shadowBlur=14; bg.lineWidth=2.5;
       bg.beginPath(); bg.moveTo(sx,b.y+b.r*0.5); bg.lineTo(sx,H); bg.stroke(); bg.globalAlpha=1; bg.shadowBlur=0; bg.restore(); }
   }
+  if(b.fk==='bmet' && b.burstT>0){ const k=b.tell||0; bg.save(); bg.globalCompositeOperation='lighter'; bg.strokeStyle=b.c; bg.shadowColor=b.c; bg.shadowBlur=16; bg.globalAlpha=0.4+0.4*k; bg.lineWidth=2+3*k;
+    bg.beginPath(); bg.arc(b.x,b.y,b.r*(1.4-0.8*k),0,6.28); bg.stroke();
+    bg.fillStyle=b.c; bg.globalAlpha=0.3*k; bg.beginPath(); bg.arc(b.x,b.y,b.r*0.5*k,0,6.28); bg.fill(); bg.globalAlpha=1; bg.shadowBlur=0; bg.restore(); }
   barriers.forEach(bar=>{ bg.globalAlpha=Math.min(1,bar.life)*0.95;
     bg.fillStyle='rgba(18,9,2,0.7)'; bg.fillRect(bar.x-bar.w/2,bar.y-bar.h/2,bar.w,bar.h);
     bg.strokeStyle=bar.c; bg.shadowColor=bar.c; bg.shadowBlur=10; bg.lineWidth=2; bg.strokeRect(bar.x-bar.w/2,bar.y-bar.h/2,bar.w,bar.h);
