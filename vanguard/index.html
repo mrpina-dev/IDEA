@@ -330,6 +330,7 @@ fit(); window.addEventListener('resize',fit);
 
 const COL={green:'#00FF41',gold:'#C8FF00',cyan:'#00F0FF',white:'#E8FFE8',dim:'#4A7A52',bg:'#020A04',
   ace:'#FF7A1A',bmet:'#B24DFF',csee:'#2E9BFF',mat:'#FFD21A',mset:'#FF2E2E'};
+const EBSHAPE={}; EBSHAPE[COL.ace]='dart'; EBSHAPE[COL.bmet]='spore'; EBSHAPE[COL.csee]='chip'; EBSHAPE[COL.mat]='streak'; EBSHAPE[COL.mset]='shard';
 const rnd=(a,b)=>a+Math.random()*(b-a);
 const pick=a=>a[(Math.random()*a.length)|0];
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
@@ -2163,8 +2164,22 @@ function drawFX(){
   pbul.forEach(b=>{ fx.fillStyle=b.c; fx.shadowColor=b.c; fx.shadowBlur=6;
     if(b.pierce){ fx.fillRect(b.x-b.r/2,b.y-(b.len||10),b.r,(b.len||10)*2); }
     else { fx.beginPath(); fx.ellipse(b.x,b.y,b.r,b.r*1.5,0,0,6.28); fx.fill(); } });
-  ebul.forEach(b=>{ fx.fillStyle=b.c; fx.shadowColor=b.c; fx.shadowBlur=12; fx.beginPath(); fx.arc(b.x,b.y,b.r,0,6.28); fx.fill();
-    fx.fillStyle=COL.white; fx.beginPath(); fx.arc(b.x,b.y,b.r*0.45,0,6.28); fx.fill(); });
+  ebul.forEach(b=>{ fx.save(); fx.shadowColor=b.c; fx.shadowBlur=12; fx.fillStyle=b.c; fx.strokeStyle=b.c;
+    const sh=b.shape||EBSHAPE[b.c]||'orb';
+    if(sh==='dart'){ const ang=Math.atan2(b.vy,b.vx); fx.translate(b.x,b.y); fx.rotate(ang);
+      fx.beginPath(); fx.moveTo(b.r*1.7,0); fx.lineTo(-b.r*0.9,b.r); fx.lineTo(-b.r*0.3,0); fx.lineTo(-b.r*0.9,-b.r); fx.closePath(); fx.fill(); }
+    else if(sh==='spore'){ fx.beginPath(); fx.arc(b.x,b.y,b.r*1.05,0,6.28); fx.fill();
+      fx.globalAlpha=0.45; fx.lineWidth=1.4; fx.beginPath(); fx.arc(b.x,b.y,b.r*1.7,0,6.28); fx.stroke(); fx.globalAlpha=1; }
+    else if(sh==='chip'){ fx.translate(b.x,b.y); fx.rotate(0.7853981); fx.fillRect(-b.r,-b.r,b.r*2,b.r*2);
+      fx.fillStyle=COL.white; fx.fillRect(-b.r*0.4,-b.r*0.4,b.r*0.8,b.r*0.8); }
+    else if(sh==='streak'){ const ang=Math.atan2(b.vy,b.vx); fx.translate(b.x,b.y); fx.rotate(ang);
+      fx.beginPath(); fx.ellipse(0,0,b.r*2.2,b.r*0.65,0,0,6.28); fx.fill();
+      fx.fillStyle=COL.white; fx.beginPath(); fx.ellipse(0,0,b.r*1.0,b.r*0.3,0,0,6.28); fx.fill(); }
+    else if(sh==='shard'){ const ang=Math.atan2(b.vy,b.vx); fx.translate(b.x,b.y); fx.rotate(ang);
+      fx.beginPath(); fx.moveTo(b.r*1.8,0); fx.lineTo(0,b.r*0.85); fx.lineTo(-b.r*0.7,b.r*0.3); fx.lineTo(-b.r*0.7,-b.r*0.3); fx.lineTo(0,-b.r*0.85); fx.closePath(); fx.fill(); }
+    else { fx.beginPath(); fx.arc(b.x,b.y,b.r,0,6.28); fx.fill();
+      fx.fillStyle=COL.white; fx.beginPath(); fx.arc(b.x,b.y,b.r*0.45,0,6.28); fx.fill(); }
+    fx.restore(); });
   fx.shadowBlur=0;
   // beam
   if(player && player.beamActive){
