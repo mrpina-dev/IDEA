@@ -1761,8 +1761,9 @@ function updateBoss(dt){
       ampShockwave(2); b.beatT=0.4;
       b.fireFlash=0.22; Audio_.wub(); Audio_.big(); shake=Math.max(shake,14); bossFlash=Math.max(bossFlash,0.45);
     } else if(b.fk==='mat'){ // FRAME: overexposure flare
-      const n=14, sp=300; for(let i=0;i<n;i++){const a=-Math.PI/2+(i/(n-1))*Math.PI;ebul.push({x:b.x,y:b.y+b.r*0.4,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:b.c,r:4});}
-      rings.push({x:b.x,y:b.y,r:b.r*0.5,vr:300,life:.6,max:.6,c:b.c}); bossFlash=Math.max(bossFlash,0.4); Audio_.blast(); shake=Math.max(shake,10);
+      const lx=b.x, ly=b.y+0.58*b.r; matLensFx(b);
+      const n=14, sp=300; for(let i=0;i<n;i++){const a=-Math.PI/2+(i/(n-1))*Math.PI;ebul.push({x:lx,y:ly,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:b.c,r:4});}
+      rings.push({x:lx,y:ly,r:b.r*0.5,vr:300,life:.6,max:.6,c:b.c}); bossFlash=Math.max(bossFlash,0.4); Audio_.blast(); shake=Math.max(shake,10);
     } else if(b.fk==='mset'){ // SCOPE: full-power scan burst
       const n=Math.min(26,16+Math.floor(sector/2));
       for(let i=0;i<n;i++){const a=b.core+i/n*6.2832;ebul.push({x:b.x,y:b.y,vx:Math.cos(a)*260,vy:Math.sin(a)*260+50,c:b.c,r:4,shape:'shard'});}
@@ -1829,26 +1830,33 @@ function updateBoss(dt){
       else { ampWaveWall(phase,b.gapCol); b.gapCol=(b.gapCol+(Math.random()<0.5?1:5))%6; }
     }
   } else if(b.fk==='mat'){
-    if(b.sweepState!==1 && b.focusState!==1) b.tell=Math.max(0,(b.tell||0)-dt*3);
-    if(b.sweepState===1){ b.sweepT-=dt; b.tell=clamp(1-b.sweepT/0.9,0,1); if(b.sweepT<=0){ b.sweepState=2; b.sweepT=1.3; b.sweepAng=(b.sweepDir||1)>0?0.30:Math.PI-0.30; b.tell=0; b.sweepEmit=0; } }
-    else if(b.sweepState===2){ b.sweepT-=dt; b.sweepAng+=dt*1.6*(b.sweepDir||1);
-      let pa=Math.atan2(player.y-b.y,player.x-b.x); let d=Math.abs(pa-b.sweepAng); if(d>Math.PI)d=2*Math.PI-d;
-      if(player.y>b.y-10 && d<0.11 && !player.dead && player.inv<=0) playerHit();
-      b.sweepEmit=(b.sweepEmit||0)-dt; if(b.sweepEmit<=0 && phase>=1){ b.sweepEmit=0.15; const sp=150+sector*6; ebul.push({x:b.x,y:b.y,vx:Math.cos(b.sweepAng)*sp,vy:Math.sin(b.sweepAng)*sp,c:b.c,r:3}); }
-      if(b.sweepT<=0) b.sweepState=0; }
+    const lx=b.x, ly=b.y+0.58*b.r;
+    if(b.sweepState===0 && b.focusState!==1) b.tell=Math.max(0,(b.tell||0)-dt*3);
+    if(b.sweepState===1){ /* telegraph: lens focuses, aim-line previews the arc */
+      b.sweepT-=dt; b.tell=clamp(1-b.sweepT/(b.sweepTele||0.5),0,1);
+      if(b.sweepT<=0){ b.sweepState=2; b.sweepT=b.sweepDur; b.sweepAng=b.sweepStart; b.tell=1; b.sweepEmit=0; Audio_.beam(); } }
+    else if(b.sweepState===2){ /* live beam carving the lower field */
+      b.sweepT-=dt; b.sweepAng+=dt*(b.sweepRate||1.6)*(b.sweepDir||1); b.tell=1; shake=Math.max(shake,phase>=2?8:6);
+      let pa=Math.atan2(player.y-ly,player.x-lx); let d=Math.abs(pa-b.sweepAng); if(d>Math.PI)d=2*Math.PI-d;
+      if(player.y>ly-6 && d<0.14 && !player.dead && player.inv<=0) playerHit();
+      b.sweepEmit=(b.sweepEmit||0)-dt; if(b.sweepEmit<=0){ b.sweepEmit=0.15; const dd=rnd(160,520), sx=clamp(lx+Math.cos(b.sweepAng)*dd,20,W-20), sy=ly+Math.sin(b.sweepAng)*dd;
+        if(sy>ly) hazards.push({x:sx,y:clamp(sy,ly,H-20),r:26,life:.7,max:.7,c:b.c}); }
+      if(b.sweepT<=0){ if(phase>=2 && b.sweepPass>0){ b.sweepPass=0; b.sweepDir=-(b.sweepDir||1); b.sweepStart=b.sweepAng; b.sweepState=1; b.sweepTele=0.32; b.sweepT=0.32; b.tell=0; }
+        else b.sweepState=0; } }
     if(b.focusState===1){ b.focusT-=dt; b.tell=clamp(1-b.focusT/0.8,0,1); b.focusX=player.x; b.focusY=player.y;
-      if(b.focusT<=0){ b.focusState=0; b.tell=0; b.fireFlash=0.16; Audio_.blast();
-        const dx=b.focusX-b.x, dy=b.focusY-(b.y+b.r*0.4), m=Math.hypot(dx,dy)||1, base=Math.atan2(dy,dx), sp=320+sector*10, n=5+phase*2;
-        for(let i=0;i<n;i++){ const a=base+rnd(-0.10,0.10); ebul.push({x:b.x,y:b.y+b.r*0.4,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:b.c,r:3.4}); }
+      if(b.focusT<=0){ b.focusState=0; b.tell=0; matLensFx(b); Audio_.blast();
+        const dx=b.focusX-lx, dy=b.focusY-ly, m=Math.hypot(dx,dy)||1, base=Math.atan2(dy,dx), sp=320+sector*10, n=5+phase*2;
+        for(let i=0;i<n;i++){ const a=base+rnd(-0.10,0.10); ebul.push({x:lx,y:ly,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:b.c,r:3.4}); }
         shake=Math.max(shake,6); } }
     if(b.sweepState===0 && b.focusState!==1 && b.sigCd<=0){ const rr=Math.random();
-      if(rr<0.32){ b.sweepState=1; b.sweepT=0.9; b.sweepDir=Math.random()<0.5?1:-1; Audio_.beam(); }
+      if(rr<0.32){ b.sweepState=1; b.sweepTele=0.5; b.sweepT=0.5; b.sweepDir=Math.random()<0.5?1:-1; b.sweepDur=phase>=2?1.0:1.3; b.sweepRate=phase>=2?2.3:1.6;
+        b.sweepStart=(b.sweepDir>0?0.30:Math.PI-0.30); b.sweepSpan=b.sweepRate*b.sweepDur; b.sweepPass=phase>=2?1:0; Audio_.whine(0.5); }
       else if(rr<0.60){ b.focusState=1; b.focusT=0.8; b.focusX=player.x; b.focusY=player.y; Audio_.whine(0.8); }
-      else if(phase>=1 && rr<0.82){ b.fireFlash=0.2; bossFlash=Math.max(bossFlash,0.3); Audio_.blast(); shake=Math.max(shake,7);
+      else if(phase>=1 && rr<0.82){ matLensFx(b); bossFlash=Math.max(bossFlash,0.3); Audio_.blast(); shake=Math.max(shake,7);
         const n=Math.min(16,9+phase*3+Math.floor(sector/4)), sp=230+sector*8, off=Math.random()*0.4;
-        for(let i=0;i<n;i++){ const a=-Math.PI/2+(i/(n-1))*Math.PI+off; ebul.push({x:b.x,y:b.y+b.r*0.4,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:b.c,r:3.4}); }
-        rings.push({x:b.x,y:b.y+b.r*0.4,r:b.r*0.4,vr:300,life:.5,max:.5,c:b.c}); }
-      else { const m=Math.hypot(pdx,pdy)||1,sp=360; const mshots=Math.min(2,1+Math.floor(sector/4)); for(let k=-mshots;k<=mshots;k++){const a=Math.atan2(pdy,pdx)+k*0.12; ebul.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:b.c,r:3});} }
+        for(let i=0;i<n;i++){ const a=-Math.PI/2+(i/(n-1))*Math.PI+off; ebul.push({x:lx,y:ly,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:b.c,r:3.4}); }
+        rings.push({x:lx,y:ly,r:b.r*0.4,vr:300,life:.5,max:.5,c:b.c}); }
+      else { matLensFx(b); const base=Math.atan2(player.y-ly,player.x-lx), sp=360, mshots=Math.min(2,1+Math.floor(sector/4)); for(let k=-mshots;k<=mshots;k++){const a=base+k*0.12; ebul.push({x:lx,y:ly,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:b.c,r:3});} }
       b.sigCd=Math.max(0.4,(rnd(2.6,3.6)-phase*0.4)*sf); }
   } else if(b.fk==='mset'){
     if(b.scanState!==1) b.tell=Math.max(0,(b.tell||0)-dt*3);
@@ -1892,6 +1900,8 @@ function updateBoss(dt){
   for(let i=barriers.length-1;i>=0;i--){ barriers[i].life-=dt; if(barriers[i].life<=0) barriers.splice(i,1); }
   document.querySelector('#bossbar i').style.transform='scaleX('+bossHpFrac()+')';
 }
+function matLensFx(b){ b.fireFlash=Math.max(b.fireFlash||0,0.2); const lx=b.x, ly=b.y+0.58*b.r;
+  for(let i=0;i<4;i++){ const a=rnd(0,6.2832),s=rnd(20,70); parts.push({x:lx,y:ly,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:.3,max:.3,c:COL.white,sz:1.6}); } }
 function spawnBarrier(){ const y=rnd(H*0.42,H*0.58), w=rnd(120,180), x=clamp(player.x+rnd(-60,60),w/2+8,W-w/2-8);
   barriers.push({x,y,w,h:12,life:4.2,max:4.2,c:boss?boss.c:COL.ace}); Audio_.hit(); }
 function angDiff(a,b){ let d=(a-b)%(2*Math.PI); if(d>Math.PI)d-=2*Math.PI; if(d<-Math.PI)d+=2*Math.PI; return d; }
@@ -2228,12 +2238,21 @@ function drawBossFX(){ const b=boss; if(!b) return; bg.save();
       for(const cc of [[-1,-1],[1,-1],[1,1],[-1,1]]){ const cx=b.focusX+cc[0]*fs, cy=b.focusY+cc[1]*fs;
         bg.beginPath(); bg.moveTo(cx,cy); bg.lineTo(cx-cc[0]*11,cy); bg.moveTo(cx,cy); bg.lineTo(cx,cy-cc[1]*11); bg.stroke(); }
       bg.beginPath(); bg.arc(b.focusX,b.focusY,2.5,0,6.28); bg.fillStyle=b.c; bg.fill(); bg.globalAlpha=1; bg.shadowBlur=0; bg.restore(); }
-    if(b.sweepState===1){ const k=1-b.sweepT/0.9; bg.globalAlpha=k; bg.fillStyle=b.c; bg.shadowColor=b.c; bg.shadowBlur=22;
-      bg.beginPath(); bg.arc(b.x,b.y,6+18*k,0,6.28); bg.fill(); bg.globalAlpha=1; bg.shadowBlur=0; }
-    else if(b.sweepState===2){ const len=900; bg.save(); bg.translate(b.x,b.y); bg.rotate(b.sweepAng);
-      const g=bg.createLinearGradient(0,0,len,0); g.addColorStop(0,'rgba(255,210,26,0.85)'); g.addColorStop(1,'rgba(255,210,26,0)');
-      bg.fillStyle=g; bg.shadowColor=b.c; bg.shadowBlur=16; const hw=12;
-      bg.beginPath(); bg.moveTo(0,-hw); bg.lineTo(len,-hw*3); bg.lineTo(len,hw*3); bg.lineTo(0,hw); bg.closePath(); bg.fill(); bg.restore(); bg.shadowBlur=0; }
+    const lx=b.x, ly=b.y+0.58*b.r;
+    if(b.sweepState===1){ const k=b.tell||0, ang=(b.sweepStart||0)+(b.sweepSpan||0)*(b.sweepDir||1)*k;
+      bg.save(); bg.globalCompositeOperation='lighter'; bg.strokeStyle=COL.white; bg.shadowColor=b.c; bg.shadowBlur=10; bg.globalAlpha=0.3+0.55*k; bg.lineWidth=1+1.6*k;
+      bg.beginPath(); bg.moveTo(lx,ly); bg.lineTo(lx+Math.cos(ang)*1000,ly+Math.sin(ang)*1000); bg.stroke();
+      bg.globalAlpha=0.5+0.5*k; bg.beginPath(); bg.arc(lx,ly,4+6*k,0,6.28); bg.fillStyle=COL.white; bg.fill(); bg.globalAlpha=1; bg.shadowBlur=0; bg.restore(); }
+    else if(b.sweepState===2){ const ang=b.sweepAng, len=1000, flk=0.6+0.4*Math.sin(t*40);
+      bg.save(); bg.globalCompositeOperation='lighter'; bg.translate(lx,ly); bg.rotate(ang);
+      const gg=bg.createLinearGradient(0,0,len,0); gg.addColorStop(0,b.c+'E6'); gg.addColorStop(0.5,b.c+'66'); gg.addColorStop(1,b.c+'00');
+      bg.fillStyle=gg; bg.shadowColor=b.c; bg.shadowBlur=26; const hw=20+8*flk;
+      bg.beginPath(); bg.moveTo(0,-hw*0.5); bg.lineTo(len,-hw*3); bg.lineTo(len,hw*3); bg.lineTo(0,hw*0.5); bg.closePath(); bg.fill();
+      const gc=bg.createLinearGradient(0,0,len,0); gc.addColorStop(0,'rgba(255,255,255,0.95)'); gc.addColorStop(0.6,'rgba(255,255,255,0.5)'); gc.addColorStop(1,'rgba(255,255,255,0)');
+      bg.fillStyle=gc; const cw=6+3*flk;
+      bg.beginPath(); bg.moveTo(0,-cw*0.4); bg.lineTo(len,-cw*2); bg.lineTo(len,cw*2); bg.lineTo(0,cw*0.4); bg.closePath(); bg.fill(); bg.restore();
+      bg.save(); bg.globalCompositeOperation='lighter'; bg.fillStyle='rgba(255,255,255,0.9)'; bg.shadowColor=b.c; bg.shadowBlur=24;
+      bg.beginPath(); bg.arc(lx,ly,10+5*flk,0,6.28); bg.fill(); bg.globalAlpha=1; bg.shadowBlur=0; bg.restore(); }
   }
   if(b.fk==='mset'){
     if(b.lockT>0){ const k=b.tell||0; bg.save(); bg.globalAlpha=0.3+0.6*k; bg.strokeStyle=b.c; bg.shadowColor=b.c; bg.shadowBlur=12; bg.lineWidth=1.5+2.5*k; bg.setLineDash([5,7]);
