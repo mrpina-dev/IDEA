@@ -419,7 +419,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
     <div class="conhdr">FIELD TIPS</div>
     <div class="cref">Parry an enemy shot the instant before it lands to reflect it.</div>
     <div class="cref">Clear a boss to reach REFIT and spend your i&#162;.</div>
-    <div class="cref">Grab a CORE pickup for a jackpot and an extra life.</div>
+    <div class="cref">Grab a CORE pickup for a coin jackpot - plus an extra life outside Hardcore.</div>
     <div class="cref">Chain kills without taking a hit to raise STYLE and multiply score.</div>
   </aside>
 </div><!-- /cabinet -->
@@ -428,7 +428,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=560,H=840; const VERSION='2549';
+const W=560,H=840; const VERSION='2550';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -1130,7 +1130,7 @@ function drawBossFrame(ctx,e){
   ctx.beginPath(); ctx.arc(lx,ly,R,0,6.2832); ctx.fillStyle=col+'12'; ctx.fill(); ctx.stroke();
   ctx.beginPath(); ctx.arc(lx,ly,R*0.82,0,6.2832); ctx.stroke();
   ctx.beginPath(); ctx.arc(lx,ly,R*0.64,0,6.2832); ctx.stroke();
-  ctx.lineWidth=lw*0.7; const irisR=R*0.50, openR=R*(0.18+0.05*Math.sin(ph*2))*(1-tell*0.4);
+  ctx.lineWidth=lw*0.7; const irisR=R*0.50, openR=R*(0.20+0.16*Math.sin(ph*2.2))*(1-tell*0.4);
   for(let i=0;i<8;i++){ const a=i/8*6.2832+ph*0.2, a2=a+0.785;
     ctx.beginPath(); ctx.moveTo(lx+Math.cos(a)*openR,ly+Math.sin(a)*openR); ctx.lineTo(lx+Math.cos(a2)*irisR,ly+Math.sin(a2)*irisR); ctx.stroke(); }
   ctx.lineWidth=lw;
@@ -1784,9 +1784,9 @@ function update(dt){
     if(fleet.arch!=='siege' && !panicking){
       if(fleet.spPhase==='idle'){ enemies.forEach(e=>{ if(e.state==='form') e.barrageGlow=0; });
         fleet.spT-=dt;
-        if(fleet.spT<=0){ const sig={pincer:'converge',swarm:'rolling',spear:'rolling',flank:'converge'}[fleet.arch];
-          const opts=['rolling','converge'].filter(m=>m!==fleet.spLast);
-          let move; if(sig && opts.includes(sig) && Math.random()<0.6) move=sig; else move=opts[(Math.random()*opts.length)|0];
+        if(fleet.spT<=0){ const sig={pincer:'converge',swarm:'rolling',spear:'rolling',flank:'curtain'}[fleet.arch];
+          const opts=['rolling','converge','curtain'].filter(m=>m!==fleet.spLast);
+          let move; if(sig && opts.includes(sig) && Math.random()<0.55) move=sig; else move=opts[(Math.random()*opts.length)|0];
           fleet.spMove=move; fleet.spLast=move; fleet.spPhase='charge'; fleet.spCharge=(move==='converge')?0.85:0.6; fleet.spDidFire=false;
           enemies.forEach(e=>{ if(e.state==='form') e.spFired=false; });
           if(move==='converge'){ fleet.spLX=player.x; fleet.spLY=player.y; }
@@ -1812,10 +1812,12 @@ function update(dt){
               else { const sp=210+sector*7; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:3,owner:e}); }
               e.fireFlash=0.12; }); }
           if(fleet.spFireT<=0){ fleet.spPhase='idle'; fleet.spT=Math.max(3.2,4.8-sector*0.10); }
-        } else {
+        } else { // curtain: full-width wall of straight-down fire with one safe gap at spGapX
           if(!fleet.spDidFire){ fleet.spDidFire=true;
-            forms.forEach(e=>{ if(Math.abs(e.x-fleet.spGapX)<=75)return; const ang=clamp((player.x-e.x)/320,-0.3,0.3), sp=200+sector*8;
-              ebul.push({x:e.x,y:e.y+e.r*0.6,vx:Math.sin(ang)*sp,vy:Math.cos(ang)*sp,c:e.c,r:3.2,owner:e}); e.fireFlash=0.12; }); }
+            const sp=200+sector*8, baseY=fleet.y+30, wc=(forms[0]&&forms[0].c)||COL.amber;
+            for(let bx=18; bx<=W-18; bx+=34){ if(Math.abs(bx-fleet.spGapX)<=85) continue;
+              ebul.push({x:bx,y:baseY,vx:0,vy:sp,c:wc,r:3.2,owner:null}); }
+            forms.forEach(e=>{ if(Math.abs(e.x-fleet.spGapX)>75) e.fireFlash=0.12; }); }
           if(fleet.spFireT<=0){ fleet.spPhase='idle'; fleet.spT=Math.max(2.6,4.2-sector*0.12); }
         }
       }
@@ -2663,7 +2665,7 @@ function drawBG(){
       bg.beginPath(); bg.arc(fleet.spLX,fleet.spLY,16,0,6.28); bg.stroke();
       bg.beginPath(); bg.moveTo(fleet.spLX-24,fleet.spLY); bg.lineTo(fleet.spLX+24,fleet.spLY); bg.moveTo(fleet.spLX,fleet.spLY-24); bg.lineTo(fleet.spLX,fleet.spLY+24); bg.stroke();
       bg.globalAlpha=1; bg.shadowBlur=0; bg.restore(); }
-    else if(fleet.spMove==='curtain'){ bg.save(); bg.globalAlpha=0.10+0.04*Math.sin(t*6); bg.fillStyle=COL.green;
+    else if(fleet.spMove==='curtain'){ bg.save(); bg.globalAlpha=0.15+0.06*Math.sin(t*6); bg.fillStyle=COL.green;
       bg.fillRect(fleet.spGapX-75,0,150,H);
       bg.globalAlpha=0.3; bg.strokeStyle=COL.green; bg.lineWidth=1.5;
       bg.beginPath(); bg.moveTo(fleet.spGapX-75,0); bg.lineTo(fleet.spGapX-75,H); bg.moveTo(fleet.spGapX+75,0); bg.lineTo(fleet.spGapX+75,H); bg.stroke();
