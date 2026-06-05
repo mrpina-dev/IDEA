@@ -353,7 +353,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=560,H=840; const VERSION='2537';
+const W=560,H=840; const VERSION='2538';
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
 const bg=bgC.getContext('2d'), fx=fxC.getContext('2d');
@@ -1240,7 +1240,7 @@ function resetPlayer(full){
   if(!player||full){ player={x:W/2,y:H-130, vx:0,vy:0,
     up:{gun:1,beamPow:1,beamCap:1,speed:1,beamPierce:1,beamSpool:1,flank:0,armor:0,heavyPow:1,heavyChg:1,teslaJump:1,singAmp:1,wavePow:1,mSpread:0,mRapid:0,mLance:0,mHoming:0},
     wtype:'spread', unlocked:{spread:1,lance:0,homing:0,rapid:0},
-    fireCd:0, beamOn:false, beamLock:false, beamActive:false, beamE:1, beamMax:1, beamDps:46, beamWind:0, beamCoolT:0,
+    fireCd:0, beamOn:false, beamLock:false, beamActive:false, beamE:1, beamMax:1, beamDps:46, beamWind:0, beamCoolT:0, heat:0, overheatT:0,
     heavy:'beam', heavyUnlocked:{beam:1,rail:0,tesla:0,singularity:0,wave:0}, heavyCharge:0, waveT:0, teslaArc:null,
     speed:184, wlevel:1, pdmg:1, bombs:2, shieldHits:0, drone:null,
     inv:1.4, armor:4, maxArmor:4, dmgFlash:0, lives:3, dead:false, respawn:0, coins:0, repair:0,
@@ -1249,7 +1249,7 @@ function resetPlayer(full){
     applyUpgrades(); player.beamE=player.beamMax; }
   else { player.x=W/2; player.y=H-130; player.armor=player.maxArmor; player.inv=1.6; player.dead=false;
     player.beamOn=false; player.beamLock=false; player.beamActive=false; player.beamE=player.beamMax; player.beamWind=0;
-    player.parryT=0; player.parryCd=0;
+    player.parryT=0; player.parryCd=0; player.heat=0; player.overheatT=0;
     player.buffs={overdrive:0,scatter:0,magnet:0}; }
 }
 function applyUpgrades(){ const u=player.up;
@@ -1376,6 +1376,10 @@ function explode(x,y,c,big){
     shards.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,rot:rnd(0,6.28),vr:rnd(-9,9),len:rnd(5,big?16:10),life:rnd(.5,big?1.0:.8),max:1,c});}
   parts.push({x,y,vx:0,vy:0,life:.14,max:.14,c:COL.white,sz:big?12:7,flash:true});
 }
+function muzzle(x,y,c,gl,n){ const k=Math.min(9,2+(n||2)*0.5);
+  for(let i=0;i<k;i++){ const a=-Math.PI/2+rnd(-0.7,0.7), sp=rnd(60,190)*gl;
+    parts.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:.12,max:.12,c:Math.random()<0.5?COL.white:c,sz:rnd(1.2,2.2)*gl}); }
+  parts.push({x,y,vx:0,vy:0,life:.06,max:.06,c:COL.white,sz:(3+gl*2),flash:true}); }
 function dropPod(x,y,fromBoss){
   let r=Math.random(); let type=null;
   if(fromBoss){ type = r<0.5?'coin' : r<0.7?'shield' : r<0.82?'pwr' : null; }
@@ -1446,32 +1450,51 @@ function applyPod(p){
 
 /* ============================= weapons ============================= */
 function firePrimary(){
+  if(player.overheatT>0) return;
   const lv=player.wlevel, x=player.x, y=player.y-20, pm=player.pdmg||1, u=player.up;
+  const gun=u.gun||1, gl=1+(gun-1)*0.16;
   const prevLen=pbul.length;
   shotsFired++;
-  if(player.wtype==='spread'){
-    const ms=u.mSpread||0; const pellets=[3,3,4,4,5,6,7,7][Math.min(lv,8)-1]+ms; const dmg=0.85*pm, spread=Math.max(0.06,0.12-ms*0.016);
-    for(let i=0;i<pellets;i++){ const a=(i-(pellets-1)/2)*spread+rnd(-0.015,0.015);
-      pbul.push({x:x+Math.sin(a)*7,y,vx:Math.sin(a)*300,vy:-600,c:COL.green,r:1.7,dmg}); }
-    player.fireCd=.19;
-  } else if(player.wtype==='rapid'){
-    const mr=u.mRapid||0; const streams=(lv<3?1:lv<6?2:3)+(mr>=3?1:0); const sp=9; const dmg=0.55*pm;
-    for(let i=0;i<streams;i++){ const ox=(i-(streams-1)/2)*sp; pbul.push({x:x+ox,y,vx:0,vy:-760,c:COL.green,r:1.3,dmg}); }
-    player.fireCd=.055*(1-mr*0.12);
-  } else if(player.wtype==='lance'){
-    const ml=u.mLance||0; const cols=lv<4?1:lv<7?2:3; const sp=11; const dmg=(3.0+ml*0.9)*pm;
-    for(let i=0;i<cols;i++){ const ox=(i-(cols-1)/2)*sp; pbul.push({x:x+ox,y,vx:0,vy:-720,c:COL.cyan,r:2.5,dmg,pierce:true,len:15}); }
-    player.fireCd=.26*(1-ml*0.06);
-  } else {
-    const mh=u.mHoming||0; const n=Math.min(6,(lv<2?1:lv<4?2:3)+mh); const dmg=1.6*pm;
-    for(let i=0;i<n;i++){ const a=(i-(n-1)/2)*0.4; pbul.push({x,y,vx:Math.sin(a)*120,vy:-380,c:COL.gold,r:2,dmg,homing:true}); }
-    player.fireCd=.18;
+  if(player.wtype==='spread'){            // SCRAPPER: point-blank shred, pellets fade at range
+    const ms=u.mSpread||0; const pellets=[4,4,5,5,6,7,8,9][Math.min(lv,8)-1]+ms; const dmg=0.7*pm, spread=Math.max(0.07,0.16-ms*0.018);
+    for(let i=0;i<pellets;i++){ const a=(i-(pellets-1)/2)*spread+rnd(-0.03,0.03);
+      pbul.push({x:x+Math.sin(a)*8,y,vx:Math.sin(a)*420,vy:-700-rnd(0,60),c:COL.green,r:2.0,dmg,wt:'scrap',gl,life:0.34+ms*0.02,max:0.34}); }
+    player.fireCd=.2; muzzle(x,y,COL.green,gl,pellets*0.5);
+  } else if(player.wtype==='rapid'){      // OVERHEAT NAILGUN: heat ramps power, redline locks the gun
+    const mr=u.mRapid||0; let heat=player.heat||0;
+    const streams=(lv<4?1:lv<7?2:3)+(mr>=3?1:0); const sp=8;
+    const dmg=(0.42+heat*0.95)*pm, hotC=heat>0.8?COL.mset:heat>0.5?COL.gold:COL.green;
+    for(let i=0;i<streams;i++){ const ox=(i-(streams-1)/2)*sp+rnd(-1.5,1.5);
+      pbul.push({x:x+ox,y,vx:rnd(-12,12),vy:-820,c:hotC,r:1.4+heat*0.8,dmg,wt:'nail',gl,hot:heat}); }
+    player.fireCd=Math.max(.028,.062*(1-heat*0.45)*(1-mr*0.1));
+    player.heat=heat+0.052-mr*0.004;
+    muzzle(x,y,hotC,gl*(0.7+heat),streams);
+    if(player.heat>=1){ player.heat=0; player.overheatT=1.2; styleHit();
+      shake=Math.max(shake,7); player.dmgFlash=Math.max(player.dmgFlash,0.12);
+      rings.push({x,y,r:6,vr:300,life:.35,max:.35,c:COL.mset});
+      pops.push({x:player.x,y:player.y-30,txt:'OVERHEAT',c:COL.mset,life:.9,max:.9}); Audio_.hit(); }
+  } else if(player.wtype==='lance'){      // RAILSPIKE: slow, committed, full-pierce columns
+    const ml=u.mLance||0; const cols=lv<5?1:lv<8?2:3; const sp=12; const dmg=(4.2+ml*1.3)*pm;
+    for(let i=0;i<cols;i++){ const ox=(i-(cols-1)/2)*sp;
+      pbul.push({x:x+ox,y,vx:0,vy:-1050,c:COL.cyan,r:3.2+ml*0.4,dmg,pierce:true,len:22+ml*4,wt:'rail',gl}); }
+    player.fireCd=.34*(1-ml*0.05); muzzle(x,y,COL.cyan,gl*1.3,cols*2);
+  } else {                                 // SWARM: weak darts, hands-free, dodge while they hunt
+    const mh=u.mHoming||0; const n=Math.min(8,(lv<3?2:lv<6?3:4)+mh); const dmg=1.05*pm;
+    for(let i=0;i<n;i++){ const a=(i-(n-1)/2)*0.42+rnd(-0.06,0.06);
+      pbul.push({x,y,vx:Math.sin(a)*150,vy:-360,c:COL.gold,r:1.8,dmg,homing:true,wt:'swarm',gl,turn:3.6}); }
+    player.fireCd=.16; muzzle(x,y,COL.gold,gl,n);
   }
   Audio_.fire(player.wtype);
   if(player.buffs && player.buffs.overdrive>0){ pbul.slice(prevLen).forEach(b=>{ if(b.dmg) b.dmg*=1.3; }); player.fireCd*=0.6; }
-  if(player.buffs && player.buffs.scatter>0){ [-0.4,-0.8,0.4,0.8].forEach(a=>pbul.push({x:player.x,y:player.y-20,vx:Math.sin(a)*480,vy:-Math.cos(a)*480,c:COL.green,r:1.5,dmg:0.6*pm})); }
-  if(player.up.flank>0){ const fa=[]; if(player.up.flank>=1){fa.push(-0.55,0.55);} if(player.up.flank>=2){fa.push(-0.95,0.95);} if(player.up.flank>=3){fa.push(-2.45,2.45);}
-    const fd=(0.55*pm)*((player.buffs&&player.buffs.overdrive>0)?1.3:1); fa.forEach(a=>pbul.push({x:player.x,y:player.y-20,vx:Math.sin(a)*480,vy:-Math.cos(a)*480,c:COL.green,r:1.5,dmg:fd})); }
+  if(player.buffs && player.buffs.scatter>0){ [-0.4,-0.8,0.4,0.8].forEach(a=>pbul.push({x:player.x,y:player.y-20,vx:Math.sin(a)*480,vy:-Math.cos(a)*480,c:COL.green,r:1.5,dmg:0.6*pm,wt:'scrap',gl})); }
+  if(player.up.flank>0){
+    const fa=[];
+    if(player.up.flank>=1){ fa.push(-0.55,0.55); }
+    if(player.up.flank>=2){ fa.push(-0.95,0.95); }
+    if(player.up.flank>=3){ fa.push(-2.45,2.45); }
+    const fd=(0.55*pm)*((player.buffs&&player.buffs.overdrive>0)?1.3:1);
+    fa.forEach(a=>pbul.push({x:player.x,y:player.y-20,vx:Math.sin(a)*480,vy:-Math.cos(a)*480,c:COL.green,r:1.5,dmg:fd,wt:'scrap',gl}));
+  }
 }
 /* ============================= HEAVY slot ============================= */
 const HEAVIES=['beam','rail','tesla','singularity','wave'];
@@ -1629,6 +1652,8 @@ function update(dt){
       else if(pl.beamE<pl.beamMax) pl.beamE=Math.min(pl.beamMax, pl.beamE+dt*(pl.beamRecharge||0.25));
       pl.fireCd-=dt; if(pl.fireCd<=0) firePrimary();
     }
+    if(pl.overheatT>0) pl.overheatT-=dt;
+    if(pl.heat>0 && (pl.wtype!=='rapid'||heavyBusy||pl.overheatT>0)) pl.heat=Math.max(0,pl.heat-dt*0.8);
     // damage embers
     const sd=pl.maxArmor-pl.armor;
     if(sd>=1 && Math.random()<0.4) parts.push({x:pl.x+rnd(8,14),y:pl.y+rnd(2,9),vx:rnd(-8,8),vy:rnd(18,46),life:.45,max:.45,c:COL.gold,sz:1.4});
@@ -1812,10 +1837,11 @@ function update(dt){
     if(b.homing){ let best=null,bd=1e9; for(const e of enemies){if(e.dead)continue;const d=dist2(e.x,e.y,b.x,b.y);if(d<bd){bd=d;best=e;}}
       if(boss){const d=dist2(boss.x,boss.y,b.x,b.y); if(d<bd){bd=d;best=boss;}}
       if(best){ const ang=Math.atan2(best.y-b.y,best.x-b.x); const cur=Math.atan2(b.vy,b.vx);
-        let na=cur+clamp(((ang-cur+Math.PI*3)%(Math.PI*2))-Math.PI,-3*dt,3*dt);
+        let na=cur+clamp(((ang-cur+Math.PI*3)%(Math.PI*2))-Math.PI,-(b.turn||3)*dt,(b.turn||3)*dt);
         const sp=Math.hypot(b.vx,b.vy); b.vx=Math.cos(na)*sp; b.vy=Math.sin(na)*sp; } }
     b.x+=b.vx*dt; b.y+=b.vy*dt;
     if(b.y<-20||b.y>H+20||b.x<-20||b.x>W+20){pbul.splice(i,1);continue;}
+    if(b.life!==undefined){ b.life-=dt; if(b.life<=0){ for(let q=0;q<2;q++)parts.push({x:b.x,y:b.y,vx:rnd(-30,30),vy:rnd(-30,30),life:.12,max:.12,c:b.c,sz:1.2}); pbul.splice(i,1); continue; } }
     let hit=false;
     for(const bar of barriers){ if(Math.abs(b.x-bar.x)<bar.w/2 && Math.abs(b.y-bar.y)<bar.h/2+2){ hit=true;
       for(let k=0;k<2;k++)parts.push({x:b.x,y:b.y,vx:rnd(-40,40),vy:rnd(-10,30),life:.15,max:.15,c:bar.c,sz:1.3}); break; } }
@@ -2789,9 +2815,26 @@ function drawFX(){
       fx.fillStyle=dg;fx.beginPath();fx.moveTo(dx-2,dy+8);fx.lineTo(dx+2,dy+8);fx.lineTo(dx,dy+18);fx.closePath();fx.fill(); }
   }
   // bullets
-  pbul.forEach(b=>{ fx.fillStyle=b.c; fx.shadowColor=b.c; fx.shadowBlur=6;
-    if(b.pierce){ fx.fillRect(b.x-b.r/2,b.y-(b.len||10),b.r,(b.len||10)*2); }
-    else { fx.beginPath(); fx.ellipse(b.x,b.y,b.r,b.r*1.5,0,0,6.28); fx.fill(); } });
+  pbul.forEach(b=>{ const gl=b.gl||1, wt=b.wt; fx.save(); fx.shadowColor=b.c; fx.shadowBlur=7*gl; fx.fillStyle=b.c;
+    if(wt==='rail'){ const L=b.len||20; fx.shadowBlur=15*gl;
+      const g=fx.createLinearGradient(b.x,b.y-L*1.6,b.x,b.y+L); g.addColorStop(0,b.c+'00'); g.addColorStop(.55,b.c); g.addColorStop(1,b.c+'00');
+      fx.fillStyle=g; fx.fillRect(b.x-b.r,b.y-L*1.6,b.r*2,L*2.6);
+      fx.fillStyle=COL.white; fx.fillRect(b.x-b.r*0.4,b.y-L*0.9,b.r*0.8,L*1.8); }
+    else if(wt==='nail'){ const hot=b.hot||0; fx.shadowBlur=(6+hot*16)*gl;
+      fx.fillStyle=b.c; fx.fillRect(b.x-b.r*0.5,b.y-7-hot*8,b.r,15+hot*16);
+      fx.fillStyle=COL.white; fx.fillRect(b.x-b.r*0.25,b.y-4,b.r*0.5,8); }
+    else if(wt==='scrap'){ const a=Math.atan2(b.vy,b.vx); fx.translate(b.x,b.y); fx.rotate(a);
+      fx.beginPath(); fx.moveTo(b.r*2.3,0); fx.lineTo(-b.r,b.r); fx.lineTo(-b.r*0.4,0); fx.lineTo(-b.r,-b.r); fx.closePath(); fx.fill();
+      fx.fillStyle=COL.white; fx.beginPath(); fx.arc(b.r*0.6,0,b.r*0.5,0,6.28); fx.fill(); }
+    else if(wt==='swarm'){ fx.beginPath(); fx.ellipse(b.x,b.y,b.r,b.r*2,0,0,6.28); fx.fill();
+      fx.globalAlpha=0.5; fx.fillRect(b.x-b.r*0.5,b.y,b.r,9); fx.globalAlpha=1;
+      fx.fillStyle=COL.white; fx.beginPath(); fx.arc(b.x,b.y,b.r*0.5,0,6.28); fx.fill(); }
+    else if(b.rail){ fx.shadowBlur=16; fx.fillRect(b.x-b.r/2,b.y-(b.len||20),b.r,(b.len||20)*2);
+      fx.fillStyle=COL.white; fx.fillRect(b.x-b.r*0.3,b.y-(b.len||20),b.r*0.6,(b.len||20)*2); }
+    else if(b.pierce){ fx.fillRect(b.x-b.r/2,b.y-(b.len||10),b.r,(b.len||10)*2); }
+    else { fx.beginPath(); fx.ellipse(b.x,b.y,b.r,b.r*1.5,0,0,6.28); fx.fill();
+      fx.fillStyle=COL.white; fx.beginPath(); fx.arc(b.x,b.y,b.r*0.45,0,6.28); fx.fill(); }
+    fx.restore(); });
   ebul.forEach(b=>{ fx.save(); fx.shadowColor=b.c; fx.shadowBlur=12; fx.fillStyle=b.c; fx.strokeStyle=b.c;
     const sh=b.shape||EBSHAPE[b.c]||'orb';
     if(sh==='dart'){ const ang=Math.atan2(b.vy,b.vx); fx.translate(b.x,b.y); fx.rotate(ang);
