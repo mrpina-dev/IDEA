@@ -146,7 +146,27 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 .legend i{width:9px;height:9px;display:inline-block;border-radius:2px}
 .coins{font-size:12px;color:var(--gold);text-shadow:0 0 10px rgba(200,255,0,.6);margin-top:3px}
 .coins b{font-family:'Chakra Petch',sans-serif;font-weight:700}
-.shop{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:340px}
+.shop{display:flex;flex-direction:column;gap:6px;width:100%;max-width:344px;max-height:46vh;overflow-y:auto;padding-right:4px}
+.shop::-webkit-scrollbar{width:5px}.shop::-webkit-scrollbar-thumb{background:rgba(0,255,65,.3);border-radius:3px}
+.card{--cc:var(--green);display:flex;align-items:center;gap:9px;padding:7px 9px;cursor:pointer;text-align:left;pointer-events:auto;
+  background:linear-gradient(100deg,rgba(0,20,8,.65),rgba(0,12,6,.5));border:1px solid color-mix(in srgb,var(--cc) 45%,transparent);
+  border-left:3px solid var(--cc);border-radius:7px;font-family:'Share Tech Mono',monospace;color:var(--white);transition:transform .1s,box-shadow .12s,background .12s;position:relative}
+.card:not(.off):hover{transform:translateX(2px);box-shadow:0 0 14px color-mix(in srgb,var(--cc) 35%,transparent),inset 0 0 18px color-mix(in srgb,var(--cc) 8%,transparent)}
+.card:not(.off):active{transform:scale(.985)}
+.card.off{opacity:.42;cursor:default;filter:saturate(.5)}
+.card.max{opacity:.85}
+.cic{flex:0 0 34px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:var(--cc);
+  border:1px solid color-mix(in srgb,var(--cc) 40%,transparent);border-radius:6px;background:color-mix(in srgb,var(--cc) 10%,transparent);box-shadow:0 0 10px color-mix(in srgb,var(--cc) 18%,transparent)}
+.cic svg{width:22px;height:22px}
+.cbody{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}
+.cname{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:12px;letter-spacing:.03em;color:var(--cc);text-shadow:0 0 8px color-mix(in srgb,var(--cc) 40%,transparent)}
+.cpips{display:flex;gap:3px;margin:1px 0}
+.cpips .pip{width:9px;height:4px;border-radius:1px;background:rgba(255,255,255,.12);border:1px solid color-mix(in srgb,var(--cc) 30%,transparent)}
+.cpips .pip.on{background:var(--cc);border-color:var(--cc);box-shadow:0 0 5px var(--cc)}
+.cdesc{font-size:9px;color:var(--dim);line-height:1.3}
+.cdelta{font-size:9px;font-family:'Chakra Petch',sans-serif;font-weight:600;color:var(--gold);letter-spacing:.02em}
+.ccost{flex:0 0 auto;align-self:center;font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:11px;color:var(--gold);text-align:right;text-shadow:0 0 8px rgba(200,255,0,.35);white-space:nowrap}
+.card.off .ccost{color:var(--dim);text-shadow:none}
 .shopbtn{display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:8px 10px;cursor:pointer;
   background:rgba(0,20,8,.5);border:1px solid rgba(0,255,65,.4);border-radius:6px;text-align:left;pointer-events:auto;
   font-family:'Share Tech Mono',monospace;color:var(--white);transition:background .12s}
@@ -333,7 +353,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=560,H=840; const VERSION='2533';
+const W=560,H=840; const VERSION='2534';
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
 const bg=bgC.getContext('2d'), fx=fxC.getContext('2d');
@@ -1260,6 +1280,7 @@ function startGame(){
   resetPlayer(true);
   { const b=startBuild; player.up=Object.assign(player.up,b.up); player.unlocked=Object.assign(player.unlocked,b.unlocked); player.wtype=b.wtype||'spread'; player.bombs=b.bombs; player.shieldHits=b.shieldHits; if(b.drone)player.drone={ph:0}; }
   applyUpgrades(); player.armor=player.maxArmor; player.beamE=player.beamMax;
+  player.coins += Math.max(0, START_BUDGET-(startBuild.spent||0));   // unspent pre-game budget carries into the run
   if(gameMode==='hardcore'){ player.lives=0; } else if(gameMode==='dev'){ player.lives=99; player.coins=99999; }
   envGrid=[0,255,65]; lastSec=-1; triggerBanner();
   showOverlay(null);
@@ -1365,21 +1386,21 @@ function dropPod(x,y,fromBoss){
   pods.push(pod);
 }
 const WEAPONS=['spread','lance','homing','rapid'];
-function outfitOffers(){ const b=startBuild, u=b.up; return [
-  {grp:'WEAPONS', label:'GUN POWER', lv:u.gun, cost:400+(u.gun-1)*250, can:u.gun<8, buy:()=>u.gun++},
-  {grp:'WEAPONS', label:'FLANK GUNS', lv:u.flank, cost:[450,700,1000][u.flank]||0, can:u.flank<3, buy:()=>u.flank++},
-  {grp:'WEAPONS', label:'LANCE', lv:b.unlocked.lance, cost:600, can:!b.unlocked.lance, buy:()=>{b.unlocked.lance=1;b.wtype='lance';}},
-  {grp:'WEAPONS', label:'HOMING', lv:b.unlocked.homing, cost:750, can:!b.unlocked.homing, buy:()=>{b.unlocked.homing=1;b.wtype='homing';}},
-  {grp:'WEAPONS', label:'RAPID', lv:b.unlocked.rapid, cost:350, can:!b.unlocked.rapid, buy:()=>{b.unlocked.rapid=1;b.wtype='rapid';}},
-  {grp:'BEAM', label:'BEAM POWER', lv:u.beamPow, cost:320+(u.beamPow-1)*220, can:u.beamPow<8, buy:()=>u.beamPow++},
-  {grp:'BEAM', label:'BEAM CELL', lv:u.beamCap, cost:280+(u.beamCap-1)*200, can:u.beamCap<8, buy:()=>u.beamCap++},
-  {grp:'BEAM', label:'BEAM PIERCE', lv:u.beamPierce, cost:400+(u.beamPierce-1)*280, can:u.beamPierce<5, buy:()=>u.beamPierce++},
-  {grp:'BEAM', label:'BEAM SPOOL', lv:u.beamSpool, cost:300+(u.beamSpool-1)*210, can:u.beamSpool<6, buy:()=>u.beamSpool++},
-  {grp:'DEFENSE', label:'HULL ARMOR', lv:u.armor, cost:400+u.armor*250, can:u.armor<4, buy:()=>u.armor++},
-  {grp:'DEFENSE', label:'SHIELD +1', lv:b.shieldHits, cost:350, can:b.shieldHits<3, buy:()=>b.shieldHits++},
-  {grp:'SYSTEMS', label:'ENGINE', lv:u.speed, cost:300+(u.speed-1)*180, can:u.speed<10, buy:()=>u.speed++},
-  {grp:'SYSTEMS', label:'BOMB +1', lv:b.bombs, cost:200, can:b.bombs<6, buy:()=>b.bombs++},
-  {grp:'SYSTEMS', label:'DRONE', lv:b.drone?1:0, cost:600, can:!b.drone, buy:()=>{b.drone={ph:0};}}
+function outfitOffers(){ const b=startBuild, u=b.up; const pdN=(1+(u.gun-1)*0.30), pdX=(1+u.gun*0.30); return [
+  {grp:'WEAPONS',name:'GUN POWER',icon:'gun',desc:'All primary weapon damage.',delta:'x'+pdN.toFixed(2)+' -> x'+pdX.toFixed(2),lv:u.gun,mx:8,cost:400+(u.gun-1)*250,can:u.gun<8,buy:()=>u.gun++},
+  {grp:'WEAPONS',name:'FLANK GUNS',icon:'flank',desc:'Wide side shots, then rear cover.',delta:'+ side guns',lv:u.flank,mx:3,cost:[450,700,1000][Math.min(u.flank,2)],can:u.flank<3,buy:()=>u.flank++},
+  {grp:'WEAPONS',name:'LANCE',icon:'w_lance',desc:'Piercing bolts, anti-line.',lv:b.unlocked.lance,mx:0,meta:b.unlocked.lance?'OWNED':'i¢600',cost:600,can:!b.unlocked.lance,buy:()=>{b.unlocked.lance=1;b.wtype='lance';}},
+  {grp:'WEAPONS',name:'HOMING',icon:'w_homing',desc:'Auto-tracking shots.',lv:b.unlocked.homing,mx:0,meta:b.unlocked.homing?'OWNED':'i¢750',cost:750,can:!b.unlocked.homing,buy:()=>{b.unlocked.homing=1;b.wtype='homing';}},
+  {grp:'WEAPONS',name:'RAPID',icon:'w_rapid',desc:'Fast narrow stream.',lv:b.unlocked.rapid,mx:0,meta:b.unlocked.rapid?'OWNED':'i¢350',cost:350,can:!b.unlocked.rapid,buy:()=>{b.unlocked.rapid=1;b.wtype='rapid';}},
+  {grp:'BEAM',name:'BEAM POWER',icon:'beampow',desc:'Beam and heavy damage.',delta:'+16 dps',lv:u.beamPow,mx:8,cost:320+(u.beamPow-1)*220,can:u.beamPow<8,buy:()=>u.beamPow++},
+  {grp:'BEAM',name:'BEAM CELL',icon:'beamcell',desc:'Heavy energy and recharge.',delta:'+0.55s cell',lv:u.beamCap,mx:8,cost:280+(u.beamCap-1)*200,can:u.beamCap<8,buy:()=>u.beamCap++},
+  {grp:'BEAM',name:'BEAM PIERCE',icon:'beampierce',desc:'Enemies the beam cuts through.',delta:'more pierce',lv:u.beamPierce,mx:5,cost:400+(u.beamPierce-1)*280,can:u.beamPierce<5,buy:()=>u.beamPierce++},
+  {grp:'BEAM',name:'BEAM SPOOL',icon:'beamspool',desc:'Faster spin-up, shorter cooldown.',delta:'faster spool',lv:u.beamSpool,mx:6,cost:300+(u.beamSpool-1)*210,can:u.beamSpool<6,buy:()=>u.beamSpool++},
+  {grp:'DEFENSE',name:'HULL ARMOR',icon:'hull',desc:'+1 max hull per life.',delta:'+1 max hull',lv:u.armor,mx:4,cost:400+u.armor*250,can:u.armor<4,buy:()=>u.armor++},
+  {grp:'DEFENSE',name:'SHIELD +1',icon:'shield',desc:'Absorbs one hit.',delta:'+1 shield',lv:b.shieldHits,mx:3,cost:350,can:b.shieldHits<3,buy:()=>b.shieldHits++},
+  {grp:'SYSTEMS',name:'ENGINE',icon:'engine',desc:'Ship movement speed.',delta:'+52 speed',lv:u.speed,mx:10,cost:300+(u.speed-1)*180,can:u.speed<10,buy:()=>u.speed++},
+  {grp:'SYSTEMS',name:'BOMB +1',icon:'bomb',desc:'Raises max bomb count.',delta:'+1 bomb',lv:b.bombs,mx:6,cost:200,can:b.bombs<6,buy:()=>b.bombs++},
+  {grp:'SYSTEMS',name:'DRONE',icon:'drone',desc:'Wingman drone that fires with you.',lv:b.drone?1:0,mx:0,meta:b.drone?'OWNED':'i¢600',cost:600,can:!b.drone,buy:()=>{b.drone={ph:0};}}
 ];}
 function buildCount(){ const u=startBuild.up,b=startBuild; return (u.gun-1)+(u.beamPow-1)+(u.beamCap-1)+(u.beamPierce-1)+(u.beamSpool-1)+(u.speed-1)+u.flank+u.armor+b.shieldHits+(b.bombs-2)+(b.drone?1:0)+b.unlocked.lance+b.unlocked.homing+b.unlocked.rapid; }
 const WCOL={spread:COL.green,lance:COL.cyan,homing:COL.gold,rapid:COL.mat};
@@ -2261,22 +2282,68 @@ function launchFromRefit(){ sector++; waveIdx=0; waveTimer=1.6; bossPending=fals
   if(station){ station.phase='depart'; station.vy=-60; }
   player.beamE=player.beamMax; triggerBanner(); state='play'; showOverlay(null);
   document.getElementById('touch').classList.toggle('hidden', !isTouch); }
-function refitItems(){ const u=player.up;
+/* ---- shared shop rendering (icons + cards + previews) ---- */
+function svgI(p){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+p+'</svg>'; }
+const SHOP_ICONS={
+  engine: svgI('<path d="M9 3h6l-1 10H10z"/><path d="M10 13c0 4 2 7 2 7s2-3 2-7"/>'),
+  gun: svgI('<path d="M7 10l5-5 5 5"/><path d="M7 16l5-5 5 5"/>'),
+  beampow: svgI('<path d="M13 3L6 13h4l-1 8 8-12h-4z"/>'),
+  beamcell: svgI('<rect x="3" y="8" width="14" height="9" rx="1.5"/><path d="M17 11h3v3h-3"/><path d="M8 11v3M11 11v3"/>'),
+  beampierce: svgI('<path d="M3 12h13"/><path d="M12 8l5 4-5 4"/><path d="M6 7v10M9 7v10"/>'),
+  beamspool: svgI('<circle cx="12" cy="12" r="8"/><path d="M12 12l5-3"/><path d="M12 4v2"/>'),
+  flank: svgI('<path d="M12 5v14"/><path d="M6 9l-4 3 4 3"/><path d="M18 9l4 3-4 3"/>'),
+  w_spread: svgI('<path d="M12 21V9"/><path d="M12 9L6 4M12 9l6-5M12 9V3"/>'),
+  w_rapid: svgI('<path d="M9 3v6M12 3v8M15 3v6"/><path d="M12 21v-4"/>'),
+  w_lance: svgI('<path d="M12 21V4"/><path d="M8 7l4-4 4 4"/>'),
+  w_homing: svgI('<circle cx="15" cy="9" r="3"/><path d="M4 20c1-6 6-9 9-9"/>'),
+  bomb: svgI('<circle cx="11" cy="15" r="6"/><path d="M15 10l3-4"/><path d="M18 4l1 2 1-2"/>'),
+  shield: svgI('<path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/>'),
+  hull: svgI('<rect x="5" y="5" width="14" height="14" rx="2"/><path d="M5 12h14M12 5v14"/>'),
+  repair: svgI('<circle cx="12" cy="12" r="9"/><path d="M12 7v10M7 12h10"/>'),
+  drone: svgI('<path d="M12 4l6 13-6-3-6 3z"/>'),
+  life: svgI('<path d="M12 4l6 14-6-3-6 3z"/><path d="M12 9v4M10 11h4"/>'),
+  rail: svgI('<path d="M12 21V4"/><path d="M9 8l3-4 3 4"/><path d="M7 12h10"/>'),
+  tesla: svgI('<path d="M13 3l-6 9h4l-2 9 7-11h-4z"/>'),
+  singularity: svgI('<circle cx="12" cy="12" r="3.5"/><path d="M12 4a8 8 0 0 1 0 16"/><path d="M12 4a8 8 0 0 0 0 16"/>'),
+  wave: svgI('<path d="M3 14c2 0 2-4 4-4s2 4 4 4 2-4 4-4 2 4 4 4"/><path d="M12 3v6"/>'),
+  default: svgI('<circle cx="12" cy="12" r="7"/>')
+};
+function shopIcon(id){ return SHOP_ICONS[id]||SHOP_ICONS.default; }
+function shopGroupColor(grp){ return ({WEAPONS:COL.green,HEAVY:COL.bmet,BEAM:COL.cyan,DEFENSE:COL.gold,SYSTEMS:COL.mat})[grp]||COL.green; }
+function shopCardHTML(it,i,aff,maxed,grp){ const col=shopGroupColor(grp); const nm=it.name||it.label||'';
+  let pips=''; if(it.mx>0){ for(let k=0;k<it.mx;k++) pips+='<i class="pip'+(k<it.lv?' on':'')+'"></i>'; }
+  const meta=(it.meta!==undefined)?it.meta:(maxed?'MAX':(it.cost>0?('i¢'+it.cost):'FREE'));
+  return '<button class="card'+(aff?'':' off')+(maxed?' max':'')+'" data-i="'+i+'" style="--cc:'+col+'">'
+    +'<span class="cic">'+shopIcon(it.icon)+'</span>'
+    +'<span class="cbody"><span class="cname">'+nm+'</span>'
+    +(it.mx>0?('<span class="cpips">'+pips+'</span>'):'')
+    +(it.desc?('<span class="cdesc">'+it.desc+'</span>'):'')
+    +((it.delta&&!maxed)?('<span class="cdelta">'+it.delta+'</span>'):'')
+    +'</span><span class="ccost">'+meta+'</span></button>'; }
+function renderShopGrid(container, items, ctx){ if(!container)return;
+  const order=['WEAPONS','HEAVY','BEAM','DEFENSE','SYSTEMS']; const grpOf=it=>it.grp||'SYSTEMS'; let html='';
+  order.forEach(g=>{ const rows=items.map((it,i)=>[it,i]).filter(p=>grpOf(p[0])===g); if(!rows.length)return;
+    html+='<div class="shophdr">'+g+'</div>';
+    rows.forEach(p=>{ const it=p[0],i=p[1]; const maxed=(it.mx>0&&it.lv>=it.mx)||!it.can; const aff=ctx.afford(it);
+      html+=shopCardHTML(it,i,aff,maxed,g); }); });
+  container.innerHTML=html;
+  [...container.querySelectorAll('.card')].forEach(b=>b.addEventListener('click',()=>ctx.onBuy(+b.dataset.i,b))); }
+function refitItems(){ const u=player.up; const pdN=(1+(u.gun-1)*0.30), pdX=(1+u.gun*0.30);
   return [
-    {name:'ENGINE',      desc:'Ship movement speed.',                              lv:u.speed,           mx:10, cost:300+(u.speed-1)*180,       can:u.speed<10,            buy:()=>u.speed++},
-    {name:'GUN POWER',   desc:'Primary weapon damage and fire rate.',              lv:u.gun,             mx:8,  cost:400+(u.gun-1)*250,         can:u.gun<8,               buy:()=>u.gun++},
-    {name:'BEAM POWER',  desc:'Beam damage per second.',                           lv:u.beamPow,         mx:8,  cost:320+(u.beamPow-1)*220,     can:u.beamPow<8,           buy:()=>u.beamPow++},
-    {name:'BEAM CELL',   desc:'Beam duration and recharge speed.',                 lv:u.beamCap,         mx:8,  cost:280+(u.beamCap-1)*200,     can:u.beamCap<8,           buy:()=>u.beamCap++},
-    {name:'BEAM PIERCE', desc:'How many enemies the beam cuts through.',           lv:u.beamPierce,      mx:5,  cost:400+(u.beamPierce-1)*280,  can:u.beamPierce<5,        buy:()=>u.beamPierce++},
-    {name:'BEAM SPOOL',  desc:'Faster beam spin-up, shorter cooldown.',           lv:u.beamSpool||1,    mx:6,  cost:300+((u.beamSpool||1)-1)*210, can:(u.beamSpool||1)<6,  buy:()=>{u.beamSpool=(u.beamSpool||1)+1;}},
-    {name:'FLANK GUNS',  desc:'Adds wide side shots, then rear cover.',           lv:u.flank||0,        mx:3,  cost:[450,700,1000][Math.min(u.flank||0,2)], can:(u.flank||0)<3, buy:()=>{u.flank=(u.flank||0)+1;}},
-    ...['spread|SPREAD|0|Balanced forward fan.','rapid|RAPID|350|Fast narrow stream, high fire rate.','lance|LANCE|600|Piercing bolts, good vs lines and bosses.','homing|HOMING|750|Auto-tracking shots, no aiming needed.'].map(s=>{const p=s.split('|'),w=p[0],owned=!!player.unlocked[w],active=player.wtype===w;return {name:p[1],grp:'WEAPONS',desc:p[3],lv:0,mx:0,meta:active?'EQUIPPED':owned?'EQUIP':('i¢'+p[2]),cost:owned?0:+p[2],can:!active,buy:()=>{player.unlocked[w]=1;player.wtype=w;}};}),
-    {name:'BOMB +1',     desc:'Raises your max bomb count.',                       lv:player.bombs,      mx:6, cost:200,                   can:player.bombs<6,       buy:()=>player.bombs++},
-    {name:'SHIELD +1',   desc:'Adds a shield that absorbs one hit.',               lv:player.shieldHits, mx:3, cost:350,                   can:player.shieldHits<3,  buy:()=>player.shieldHits++},
-    {name:'HULL ARMOR',  desc:'+1 max hull (hits per life).',                     lv:u.armor||0,        mx:4,  cost:400+(u.armor||0)*250,    can:(u.armor||0)<4,       buy:()=>{ u.armor=(u.armor||0)+1; player.armor++; }},
-    {name:'REPAIR HULL', desc:'Restore hull to full.',                            lv:0,                 mx:0,  cost:130*(player.maxArmor-player.armor), can:player.armor<player.maxArmor, buy:()=>{ player.armor=player.maxArmor; }},
-    {name:player.drone?'DRONE READY':'DRONE', desc:'Deploys a wingman drone that fires with you.', lv:0, mx:0, cost:600, can:!player.drone, buy:()=>{player.drone={ph:0};}},
-    {name:'EXTRA LIFE',  desc:'One more life (max 4).',                            lv:0,                 mx:0, cost:2500,                  can:player.lives<4,       buy:()=>player.lives++}
+    {grp:'SYSTEMS',name:'ENGINE',icon:'engine',desc:'Ship movement speed.',delta:'+52 speed',lv:u.speed,mx:10,cost:300+(u.speed-1)*180,can:u.speed<10,buy:()=>u.speed++},
+    {grp:'WEAPONS',name:'GUN POWER',icon:'gun',desc:'All primary weapon damage.',delta:'x'+pdN.toFixed(2)+' -> x'+pdX.toFixed(2),lv:u.gun,mx:8,cost:400+(u.gun-1)*250,can:u.gun<8,buy:()=>u.gun++},
+    {grp:'WEAPONS',name:'FLANK GUNS',icon:'flank',desc:'Adds wide side shots, then rear cover.',delta:'+ side guns',lv:u.flank||0,mx:3,cost:[450,700,1000][Math.min(u.flank||0,2)],can:(u.flank||0)<3,buy:()=>{u.flank=(u.flank||0)+1;}},
+    {grp:'BEAM',name:'BEAM POWER',icon:'beampow',desc:'Beam and heavy damage.',delta:'+16 dps',lv:u.beamPow,mx:8,cost:320+(u.beamPow-1)*220,can:u.beamPow<8,buy:()=>u.beamPow++},
+    {grp:'BEAM',name:'BEAM CELL',icon:'beamcell',desc:'Heavy energy and recharge.',delta:'+0.55s cell',lv:u.beamCap,mx:8,cost:280+(u.beamCap-1)*200,can:u.beamCap<8,buy:()=>u.beamCap++},
+    {grp:'BEAM',name:'BEAM PIERCE',icon:'beampierce',desc:'Enemies the beam cuts through.',delta:'more pierce',lv:u.beamPierce,mx:5,cost:400+(u.beamPierce-1)*280,can:u.beamPierce<5,buy:()=>u.beamPierce++},
+    {grp:'BEAM',name:'BEAM SPOOL',icon:'beamspool',desc:'Faster spin-up, shorter cooldown.',delta:'faster spool',lv:u.beamSpool||1,mx:6,cost:300+((u.beamSpool||1)-1)*210,can:(u.beamSpool||1)<6,buy:()=>{u.beamSpool=(u.beamSpool||1)+1;}},
+    ...['spread|SPREAD|0|w_spread|Balanced forward fan.','rapid|RAPID|350|w_rapid|Fast narrow stream.','lance|LANCE|600|w_lance|Piercing bolts, anti-line.','homing|HOMING|750|w_homing|Auto-tracking shots.'].map(s=>{const p=s.split('|'),w=p[0],owned=!!player.unlocked[w],active=player.wtype===w;return {grp:'WEAPONS',name:p[1],icon:p[3],desc:p[4],lv:0,mx:0,meta:active?'EQUIPPED':owned?'EQUIP':('i¢'+p[2]),cost:owned?0:+p[2],can:!active,buy:()=>{player.unlocked[w]=1;player.wtype=w;}};}),
+    {grp:'SYSTEMS',name:'BOMB +1',icon:'bomb',desc:'Raises max bomb count.',delta:'+1 bomb',lv:player.bombs,mx:6,cost:200,can:player.bombs<6,buy:()=>player.bombs++},
+    {grp:'DEFENSE',name:'SHIELD +1',icon:'shield',desc:'Absorbs one hit.',delta:'+1 shield',lv:player.shieldHits,mx:3,cost:350,can:player.shieldHits<3,buy:()=>player.shieldHits++},
+    {grp:'DEFENSE',name:'HULL ARMOR',icon:'hull',desc:'+1 max hull per life.',delta:'+1 max hull',lv:u.armor||0,mx:4,cost:400+(u.armor||0)*250,can:(u.armor||0)<4,buy:()=>{ u.armor=(u.armor||0)+1; player.armor++; }},
+    {grp:'DEFENSE',name:'REPAIR HULL',icon:'repair',desc:'Restore hull to full.',delta:'full hull',lv:0,mx:0,meta:(player.armor<player.maxArmor)?('i¢'+(130*(player.maxArmor-player.armor))):'FULL',cost:130*(player.maxArmor-player.armor),can:player.armor<player.maxArmor,buy:()=>{ player.armor=player.maxArmor; }},
+    {grp:'SYSTEMS',name:player.drone?'DRONE READY':'DRONE',icon:'drone',desc:'Wingman drone that fires with you.',delta:player.drone?'':'wingman',lv:0,mx:0,meta:player.drone?'OWNED':'i¢600',cost:600,can:!player.drone,buy:()=>{player.drone={ph:0};}},
+    {grp:'DEFENSE',name:'EXTRA LIFE',icon:'life',desc:'One more life (max 4).',delta:'+1 life',lv:0,mx:0,cost:2500,can:player.lives<4,buy:()=>player.lives++}
   ];
 }
 function nextWeapon(){ const i=WEAPONS.indexOf(player.wtype); return WEAPONS[(i+1)%WEAPONS.length]; }
@@ -2286,28 +2353,12 @@ function buyWeapon(){ const w=nextWeapon(); player.unlocked[w]=1; player.wtype=w
 function switchWeapon(){ const list=WEAPONS.filter(w=>player.unlocked[w]); if(list.length<2)return;
   const i=list.indexOf(player.wtype); player.wtype=list[(i+1)%list.length]; Audio_.hit(); }
 function buildRefit(){ el('refitBal').textContent=player.coins.toLocaleString();
-  const items=refitItems();
-  const GRP={'ENGINE':'SYSTEMS','GUN POWER':'WEAPONS','BEAM POWER':'BEAM','BEAM CELL':'BEAM','BEAM PIERCE':'BEAM','BEAM SPOOL':'BEAM','FLANK GUNS':'WEAPONS','BOMB +1':'SYSTEMS','SHIELD +1':'DEFENSE','HULL ARMOR':'DEFENSE','REPAIR HULL':'DEFENSE','EXTRA LIFE':'DEFENSE'};
-  const grpOf=it=> it.grp || (it.name.indexOf('WEAPON:')===0?'WEAPONS' : it.name.indexOf('DRONE')===0?'SYSTEMS' : (GRP[it.name]||'SYSTEMS'));
-  const order=['WEAPONS','BEAM','DEFENSE','SYSTEMS'];
-  let html='';
-  order.forEach(g=>{
-    const rows=items.map((it,i)=>[it,i]).filter(p=>grpOf(p[0])===g);
-    if(!rows.length)return;
-    html+='<div class="shophdr">'+g+'</div>';
-    rows.forEach(p=>{ const it=p[0], i=p[1];
-      const maxed=(it.mx>0 && it.lv>=it.mx);
-      const afford=!maxed && it.can && player.coins>=it.cost;
-      const meta = it.meta!==undefined ? it.meta : (maxed?'MAX' : (it.name==='REPAIR HULL'&&!it.can)?'FULL' : it.cost===0?'SWAP' : (it.mx>0?('Lv'+it.lv+' \u2192 i\u00a2'+it.cost):('i\u00a2'+it.cost)));
-      html+='<button class="shopbtn'+(afford?'':' off')+'" data-i="'+i+'"><span class="sn">'+it.name+'</span><span class="sm">'+meta+'</span>'+(it.desc?'<span class="sd">'+it.desc+'</span>':'')+'</button>';
-    });
+  renderShopGrid(el('refitItems'), refitItems(), {
+    afford:it=>{ const maxed=(it.mx>0&&it.lv>=it.mx)||!it.can; return !maxed && player.coins>=it.cost; },
+    onBuy:(i)=>{ const it=refitItems()[i]; const maxed=(it.mx>0&&it.lv>=it.mx)||!it.can;
+      if(maxed||!it.can||player.coins<it.cost){ Audio_.hit(); return; }
+      player.coins-=it.cost; it.buy(); applyUpgrades(); Audio_.pickup(); buildRefit(); }
   });
-  el('refitItems').innerHTML=html;
-  [...el('refitItems').querySelectorAll('.shopbtn')].forEach(b=>b.addEventListener('click',()=>{
-    const it=refitItems()[+b.dataset.i]; const maxed=(it.mx>0 && it.lv>=it.mx);
-    if(maxed||!it.can||player.coins<it.cost){ Audio_.hit(); return; }
-    player.coins-=it.cost; it.buy(); applyUpgrades(); Audio_.pickup(); buildRefit();
-  }));
 }
 const _delayed=[];
 function setTimeoutSafe(x,y,c,ms){ _delayed.push({x,y,c,at:performance.now()+ms}); }
@@ -2958,18 +3009,16 @@ try{ if(localStorage.getItem('vanguard_mute')==='1'){Audio_.muted=true;const pmb
 
 /* starting build (outfit) */
 function saveBuild(){ try{ const b=startBuild; localStorage.setItem('vanguard_build',JSON.stringify({up:b.up,unlocked:b.unlocked,wtype:b.wtype,bombs:b.bombs,shieldHits:b.shieldHits,drone:!!b.drone,spent:b.spent})); }catch(e){} }
-function refreshBuildSummary(){ const s=el('buildSummary'); if(!s)return; const n=buildCount(); s.textContent=n>0?(n+' upgrade'+(n>1?'s':'')+' · '+startBuild.spent.toLocaleString()+' i¢ spent'):'No upgrades selected.'; }
+function refreshBuildSummary(){ const s=el('buildSummary'); if(!s)return; const n=buildCount(); const left=Math.max(0,START_BUDGET-(startBuild.spent||0));
+  s.textContent=n>0?(n+' upgrade'+(n>1?'s':'')+' · '+startBuild.spent.toLocaleString()+' spent · '+left.toLocaleString()+' i¢ carried in'):('Full '+START_BUDGET.toLocaleString()+' i¢ carries into the run.'); }
 function buildOutfit(){ const box=el('outfitItems'); if(!box)return; const rem=START_BUDGET-startBuild.spent;
   const bd=el('outfitBudget'); if(bd) bd.textContent=rem.toLocaleString();
-  const offers=outfitOffers(); const order=['WEAPONS','BEAM','DEFENSE','SYSTEMS']; let html='';
-  order.forEach(g=>{ const rows=offers.map((o,i)=>[o,i]).filter(p=>p[0].grp===g); if(!rows.length)return; html+='<div class="shophdr">'+g+'</div>';
-    rows.forEach(p=>{ const o=p[0],i=p[1]; const maxed=!o.can; const afford=!maxed&&rem>=o.cost;
-      const meta=maxed?(o.lv>0?'OWNED':'MAX'):('i¢'+o.cost);
-      html+='<button class="shopbtn'+(afford?'':' off')+'" data-i="'+i+'"><span class="sn">'+o.label+(o.lv>0?(' · '+o.lv):'')+'</span><span class="sm">'+meta+'</span></button>'; }); });
-  box.innerHTML=html;
-  [...box.querySelectorAll('.shopbtn')].forEach(btn=>btn.addEventListener('click',()=>{ const o=outfitOffers()[+btn.dataset.i];
-    if(!o.can||(START_BUDGET-startBuild.spent)<o.cost){ Audio_.hit(); return; }
-    startBuild.spent+=o.cost; o.buy(); saveBuild(); Audio_.pickup(); buildOutfit(); refreshBuildSummary(); }));
+  renderShopGrid(box, outfitOffers(), {
+    afford:it=>{ const maxed=(it.mx>0&&it.lv>=it.mx)||!it.can; return !maxed && (START_BUDGET-startBuild.spent)>=it.cost; },
+    onBuy:(i)=>{ const o=outfitOffers()[i]; const maxed=(o.mx>0&&o.lv>=o.mx)||!o.can;
+      if(maxed||!o.can||(START_BUDGET-startBuild.spent)<o.cost){ Audio_.hit(); return; }
+      startBuild.spent+=o.cost; o.buy(); saveBuild(); Audio_.pickup(); buildOutfit(); refreshBuildSummary(); }
+  });
 }
 function openOutfit(){ el('ovlOutfit').classList.remove('hidden'); buildOutfit(); }
 function closeOutfit(){ el('ovlOutfit').classList.add('hidden'); refreshBuildSummary(); }
