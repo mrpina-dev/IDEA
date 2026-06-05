@@ -187,10 +187,55 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 .keyrow{display:flex;justify-content:space-between;align-items:center;gap:12px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--white);letter-spacing:.06em}
 .keyrow .kb{font-family:'Chakra Petch',sans-serif;font-weight:700;min-width:60px;text-align:center;border:1px solid var(--cyan);color:var(--cyan);padding:5px 10px;border-radius:4px;cursor:pointer;background:rgba(0,240,255,.08)}
 .keyrow .kb.cap{border-color:var(--gold);color:var(--gold);animation:lockpulse .5s steps(2,start) infinite}
+
+/* desktop cabinet */
+#cabinet{display:flex;align-items:center;justify-content:center;gap:18px;width:100%;height:100%}
+.console{display:none;flex-direction:column;gap:7px;width:240px;max-width:300px;align-self:center;
+  font-family:'Share Tech Mono',monospace;color:var(--white);padding:18px 6px}
+.console .conhdr{font-size:10px;letter-spacing:.24em;color:var(--dim);border-bottom:1px solid rgba(74,122,82,.35);padding-bottom:4px;margin-top:12px}
+.console .conhdr:first-child{margin-top:0}
+.console .cintel{display:flex;align-items:center;gap:9px;font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em}
+.console .cintel i{width:11px;height:11px;border-radius:2px}
+.console .cref{font-size:11px;line-height:1.5;color:var(--white);letter-spacing:.03em}
+.console .cref b{color:var(--cyan);font-family:'Chakra Petch',sans-serif;letter-spacing:.06em}
+.conwm{font-family:'Chakra Petch',sans-serif;font-weight:700;line-height:1;margin-bottom:2px}
+.conwm .a{display:block;font-size:22px;color:var(--green);text-shadow:0 0 14px rgba(0,255,65,.6);letter-spacing:.12em}
+.conwm .b{display:block;font-size:11px;color:var(--white);letter-spacing:.4em;margin-top:3px}
+@media (min-width:1080px){
+  #cabinet{gap:22px}
+  .console{display:flex}
+  .shop{width:94%;max-width:640px;max-height:60vh;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:8px;align-content:start}
+  .shop .shophdr{grid-column:1/-1}
+  .card{padding:9px 11px}
+  .cic{flex:0 0 38px;width:38px;height:38px}
+  .cic svg{width:24px;height:24px}
+  .cname{font-size:13px}
+  .cdesc{font-size:10.5px;line-height:1.35}
+  .cdelta{font-size:10px}
+  .ccost{font-size:12px}
+}
 </style>
 </head>
 <body>
-<div id="stage">
+<div id="cabinet">
+  <aside class="console left">
+    <div class="conhdr">RIVAL PATHWAYS</div>
+    <div class="cintel"><i style="background:var(--ace)"></i>ACE</div>
+    <div class="cintel"><i style="background:var(--bmet)"></i>BMET</div>
+    <div class="cintel"><i style="background:var(--csee)"></i>CSEE</div>
+    <div class="cintel"><i style="background:var(--mat)"></i>MAT</div>
+    <div class="cintel"><i style="background:var(--mset)"></i>MSET</div>
+    <div class="conhdr">CONTROLS</div>
+    <div class="cref"><b>MOVE</b> WASD / ARROWS / DRAG</div>
+    <div class="cref"><b>FIRE</b> AUTO</div>
+    <div class="cref"><b>HEAVY</b> HOLD C / SPACE</div>
+    <div class="cref"><b>BOMB</b> X / SHIFT</div>
+    <div class="cref"><b>PARRY</b> Z</div>
+    <div class="cref"><b>SWITCH GUN</b> Q</div>
+    <div class="cref"><b>SWITCH HEAVY</b> E</div>
+    <div class="cref"><b>PAUSE</b> P &nbsp; <b>MUTE</b> M</div>
+  </aside>
+  <div id="stage">
   <canvas id="bg"></canvas>
   <canvas id="fx"></canvas>
   <div class="crt"></div>
@@ -349,13 +394,24 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
     <button class="obtn" id="againBtn">PLAY AGAIN</button>
     <button class="mini" id="menuBtn">MAIN MENU</button>
   </div>
-</div>
+  </div><!-- /stage -->
+  <aside class="console right">
+    <div class="conwm"><span class="a">VANGUARD</span><span class="b">IDEA</span></div>
+    <div class="conhdr" id="cabVer">BUILD ----</div>
+    <div class="conhdr">FIELD TIPS</div>
+    <div class="cref">Parry an enemy shot the instant before it lands to reflect it.</div>
+    <div class="cref">Clear a boss to reach REFIT and spend your i&#162;.</div>
+    <div class="cref">Grab a CORE pickup for a jackpot and an extra life.</div>
+    <div class="cref">Chain kills without taking a hit to raise STYLE and multiply score.</div>
+  </aside>
+</div><!-- /cabinet -->
 
 <script>
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=560,H=840; const VERSION='2543';
+const W=560,H=840; const VERSION='2544';
+try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
 const bg=bgC.getContext('2d'), fx=fxC.getContext('2d');
