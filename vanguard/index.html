@@ -353,7 +353,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=560,H=840; const VERSION='2538';
+const W=560,H=840; const VERSION='2539';
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
 const bg=bgC.getContext('2d'), fx=fxC.getContext('2d');
@@ -1380,6 +1380,10 @@ function muzzle(x,y,c,gl,n){ const k=Math.min(9,2+(n||2)*0.5);
   for(let i=0;i<k;i++){ const a=-Math.PI/2+rnd(-0.7,0.7), sp=rnd(60,190)*gl;
     parts.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:.12,max:.12,c:Math.random()<0.5?COL.white:c,sz:rnd(1.2,2.2)*gl}); }
   parts.push({x,y,vx:0,vy:0,life:.06,max:.06,c:COL.white,sz:(3+gl*2),flash:true}); }
+function impactFX(x,y,c,vx,vy){ const m=Math.hypot(vx||0,vy||0)||1, bx=-(vx||0)/m, by=-(vy||0)/m, base=Math.atan2(by,bx);
+  for(let k=0;k<5;k++){ const a=base+rnd(-0.9,0.9), sp=rnd(80,240);
+    parts.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:.16,max:.16,c:Math.random()<0.4?COL.white:c,sz:rnd(1,2)}); }
+  parts.push({x,y,vx:0,vy:0,life:.05,max:.05,c:COL.white,sz:3.5,flash:true}); }
 function dropPod(x,y,fromBoss){
   let r=Math.random(); let type=null;
   if(fromBoss){ type = r<0.5?'coin' : r<0.7?'shield' : r<0.82?'pwr' : null; }
@@ -1583,6 +1587,10 @@ function fireBomb(){
     parts.push({x:player.x,y:player.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:.5,max:.5,c:COL.green,sz:2});}
 }
 function killEnemy(e,silent){ if(e.dead)return; runKills++; e.dead=true; e.dt=0; explode(e.x,e.y,e.c,e.variant>=2);
+  shake=Math.max(shake, 2.5+(e.variant||0)*3.5);
+  { const nd=4+(e.variant||0)*4; for(let i=0;i<nd;i++){ const a=rnd(0,6.28),sp=rnd(70,150+(e.variant||0)*120);
+    shards.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,rot:rnd(0,6.28),vr:rnd(-10,10),len:rnd(5,9+(e.variant||0)*8),life:rnd(.4,.5+(e.variant||0)*0.4),max:1,c:e.c}); } }
+  if((e.variant||0)>=2||e.fk==='foreman'||e.fk==='vector'){ hitStop=Math.max(hitStop,0.05); rings.push({x:e.x,y:e.y,r:e.r*0.4,vr:440,life:.4,max:.4,c:COL.white}); }
   addScore(e.pts,e.x,e.y,e.c); player.coins+=Math.ceil(e.pts*0.22*styleCoinMult()); sectorKills++;
   if(player && !player.dead && dist2(e.x,e.y,player.x,player.y)<80*80){ player.repair=Math.min(1,(player.repair||0)+0.2);
     if(player.repair>=1 && player.armor<player.maxArmor){ player.repair=0; player.armor++; Audio_.power();
@@ -1851,11 +1859,10 @@ function update(dt){
           ebul.push({x:e.x,y:e.y,vx:dx/mm*300,vy:dy/mm*300,c:e.c,r:3,owner:e}); e.flash=.1; Audio_.hit();
           for(let k=0;k<3;k++)parts.push({x:e.x,y:e.y,vx:rnd(-60,60),vy:rnd(-60,60),life:.18,max:.18,c:e.c,sz:1.6});
           hit=true; break; }
-        e.hp-=b.dmg; e.flash=.1;
-        for(let k=0;k<3;k++)parts.push({x:b.x,y:b.y,vx:rnd(-50,50),vy:rnd(-50,50),life:.18,max:.18,c:e.c,sz:1.5});
+        e.hp-=b.dmg; e.flash=.1; impactFX(b.x,b.y,e.c,b.vx,b.vy);
         if(e.hp<=0)killEnemy(e); if(!b.pierce){hit=true;} break; } }
     if(!hit && boss && !boss.entering && !boss.dying && dist2(boss.x,boss.y,b.x,b.y)<(boss.r)*(boss.r)){
-      damageBoss(b.dmg); for(let k=0;k<3;k++)parts.push({x:b.x,y:b.y,vx:rnd(-50,50),vy:rnd(-50,50),life:.18,max:.18,c:boss.c,sz:1.5});
+      damageBoss(b.dmg); impactFX(b.x,b.y,boss.c,b.vx,b.vy);
       shotsHit++; if(!b.pierce)hit=true;
     }
     if(hit)pbul.splice(i,1);
