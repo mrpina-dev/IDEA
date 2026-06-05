@@ -324,8 +324,10 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
   <!-- KEY REMAP -->
   <div class="fbovl hidden" id="ovlKeys">
     <h2 class="ovh">CONTROLS</h2>
-    <div class="tag">CLICK AN ACTION, THEN PRESS A KEY</div>
-    <div id="keyList" style="display:flex;flex-direction:column;gap:6px;width:100%;max-width:280px"></div>
+    <div class="tag">CLICK AN ACTION, THEN PRESS ANY KEY OR MOUSE BUTTON</div>
+    <button class="mini" id="autofireBtn" style="border-color:var(--gold);color:var(--gold)">AUTO-FIRE: ON</button>
+    <div class="tag" style="color:var(--dim);max-width:280px">Auto-fire OFF: hold FIRE to shoot, release to vent RAPID heat.</div>
+    <div id="keyList" style="display:flex;flex-direction:column;gap:6px;width:100%;max-width:280px;max-height:40vh;overflow-y:auto"></div>
     <button class="obtn" id="keysDone">DONE</button>
     <button class="mini" id="keysReset">RESET TO DEFAULTS</button>
   </div>
@@ -453,7 +455,10 @@ const START_BUDGET=1000;
 function freshBuild(){ return { up:{gun:1,beamPow:1,beamCap:1,speed:1,beamPierce:1,beamSpool:1,flank:0,armor:0,heavyPow:1,heavyChg:1,teslaJump:1,singAmp:1,wavePow:1,mSpread:0,mRapid:0,mLance:0,mHoming:0}, unlocked:{spread:1,lance:0,homing:0,rapid:0}, heavyUnlocked:{beam:1,rail:0,tesla:0,singularity:0,wave:0}, wtype:'spread', heavy:'beam', bombs:2, shieldHits:0, drone:null, spent:0 }; }
 let startBuild=freshBuild();
 try{ const _sb=JSON.parse(localStorage.getItem('vanguard_build')||'null'); if(_sb&&_sb.up){ startBuild=freshBuild(); startBuild.up=Object.assign(startBuild.up,_sb.up); startBuild.unlocked=Object.assign(startBuild.unlocked,_sb.unlocked||{}); startBuild.heavyUnlocked=Object.assign(startBuild.heavyUnlocked,_sb.heavyUnlocked||{}); startBuild.heavy=_sb.heavy||'beam'; startBuild.wtype=_sb.wtype||'spread'; startBuild.bombs=_sb.bombs||2; startBuild.shieldHits=_sb.shieldHits||0; startBuild.drone=_sb.drone?{ph:0}:null; startBuild.spent=_sb.spent||0; } }catch(e){}
-const KEYS_DEFAULT={beam:'c', bomb:'x', parry:'z', weapon:'q', heavy:'e', pause:'p', mute:'m'};
+const KEYS_DEFAULT={fire:'Space', beam:'c', bomb:'x', parry:'z', weapon:'q', heavy:'e', pause:'p', mute:'m', weap1:'1', weap2:'2', weap3:'3', weap4:'4'};
+let autofire=true; try{ autofire = localStorage.getItem('vanguard_autofire')!=='0'; }catch(e){}
+const held={};
+function tok(e){ const k=e.key; if(k===' ')return 'Space'; return k.length===1?k.toLowerCase():k; }
 let keybinds=Object.assign({},KEYS_DEFAULT);
 try{ const _sk=JSON.parse(localStorage.getItem('vanguard_keys')||'null'); if(_sk) keybinds=Object.assign({},KEYS_DEFAULT,_sk); }catch(e){}
 let rebindAction=null;
@@ -1473,12 +1478,15 @@ function firePrimary(){
     player.fireCd=Math.max(.028,.062*(1-heat*0.45)*(1-mr*0.1));
     player.heat=heat+0.052-mr*0.004;
     muzzle(x,y,hotC,gl*(0.7+heat),streams);
-    if(player.heat>=1){ player.heat=0; player.overheatT=1.2; styleHit();
-      shake=Math.max(shake,7); player.dmgFlash=Math.max(player.dmgFlash,0.12);
-      rings.push({x,y,r:6,vr:300,life:.35,max:.35,c:COL.mset});
-      pops.push({x:player.x,y:player.y-30,txt:'OVERHEAT',c:COL.mset,life:.9,max:.9}); Audio_.hit(); }
+    if(player.heat>=1){
+      if(autofire){ player.heat=0.45; player.fireCd=0.16; rings.push({x,y,r:5,vr:220,life:.28,max:.28,c:COL.gold});
+        pops.push({x:player.x,y:player.y-30,txt:'VENT',c:COL.gold,life:.6,max:.6}); Audio_.hit(); }
+      else { player.heat=0; player.overheatT=1.2; styleHit();
+        shake=Math.max(shake,7); player.dmgFlash=Math.max(player.dmgFlash,0.12);
+        rings.push({x,y,r:6,vr:300,life:.35,max:.35,c:COL.mset});
+        pops.push({x:player.x,y:player.y-30,txt:'OVERHEAT',c:COL.mset,life:.9,max:.9}); Audio_.hit(); } }
   } else if(player.wtype==='lance'){      // RAILSPIKE: slow, committed, full-pierce columns
-    const ml=u.mLance||0; const cols=lv<5?1:lv<8?2:3; const sp=12; const dmg=(4.2+ml*1.3)*pm;
+    const ml=u.mLance||0; const cols=lv<5?1:lv<8?2:3; const sp=12; const dmg=(2.5+ml*0.8)*pm;
     for(let i=0;i<cols;i++){ const ox=(i-(cols-1)/2)*sp;
       pbul.push({x:x+ox,y,vx:0,vy:-1050,c:COL.cyan,r:3.2+ml*0.4,dmg,pierce:true,len:22+ml*4,wt:'rail',gl}); }
     player.fireCd=.34*(1-ml*0.05); muzzle(x,y,COL.cyan,gl*1.3,cols*2);
@@ -1655,13 +1663,16 @@ function update(dt){
     pl.x=clamp(pl.x,16,W-16); pl.y=clamp(pl.y,H*0.16,H-40);
     // HEAVY slot operates the heavy energy meter and suppresses primary while engaged
     const heavyBusy=updateHeavy(pl,dt);
+    const wantFire = autofire || !!held[keybinds.fire];
     if(!heavyBusy){
       if(pl.beamCoolT>0) pl.beamCoolT-=dt;
       else if(pl.beamE<pl.beamMax) pl.beamE=Math.min(pl.beamMax, pl.beamE+dt*(pl.beamRecharge||0.25));
-      pl.fireCd-=dt; if(pl.fireCd<=0) firePrimary();
+      if(wantFire){ pl.fireCd-=dt; if(pl.fireCd<=0) firePrimary(); }
+      else if(pl.fireCd>0) pl.fireCd=Math.max(0,pl.fireCd-dt);
     }
     if(pl.overheatT>0) pl.overheatT-=dt;
-    if(pl.heat>0 && (pl.wtype!=='rapid'||heavyBusy||pl.overheatT>0)) pl.heat=Math.max(0,pl.heat-dt*0.8);
+    const firingRapid = wantFire && !heavyBusy && pl.overheatT<=0 && pl.wtype==='rapid';
+    if(pl.heat>0 && !firingRapid) pl.heat=Math.max(0,pl.heat-dt*0.8);
     // damage embers
     const sd=pl.maxArmor-pl.armor;
     if(sd>=1 && Math.random()<0.4) parts.push({x:pl.x+rnd(8,14),y:pl.y+rnd(2,9),vx:rnd(-8,8),vy:rnd(18,46),life:.45,max:.45,c:COL.gold,sz:1.4});
@@ -2423,6 +2434,8 @@ function weaponCost(){ return player.unlocked[nextWeapon()]?0:350; }
 function buyWeapon(){ const w=nextWeapon(); player.unlocked[w]=1; player.wtype=w; }
 function switchWeapon(){ const list=WEAPONS.filter(w=>player.unlocked[w]); if(list.length<2)return;
   const i=list.indexOf(player.wtype); player.wtype=list[(i+1)%list.length]; Audio_.hit(); }
+function selectWeapon(w){ if(state!=='play'||!player||!player.unlocked||!player.unlocked[w]||player.wtype===w)return; player.wtype=w; Audio_.hit(); }
+function setAutofire(v){ autofire=v; try{localStorage.setItem('vanguard_autofire',v?'1':'0');}catch(e){} const b=el('autofireBtn'); if(b)b.textContent='AUTO-FIRE: '+(v?'ON':'OFF'); }
 function buildRefit(){ el('refitBal').textContent=player.coins.toLocaleString();
   renderShopGrid(el('refitItems'), refitItems(), {
     afford:it=>{ const maxed=(it.mx>0&&it.lv>=it.mx)||!it.can; return !maxed && player.coins>=it.cost; },
@@ -3086,15 +3099,36 @@ stage.addEventListener('pointerdown',e=>{ Audio_.init(); Audio_.resume();
   if(e.target.closest('.tbtn')||e.target.closest('.ovl')||e.target.closest('.mini'))return;
   if(state==='title'){ startGame(); return; }
   if(state!=='play')return;
+  if(e.pointerType==='mouse' && e.button!==0) return;
   const p=toLogical(e.clientX,e.clientY); ptr.x=p.x; ptr.y=p.y; ptr.active=true; },{passive:true});
 stage.addEventListener('pointermove',e=>{ if(!ptr.active)return; const p=toLogical(e.clientX,e.clientY); ptr.x=p.x; ptr.y=p.y; },{passive:true});
 window.addEventListener('pointerup',()=>{ ptr.active=false; });
 window.addEventListener('pointercancel',()=>{ ptr.active=false; });
+stage.addEventListener('contextmenu',e=>e.preventDefault());
+stage.addEventListener('mousedown',e=>{ const tk='Mouse'+e.button;
+  if(rebindAction){ e.preventDefault();
+    for(const a in keybinds){ if(keybinds[a]===tk&&a!==rebindAction) keybinds[a]=keybinds[rebindAction]; } keybinds[rebindAction]=tk; saveKeys(); rebindAction=null; buildKeyList(); refreshControlsHint(); return; }
+  if(e.target.closest('button')||e.target.closest('.ovl')||e.target.closest('.fbovl'))return;
+  held[tk]=true;
+  if(state==='play'){
+    if(tk===keybinds.beam){ if(!player.beamOn){player.beamOn=true; if(!player.beamLock)Audio_.beam();} }
+    if(tk===keybinds.bomb) fireBomb();
+    if(tk===keybinds.parry) tryParry();
+    if(tk===keybinds.weapon) switchWeapon();
+    if(tk===keybinds.heavy) cycleHeavy();
+    if(tk===keybinds.weap1) selectWeapon('spread');
+    if(tk===keybinds.weap2) selectWeapon('lance');
+    if(tk===keybinds.weap3) selectWeapon('homing');
+    if(tk===keybinds.weap4) selectWeapon('rapid');
+  } });
+window.addEventListener('mouseup',e=>{ const tk='Mouse'+e.button; held[tk]=false;
+  if(tk===keybinds.beam){ if(player){player.beamOn=false; player.beamLock=false;} } });
 
 window.addEventListener('keydown',e=>{ Audio_.init(); Audio_.resume();
   const k=e.key.length===1?e.key.toLowerCase():e.key; keys[k]=true; keys[e.key]=true;
-  if(rebindAction){ e.preventDefault(); const RES={w:1,a:1,s:1,d:1};
-    if(/^[a-z0-9]$/.test(k)&&!RES[k]){ for(const a in keybinds){ if(keybinds[a]===k&&a!==rebindAction) keybinds[a]=keybinds[rebindAction]; } keybinds[rebindAction]=k; saveKeys(); }
+  const tk=tok(e); held[tk]=true;
+  if(rebindAction){ e.preventDefault(); const RES={w:1,a:1,s:1,d:1,ArrowUp:1,ArrowDown:1,ArrowLeft:1,ArrowRight:1};
+    if(tk&&!RES[tk]){ for(const a in keybinds){ if(keybinds[a]===tk&&a!==rebindAction) keybinds[a]=keybinds[rebindAction]; } keybinds[rebindAction]=tk; saveKeys(); }
     rebindAction=null; buildKeyList(); refreshControlsHint(); return; }
   if(!document.getElementById('ovlKeys').classList.contains('hidden')) return;
   if(!document.getElementById('ovlOutfit').classList.contains('hidden')) return;
@@ -3104,12 +3138,17 @@ window.addEventListener('keydown',e=>{ Audio_.init(); Audio_.resume();
     e.preventDefault(); return; }
   if((e.key===' '||e.key==='Enter')&&state==='title'){ startGame(); e.preventDefault(); return; }
   if(state==='play'){
-    if(k===keybinds.beam||e.key===' '){ if(!player.beamOn){player.beamOn=true; if(!player.beamLock)Audio_.beam();} e.preventDefault(); }
-    if(k===keybinds.bomb||e.key==='Shift'){ fireBomb(); }
-    if(k===keybinds.parry){ tryParry(); }
-    if(k===keybinds.pause||e.key==='Escape'){ pauseToggle(); }
-    if(k===keybinds.weapon){ switchWeapon(); }
-    if(k===keybinds.heavy){ cycleHeavy(); }
+    if(tk===keybinds.beam){ if(!player.beamOn){player.beamOn=true; if(!player.beamLock)Audio_.beam();} e.preventDefault(); }
+    if(tk===keybinds.fire){ e.preventDefault(); }
+    if(tk===keybinds.bomb){ fireBomb(); }
+    if(tk===keybinds.parry){ tryParry(); }
+    if(tk===keybinds.pause||e.key==='Escape'){ pauseToggle(); }
+    if(tk===keybinds.weapon){ switchWeapon(); }
+    if(tk===keybinds.heavy){ cycleHeavy(); }
+    if(tk===keybinds.weap1){ selectWeapon('spread'); }
+    if(tk===keybinds.weap2){ selectWeapon('lance'); }
+    if(tk===keybinds.weap3){ selectWeapon('homing'); }
+    if(tk===keybinds.weap4){ selectWeapon('rapid'); }
   } else if(state==='pause'){
     if(k===keybinds.pause||e.key==='Escape'){ pauseToggle(); }
   } else if(state==='refit'){
@@ -3121,10 +3160,11 @@ window.addEventListener('keydown',e=>{ Audio_.init(); Audio_.resume();
     else if(e.key==='ArrowLeft'){ selSlot=Math.max(0,selSlot-1); refreshInitials(); }
     else if(e.key==='ArrowRight'){ selSlot=Math.min(NAMELEN-1,selSlot+1); refreshInitials(); }
   }
-  if(k===keybinds.mute){ toggleMute(); }
+  if(tk===keybinds.mute){ toggleMute(); }
 },{passive:false});
 window.addEventListener('keyup',e=>{ const k=e.key.length===1?e.key.toLowerCase():e.key; keys[k]=false; keys[e.key]=false;
-  if(k===keybinds.beam||e.key===' '){ if(player){player.beamOn=false; player.beamLock=false;} } });
+  const tk=tok(e); held[tk]=false;
+  if(tk===keybinds.beam){ if(player){player.beamOn=false; player.beamLock=false;} } });
 
 // touch buttons
 function bindHold(id,onDown,onUp){ const b=el(id);
@@ -3248,8 +3288,10 @@ function resetBuild(){ startBuild=freshBuild(); saveBuild(); buildOutfit(); refr
 })();
 
 /* keybind remapping */
-const KEY_ACTIONS=[['beam','HEAVY FIRE'],['heavy','CYCLE HEAVY'],['bomb','BOMB'],['parry','PARRY'],['weapon','SWITCH WEAPON'],['pause','PAUSE'],['mute','MUTE']];
-function keyLabel(c){ return c===' '?'SPACE':(c||'?').toUpperCase(); }
+const KEY_ACTIONS=[['fire','FIRE (manual)'],['beam','HEAVY FIRE'],['heavy','CYCLE HEAVY'],['weapon','CYCLE WEAPON'],['weap1','> SPREAD'],['weap2','> LANCE'],['weap3','> HOMING'],['weap4','> RAPID'],['bomb','BOMB'],['parry','PARRY'],['pause','PAUSE'],['mute','MUTE']];
+function keyLabel(c){ if(!c)return '—'; if(c==='Space'||c===' ')return 'SPACE';
+  if(c.indexOf('Mouse')===0){ return ['L-CLICK','MID-CLICK','R-CLICK','MOUSE4','MOUSE5'][+c.slice(5)]||('MOUSE'+(+c.slice(5)+1)); }
+  return c.toUpperCase(); }
 function saveKeys(){ try{localStorage.setItem('vanguard_keys',JSON.stringify(keybinds));}catch(e){} }
 function buildKeyList(){ const box=el('keyList'); if(!box)return; box.innerHTML='';
   KEY_ACTIONS.forEach(p=>{ const act=p[0],lbl=p[1]; const row=document.createElement('div'); row.className='keyrow';
@@ -3260,14 +3302,17 @@ function buildKeyList(){ const box=el('keyList'); if(!box)return; box.innerHTML=
 function openKeys(){ rebindAction=null; el('ovlKeys').classList.remove('hidden'); buildKeyList(); }
 function closeKeys(){ rebindAction=null; el('ovlKeys').classList.add('hidden'); }
 function refreshControlsHint(){ const p=el('ctrlsPanel'); if(!p)return; const kl=c=>keyLabel(keybinds[c]);
-  p.innerHTML='<span class="k">MOVE</span> WASD / ARROWS / DRAG &nbsp; <span class="k">FIRE</span> AUTO<br>'+
-    '<span class="k">BEAM</span> HOLD '+kl('beam')+'/SPACE &nbsp; <span class="k">BOMB</span> '+kl('bomb')+'/SHIFT &nbsp; <span class="k">PARRY</span> '+kl('parry')+' &nbsp; <span class="k">SWITCH</span> '+kl('weapon')+'<br>'+
-    '<span class="k">PAUSE</span> '+kl('pause')+'/ESC &nbsp; <span class="k">MUTE</span> '+kl('mute')+' &nbsp; <span class="k">earn i¢ at REFIT after each boss</span>'; }
+  p.innerHTML='<span class="k">MOVE</span> WASD / ARROWS / DRAG &nbsp; <span class="k">FIRE</span> '+(autofire?'AUTO':('HOLD '+kl('fire')))+'<br>'+
+    '<span class="k">HEAVY</span> HOLD '+kl('beam')+' &nbsp; <span class="k">CYCLE HVY</span> '+kl('heavy')+' &nbsp; <span class="k">BOMB</span> '+kl('bomb')+' &nbsp; <span class="k">PARRY</span> '+kl('parry')+'<br>'+
+    '<span class="k">WEAPON</span> '+kl('weapon')+' &nbsp; <span class="k">SELECT</span> '+kl('weap1')+' '+kl('weap2')+' '+kl('weap3')+' '+kl('weap4')+' &nbsp; <span class="k">PAUSE</span> '+kl('pause')+'<br>'+
+    '<span class="k">REMAP KEYS supports mouse buttons and any key</span>'; }
 (function(){
   const done=el('keysDone'); if(done) done.addEventListener('click',e=>{e.stopPropagation();closeKeys();});
   const rst=el('keysReset'); if(rst) rst.addEventListener('click',e=>{e.stopPropagation(); keybinds=Object.assign({},KEYS_DEFAULT); saveKeys(); buildKeyList(); refreshControlsHint();});
   const tk=el('titleKeys'); if(tk) tk.addEventListener('click',e=>{e.stopPropagation();openKeys();});
   const pk=el('pauseKeys'); if(pk) pk.addEventListener('click',e=>{e.stopPropagation();openKeys();});
+  const af=el('autofireBtn'); if(af) af.addEventListener('click',e=>{e.stopPropagation(); setAutofire(!autofire);});
+  setAutofire(autofire);
   refreshControlsHint();
 })();
 
