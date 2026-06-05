@@ -1296,7 +1296,7 @@ function spawnWave(){
   } else { // sweep
     const fk=waveFk; const n=8+Math.min(sector,8); const side=Math.random()<.5?-1:1; const y0=rnd(110,260);
     for(let i=0;i<n;i++){ const e=makeEnemy(fk,0, side<0?-30-i*42:W+30+i*42, y0+i*8, 'strafe');
-      e.vx=side*(165+sector*10); e.vy=22; e.fire=0.4+i*0.18; enemies.push(e); }
+      e.vx=side*(165+sector*10); e.vy=22; e.fire=(gameMode==='hardcore'?0.2+i*0.12:0.4+i*0.18); enemies.push(e); }
   }
 }
 
@@ -1304,7 +1304,7 @@ function spawnBoss(forceFk){
   const fk=forceFk || sectorTheme().fk || factionForSector(); const F=FACTIONS[fk];
   const hp=280+sector*110 - Math.max(0,(4-sector))*24;
   boss={fk,c:F.c,draw:drawBoss,variant:2, x:W/2, y:-90, ty:128, r:60, name:F.name,
-    hp:hp, maxhp:hp, core:0, phase:0, lastPhase:0, ph:0, fire:Math.max(0.18,1.0/(1+sector*0.10)), sweep:0, entering:true,
+    hp:hp, maxhp:hp, core:0, phase:0, lastPhase:0, ph:0, fire:Math.max(0.18,gameMode==='hardcore'?0.3:1.0/(1+sector*0.10)), sweep:0, entering:true,
     flash:0, dead:false, dying:false, deathT:0, salvo:0,
     gx:W/2, gy:140, moveMode:'track', moveT:1.0, dodgeCd:0,
     sigCd:Math.max(0.4,2.6/(1+sector*0.10)), blinkCd:Math.max(0.8,3.2/(1+sector*0.10)), lockT:0, lockX:0, lockY:0,
@@ -1442,8 +1442,8 @@ function onKill(e){ Audio_.kill(); shotsHit++; }
 function playerHit(){
   if(window.__devGod)return;
   if(player.inv>0||player.dead)return;
-  if(player.shieldHits>0){ player.shieldHits--; player.dmgFlash=.18; player.inv=0.4; Audio_.hit(); return; }
-  player.armor--; player.inv=0.6; player.dmgFlash=.2; styleHit(); Audio_.hit();
+  if(player.shieldHits>0){ player.shieldHits--; player.dmgFlash=.18; player.inv=(gameMode==='hardcore'?0.25:0.4); Audio_.hit(); return; }
+  player.armor--; player.inv=(gameMode==='hardcore'?0.40:0.6); player.dmgFlash=.2; styleHit(); Audio_.hit();
   for(let k=0;k<10;k++) parts.push({x:player.x,y:player.y,vx:rnd(-80,80),vy:rnd(-80,80),life:.25,max:.25,c:COL.green,sz:1.8});
   shake=Math.max(shake,6);
   if(player.armor<=0){ explode(player.x,player.y,COL.green,true); Audio_.big(); shake=14;
@@ -1870,7 +1870,7 @@ function update(dt){
     if(e.state==='form'){
       const s=slots[e.slot], hx=fleet?fleet.x+(s?s.ox:0):e.x, hy=fleet?fleet.y+(s?s.oy:0):e.y;
       e.x+=(hx-e.x)*Math.min(1,dt*6); e.y+=(hy+Math.sin(e.bob)*3-e.y)*Math.min(1,dt*6); e.bank=(hx-e.x)*0.4;
-      e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(2.0,3.0)/(1+sector*0.13)); if(Math.random()<0.85) factionFire(e); }
+      e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(2.0,3.0)/((1+sector*0.13)*(gameMode==='hardcore'?1.25:1))); if(Math.random()<0.85) factionFire(e); }
     } else if(e.state==='reenter'){
       if(!fleet){ e.dead=true; e.dt=0; e.gone=true; }
       else { const s=slots[e.slot], hx=fleet.x+(s?s.ox:0), hy=fleet.y+(s?s.oy:0);
@@ -1878,15 +1878,15 @@ function update(dt){
         if(Math.abs(e.x-hx)<3&&Math.abs(e.y-hy)<3) e.state='form'; }
     } else if(e.state==='dive'){
       e.vy+=240*dt; if(e.y<H*0.62) e.vx+=(player.x-e.x)*dt*1.6; e.vx*=0.99; e.x+=e.vx*dt; e.y+=e.vy*dt; e.bank=e.vx*0.05;
-      e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(1.8,2.8)/(1+sector*0.13)); factionFire(e); }
+      e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(1.8,2.8)/((1+sector*0.13)*(gameMode==='hardcore'?1.25:1))); factionFire(e); }
       if(e.y>H+40){ e.dead=true; e.dt=0; e.gone=true; }
     } else if(e.state==='weave'){
       e.y+=e.vy*dt; e.x=e.baseX+Math.sin(e.t*e.freq+e.phase)*e.amp*e.wdir; e.bank=Math.cos(e.t*e.freq+e.phase)*8*e.wdir;
-      e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(2.5,3.5)/(1+sector*0.13)); if(e.y>0&&e.y<H*0.7) factionFire(e); }
+      e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(2.5,3.5)/((1+sector*0.13)*(gameMode==='hardcore'?1.25:1))); if(e.y>0&&e.y<H*0.7) factionFire(e); }
       if(e.y>H+40){ e.dead=true; e.dt=0; e.gone=true; }
     } else if(e.state==='strafe'){
       e.x+=e.vx*dt; e.y+=e.vy*dt; e.bank=e.vx*0.04;
-      e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(2.0,3.0)/(1+sector*0.13)); if(e.x>0&&e.x<W) enemyShot(e,0,1); }
+      e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(2.0,3.0)/((1+sector*0.13)*(gameMode==='hardcore'?1.25:1))); if(e.x>0&&e.x<W) enemyShot(e,0,1); }
       if(e.x<-50||e.x>W+50){ e.dead=true; e.dt=0; e.gone=true; }
     } else if(e.state==='retreat'){
       e.x+=e.vx*dt; e.y+=e.vy*dt; e.vy-=dt*70; e.bank=e.vx*0.05;
@@ -1927,7 +1927,7 @@ function update(dt){
       e.r=br*(1+0.18*Math.abs(Math.sin(e.celT*7)));
       if(Math.random()<0.6) parts.push({x:e.x+rnd(-br,br),y:e.y-rnd(0,br),vx:rnd(-55,55),vy:rnd(-120,-30),life:.6,max:.6,c:e.c,sz:1.9});
     } else { // free
-      e.y+=e.vy*dt; e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(2.0,3.5)/(1+sector*0.13)); factionFire(e); }
+      e.y+=e.vy*dt; e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(2.0,3.5)/((1+sector*0.13)*(gameMode==='hardcore'?1.25:1))); factionFire(e); }
       if(e.y>H+40){ e.dead=true; e.dt=0; e.gone=true; }
     }
     // contact with player
