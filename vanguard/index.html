@@ -466,6 +466,7 @@ let bgScroll=0; const stars=[
 let shake=0;
 let station=null;
 let neb=[], debris=[], planet=null, farFleet=[], warpT=0, bdInit=false, farFleetT=4;
+let bossCard=null;
 
 /* ============================= factions ============================= */
 function thr(ctx,r){ ctx.beginPath(); ctx.moveTo(-r*0.22,-r*0.78); ctx.lineTo(-r*0.22,-r*1.0);
@@ -1229,6 +1230,8 @@ function spawnBoss(forceFk){
     const bb=document.getElementById('bossbar'), bi=bb.querySelector('i');
     bb.style.borderColor=F.c; bb.style.background=F.c+'1A';
     bi.style.background=F.c; bi.style.boxShadow='0 0 10px '+F.c; bi.style.transform='scaleX(1)'; }
+  warpT=Math.max(warpT,1.0);
+  bossCard={mode:'enter',name:(BOSSNAME[fk]||F.name),sub:'SECTOR BOSS',c:F.c,t:0,dur:2.4};
   Audio_.music(true,'boss_'+fk);
 }
 
@@ -1270,7 +1273,7 @@ function updateGamesPlayed(){ const g=el('gamesPlayed'); if(g) g.textContent='RU
 function startGame(){
   state='play';
   try{ localStorage.setItem('vanguard_games', getGames()+1); }catch(e){}
-  enemies=[]; pbul=[]; ebul=[]; pods=[]; parts=[]; shards=[]; rings=[]; pops=[]; boss=null; barriers=[]; bossSpoils=0; bossFlash=0; hitStop=0; gameOverT=0; killer=null; lastHitBy=null; hazards=[]; station=null; holes=[];
+  enemies=[]; pbul=[]; ebul=[]; pods=[]; parts=[]; shards=[]; rings=[]; pops=[]; boss=null; barriers=[]; bossSpoils=0; bossFlash=0; hitStop=0; gameOverT=0; killer=null; lastHitBy=null; hazards=[]; station=null; holes=[]; bossCard=null;
   runFactionSeq=[...FKEYS]; for(let _i=runFactionSeq.length-1;_i>0;_i--){const _j=Math.random()*_i|0;[runFactionSeq[_i],runFactionSeq[_j]]=[runFactionSeq[_j],runFactionSeq[_i]];} waveFk=null;
   hybridTimer=rnd(6,10);
   fleet=null; slots=[]; refill=[]; reconfTimer=0; volleyTimer=2; diveTimer=2.6;
@@ -1583,6 +1586,7 @@ function update(dt){
   if(state==='play'||state==='refit'||state==='over'){ const tg=sectorTheme().grid;
     for(let i=0;i<3;i++) envGrid[i]+=(tg[i]-envGrid[i])*Math.min(1,dt*2.2); }
   if(sectorBanner>0) sectorBanner-=dt;
+  if(bossCard){ bossCard.t+=dt; if(bossCard.t>=bossCard.dur) bossCard=null; }
   if(state!=='play')return;
 
   /* ----- player ----- */
@@ -1929,12 +1933,24 @@ function bossHpFrac(){ const b=boss; if(!b) return 0;
 function updateBoss(dt){
   const b=boss; b.core+=dt*1.5; if(b.flash>0)b.flash-=dt;
   // entering
-  if(b.entering){ b.y+=(b.ty-b.y)*Math.min(1,dt*1.6); if(Math.abs(b.y-b.ty)<3){b.entering=false; b.gy=b.ty;}
-    document.getElementById('bossname').style.display='block'; document.getElementById('bossbar').style.display='block'; return; }
+  if(b.entering){ b.enterT=(b.enterT||0)+dt; const tIn=0.5, tDesc=1.6;
+    if(b.enterT<tIn){ b.y=-90; }
+    else if(b.enterT<tDesc){ const k=(b.enterT-tIn)/(tDesc-tIn), e=1-Math.pow(1-k,3); b.y=-90+(b.ty+90)*e; }
+    else { b.y+=(b.ty-b.y)*Math.min(1,dt*6);
+      if(!b.touchedDown){ b.touchedDown=true; shake=Math.max(shake,15); bossFlash=Math.max(bossFlash,0.5);
+        rings.push({x:b.x,y:b.y,r:b.r*0.6,vr:540,life:.6,max:.6,c:COL.white}); rings.push({x:b.x,y:b.y,r:b.r,vr:340,life:.55,max:.55,c:b.c});
+        for(let i=0;i<32;i++){ const a=rnd(0,6.28),sp=rnd(60,330); parts.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:.6,max:.6,c:Math.random()<0.4?COL.white:b.c,sz:rnd(1.6,2.8)}); }
+        Audio_.big(); }
+      if(b.enterT>tDesc+0.45){ b.entering=false; b.gx=b.x; b.gy=b.ty;
+        document.getElementById('bossname').style.display='block'; document.getElementById('bossbar').style.display='block'; } }
+    return; }
   // death sequence
-  if(b.dying){ b.deathT-=dt; shake=Math.max(shake,7);
-    if(Math.random()<0.55) explode(b.x+rnd(-b.r,b.r), b.y+rnd(-b.r*0.7,b.r*0.7), Math.random()<0.5?b.c:COL.white,false);
-    b.x+=Math.sin(b.core*28)*0.7;
+  if(b.dying){ b.deathT-=dt; const prog=1-clamp(b.deathT/(b.deathDur||2.4),0,1);
+    shake=Math.max(shake,7+prog*11);
+    if(Math.random()<0.4+prog*0.5) explode(b.x+rnd(-b.r,b.r), b.y+rnd(-b.r*0.8,b.r*0.8), Math.random()<0.5?b.c:COL.white,false);
+    b.deathRing=(b.deathRing||0)-dt; if(b.deathRing<=0){ b.deathRing=0.3; rings.push({x:b.x,y:b.y,r:b.r*0.4,vr:300+prog*220,life:.5,max:.5,c:Math.random()<0.5?b.c:COL.white}); Audio_.phase(); }
+    if(Math.random()<0.4){ const a=rnd(0,6.28),sp=rnd(60,230); shards.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,rot:rnd(0,6.28),vr:rnd(-9,9),len:rnd(8,20),life:rnd(.5,1.0),max:1,c:b.c}); }
+    b.x+=Math.sin(b.core*30)*1.0; b.flash=Math.max(b.flash,0.12); bossFlash=Math.max(bossFlash,prog*0.4);
     if(b.deathT<=0) finishBoss();
     return; }
 
@@ -2234,11 +2250,17 @@ function damageBoss(dmg){ const b=boss; if(!b||b.dying||b.entering||b.tT>0) retu
     return; }
   b.hp-=dmg; if(b.hp<=0) startBossDeath();
 }
-function startBossDeath(){ const b=boss; b.dying=true; b.deathT=1.6; b.hp=0; ebul.length=0; barriers.length=0;
-  Audio_.big(); shake=16; bossFlash=Math.max(bossFlash,0.35);
-  document.querySelector('#bossbar i').style.transform='scaleX(0)'; }
-function finishBoss(){ runBosses++; const b=boss; explode(b.x,b.y,b.c,true); Audio_.big(); shake=20; bossFlash=0.7;
-  for(let i=0;i<6;i++) setTimeoutSafe(b.x+rnd(-50,50),b.y+rnd(-40,40),b.c,i*70);
+function startBossDeath(){ const b=boss; b.dying=true; b.deathT=2.4; b.deathDur=2.4; b.deathRing=0; b.hp=0; ebul.length=0; barriers.length=0;
+  Audio_.big(); shake=18; bossFlash=Math.max(bossFlash,0.5); deathSlow=Math.max(deathSlow,0.7);
+  bossCard={mode:'death',name:(BOSSNAME[b.fk]||b.name),sub:'ELIMINATED',c:b.c,t:0,dur:2.6};
+  rings.push({x:b.x,y:b.y,r:b.r*0.5,vr:300,life:.6,max:.6,c:COL.white});
+  document.querySelector('#bossbar i').style.transform='scaleX(0)';
+  document.getElementById('bossname').style.display='none'; document.getElementById('bossbar').style.display='none'; }
+function finishBoss(){ runBosses++; const b=boss;
+  explode(b.x,b.y,b.c,true); explode(b.x,b.y,COL.white,true); Audio_.big(); Audio_.death(); shake=24; bossFlash=0.85; deathSlow=Math.max(deathSlow,0.5); warpT=Math.max(warpT,0.7);
+  rings.push({x:b.x,y:b.y,r:8,vr:900,life:.7,max:.7,c:COL.white}); rings.push({x:b.x,y:b.y,r:8,vr:620,life:.65,max:.65,c:b.c}); rings.push({x:b.x,y:b.y,r:8,vr:380,life:.6,max:.6,c:COL.white});
+  for(let i=0;i<10;i++) setTimeoutSafe(b.x+rnd(-70,70),b.y+rnd(-60,60),Math.random()<0.5?b.c:COL.white,i*60);
+  for(let i=0;i<30;i++){ const a=rnd(0,6.28),sp=rnd(80,360); shards.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,rot:rnd(0,6.28),vr:rnd(-10,10),len:rnd(8,22),life:rnd(.6,1.2),max:1,c:b.c}); }
   addScore(2000+sector*500,b.x,b.y,b.c);
   pods.push({x:b.x,y:b.y,vy:34,type:'core',fk:b.fk,c:b.c,bob:rnd(0,6.28),r:16,spin:0});
   for(let i=0;i<4;i++) pods.push({x:b.x+rnd(-40,40),y:b.y+rnd(-10,20),vy:rnd(40,60),type:'coin',c:COL.gold,bob:rnd(0,6.28),r:11,magnet:true});
@@ -2470,7 +2492,7 @@ function drawBG(){
   // enemies
   bg.lineJoin='round';
   enemies.forEach(e=>{ if(e.dead)return; drawCraft(bg,e,e.draw); });
-  if(boss){ drawCraft(bg,boss,boss.draw,true); drawBossFX(); }
+  if(boss){ if(boss.entering) drawBossTear(); drawCraft(bg,boss,boss.draw,true); drawBossFX(); }
   // FOREMAN telegraph lines
   enemies.forEach(e=>{ if(e.dead||e.lockT<=0||e.state!=='foreman')return; const k=clamp(1-e.lockT/0.7,0,1);
     bg.save(); bg.globalAlpha=0.45+0.45*k; bg.strokeStyle=COL.csee; bg.shadowColor=COL.csee; bg.shadowBlur=8; bg.lineWidth=1.5;
@@ -2524,6 +2546,7 @@ function drawBG(){
   bg.fillStyle=tf; bg.fillRect(0,0,W,72);
   if(bossFlash>0){ bg.globalAlpha=Math.min(0.7,bossFlash); bg.fillStyle='#fff'; bg.fillRect(0,0,W,H); bg.globalAlpha=1; }
   if(sectorBanner>0) drawBanner();
+  if(bossCard) drawBossCard();
   // Death vignette + DESTROYED text
   if(state==='play' && player && player.dead && gameOverT>0){
     const prog=clamp(1-gameOverT/1.9,0,1);
@@ -2565,6 +2588,33 @@ function drawBanner(){
   bg.globalAlpha=1; bg.shadowBlur=0; bg.textAlign='start';
   bg.restore();
 }
+function drawBossTear(){ const b=boss; if(!b)return; const et=b.enterT||0;
+  const open=Math.sin(clamp(et/1.6,0,1)*Math.PI); if(open<=0.001)return;
+  const x=b.x, y=clamp(b.y,30,b.ty), h=b.r*2.2+80, w=(b.r*0.55+26)*open;
+  bg.save(); bg.globalCompositeOperation='lighter';
+  const g=bg.createRadialGradient(x,y,0,x,y,h); g.addColorStop(0,b.c+'AA'); g.addColorStop(0.4,b.c+'30'); g.addColorStop(1,b.c+'00');
+  bg.fillStyle=g; bg.beginPath(); bg.ellipse(x,y,w+44,h,0,0,6.28); bg.fill();
+  bg.fillStyle='rgba(255,255,255,'+(0.45+0.45*open)+')'; bg.shadowColor=b.c; bg.shadowBlur=30;
+  bg.beginPath(); bg.ellipse(x,y,Math.max(2,w*0.4),h*0.92,0,0,6.28); bg.fill();
+  bg.strokeStyle=COL.white; bg.lineWidth=1.5; bg.globalAlpha=open*0.8;
+  for(let i=0;i<5;i++){ const yy=y+rnd(-h,h)*0.8; bg.beginPath(); bg.moveTo(x,yy); bg.lineTo(x+rnd(-52,52),yy+rnd(-14,14)); bg.stroke(); }
+  bg.globalAlpha=1; bg.shadowBlur=0; bg.restore(); }
+function drawBossCard(){ const c=bossCard; if(!c)return;
+  const inP=clamp(c.t/0.35,0,1), outP=clamp((c.dur-c.t)/0.5,0,1), barH=64*Math.min(inP,outP);
+  bg.save();
+  bg.fillStyle='rgba(2,6,4,0.92)'; bg.fillRect(0,0,W,barH); bg.fillRect(0,H-barH,W,barH);
+  bg.globalAlpha=Math.min(inP,outP); bg.strokeStyle=c.c; bg.shadowColor=c.c; bg.shadowBlur=12; bg.lineWidth=2;
+  bg.beginPath(); bg.moveTo(0,barH); bg.lineTo(W,barH); bg.moveTo(0,H-barH); bg.lineTo(W,H-barH); bg.stroke();
+  bg.globalAlpha=1; bg.shadowBlur=0;
+  const a=Math.min(clamp(c.t/0.35,0,1),clamp((c.dur-c.t)/0.4,0,1));
+  const scale=c.mode==='enter' ? (1+0.6*(1-clamp(c.t/0.28,0,1))) : 1;
+  bg.save(); bg.globalAlpha=a; bg.translate(W/2,H*0.5); bg.scale(scale,scale); bg.textAlign='center';
+  bg.font="700 12px 'Share Tech Mono',monospace"; bg.fillStyle=COL.white; bg.shadowColor=c.c; bg.shadowBlur=10; bg.fillText(c.sub,0,-26);
+  bg.font="700 38px 'Chakra Petch',sans-serif"; bg.fillStyle=c.c; bg.shadowColor=c.c; bg.shadowBlur=24; bg.fillText(c.name,0,8);
+  if(c.mode==='death'){ const sw=bg.measureText(c.name).width*0.58*clamp((c.t-0.2)/0.4,0,1);
+    bg.strokeStyle=COL.mset; bg.shadowColor=COL.mset; bg.shadowBlur=14; bg.lineWidth=4;
+    bg.beginPath(); bg.moveTo(-sw,2); bg.lineTo(sw,2); bg.stroke(); }
+  bg.globalAlpha=1; bg.shadowBlur=0; bg.restore(); bg.restore(); bg.textAlign='start'; }
 function drawCraft(ctx,e,drawFn,isBoss){
   const flashing=e.flash>0, col=flashing?COL.white:e.c, r=e.r;
   ctx.save(); ctx.translate(e.x,e.y); ctx.rotate((e.faceRot||0)+(e.bank||0)*0.02);
