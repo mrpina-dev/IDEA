@@ -306,6 +306,8 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
       <span class="k">PAUSE</span> P/ESC &nbsp; <span class="k">MUTE</span> M &nbsp; <span class="k">earn i¢ at REFIT after each boss</span></div>
     <button class="mini" id="ctrlsToggle">CONTROLS: ON</button>
     <button class="mini" id="titleKeys">REMAP KEYS</button>
+    <button class="mini" id="howtoBtn" style="border-color:var(--cyan);color:var(--cyan)">HOW TO PLAY</button>
+    <button class="mini" id="logBtn">UPDATE LOG</button>
     <div class="tag" style="color:var(--cyan);letter-spacing:.12em;margin-top:2px">FOUND A BUG OR HAVE AN IDEA?</div>
     <button class="fbbtn" id="titleFeedback">SEND FEEDBACK</button>
   </div>
@@ -394,6 +396,25 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
     <button class="obtn" id="againBtn">PLAY AGAIN</button>
     <button class="mini" id="menuBtn">MAIN MENU</button>
   </div>
+
+  <!-- HOW TO PLAY -->
+  <div class="ovl hidden" id="ovlTut" style="background:rgba(2,10,4,.96);z-index:13;gap:16px">
+    <h2 class="ovh" id="tutTitle">HOW TO PLAY</h2>
+    <div id="tutBody" class="panel" style="max-width:300px;min-height:120px;text-align:left"></div>
+    <div id="tutDots" style="display:flex;gap:6px;justify-content:center"></div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <button class="mini" id="tutBack">BACK</button>
+      <button class="obtn" id="tutNext">NEXT</button>
+    </div>
+    <button class="mini" id="tutSkip">SKIP</button>
+  </div>
+
+  <!-- UPDATE LOG -->
+  <div class="ovl hidden" id="ovlLog" style="background:rgba(2,10,4,.96);z-index:13;gap:12px">
+    <h2 class="ovh">UPDATE LOG</h2>
+    <div id="logBody" class="board" style="max-width:320px;max-height:60vh;overflow-y:auto;text-align:left"></div>
+    <button class="obtn" id="logClose">CLOSE</button>
+  </div>
   </div><!-- /stage -->
   <aside class="console right">
     <div class="conwm"><span class="a">VANGUARD</span><span class="b">IDEA</span></div>
@@ -410,7 +431,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=560,H=840; const VERSION='2544';
+const W=560,H=840; const VERSION='2545';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -3204,6 +3225,8 @@ window.addEventListener('keydown',e=>{ Audio_.init(); Audio_.resume();
   if(!document.getElementById('ovlKeys').classList.contains('hidden')) return;
   if(!document.getElementById('ovlOutfit').classList.contains('hidden')) return;
   if(!document.getElementById('ovlFeedback').classList.contains('hidden')) return;
+  if(!document.getElementById('ovlTut').classList.contains('hidden')){ if(e.key==='Escape')closeTut(); e.preventDefault(); return; }
+  if(!document.getElementById('ovlLog').classList.contains('hidden')){ if(e.key==='Escape')closeLog(); e.preventDefault(); return; }
   if(!document.getElementById('ovlConfirm').classList.contains('hidden')){
     if(e.key==='Enter') doRestart(); else if(e.key==='Escape') cancelRestart();
     e.preventDefault(); return; }
@@ -3386,6 +3409,43 @@ function refreshControlsHint(){ const p=el('ctrlsPanel'); if(!p)return; const kl
   setAutofire(autofire);
   refreshControlsHint();
 })();
+
+/* how-to-play tutorial + update log */
+const TUT_PAGES=[
+ {h:'WELCOME, PILOT',b:'You fly the IDEA ship against five rival Bosco Tech pathways across escalating sectors. Survive, rack up score, and climb the leaderboard.'},
+ {h:'MOVE & FIRE',b:'Move with WASD, the arrow keys, or by dragging. Your guns fire automatically. You can switch to manual fire under CONTROLS if you prefer.'},
+ {h:'GUNS',b:'Four primary guns: SPREAD, LANCE, HOMING, RAPID. Press Q to switch between the ones you have unlocked.'},
+ {h:'HEAVY WEAPON',b:'Hold C or SPACE to spin up and fire your HEAVY weapon. Press E to switch heavy type. It drains an energy cell and locks while recharging, so pick your moment.'},
+ {h:'PARRY & BOMB',b:'Tap Z the instant before an enemy shot reaches you to PARRY and reflect it. Press X to set off a BOMB that clears the screen when you are cornered.'},
+ {h:'STYLE & REFIT',b:'Chain kills without taking a hit to raise your STYLE grade, which multiplies score. Kills and CORE pickups earn i¢. Clear a boss to reach REFIT and spend it. Set a permanent loadout with CONFIGURE BUILD on the title.'},
+ {h:'MODES',b:'NORMAL and HARDCORE (one life) keep separate leaderboards. Pick your mode on the title screen. Good luck out there.'}
+];
+let tutIdx=0;
+function renderTut(){ const p=TUT_PAGES[tutIdx]; el('tutTitle').textContent=p.h; el('tutBody').textContent=p.b;
+  const last=tutIdx===TUT_PAGES.length-1; el('tutNext').textContent=last?'START':'NEXT'; el('tutBack').style.visibility=tutIdx===0?'hidden':'visible';
+  const dots=el('tutDots'); dots.innerHTML=''; TUT_PAGES.forEach((_,i)=>{ const d=document.createElement('span'); d.style.cssText='width:8px;height:8px;border-radius:50%;background:'+(i===tutIdx?'var(--green)':'rgba(74,122,82,.5)'); dots.appendChild(d); }); }
+function openTut(){ tutIdx=0; renderTut(); el('ovlTut').classList.remove('hidden'); }
+function closeTut(){ el('ovlTut').classList.add('hidden'); try{localStorage.setItem('vanguard_tutdone','1');}catch(e){} }
+{ const n=el('tutNext'); if(n) n.addEventListener('click',e=>{ e.stopPropagation(); if(tutIdx>=TUT_PAGES.length-1){ closeTut(); } else { tutIdx++; renderTut(); Audio_.hit(); } }); }
+{ const b=el('tutBack'); if(b) b.addEventListener('click',e=>{ e.stopPropagation(); if(tutIdx>0){ tutIdx--; renderTut(); Audio_.hit(); } }); }
+{ const s=el('tutSkip'); if(s) s.addEventListener('click',e=>{ e.stopPropagation(); closeTut(); }); }
+{ const b=el('howtoBtn'); if(b) b.addEventListener('click',e=>{ e.stopPropagation(); openTut(); }); }
+
+const CHANGELOG=[
+ {ver:'2545',date:'2026',items:['In-game HOW TO PLAY tutorial for new pilots','This update log, reachable from the title and the desktop console']},
+ {ver:'2544',date:'2026',items:['Desktop cabinet layout fills the side space with intel and status consoles','Wider, more readable two-column upgrade menu']},
+ {ver:'EARLIER',date:'',items:['HEAVY weapon system: PRISM BEAM, RAILGUN, TESLA, SINGULARITY, WAVE MOTION','Beam reworked with separate spool-up, cell, and recharge timing','Persistent CONFIGURE BUILD starting loadout','Live controls hint and full key remapping','Death screen shows your own rank even outside the top 10','Per-device runs-played counter','NORMAL and HARDCORE modes with separate boards','Feedback submission and hybrid elite enemies']}
+];
+function renderLog(){ const box=el('logBody'); if(!box)return; box.innerHTML='';
+  CHANGELOG.forEach(en=>{ const h=document.createElement('div'); h.style.cssText='color:var(--gold);font-family:\'Chakra Petch\',sans-serif;font-weight:700;letter-spacing:.1em;margin-top:9px';
+    h.textContent=(en.ver==='EARLIER'?'EARLIER BUILDS':'BUILD '+en.ver)+(en.date?'  ·  '+en.date:''); box.appendChild(h);
+    en.items.forEach(it=>{ const r=document.createElement('div'); r.style.cssText='font-size:11px;line-height:1.5;color:var(--white);padding:1px 0 1px 10px'; r.textContent='› '+it; box.appendChild(r); }); }); }
+function openLog(){ renderLog(); el('ovlLog').classList.remove('hidden'); }
+function closeLog(){ el('ovlLog').classList.add('hidden'); }
+{ const c=el('logClose'); if(c) c.addEventListener('click',e=>{ e.stopPropagation(); closeLog(); }); }
+{ const b=el('logBtn'); if(b) b.addEventListener('click',e=>{ e.stopPropagation(); openLog(); }); }
+{ const cv=el('cabVer'); if(cv){ cv.style.cursor='pointer'; cv.title='View update log'; cv.addEventListener('click',e=>{ e.stopPropagation(); openLog(); }); } }
+try{ if(!localStorage.getItem('vanguard_tutdone')) openTut(); }catch(e){}
 
 /* board mode tabs */
 function setBoardMode(m,target){ boardMode=m; onlineBoard=null; boardRetries=0;
