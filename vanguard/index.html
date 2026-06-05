@@ -355,7 +355,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=560,H=840; const VERSION='2541';
+const W=560,H=840; const VERSION='2542';
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
 const bg=bgC.getContext('2d'), fx=fxC.getContext('2d');
@@ -1176,7 +1176,9 @@ function spawnFormationOccupant(i,fromTop){
   let e;
   if(role==='anchor'){ e=makeEnemy('mat',2,sx,sy,st); e.role='anchor'; e.c=COL.mat; e.buffR=150; e.hp*=2.4; e.maxhp*=2.4; e.r*=1.25; e.pts*=4; }
   else { let variant; if(role==='rusher')variant=0; else if(role==='zoner')variant=2; else variant=(Math.random()<0.4)?1:0;
-    e=makeEnemy(s.fk,variant, sx, sy, st); e.role=role||'grunt'; }
+    const mv = sector<=1?0 : sector<=3?1 : 2; variant=Math.min(variant,mv);
+    e=makeEnemy(s.fk,variant, sx, sy, st); e.role=role||'grunt';
+    if(variant===2){ e.hp=Math.round(e.hp*1.25); e.maxhp=e.hp; e.fire=Math.max(0.3,(e.fire||1)*0.7); } }
   e.slot=i; enemies.push(e);
 }
 function slotFilled(i){ for(const e of enemies) if(!e.dead && e.slot===i) return true; return false; }
@@ -1187,7 +1189,10 @@ function spawnWave(){
   const pool=['formation','stream','sweep'].filter(t=>t!==spawnWave._last);
   const type=pick(pool); spawnWave._last=type;
   if(type==='formation'){
-    const arch=pick(['pincer','siege','swarm','flank','spear'].filter(a=>a!==spawnWave._lastArch));
+    const _poolAll=['pincer','siege','swarm','flank','spear'].filter(a=>a!==spawnWave._lastArch);
+    const _prefs={ace:['siege','spear'],bmet:['swarm','pincer'],csee:['siege','flank'],mat:['spear','flank'],mset:['pincer','spear']}[waveFk];
+    let arch; const _pf=_prefs?_prefs.filter(a=>a!==spawnWave._lastArch):[];
+    if(_pf.length && Math.random()<0.6) arch=pick(_pf); else arch=pick(_poolAll);
     spawnWave._lastArch=arch;
     const cfg={
       pincer:{holdY:H*0.30,sweep:30,phRate:0.5,descend:6,advancing:false,squeeze:true,spread:1.3,spreadTarget:0.55,volleyMul:1.0,diveMul:1.7,diveCount:1},
@@ -1392,7 +1397,7 @@ function impactFX(x,y,c,vx,vy){ const m=Math.hypot(vx||0,vy||0)||1, bx=-(vx||0)/
 function dropPod(x,y,fromBoss){
   let r=Math.random(); let type=null;
   if(fromBoss){ type = r<0.5?'coin' : r<0.7?'shield' : r<0.82?'pwr' : null; }
-  else { if(r<0.022) type='coin'; else if(r<0.027) type='1up'; else if(r<0.035) type='pwr'; else return; }
+  else { if(r<0.013) type='coin'; else if(r<0.017) type='1up'; else if(r<0.022) type='pwr'; else return; }
   if(!type)return;
   const buffs=['overdrive','scatter','magnet'];
   const buff=type==='pwr'?buffs[Math.random()*3|0]:null;
