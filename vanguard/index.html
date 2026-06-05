@@ -355,7 +355,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=560,H=840; const VERSION='2542';
+const W=560,H=840; const VERSION='2543';
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
 const bg=bgC.getContext('2d'), fx=fxC.getContext('2d');
@@ -452,7 +452,7 @@ let runFactionSeq=[], waveFk=null;
 let hybridTimer=0;
 let gameMode='normal';
 const START_BUDGET=1000;
-function freshBuild(){ return { up:{gun:1,beamPow:1,beamCap:1,speed:1,beamPierce:1,beamSpool:1,flank:0,armor:0,heavyPow:1,heavyChg:1,teslaJump:1,singAmp:1,wavePow:1,mSpread:0,mRapid:0,mLance:0,mHoming:0}, unlocked:{spread:1,lance:0,homing:0,rapid:0}, heavyUnlocked:{beam:1,rail:0,tesla:0,singularity:0,wave:0}, wtype:'spread', heavy:'beam', bombs:2, shieldHits:0, drone:null, spent:0 }; }
+function freshBuild(){ return { up:{gun:1,beamPow:1,beamCap:1,speed:1,beamPierce:1,beamSpool:1,flank:0,armor:0,heavyPow:1,heavyChg:1,teslaJump:1,singAmp:1,wavePow:1,mSpread:0,mRapid:0,mLance:0,mHoming:0,bombPow:1}, unlocked:{spread:1,lance:0,homing:0,rapid:0}, heavyUnlocked:{beam:1,rail:0,tesla:0,singularity:0,wave:0}, wtype:'spread', heavy:'beam', bombs:2, shieldHits:0, drone:null, spent:0 }; }
 let startBuild=freshBuild();
 try{ const _sb=JSON.parse(localStorage.getItem('vanguard_build')||'null'); if(_sb&&_sb.up){ startBuild=freshBuild(); startBuild.up=Object.assign(startBuild.up,_sb.up); startBuild.unlocked=Object.assign(startBuild.unlocked,_sb.unlocked||{}); startBuild.heavyUnlocked=Object.assign(startBuild.heavyUnlocked,_sb.heavyUnlocked||{}); startBuild.heavy=_sb.heavy||'beam'; startBuild.wtype=_sb.wtype||'spread'; startBuild.bombs=_sb.bombs||2; startBuild.shieldHits=_sb.shieldHits||0; startBuild.drone=_sb.drone?{ph:0}:null; startBuild.spent=_sb.spent||0; } }catch(e){}
 const KEYS_DEFAULT={fire:'Space', beam:'c', bomb:'x', parry:'z', weapon:'q', heavy:'e', pause:'p', mute:'m', weap1:'1', weap2:'2', weap3:'3', weap4:'4'};
@@ -1248,7 +1248,7 @@ function spawnBoss(forceFk){
 /* ============================= player ============================= */
 function resetPlayer(full){
   if(!player||full){ player={x:W/2,y:H-130, vx:0,vy:0,
-    up:{gun:1,beamPow:1,beamCap:1,speed:1,beamPierce:1,beamSpool:1,flank:0,armor:0,heavyPow:1,heavyChg:1,teslaJump:1,singAmp:1,wavePow:1,mSpread:0,mRapid:0,mLance:0,mHoming:0},
+    up:{gun:1,beamPow:1,beamCap:1,speed:1,beamPierce:1,beamSpool:1,flank:0,armor:0,heavyPow:1,heavyChg:1,teslaJump:1,singAmp:1,wavePow:1,mSpread:0,mRapid:0,mLance:0,mHoming:0,bombPow:1},
     wtype:'spread', unlocked:{spread:1,lance:0,homing:0,rapid:0},
     fireCd:0, beamOn:false, beamLock:false, beamActive:false, beamE:1, beamMax:1, beamDps:46, beamWind:0, beamCoolT:0, heat:0, overheatT:0,
     heavy:'beam', heavyUnlocked:{beam:1,rail:0,tesla:0,singularity:0,wave:0}, heavyCharge:0, waveT:0, teslaArc:null,
@@ -1419,10 +1419,10 @@ function outfitOffers(){ const b=startBuild, u=b.up; const pdN=(1+(u.gun-1)*0.30
   ...(b.unlocked.rapid?[{grp:'WEAPONS',name:'OVERCLOCK',icon:'w_rapid',desc:'RAPID: higher fire rate.',delta:'+12% rate',lv:u.mRapid||0,mx:3,cost:300+(u.mRapid||0)*220,can:(u.mRapid||0)<3,buy:()=>{u.mRapid=(u.mRapid||0)+1;}}]:[]),
   ...(b.unlocked.lance?[{grp:'WEAPONS',name:'HIGH-VELOCITY',icon:'w_lance',desc:'LANCE: heavier bolts.',delta:'+ bolt dmg',lv:u.mLance||0,mx:3,cost:320+(u.mLance||0)*230,can:(u.mLance||0)<3,buy:()=>{u.mLance=(u.mLance||0)+1;}}]:[]),
   ...(b.unlocked.homing?[{grp:'WEAPONS',name:'SWARM CTRL',icon:'w_homing',desc:'HOMING: extra tracking shot.',delta:'+1 shot',lv:u.mHoming||0,mx:3,cost:320+(u.mHoming||0)*230,can:(u.mHoming||0)<3,buy:()=>{u.mHoming=(u.mHoming||0)+1;}}]:[]),
-  {grp:'HEAVY',name:'RAILGUN',icon:'rail',desc:'Charged hypervelocity slug.',lv:0,mx:0,meta:hu.rail?'OWNED':'i¢700',cost:700,can:!hu.rail,buy:()=>{b.heavyUnlocked.rail=1;b.heavy='rail';}},
-  {grp:'HEAVY',name:'TESLA',icon:'tesla',desc:'Chain lightning across enemies.',lv:0,mx:0,meta:hu.tesla?'OWNED':'i¢800',cost:800,can:!hu.tesla,buy:()=>{b.heavyUnlocked.tesla=1;b.heavy='tesla';}},
-  {grp:'HEAVY',name:'SINGULARITY',icon:'singularity',desc:'Black hole that pulls then implodes.',lv:0,mx:0,meta:hu.singularity?'OWNED':'i¢900',cost:900,can:!hu.singularity,buy:()=>{b.heavyUnlocked.singularity=1;b.heavy='singularity';}},
-  {grp:'HEAVY',name:'WAVE MOTION',icon:'wave',desc:'Full-meter screen-clearing beam.',lv:0,mx:0,meta:hu.wave?'OWNED':'i¢1400',cost:1400,can:!hu.wave,buy:()=>{b.heavyUnlocked.wave=1;b.heavy='wave';}},
+  {grp:'HEAVY',name:'RAILGUN',icon:'rail',desc:'Unlocked in-run at REFIT.',lv:0,mx:0,meta:hu.rail?'OWNED':'IN-RUN',cost:0,can:false,buy:()=>{}},
+  {grp:'HEAVY',name:'TESLA',icon:'tesla',desc:'Unlocked in-run at REFIT.',lv:0,mx:0,meta:hu.tesla?'OWNED':'IN-RUN',cost:0,can:false,buy:()=>{}},
+  {grp:'HEAVY',name:'SINGULARITY',icon:'singularity',desc:'Unlocked in-run at REFIT.',lv:0,mx:0,meta:hu.singularity?'OWNED':'IN-RUN',cost:0,can:false,buy:()=>{}},
+  {grp:'HEAVY',name:'WAVE MOTION',icon:'wave',desc:'Unlocked in-run at REFIT.',lv:0,mx:0,meta:hu.wave?'OWNED':'IN-RUN',cost:0,can:false,buy:()=>{}},
   {grp:'HEAVY',name:'HEAVY POWER',icon:'beampow',desc:'Rail, Tesla, Singularity, Wave damage.',delta:'+30% dmg',lv:u.heavyPow||1,mx:6,cost:350+((u.heavyPow||1)-1)*240,can:(u.heavyPow||1)<6,buy:()=>{u.heavyPow=(u.heavyPow||1)+1;}},
   {grp:'HEAVY',name:'HEAVY SPOOL',icon:'beamspool',desc:'Faster heavy charge time.',delta:'faster charge',lv:u.heavyChg||1,mx:5,cost:300+((u.heavyChg||1)-1)*200,can:(u.heavyChg||1)<5,buy:()=>{u.heavyChg=(u.heavyChg||1)+1;}},
   ...(hu.tesla?[{grp:'HEAVY',name:'ARC CHAIN',icon:'tesla',desc:'Tesla: more jumps and range.',delta:'+1 arc',lv:u.teslaJump||1,mx:4,cost:350+((u.teslaJump||1)-1)*220,can:(u.teslaJump||1)<4,buy:()=>{u.teslaJump=(u.teslaJump||1)+1;}}]:[]),
@@ -1436,9 +1436,10 @@ function outfitOffers(){ const b=startBuild, u=b.up; const pdN=(1+(u.gun-1)*0.30
   {grp:'DEFENSE',name:'SHIELD +1',icon:'shield',desc:'Absorbs one hit.',delta:'+1 shield',lv:b.shieldHits,mx:3,cost:350,can:b.shieldHits<3,buy:()=>b.shieldHits++},
   {grp:'SYSTEMS',name:'ENGINE',icon:'engine',desc:'Ship movement speed.',delta:'+52 speed',lv:u.speed,mx:10,cost:300+(u.speed-1)*180,can:u.speed<10,buy:()=>u.speed++},
   {grp:'SYSTEMS',name:'BOMB +1',icon:'bomb',desc:'Raises max bomb count.',delta:'+1 bomb',lv:b.bombs,mx:6,cost:200,can:b.bombs<6,buy:()=>b.bombs++},
+  {grp:'SYSTEMS',name:'BOMB CORE',icon:'bomb',desc:'Bomb blast damage.',delta:'+50% dmg',lv:u.bombPow||1,mx:5,cost:300+((u.bombPow||1)-1)*220,can:(u.bombPow||1)<5,buy:()=>{u.bombPow=(u.bombPow||1)+1;}},
   {grp:'SYSTEMS',name:'DRONE',icon:'drone',desc:'Wingman drone that fires with you.',lv:b.drone?1:0,mx:0,meta:b.drone?'OWNED':'i¢600',cost:600,can:!b.drone,buy:()=>{b.drone={ph:0};}}
 ];}
-function buildCount(){ const u=startBuild.up,b=startBuild; const hu=b.heavyUnlocked||{}; return (u.gun-1)+(u.beamPow-1)+(u.beamCap-1)+(u.beamPierce-1)+(u.beamSpool-1)+(u.speed-1)+u.flank+u.armor+b.shieldHits+(b.bombs-2)+(b.drone?1:0)+b.unlocked.lance+b.unlocked.homing+b.unlocked.rapid+((u.heavyPow||1)-1)+((u.heavyChg||1)-1)+((u.teslaJump||1)-1)+((u.singAmp||1)-1)+((u.wavePow||1)-1)+(u.mSpread||0)+(u.mRapid||0)+(u.mLance||0)+(u.mHoming||0)+(hu.rail?1:0)+(hu.tesla?1:0)+(hu.singularity?1:0)+(hu.wave?1:0); }
+function buildCount(){ const u=startBuild.up,b=startBuild; const hu=b.heavyUnlocked||{}; return (u.gun-1)+(u.beamPow-1)+(u.beamCap-1)+(u.beamPierce-1)+(u.beamSpool-1)+(u.speed-1)+u.flank+u.armor+b.shieldHits+(b.bombs-2)+(b.drone?1:0)+b.unlocked.lance+b.unlocked.homing+b.unlocked.rapid+((u.heavyPow||1)-1)+((u.heavyChg||1)-1)+((u.teslaJump||1)-1)+((u.singAmp||1)-1)+((u.wavePow||1)-1)+(u.mSpread||0)+(u.mRapid||0)+(u.mLance||0)+(u.mHoming||0)+((u.bombPow||1)-1)+(hu.rail?1:0)+(hu.tesla?1:0)+(hu.singularity?1:0)+(hu.wave?1:0); }
 const WCOL={spread:COL.green,lance:COL.cyan,homing:COL.gold,rapid:COL.mat};
 function applyPod(p){
   if(p.type==='core'){ const jack=90+sector*22; player.coins+=jack; addScore(jack,p.x,p.y,p.c);
@@ -1590,14 +1591,19 @@ function tryParry(){ if(state!=='play'||!player||player.dead||player.parryCd>0||
   rings.push({x:player.x,y:player.y,r:10,vr:150,life:.3,max:.3,c:COL.cyan}); shake=Math.max(shake,3);
 }
 function fireBomb(){
-  if(player.bombs<=0||player.dead)return; player.bombs--; Audio_.bomb();
-  ebul.length=0; shake=Math.max(shake,10);
-  rings.push({x:player.x,y:player.y,r:4,vr:900,life:.5,max:.5,c:COL.white});
-  rings.push({x:player.x,y:player.y,r:4,vr:640,life:.5,max:.5,c:COL.green});
-  enemies.forEach(e=>{ if(!e.dead){ e.hp-=6; e.flash=.12; if(e.hp<=0){ window.killSrc='bomb'; killEnemy(e,true); } } });
-  if(boss){ damageBoss(40); }
-  for(let i=0;i<40;i++){const a=rnd(0,6.28),sp=rnd(100,420);
-    parts.push({x:player.x,y:player.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:.5,max:.5,c:COL.green,sz:2});}
+  if(player.bombs<=0||player.dead)return; player.bombs--;
+  const bp=(player.up.bombPow||1), dmg=(10+sector*3)*(1+(bp-1)*0.5);
+  player.inv=Math.max(player.inv,1.1);
+  ebul.length=0; shake=Math.max(shake,16); bossFlash=Math.max(bossFlash,0.55); deathSlow=Math.max(deathSlow,0.25);
+  Audio_.bomb(); Audio_.big();
+  rings.push({x:player.x,y:player.y,r:6,vr:1100,life:.55,max:.55,c:COL.white});
+  rings.push({x:player.x,y:player.y,r:6,vr:760,life:.55,max:.55,c:COL.green});
+  rings.push({x:player.x,y:player.y,r:6,vr:480,life:.5,max:.5,c:COL.gold});
+  enemies.forEach(e=>{ if(!e.dead){ e.hp-=dmg; e.flash=.14; if(e.hp<=0){ window.killSrc='bomb'; killEnemy(e,true); } } });
+  if(boss){ damageBoss(dmg*7); }
+  for(let i=0;i<64;i++){const a=rnd(0,6.28),sp=rnd(120,520);
+    parts.push({x:player.x,y:player.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:rnd(.4,.7),max:.7,c:Math.random()<0.4?COL.white:COL.green,sz:rnd(1.6,3)});}
+  pops.push({x:player.x,y:player.y-30,txt:'PURGE',c:COL.green,life:.8,max:.8});
 }
 function killEnemy(e,silent){ if(e.dead)return; runKills++; e.dead=true; e.dt=0; explode(e.x,e.y,e.c,e.variant>=2);
   shake=Math.max(shake, 2.5+(e.variant||0)*3.5);
@@ -2414,10 +2420,10 @@ function refitItems(){ const u=player.up; const pdN=(1+(u.gun-1)*0.30), pdX=(1+u
     ...(player.unlocked.rapid?[{grp:'WEAPONS',name:'OVERCLOCK',icon:'w_rapid',desc:'RAPID: higher fire rate.',delta:'+12% rate',lv:u.mRapid||0,mx:3,cost:300+(u.mRapid||0)*220,can:(u.mRapid||0)<3,buy:()=>{u.mRapid=(u.mRapid||0)+1;}}]:[]),
     ...(player.unlocked.lance?[{grp:'WEAPONS',name:'HIGH-VELOCITY',icon:'w_lance',desc:'LANCE: heavier bolts.',delta:'+ bolt dmg',lv:u.mLance||0,mx:3,cost:320+(u.mLance||0)*230,can:(u.mLance||0)<3,buy:()=>{u.mLance=(u.mLance||0)+1;}}]:[]),
     ...(player.unlocked.homing?[{grp:'WEAPONS',name:'SWARM CTRL',icon:'w_homing',desc:'HOMING: extra tracking shot.',delta:'+1 shot',lv:u.mHoming||0,mx:3,cost:320+(u.mHoming||0)*230,can:(u.mHoming||0)<3,buy:()=>{u.mHoming=(u.mHoming||0)+1;}}]:[]),
-    {grp:'HEAVY',name:'RAILGUN',icon:'rail',desc:'Charged hypervelocity slug.',lv:0,mx:0,meta:hu.rail?'OWNED':'i¢700',cost:700,can:!hu.rail,buy:()=>{player.heavyUnlocked.rail=1;player.heavy='rail';}},
-    {grp:'HEAVY',name:'TESLA',icon:'tesla',desc:'Chain lightning across enemies.',lv:0,mx:0,meta:hu.tesla?'OWNED':'i¢800',cost:800,can:!hu.tesla,buy:()=>{player.heavyUnlocked.tesla=1;player.heavy='tesla';}},
-    {grp:'HEAVY',name:'SINGULARITY',icon:'singularity',desc:'Black hole that pulls then implodes.',lv:0,mx:0,meta:hu.singularity?'OWNED':'i¢900',cost:900,can:!hu.singularity,buy:()=>{player.heavyUnlocked.singularity=1;player.heavy='singularity';}},
-    {grp:'HEAVY',name:'WAVE MOTION',icon:'wave',desc:'Full-meter screen-clearing beam.',lv:0,mx:0,meta:hu.wave?'OWNED':'i¢1400',cost:1400,can:!hu.wave,buy:()=>{player.heavyUnlocked.wave=1;player.heavy='wave';}},
+    {grp:'HEAVY',name:'RAILGUN',icon:'rail',desc:'Charged hypervelocity slug.',lv:0,mx:0,meta:hu.rail?'OWNED':(sector<2?'SECTOR 2+':'i¢750'),cost:750,can:!hu.rail&&sector>=2,buy:()=>{player.heavyUnlocked.rail=1;player.heavy='rail';}},
+    {grp:'HEAVY',name:'TESLA',icon:'tesla',desc:'Chain lightning across enemies.',lv:0,mx:0,meta:hu.tesla?'OWNED':(sector<3?'SECTOR 3+':'i¢900'),cost:900,can:!hu.tesla&&sector>=3,buy:()=>{player.heavyUnlocked.tesla=1;player.heavy='tesla';}},
+    {grp:'HEAVY',name:'SINGULARITY',icon:'singularity',desc:'Black hole that pulls then implodes.',lv:0,mx:0,meta:hu.singularity?'OWNED':(sector<4?'SECTOR 4+':'i¢1100'),cost:1100,can:!hu.singularity&&sector>=4,buy:()=>{player.heavyUnlocked.singularity=1;player.heavy='singularity';}},
+    {grp:'HEAVY',name:'WAVE MOTION',icon:'wave',desc:'Full-meter screen-clearing beam.',lv:0,mx:0,meta:hu.wave?'OWNED':(sector<5?'SECTOR 5+':'i¢1600'),cost:1600,can:!hu.wave&&sector>=5,buy:()=>{player.heavyUnlocked.wave=1;player.heavy='wave';}},
     {grp:'HEAVY',name:'HEAVY POWER',icon:'beampow',desc:'Rail, Tesla, Singularity, Wave damage.',delta:'+30% dmg',lv:u.heavyPow||1,mx:6,cost:350+((u.heavyPow||1)-1)*240,can:(u.heavyPow||1)<6,buy:()=>{u.heavyPow=(u.heavyPow||1)+1;}},
     {grp:'HEAVY',name:'HEAVY SPOOL',icon:'beamspool',desc:'Faster heavy charge time.',delta:'faster charge',lv:u.heavyChg||1,mx:5,cost:300+((u.heavyChg||1)-1)*200,can:(u.heavyChg||1)<5,buy:()=>{u.heavyChg=(u.heavyChg||1)+1;}},
     ...(hu.tesla?[{grp:'HEAVY',name:'ARC CHAIN',icon:'tesla',desc:'Tesla: more jumps and range.',delta:'+1 arc',lv:u.teslaJump||1,mx:4,cost:350+((u.teslaJump||1)-1)*220,can:(u.teslaJump||1)<4,buy:()=>{u.teslaJump=(u.teslaJump||1)+1;}}]:[]),
@@ -2433,6 +2439,7 @@ function refitItems(){ const u=player.up; const pdN=(1+(u.gun-1)*0.30), pdX=(1+u
     {grp:'DEFENSE',name:'EXTRA LIFE',icon:'life',desc:'One more life (max 4).',delta:'+1 life',lv:0,mx:0,cost:2500,can:player.lives<4,buy:()=>player.lives++},
     {grp:'SYSTEMS',name:'ENGINE',icon:'engine',desc:'Ship movement speed.',delta:'+52 speed',lv:u.speed,mx:10,cost:300+(u.speed-1)*180,can:u.speed<10,buy:()=>u.speed++},
     {grp:'SYSTEMS',name:'BOMB +1',icon:'bomb',desc:'Raises max bomb count.',delta:'+1 bomb',lv:player.bombs,mx:6,cost:200,can:player.bombs<6,buy:()=>player.bombs++},
+    {grp:'SYSTEMS',name:'BOMB CORE',icon:'bomb',desc:'Bomb blast damage.',delta:'+50% dmg',lv:u.bombPow||1,mx:5,cost:300+((u.bombPow||1)-1)*220,can:(u.bombPow||1)<5,buy:()=>{u.bombPow=(u.bombPow||1)+1;}},
     {grp:'SYSTEMS',name:player.drone?'DRONE READY':'DRONE',icon:'drone',desc:'Wingman drone that fires with you.',delta:player.drone?'':'wingman',lv:0,mx:0,meta:player.drone?'OWNED':'i¢600',cost:600,can:!player.drone,buy:()=>{player.drone={ph:0};}}
   ];
 }
