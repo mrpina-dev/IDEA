@@ -107,6 +107,8 @@ body{background:#000;display:flex;align-items:center;justify-content:center;min-
 .board .rk{color:var(--dim);width:30px;text-align:left}
 .board .nm{flex:1;text-align:left;padding-left:8px}
 .board .sc{font-family:'Chakra Petch',sans-serif;font-weight:700}
+.board .scwrap{display:flex;flex-direction:column;align-items:flex-end;line-height:1.05}
+.board .bst{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--dim);letter-spacing:.06em;margin-top:1px}
 .btabs{display:flex;gap:6px;justify-content:center;margin-bottom:2px}
 .btab{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.14em;background:none;border:1px solid var(--dim);color:var(--dim);padding:3px 10px;border-radius:4px;cursor:pointer;pointer-events:auto}
 .btab.sel{border-color:var(--green);color:var(--green);text-shadow:0 0 8px rgba(0,255,65,.5)}
@@ -306,6 +308,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
     <button class="mini" id="logBtn">UPDATE LOG</button>
     <div class="tag" style="color:var(--cyan);letter-spacing:.12em;margin-top:2px">FOUND A BUG OR HAVE AN IDEA?</div>
     <button class="fbbtn" id="titleFeedback">SEND FEEDBACK</button>
+    <button class="fbbtn" id="titleSuggest" style="border-color:var(--gold);color:var(--gold);background:rgba(200,255,0,.12);text-shadow:0 0 8px rgba(200,255,0,.5);box-shadow:0 0 12px rgba(200,255,0,.2)">SUGGEST AN IDEA</button>
   </div>
 
   <!-- PAUSE -->
@@ -354,6 +357,16 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
     <div class="tag"><span id="fbCount">0</span> / 500</div>
     <button class="obtn" id="fbSend">SEND</button>
     <button class="mini" id="fbCancel">CANCEL</button>
+  </div>
+
+  <!-- SUGGESTION BOX -->
+  <div class="fbovl hidden" id="ovlSuggest">
+    <h2 class="ovh">SUGGEST AN IDEA</h2>
+    <div class="tag">HOW SHOULD VANGUARD GROW?</div>
+    <textarea id="sgMsg" class="fbtxt" maxlength="500" placeholder="Your idea for a feature, enemy, or weapon..."></textarea>
+    <div class="tag"><span id="sgCount">0</span> / 500</div>
+    <button class="obtn" id="sgSend">SEND</button>
+    <button class="mini" id="sgCancel">CANCEL</button>
   </div>
 
   <!-- RESTART CONFIRM -->
@@ -428,7 +441,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2553';
+const W=630,H=840; const VERSION='2554';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -3189,11 +3202,14 @@ function renderBoard(target,highlightName,highlightScore){
   const hl=(highlightName!=null&&highlightScore!=null);
   const top=b.slice(0,10);
   let html=top.map((r,i)=>{ const me=(hl&&r.name===highlightName&&r.score===highlightScore);
-    return '<div class="row'+(me?' me':'')+'"><span class="rk">'+(i+1)+'</span><span class="nm">'+r.name+'</span><span class="sc">'+(r.score).toLocaleString()+'</span></div>'; }).join('');
+    const st=(r.sector!=null)?('<span class="bst">S'+r.sector+(r.acc!=null?' · '+r.acc+'%':'')+(r.ver?' · v'+r.ver:'')+'</span>'):'';
+    return '<div class="row'+(me?' me':'')+'"><span class="rk">'+(i+1)+'</span><span class="nm">'+r.name+'</span><span class="scwrap"><span class="sc">'+(r.score).toLocaleString()+'</span>'+st+'</span></div>'; }).join('');
   if(hl && !top.some(r=>r.name===highlightName&&r.score===highlightScore)){
     let rank=1; for(const r of b){ if(r.score>highlightScore) rank++; }
     html+='<div class="row" style="color:var(--dim);justify-content:center;letter-spacing:.3em;padding:1px 0">···</div>';
-    html+='<div class="row me"><span class="rk">'+rank+'</span><span class="nm">'+highlightName+'</span><span class="sc">'+(highlightScore).toLocaleString()+'</span></div>';
+    const mr=b.find(r=>r.name===highlightName&&r.score===highlightScore)||{};
+    const mst=(mr.sector!=null)?('<span class="bst">S'+mr.sector+(mr.acc!=null?' · '+mr.acc+'%':'')+(mr.ver?' · v'+mr.ver:'')+'</span>'):'';
+    html+='<div class="row me"><span class="rk">'+rank+'</span><span class="nm">'+highlightName+'</span><span class="scwrap"><span class="sc">'+(highlightScore).toLocaleString()+'</span>'+mst+'</span></div>';
   }
   box.innerHTML=html;
 }
@@ -3214,7 +3230,7 @@ const ptr={x:W/2,y:H-130,active:false};
 let isTouch=('ontouchstart' in window)||navigator.maxTouchPoints>0;
 function toLogical(clientX,clientY){ const r=bgC.getBoundingClientRect(); return {x:(clientX-r.left)/r.width*W,y:(clientY-r.top)/r.height*H}; }
 stage.addEventListener('pointerdown',e=>{ Audio_.init(); Audio_.resume();
-  if(e.target.closest('.tbtn')||e.target.closest('.ovl')||e.target.closest('.mini'))return;
+  if(e.target.closest('.tbtn')||e.target.closest('.ovl')||e.target.closest('.mini')||e.target.closest('.fbovl'))return;
   if(state==='title'){ startGame(); return; }
   if(state!=='play')return;
   if(e.pointerType==='mouse' && e.button!==0) return;
@@ -3252,6 +3268,7 @@ window.addEventListener('keydown',e=>{ Audio_.init(); Audio_.resume();
   if(!document.getElementById('ovlKeys').classList.contains('hidden')) return;
   if(!document.getElementById('ovlOutfit').classList.contains('hidden')) return;
   if(!document.getElementById('ovlFeedback').classList.contains('hidden')) return;
+  if(!document.getElementById('ovlSuggest').classList.contains('hidden')) return;
   if(!document.getElementById('ovlTut').classList.contains('hidden')){ if(e.key==='Escape')closeTut(); e.preventDefault(); return; }
   if(!document.getElementById('ovlLog').classList.contains('hidden')){ if(e.key==='Escape')closeLog(); e.preventDefault(); return; }
   if(!document.getElementById('ovlConfirm').classList.contains('hidden')){
@@ -3405,6 +3422,25 @@ function resetBuild(){ startBuild=freshBuild(); saveBuild(); buildOutfit(); refr
     if(API_URL){ try{ new Image().src=API_URL+'?action=feedback&cat='+encodeURIComponent(cat)+'&msg='+encodeURIComponent(txt)+'&ver='+VERSION+'&name='+encodeURIComponent(curInitials||'---')+'&cb='+Date.now(); }catch(e){} }
     sendBtn.textContent='THANKS!'; sendBtn.disabled=true;
     setTimeout(closeFb,1400);
+  });
+})();
+
+/* suggestion box */
+(function(){
+  const modal=document.getElementById('ovlSuggest'); if(!modal)return;
+  const msg=document.getElementById('sgMsg');
+  const cnt=document.getElementById('sgCount');
+  const sendBtn=document.getElementById('sgSend');
+  function openSg(){ modal.classList.remove('hidden'); msg.value=''; cnt.textContent='0'; sendBtn.textContent='SEND'; sendBtn.disabled=false; }
+  function closeSg(){ modal.classList.add('hidden'); }
+  { const tb=document.getElementById('titleSuggest'); if(tb) tb.addEventListener('click',e=>{e.stopPropagation();openSg();}); }
+  document.getElementById('sgCancel').addEventListener('click',closeSg);
+  msg.addEventListener('input',()=>cnt.textContent=msg.value.length);
+  sendBtn.addEventListener('click',()=>{
+    const txt=msg.value.trim().slice(0,500); if(!txt){ closeSg(); return; }
+    if(API_URL){ try{ new Image().src=API_URL+'?action=suggest&msg='+encodeURIComponent(txt)+'&ver='+VERSION+'&name='+encodeURIComponent(curInitials||'---')+'&cb='+Date.now(); }catch(e){} }
+    sendBtn.textContent='THANKS!'; sendBtn.disabled=true;
+    setTimeout(closeSg,1400);
   });
 })();
 
