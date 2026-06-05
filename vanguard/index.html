@@ -353,7 +353,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=560,H=840; const VERSION='2535';
+const W=560,H=840; const VERSION='2536';
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
 const bg=bgC.getContext('2d'), fx=fxC.getContext('2d');
@@ -450,9 +450,9 @@ let runFactionSeq=[], waveFk=null;
 let hybridTimer=0;
 let gameMode='normal';
 const START_BUDGET=1000;
-function freshBuild(){ return { up:{gun:1,beamPow:1,beamCap:1,speed:1,beamPierce:1,beamSpool:1,flank:0,armor:0}, unlocked:{spread:1,lance:0,homing:0,rapid:0}, wtype:'spread', bombs:2, shieldHits:0, drone:null, spent:0 }; }
+function freshBuild(){ return { up:{gun:1,beamPow:1,beamCap:1,speed:1,beamPierce:1,beamSpool:1,flank:0,armor:0,heavyPow:1,heavyChg:1,teslaJump:1,singAmp:1,wavePow:1,mSpread:0,mRapid:0,mLance:0,mHoming:0}, unlocked:{spread:1,lance:0,homing:0,rapid:0}, heavyUnlocked:{beam:1,rail:0,tesla:0,singularity:0,wave:0}, wtype:'spread', heavy:'beam', bombs:2, shieldHits:0, drone:null, spent:0 }; }
 let startBuild=freshBuild();
-try{ const _sb=JSON.parse(localStorage.getItem('vanguard_build')||'null'); if(_sb&&_sb.up){ startBuild=freshBuild(); startBuild.up=Object.assign(startBuild.up,_sb.up); startBuild.unlocked=Object.assign(startBuild.unlocked,_sb.unlocked||{}); startBuild.wtype=_sb.wtype||'spread'; startBuild.bombs=_sb.bombs||2; startBuild.shieldHits=_sb.shieldHits||0; startBuild.drone=_sb.drone?{ph:0}:null; startBuild.spent=_sb.spent||0; } }catch(e){}
+try{ const _sb=JSON.parse(localStorage.getItem('vanguard_build')||'null'); if(_sb&&_sb.up){ startBuild=freshBuild(); startBuild.up=Object.assign(startBuild.up,_sb.up); startBuild.unlocked=Object.assign(startBuild.unlocked,_sb.unlocked||{}); startBuild.heavyUnlocked=Object.assign(startBuild.heavyUnlocked,_sb.heavyUnlocked||{}); startBuild.heavy=_sb.heavy||'beam'; startBuild.wtype=_sb.wtype||'spread'; startBuild.bombs=_sb.bombs||2; startBuild.shieldHits=_sb.shieldHits||0; startBuild.drone=_sb.drone?{ph:0}:null; startBuild.spent=_sb.spent||0; } }catch(e){}
 const KEYS_DEFAULT={beam:'c', bomb:'x', parry:'z', weapon:'q', heavy:'e', pause:'p', mute:'m'};
 let keybinds=Object.assign({},KEYS_DEFAULT);
 try{ const _sk=JSON.parse(localStorage.getItem('vanguard_keys')||'null'); if(_sk) keybinds=Object.assign({},KEYS_DEFAULT,_sk); }catch(e){}
@@ -1235,10 +1235,10 @@ function spawnBoss(forceFk){
 /* ============================= player ============================= */
 function resetPlayer(full){
   if(!player||full){ player={x:W/2,y:H-130, vx:0,vy:0,
-    up:{gun:1,beamPow:1,beamCap:1,speed:1,beamPierce:1,beamSpool:1,flank:0,armor:0},
+    up:{gun:1,beamPow:1,beamCap:1,speed:1,beamPierce:1,beamSpool:1,flank:0,armor:0,heavyPow:1,heavyChg:1,teslaJump:1,singAmp:1,wavePow:1,mSpread:0,mRapid:0,mLance:0,mHoming:0},
     wtype:'spread', unlocked:{spread:1,lance:0,homing:0,rapid:0},
     fireCd:0, beamOn:false, beamLock:false, beamActive:false, beamE:1, beamMax:1, beamDps:46, beamWind:0, beamCoolT:0,
-    heavy:'beam', heavyUnlocked:{beam:1,rail:1,tesla:1,singularity:1,wave:1}, heavyCharge:0, waveT:0, teslaArc:null,
+    heavy:'beam', heavyUnlocked:{beam:1,rail:0,tesla:0,singularity:0,wave:0}, heavyCharge:0, waveT:0, teslaArc:null,
     speed:184, wlevel:1, pdmg:1, bombs:2, shieldHits:0, drone:null,
     inv:1.4, armor:4, maxArmor:4, dmgFlash:0, lives:3, dead:false, respawn:0, coins:0, repair:0,
     parryT:0, parryCd:0,
@@ -1259,6 +1259,7 @@ function applyUpgrades(){ const u=player.up;
   player.beamWindup  = Math.max(0.12, 0.50 - (u.beamSpool||1)*0.06);   // SPOOL: spin-up only
   player.beamCool    = Math.max(0.35, 0.95 - (u.beamSpool||1)*0.07);   // SPOOL: post-fire lockout before recharge
   player.beamRecharge= 0.16 + u.beamCap*0.06;                          // CELL: recharge rate
+  player.heavyMult   = 1 + ((u.heavyPow||1)-1)*0.30;   // rail/tesla/singularity/wave damage
   player.maxArmor    = 4 + (u.armor||0);
   if(player.beamE>player.beamMax) player.beamE=player.beamMax;
 }
@@ -1279,10 +1280,10 @@ function startGame(){
   window.style=0; window.styleGrace=0; window.styleRepeat=0; window.lastKillWpn=''; window.maxStyle=0; window.killSrc=null;
   runKills=0; runBosses=0; deathSlow=0; killerInfo=null;
   resetPlayer(true);
-  { const b=startBuild; player.up=Object.assign(player.up,b.up); player.unlocked=Object.assign(player.unlocked,b.unlocked); player.wtype=b.wtype||'spread'; player.bombs=b.bombs; player.shieldHits=b.shieldHits; if(b.drone)player.drone={ph:0}; }
+  { const b=startBuild; player.up=Object.assign(player.up,b.up); player.unlocked=Object.assign(player.unlocked,b.unlocked); player.heavyUnlocked=Object.assign(player.heavyUnlocked,b.heavyUnlocked||{}); player.heavy=(b.heavyUnlocked&&b.heavyUnlocked[b.heavy])?b.heavy:'beam'; player.wtype=b.wtype||'spread'; player.bombs=b.bombs; player.shieldHits=b.shieldHits; if(b.drone)player.drone={ph:0}; }
   applyUpgrades(); player.armor=player.maxArmor; player.beamE=player.beamMax;
   player.coins += Math.max(0, START_BUDGET-(startBuild.spent||0));   // unspent pre-game budget carries into the run
-  if(gameMode==='hardcore'){ player.lives=0; } else if(gameMode==='dev'){ player.lives=99; player.coins=99999; }
+  if(gameMode==='hardcore'){ player.lives=0; } else if(gameMode==='dev'){ player.lives=99; player.coins=99999; player.heavyUnlocked={beam:1,rail:1,tesla:1,singularity:1,wave:1}; }
   envGrid=[0,255,65]; lastSec=-1; initBackdrop(); triggerBanner();
   showOverlay(null);
   requestNonce(); fetchOnline();
@@ -1387,23 +1388,36 @@ function dropPod(x,y,fromBoss){
   pods.push(pod);
 }
 const WEAPONS=['spread','lance','homing','rapid'];
-function outfitOffers(){ const b=startBuild, u=b.up; const pdN=(1+(u.gun-1)*0.30), pdX=(1+u.gun*0.30); return [
+function outfitOffers(){ const b=startBuild, u=b.up; const pdN=(1+(u.gun-1)*0.30), pdX=(1+u.gun*0.30); const hu=b.heavyUnlocked||{}; return [
   {grp:'WEAPONS',name:'GUN POWER',icon:'gun',desc:'All primary weapon damage.',delta:'x'+pdN.toFixed(2)+' -> x'+pdX.toFixed(2),lv:u.gun,mx:8,cost:400+(u.gun-1)*250,can:u.gun<8,buy:()=>u.gun++},
   {grp:'WEAPONS',name:'FLANK GUNS',icon:'flank',desc:'Wide side shots, then rear cover.',delta:'+ side guns',lv:u.flank,mx:3,cost:[450,700,1000][Math.min(u.flank,2)],can:u.flank<3,buy:()=>u.flank++},
   {grp:'WEAPONS',name:'LANCE',icon:'w_lance',desc:'Piercing bolts, anti-line.',lv:b.unlocked.lance,mx:0,meta:b.unlocked.lance?'OWNED':'i¢600',cost:600,can:!b.unlocked.lance,buy:()=>{b.unlocked.lance=1;b.wtype='lance';}},
   {grp:'WEAPONS',name:'HOMING',icon:'w_homing',desc:'Auto-tracking shots.',lv:b.unlocked.homing,mx:0,meta:b.unlocked.homing?'OWNED':'i¢750',cost:750,can:!b.unlocked.homing,buy:()=>{b.unlocked.homing=1;b.wtype='homing';}},
   {grp:'WEAPONS',name:'RAPID',icon:'w_rapid',desc:'Fast narrow stream.',lv:b.unlocked.rapid,mx:0,meta:b.unlocked.rapid?'OWNED':'i¢350',cost:350,can:!b.unlocked.rapid,buy:()=>{b.unlocked.rapid=1;b.wtype='rapid';}},
-  {grp:'BEAM',name:'BEAM POWER',icon:'beampow',desc:'Beam and heavy damage.',delta:'+16 dps',lv:u.beamPow,mx:8,cost:320+(u.beamPow-1)*220,can:u.beamPow<8,buy:()=>u.beamPow++},
+  {grp:'WEAPONS',name:'SCATTER CHOKE',icon:'w_spread',desc:'SPREAD: more pellets, tighter cone.',delta:'+1 pellet',lv:u.mSpread||0,mx:3,cost:300+(u.mSpread||0)*220,can:(u.mSpread||0)<3,buy:()=>{u.mSpread=(u.mSpread||0)+1;}},
+  ...(b.unlocked.rapid?[{grp:'WEAPONS',name:'OVERCLOCK',icon:'w_rapid',desc:'RAPID: higher fire rate.',delta:'+12% rate',lv:u.mRapid||0,mx:3,cost:300+(u.mRapid||0)*220,can:(u.mRapid||0)<3,buy:()=>{u.mRapid=(u.mRapid||0)+1;}}]:[]),
+  ...(b.unlocked.lance?[{grp:'WEAPONS',name:'HIGH-VELOCITY',icon:'w_lance',desc:'LANCE: heavier bolts.',delta:'+ bolt dmg',lv:u.mLance||0,mx:3,cost:320+(u.mLance||0)*230,can:(u.mLance||0)<3,buy:()=>{u.mLance=(u.mLance||0)+1;}}]:[]),
+  ...(b.unlocked.homing?[{grp:'WEAPONS',name:'SWARM CTRL',icon:'w_homing',desc:'HOMING: extra tracking shot.',delta:'+1 shot',lv:u.mHoming||0,mx:3,cost:320+(u.mHoming||0)*230,can:(u.mHoming||0)<3,buy:()=>{u.mHoming=(u.mHoming||0)+1;}}]:[]),
+  {grp:'HEAVY',name:'RAILGUN',icon:'rail',desc:'Charged hypervelocity slug.',lv:0,mx:0,meta:hu.rail?'OWNED':'i¢700',cost:700,can:!hu.rail,buy:()=>{b.heavyUnlocked.rail=1;b.heavy='rail';}},
+  {grp:'HEAVY',name:'TESLA',icon:'tesla',desc:'Chain lightning across enemies.',lv:0,mx:0,meta:hu.tesla?'OWNED':'i¢800',cost:800,can:!hu.tesla,buy:()=>{b.heavyUnlocked.tesla=1;b.heavy='tesla';}},
+  {grp:'HEAVY',name:'SINGULARITY',icon:'singularity',desc:'Black hole that pulls then implodes.',lv:0,mx:0,meta:hu.singularity?'OWNED':'i¢900',cost:900,can:!hu.singularity,buy:()=>{b.heavyUnlocked.singularity=1;b.heavy='singularity';}},
+  {grp:'HEAVY',name:'WAVE MOTION',icon:'wave',desc:'Full-meter screen-clearing beam.',lv:0,mx:0,meta:hu.wave?'OWNED':'i¢1400',cost:1400,can:!hu.wave,buy:()=>{b.heavyUnlocked.wave=1;b.heavy='wave';}},
+  {grp:'HEAVY',name:'HEAVY POWER',icon:'beampow',desc:'Rail, Tesla, Singularity, Wave damage.',delta:'+30% dmg',lv:u.heavyPow||1,mx:6,cost:350+((u.heavyPow||1)-1)*240,can:(u.heavyPow||1)<6,buy:()=>{u.heavyPow=(u.heavyPow||1)+1;}},
+  {grp:'HEAVY',name:'HEAVY SPOOL',icon:'beamspool',desc:'Faster heavy charge time.',delta:'faster charge',lv:u.heavyChg||1,mx:5,cost:300+((u.heavyChg||1)-1)*200,can:(u.heavyChg||1)<5,buy:()=>{u.heavyChg=(u.heavyChg||1)+1;}},
+  ...(hu.tesla?[{grp:'HEAVY',name:'ARC CHAIN',icon:'tesla',desc:'Tesla: more jumps and range.',delta:'+1 arc',lv:u.teslaJump||1,mx:4,cost:350+((u.teslaJump||1)-1)*220,can:(u.teslaJump||1)<4,buy:()=>{u.teslaJump=(u.teslaJump||1)+1;}}]:[]),
+  ...(hu.singularity?[{grp:'HEAVY',name:'EVENT HORIZON',icon:'singularity',desc:'Singularity: bigger pull and blast.',delta:'wider pull',lv:u.singAmp||1,mx:4,cost:350+((u.singAmp||1)-1)*240,can:(u.singAmp||1)<4,buy:()=>{u.singAmp=(u.singAmp||1)+1;}}]:[]),
+  ...(hu.wave?[{grp:'HEAVY',name:'WAVE AMP',icon:'wave',desc:'Wave Motion: more power and width.',delta:'+power/width',lv:u.wavePow||1,mx:4,cost:400+((u.wavePow||1)-1)*260,can:(u.wavePow||1)<4,buy:()=>{u.wavePow=(u.wavePow||1)+1;}}]:[]),
+  {grp:'BEAM',name:'BEAM POWER',icon:'beampow',desc:'PRISM beam damage.',delta:'+16 dps',lv:u.beamPow,mx:8,cost:320+(u.beamPow-1)*220,can:u.beamPow<8,buy:()=>u.beamPow++},
   {grp:'BEAM',name:'BEAM CELL',icon:'beamcell',desc:'Heavy energy and recharge.',delta:'+0.55s cell',lv:u.beamCap,mx:8,cost:280+(u.beamCap-1)*200,can:u.beamCap<8,buy:()=>u.beamCap++},
-  {grp:'BEAM',name:'BEAM PIERCE',icon:'beampierce',desc:'Enemies the beam cuts through.',delta:'more pierce',lv:u.beamPierce,mx:5,cost:400+(u.beamPierce-1)*280,can:u.beamPierce<5,buy:()=>u.beamPierce++},
-  {grp:'BEAM',name:'BEAM SPOOL',icon:'beamspool',desc:'Faster spin-up, shorter cooldown.',delta:'faster spool',lv:u.beamSpool,mx:6,cost:300+(u.beamSpool-1)*210,can:u.beamSpool<6,buy:()=>u.beamSpool++},
+  {grp:'BEAM',name:'BEAM PIERCE',icon:'beampierce',desc:'Enemies the PRISM beam cuts through.',delta:'more pierce',lv:u.beamPierce,mx:5,cost:400+(u.beamPierce-1)*280,can:u.beamPierce<5,buy:()=>u.beamPierce++},
+  {grp:'BEAM',name:'BEAM SPOOL',icon:'beamspool',desc:'Faster PRISM spin-up, shorter cooldown.',delta:'faster spool',lv:u.beamSpool,mx:6,cost:300+(u.beamSpool-1)*210,can:u.beamSpool<6,buy:()=>u.beamSpool++},
   {grp:'DEFENSE',name:'HULL ARMOR',icon:'hull',desc:'+1 max hull per life.',delta:'+1 max hull',lv:u.armor,mx:4,cost:400+u.armor*250,can:u.armor<4,buy:()=>u.armor++},
   {grp:'DEFENSE',name:'SHIELD +1',icon:'shield',desc:'Absorbs one hit.',delta:'+1 shield',lv:b.shieldHits,mx:3,cost:350,can:b.shieldHits<3,buy:()=>b.shieldHits++},
   {grp:'SYSTEMS',name:'ENGINE',icon:'engine',desc:'Ship movement speed.',delta:'+52 speed',lv:u.speed,mx:10,cost:300+(u.speed-1)*180,can:u.speed<10,buy:()=>u.speed++},
   {grp:'SYSTEMS',name:'BOMB +1',icon:'bomb',desc:'Raises max bomb count.',delta:'+1 bomb',lv:b.bombs,mx:6,cost:200,can:b.bombs<6,buy:()=>b.bombs++},
   {grp:'SYSTEMS',name:'DRONE',icon:'drone',desc:'Wingman drone that fires with you.',lv:b.drone?1:0,mx:0,meta:b.drone?'OWNED':'i¢600',cost:600,can:!b.drone,buy:()=>{b.drone={ph:0};}}
 ];}
-function buildCount(){ const u=startBuild.up,b=startBuild; return (u.gun-1)+(u.beamPow-1)+(u.beamCap-1)+(u.beamPierce-1)+(u.beamSpool-1)+(u.speed-1)+u.flank+u.armor+b.shieldHits+(b.bombs-2)+(b.drone?1:0)+b.unlocked.lance+b.unlocked.homing+b.unlocked.rapid; }
+function buildCount(){ const u=startBuild.up,b=startBuild; const hu=b.heavyUnlocked||{}; return (u.gun-1)+(u.beamPow-1)+(u.beamCap-1)+(u.beamPierce-1)+(u.beamSpool-1)+(u.speed-1)+u.flank+u.armor+b.shieldHits+(b.bombs-2)+(b.drone?1:0)+b.unlocked.lance+b.unlocked.homing+b.unlocked.rapid+((u.heavyPow||1)-1)+((u.heavyChg||1)-1)+((u.teslaJump||1)-1)+((u.singAmp||1)-1)+((u.wavePow||1)-1)+(u.mSpread||0)+(u.mRapid||0)+(u.mLance||0)+(u.mHoming||0)+(hu.rail?1:0)+(hu.tesla?1:0)+(hu.singularity?1:0)+(hu.wave?1:0); }
 const WCOL={spread:COL.green,lance:COL.cyan,homing:COL.gold,rapid:COL.mat};
 function applyPod(p){
   if(p.type==='core'){ const jack=150+sector*30; player.coins+=jack; addScore(jack,p.x,p.y,p.c);
@@ -1429,51 +1443,37 @@ function applyPod(p){
 
 /* ============================= weapons ============================= */
 function firePrimary(){
-  const lv=player.wlevel, x=player.x, y=player.y-20, pm=player.pdmg||1;
+  const lv=player.wlevel, x=player.x, y=player.y-20, pm=player.pdmg||1, u=player.up;
   const prevLen=pbul.length;
   shotsFired++;
-  if(player.wtype==='spread'){           // SHOTGUN: wide fan, melts point-blank, chips at range
-    const pellets=[3,3,4,4,5,6,7,7][Math.min(lv,8)-1]; const dmg=0.85*pm, spread=0.12;
+  if(player.wtype==='spread'){
+    const ms=u.mSpread||0; const pellets=[3,3,4,4,5,6,7,7][Math.min(lv,8)-1]+ms; const dmg=0.85*pm, spread=Math.max(0.06,0.12-ms*0.016);
     for(let i=0;i<pellets;i++){ const a=(i-(pellets-1)/2)*spread+rnd(-0.015,0.015);
       pbul.push({x:x+Math.sin(a)*7,y,vx:Math.sin(a)*300,vy:-600,c:COL.green,r:1.7,dmg}); }
     player.fireCd=.19;
-  } else if(player.wtype==='rapid'){     // NAILGUN: pinpoint sustained, single-target king
-    const streams=lv<3?1:lv<6?2:3; const sp=9; const dmg=0.55*pm;
-    for(let i=0;i<streams;i++){ const ox=(i-(streams-1)/2)*sp;
-      pbul.push({x:x+ox,y,vx:0,vy:-760,c:COL.green,r:1.3,dmg}); }
-    player.fireCd=.055;
-  } else if(player.wtype==='lance'){     // RAILPIERCER: high per-hit, pierces, anti-line/boss
-    const cols=lv<4?1:lv<7?2:3; const sp=11; const dmg=3.0*pm;
-    for(let i=0;i<cols;i++){ const ox=(i-(cols-1)/2)*sp;
-      pbul.push({x:x+ox,y,vx:0,vy:-720,c:COL.cyan,r:2.5,dmg,pierce:true,len:15}); }
-    player.fireCd=.26;
-  } else {                                // TRACKER: hands-free, damage while dodging
-    const n=lv<2?1:lv<4?2:3; const dmg=1.6*pm;
-    for(let i=0;i<n;i++){ const a=(i-(n-1)/2)*0.4;
-      pbul.push({x,y,vx:Math.sin(a)*120,vy:-380,c:COL.gold,r:2,dmg,homing:true}); }
+  } else if(player.wtype==='rapid'){
+    const mr=u.mRapid||0; const streams=(lv<3?1:lv<6?2:3)+(mr>=3?1:0); const sp=9; const dmg=0.55*pm;
+    for(let i=0;i<streams;i++){ const ox=(i-(streams-1)/2)*sp; pbul.push({x:x+ox,y,vx:0,vy:-760,c:COL.green,r:1.3,dmg}); }
+    player.fireCd=.055*(1-mr*0.12);
+  } else if(player.wtype==='lance'){
+    const ml=u.mLance||0; const cols=lv<4?1:lv<7?2:3; const sp=11; const dmg=(3.0+ml*0.9)*pm;
+    for(let i=0;i<cols;i++){ const ox=(i-(cols-1)/2)*sp; pbul.push({x:x+ox,y,vx:0,vy:-720,c:COL.cyan,r:2.5,dmg,pierce:true,len:15}); }
+    player.fireCd=.26*(1-ml*0.06);
+  } else {
+    const mh=u.mHoming||0; const n=Math.min(6,(lv<2?1:lv<4?2:3)+mh); const dmg=1.6*pm;
+    for(let i=0;i<n;i++){ const a=(i-(n-1)/2)*0.4; pbul.push({x,y,vx:Math.sin(a)*120,vy:-380,c:COL.gold,r:2,dmg,homing:true}); }
     player.fireCd=.18;
   }
   Audio_.fire(player.wtype);
-  if(player.buffs && player.buffs.overdrive>0){
-    pbul.slice(prevLen).forEach(b=>{ if(b.dmg) b.dmg*=1.3; });
-    player.fireCd*=0.6;
-  }
-  if(player.buffs && player.buffs.scatter>0){
-    [-0.4,-0.8,0.4,0.8].forEach(a=>pbul.push({x:player.x,y:player.y-20,vx:Math.sin(a)*480,vy:-Math.cos(a)*480,c:COL.green,r:1.5,dmg:0.6*pm}));
-  }
-  if(player.up.flank>0){
-    const fa=[];
-    if(player.up.flank>=1){ fa.push(-0.55,0.55); }
-    if(player.up.flank>=2){ fa.push(-0.95,0.95); }
-    if(player.up.flank>=3){ fa.push(-2.45,2.45); }
-    const fd=(0.55*pm)*((player.buffs&&player.buffs.overdrive>0)?1.3:1);
-    fa.forEach(a=>pbul.push({x:player.x,y:player.y-20,vx:Math.sin(a)*480,vy:-Math.cos(a)*480,c:COL.green,r:1.5,dmg:fd}));
-  }
+  if(player.buffs && player.buffs.overdrive>0){ pbul.slice(prevLen).forEach(b=>{ if(b.dmg) b.dmg*=1.3; }); player.fireCd*=0.6; }
+  if(player.buffs && player.buffs.scatter>0){ [-0.4,-0.8,0.4,0.8].forEach(a=>pbul.push({x:player.x,y:player.y-20,vx:Math.sin(a)*480,vy:-Math.cos(a)*480,c:COL.green,r:1.5,dmg:0.6*pm})); }
+  if(player.up.flank>0){ const fa=[]; if(player.up.flank>=1){fa.push(-0.55,0.55);} if(player.up.flank>=2){fa.push(-0.95,0.95);} if(player.up.flank>=3){fa.push(-2.45,2.45);}
+    const fd=(0.55*pm)*((player.buffs&&player.buffs.overdrive>0)?1.3:1); fa.forEach(a=>pbul.push({x:player.x,y:player.y-20,vx:Math.sin(a)*480,vy:-Math.cos(a)*480,c:COL.green,r:1.5,dmg:fd})); }
 }
 /* ============================= HEAVY slot ============================= */
 const HEAVIES=['beam','rail','tesla','singularity','wave'];
 const HEAVYNAME={beam:'PRISM BEAM',rail:'RAILGUN',tesla:'TESLA',singularity:'SINGULARITY',wave:'WAVE MOTION'};
-function heavyChargeTime(h){ return h==='wave'?1.2 : h==='rail'?0.7 : h==='singularity'?0.5 : 0.4; }
+function heavyChargeTime(h){ const base=h==='wave'?1.2:h==='rail'?0.7:h==='singularity'?0.5:0.4; const lv=(player&&player.up&&player.up.heavyChg)||1; return base*(1-(lv-1)*0.13); }
 function heavyCost(h){ return h==='wave'?1.0 : h==='rail'?0.5 : h==='singularity'?0.6 : 0; }
 function cycleHeavy(){ if(!player)return; const list=HEAVIES.filter(h=>player.heavyUnlocked&&player.heavyUnlocked[h]); if(list.length<2)return;
   const i=list.indexOf(player.heavy); player.heavy=list[(i+1)%list.length]; player.heavyCharge=0; player.beamLock=false; Audio_.hit(); }
@@ -1483,28 +1483,29 @@ function beamColumnDamage(pl,dt){ const bx=pl.x;
   for(let k=0;k<col.length && k<np;k++){ const e=col[k]; e.hp-=dt*pl.beamDps; e.flash=.1; if(e.hp<=0){ window.killSrc='beam'; killEnemy(e); } }
   pl.beamEndY=(col.length>np)?col[np-1].y:-20;
   if(boss && !boss.dying && !boss.entering && Math.abs(boss.x-bx)<54 && boss.y>pl.beamEndY){ damageBoss(dt*pl.beamDps*0.9); pl.beamEndY=boss.y; } }
-function teslaChainDamage(pl,dt){ pl.beamEndY=pl.y-18; const range=210, jump=130, maxT=3+(pl.beamPierce>3?2:0);
+function teslaChainDamage(pl,dt){ pl.beamEndY=pl.y-18; const jl=(pl.up.teslaJump||1); const range=200+jl*20, jump=115+jl*16, maxT=2+jl, dps=58*(pl.heavyMult||1);
   let from={x:pl.x,y:pl.y-18}; const hit=[]; pl.teslaArc=[];
   for(let n=0;n<maxT;n++){ let best=null,bd=(n===0?range:jump);
     for(const e of enemies){ if(e.dead||hit.indexOf(e)>=0)continue; const d=Math.sqrt(dist2(e.x,e.y,from.x,from.y)); if(d<bd){bd=d;best=e;} }
-    if(!best)break; best.hp-=dt*pl.beamDps*0.7; best.flash=.1; hit.push(best);
+    if(!best)break; best.hp-=dt*dps; best.flash=.1; hit.push(best);
     pl.teslaArc.push({x1:from.x,y1:from.y,x2:best.x,y2:best.y}); from={x:best.x,y:best.y};
     if(best.hp<=0){ window.killSrc='tesla'; killEnemy(best); } }
-  if(boss && !boss.dying && !boss.entering){ const d=Math.sqrt(dist2(boss.x,boss.y,pl.x,pl.y-18)); if(d<range+60){ damageBoss(dt*pl.beamDps*0.5); if(!pl.teslaArc.length)pl.teslaArc.push({x1:pl.x,y1:pl.y-18,x2:boss.x,y2:boss.y}); } } }
+  if(boss && !boss.dying && !boss.entering){ const d=Math.sqrt(dist2(boss.x,boss.y,pl.x,pl.y-18)); if(d<range+60){ damageBoss(dt*dps*0.6); if(!pl.teslaArc.length)pl.teslaArc.push({x1:pl.x,y1:pl.y-18,x2:boss.x,y2:boss.y}); } } }
 function fireHeavyShot(pl,h,charge){
   if(pl.beamE < heavyCost(h)*pl.beamMax) return;
-  pl.beamE -= heavyCost(h)*pl.beamMax; pl.beamCoolT=pl.beamCool||0.6; const pw=(pl.up&&pl.up.beamPow)||1;
-  if(h==='rail'){ const dmg=(30+pw*10)*(0.4+0.6*charge);
+  pl.beamE -= heavyCost(h)*pl.beamMax; pl.beamCoolT=pl.beamCool||0.6; const hm=pl.heavyMult||1;
+  if(h==='rail'){ const dmg=(40*hm)*(0.4+0.6*charge);
     pbul.push({x:pl.x,y:pl.y-20,vx:0,vy:-1500,c:COL.cyan,r:5,dmg,pierce:true,len:30,rail:true});
     Audio_.blast(); shake=Math.max(shake,5+charge*6); rings.push({x:pl.x,y:pl.y-20,r:6,vr:240,life:.3,max:.3,c:COL.cyan}); }
-  else if(h==='singularity'){ holes.push({x:pl.x,y:pl.y-30,ty:rnd(H*0.22,H*0.40),vy:-200,state:'travel',t:0,r:0,maxr:150,pull:260,dur:1.6,dmg:(10+pw*4),core:0});
+  else if(h==='singularity'){ const sa=(pl.up.singAmp||1);
+    holes.push({x:pl.x,y:pl.y-30,ty:rnd(H*0.22,H*0.40),vy:-200,state:'travel',t:0,r:0,maxr:128+sa*22,pull:220+sa*42,dur:1.4+sa*0.25,dmg:(13*hm)*(0.85+sa*0.15),core:0});
     Audio_.whine(0.5); shake=Math.max(shake,5); }
-  else if(h==='wave'){ pl.waveT=0.7; pl.beamE=0; pl.beamLock=true; pl.beamCoolT=(pl.beamCool||0.6)+1.0;
+  else if(h==='wave'){ const wp=(pl.up.wavePow||1); pl.waveT=0.6+wp*0.06; pl.beamE=0; pl.beamLock=true; pl.beamCoolT=(pl.beamCool||0.6)+1.0;
     Audio_.big(); shake=Math.max(shake,18); bossFlash=Math.max(bossFlash,0.6); } }
 function updateHeavy(pl,dt){ const h=pl.heavy||'beam';
-  if(pl.waveT>0){ pl.waveT-=dt; const ww=140;
-    for(const e of enemies){ if(e.dead)continue; if(Math.abs(e.x-pl.x)<ww && e.y<pl.y){ e.hp-=dt*900; e.flash=.1; if(e.hp<=0){ window.killSrc='wave'; killEnemy(e); } } }
-    if(boss && !boss.dying && !boss.entering && Math.abs(boss.x-pl.x)<ww+40) damageBoss(dt*1200);
+  if(pl.waveT>0){ pl.waveT-=dt; const wp=(pl.up.wavePow||1), ww=120+wp*22, dps=650+wp*220;
+    for(const e of enemies){ if(e.dead)continue; if(Math.abs(e.x-pl.x)<ww && e.y<pl.y){ e.hp-=dt*dps; e.flash=.1; if(e.hp<=0){ window.killSrc='wave'; killEnemy(e); } } }
+    if(boss && !boss.dying && !boss.entering && Math.abs(boss.x-pl.x)<ww+40) damageBoss(dt*dps*1.3);
     ebul.length=0; pl.beamActive=true; return true; }
   if(h==='beam'||h==='tesla'){
     if(pl.beamOn && pl.beamE>0.02 && !pl.beamLock){
@@ -2330,22 +2331,35 @@ function renderShopGrid(container, items, ctx){ if(!container)return;
       html+=shopCardHTML(it,i,aff,maxed,g); }); });
   container.innerHTML=html;
   [...container.querySelectorAll('.card')].forEach(b=>b.addEventListener('click',()=>ctx.onBuy(+b.dataset.i,b))); }
-function refitItems(){ const u=player.up; const pdN=(1+(u.gun-1)*0.30), pdX=(1+u.gun*0.30);
+function refitItems(){ const u=player.up; const pdN=(1+(u.gun-1)*0.30), pdX=(1+u.gun*0.30); const hu=player.heavyUnlocked||{};
   return [
-    {grp:'SYSTEMS',name:'ENGINE',icon:'engine',desc:'Ship movement speed.',delta:'+52 speed',lv:u.speed,mx:10,cost:300+(u.speed-1)*180,can:u.speed<10,buy:()=>u.speed++},
     {grp:'WEAPONS',name:'GUN POWER',icon:'gun',desc:'All primary weapon damage.',delta:'x'+pdN.toFixed(2)+' -> x'+pdX.toFixed(2),lv:u.gun,mx:8,cost:400+(u.gun-1)*250,can:u.gun<8,buy:()=>u.gun++},
     {grp:'WEAPONS',name:'FLANK GUNS',icon:'flank',desc:'Adds wide side shots, then rear cover.',delta:'+ side guns',lv:u.flank||0,mx:3,cost:[450,700,1000][Math.min(u.flank||0,2)],can:(u.flank||0)<3,buy:()=>{u.flank=(u.flank||0)+1;}},
-    {grp:'BEAM',name:'BEAM POWER',icon:'beampow',desc:'Beam and heavy damage.',delta:'+16 dps',lv:u.beamPow,mx:8,cost:320+(u.beamPow-1)*220,can:u.beamPow<8,buy:()=>u.beamPow++},
-    {grp:'BEAM',name:'BEAM CELL',icon:'beamcell',desc:'Heavy energy and recharge.',delta:'+0.55s cell',lv:u.beamCap,mx:8,cost:280+(u.beamCap-1)*200,can:u.beamCap<8,buy:()=>u.beamCap++},
-    {grp:'BEAM',name:'BEAM PIERCE',icon:'beampierce',desc:'Enemies the beam cuts through.',delta:'more pierce',lv:u.beamPierce,mx:5,cost:400+(u.beamPierce-1)*280,can:u.beamPierce<5,buy:()=>u.beamPierce++},
-    {grp:'BEAM',name:'BEAM SPOOL',icon:'beamspool',desc:'Faster spin-up, shorter cooldown.',delta:'faster spool',lv:u.beamSpool||1,mx:6,cost:300+((u.beamSpool||1)-1)*210,can:(u.beamSpool||1)<6,buy:()=>{u.beamSpool=(u.beamSpool||1)+1;}},
     ...['spread|SPREAD|0|w_spread|Balanced forward fan.','rapid|RAPID|350|w_rapid|Fast narrow stream.','lance|LANCE|600|w_lance|Piercing bolts, anti-line.','homing|HOMING|750|w_homing|Auto-tracking shots.'].map(s=>{const p=s.split('|'),w=p[0],owned=!!player.unlocked[w],active=player.wtype===w;return {grp:'WEAPONS',name:p[1],icon:p[3],desc:p[4],lv:0,mx:0,meta:active?'EQUIPPED':owned?'EQUIP':('i¢'+p[2]),cost:owned?0:+p[2],can:!active,buy:()=>{player.unlocked[w]=1;player.wtype=w;}};}),
-    {grp:'SYSTEMS',name:'BOMB +1',icon:'bomb',desc:'Raises max bomb count.',delta:'+1 bomb',lv:player.bombs,mx:6,cost:200,can:player.bombs<6,buy:()=>player.bombs++},
+    {grp:'WEAPONS',name:'SCATTER CHOKE',icon:'w_spread',desc:'SPREAD: more pellets, tighter cone.',delta:'+1 pellet',lv:u.mSpread||0,mx:3,cost:300+(u.mSpread||0)*220,can:(u.mSpread||0)<3,buy:()=>{u.mSpread=(u.mSpread||0)+1;}},
+    ...(player.unlocked.rapid?[{grp:'WEAPONS',name:'OVERCLOCK',icon:'w_rapid',desc:'RAPID: higher fire rate.',delta:'+12% rate',lv:u.mRapid||0,mx:3,cost:300+(u.mRapid||0)*220,can:(u.mRapid||0)<3,buy:()=>{u.mRapid=(u.mRapid||0)+1;}}]:[]),
+    ...(player.unlocked.lance?[{grp:'WEAPONS',name:'HIGH-VELOCITY',icon:'w_lance',desc:'LANCE: heavier bolts.',delta:'+ bolt dmg',lv:u.mLance||0,mx:3,cost:320+(u.mLance||0)*230,can:(u.mLance||0)<3,buy:()=>{u.mLance=(u.mLance||0)+1;}}]:[]),
+    ...(player.unlocked.homing?[{grp:'WEAPONS',name:'SWARM CTRL',icon:'w_homing',desc:'HOMING: extra tracking shot.',delta:'+1 shot',lv:u.mHoming||0,mx:3,cost:320+(u.mHoming||0)*230,can:(u.mHoming||0)<3,buy:()=>{u.mHoming=(u.mHoming||0)+1;}}]:[]),
+    {grp:'HEAVY',name:'RAILGUN',icon:'rail',desc:'Charged hypervelocity slug.',lv:0,mx:0,meta:hu.rail?'OWNED':'i¢700',cost:700,can:!hu.rail,buy:()=>{player.heavyUnlocked.rail=1;player.heavy='rail';}},
+    {grp:'HEAVY',name:'TESLA',icon:'tesla',desc:'Chain lightning across enemies.',lv:0,mx:0,meta:hu.tesla?'OWNED':'i¢800',cost:800,can:!hu.tesla,buy:()=>{player.heavyUnlocked.tesla=1;player.heavy='tesla';}},
+    {grp:'HEAVY',name:'SINGULARITY',icon:'singularity',desc:'Black hole that pulls then implodes.',lv:0,mx:0,meta:hu.singularity?'OWNED':'i¢900',cost:900,can:!hu.singularity,buy:()=>{player.heavyUnlocked.singularity=1;player.heavy='singularity';}},
+    {grp:'HEAVY',name:'WAVE MOTION',icon:'wave',desc:'Full-meter screen-clearing beam.',lv:0,mx:0,meta:hu.wave?'OWNED':'i¢1400',cost:1400,can:!hu.wave,buy:()=>{player.heavyUnlocked.wave=1;player.heavy='wave';}},
+    {grp:'HEAVY',name:'HEAVY POWER',icon:'beampow',desc:'Rail, Tesla, Singularity, Wave damage.',delta:'+30% dmg',lv:u.heavyPow||1,mx:6,cost:350+((u.heavyPow||1)-1)*240,can:(u.heavyPow||1)<6,buy:()=>{u.heavyPow=(u.heavyPow||1)+1;}},
+    {grp:'HEAVY',name:'HEAVY SPOOL',icon:'beamspool',desc:'Faster heavy charge time.',delta:'faster charge',lv:u.heavyChg||1,mx:5,cost:300+((u.heavyChg||1)-1)*200,can:(u.heavyChg||1)<5,buy:()=>{u.heavyChg=(u.heavyChg||1)+1;}},
+    ...(hu.tesla?[{grp:'HEAVY',name:'ARC CHAIN',icon:'tesla',desc:'Tesla: more jumps and range.',delta:'+1 arc',lv:u.teslaJump||1,mx:4,cost:350+((u.teslaJump||1)-1)*220,can:(u.teslaJump||1)<4,buy:()=>{u.teslaJump=(u.teslaJump||1)+1;}}]:[]),
+    ...(hu.singularity?[{grp:'HEAVY',name:'EVENT HORIZON',icon:'singularity',desc:'Singularity: bigger pull and blast.',delta:'wider pull',lv:u.singAmp||1,mx:4,cost:350+((u.singAmp||1)-1)*240,can:(u.singAmp||1)<4,buy:()=>{u.singAmp=(u.singAmp||1)+1;}}]:[]),
+    ...(hu.wave?[{grp:'HEAVY',name:'WAVE AMP',icon:'wave',desc:'Wave Motion: more power and width.',delta:'+power/width',lv:u.wavePow||1,mx:4,cost:400+((u.wavePow||1)-1)*260,can:(u.wavePow||1)<4,buy:()=>{u.wavePow=(u.wavePow||1)+1;}}]:[]),
+    {grp:'BEAM',name:'BEAM POWER',icon:'beampow',desc:'PRISM beam damage.',delta:'+16 dps',lv:u.beamPow,mx:8,cost:320+(u.beamPow-1)*220,can:u.beamPow<8,buy:()=>u.beamPow++},
+    {grp:'BEAM',name:'BEAM CELL',icon:'beamcell',desc:'Heavy energy and recharge.',delta:'+0.55s cell',lv:u.beamCap,mx:8,cost:280+(u.beamCap-1)*200,can:u.beamCap<8,buy:()=>u.beamCap++},
+    {grp:'BEAM',name:'BEAM PIERCE',icon:'beampierce',desc:'Enemies the PRISM beam cuts through.',delta:'more pierce',lv:u.beamPierce,mx:5,cost:400+(u.beamPierce-1)*280,can:u.beamPierce<5,buy:()=>u.beamPierce++},
+    {grp:'BEAM',name:'BEAM SPOOL',icon:'beamspool',desc:'Faster PRISM spin-up, shorter cooldown.',delta:'faster spool',lv:u.beamSpool||1,mx:6,cost:300+((u.beamSpool||1)-1)*210,can:(u.beamSpool||1)<6,buy:()=>{u.beamSpool=(u.beamSpool||1)+1;}},
     {grp:'DEFENSE',name:'SHIELD +1',icon:'shield',desc:'Absorbs one hit.',delta:'+1 shield',lv:player.shieldHits,mx:3,cost:350,can:player.shieldHits<3,buy:()=>player.shieldHits++},
     {grp:'DEFENSE',name:'HULL ARMOR',icon:'hull',desc:'+1 max hull per life.',delta:'+1 max hull',lv:u.armor||0,mx:4,cost:400+(u.armor||0)*250,can:(u.armor||0)<4,buy:()=>{ u.armor=(u.armor||0)+1; player.armor++; }},
     {grp:'DEFENSE',name:'REPAIR HULL',icon:'repair',desc:'Restore hull to full.',delta:'full hull',lv:0,mx:0,meta:(player.armor<player.maxArmor)?('i¢'+(130*(player.maxArmor-player.armor))):'FULL',cost:130*(player.maxArmor-player.armor),can:player.armor<player.maxArmor,buy:()=>{ player.armor=player.maxArmor; }},
-    {grp:'SYSTEMS',name:player.drone?'DRONE READY':'DRONE',icon:'drone',desc:'Wingman drone that fires with you.',delta:player.drone?'':'wingman',lv:0,mx:0,meta:player.drone?'OWNED':'i¢600',cost:600,can:!player.drone,buy:()=>{player.drone={ph:0};}},
-    {grp:'DEFENSE',name:'EXTRA LIFE',icon:'life',desc:'One more life (max 4).',delta:'+1 life',lv:0,mx:0,cost:2500,can:player.lives<4,buy:()=>player.lives++}
+    {grp:'DEFENSE',name:'EXTRA LIFE',icon:'life',desc:'One more life (max 4).',delta:'+1 life',lv:0,mx:0,cost:2500,can:player.lives<4,buy:()=>player.lives++},
+    {grp:'SYSTEMS',name:'ENGINE',icon:'engine',desc:'Ship movement speed.',delta:'+52 speed',lv:u.speed,mx:10,cost:300+(u.speed-1)*180,can:u.speed<10,buy:()=>u.speed++},
+    {grp:'SYSTEMS',name:'BOMB +1',icon:'bomb',desc:'Raises max bomb count.',delta:'+1 bomb',lv:player.bombs,mx:6,cost:200,can:player.bombs<6,buy:()=>player.bombs++},
+    {grp:'SYSTEMS',name:player.drone?'DRONE READY':'DRONE',icon:'drone',desc:'Wingman drone that fires with you.',delta:player.drone?'':'wingman',lv:0,mx:0,meta:player.drone?'OWNED':'i¢600',cost:600,can:!player.drone,buy:()=>{player.drone={ph:0};}}
   ];
 }
 function nextWeapon(){ const i=WEAPONS.indexOf(player.wtype); return WEAPONS[(i+1)%WEAPONS.length]; }
@@ -2750,7 +2764,7 @@ function drawFX(){
   fx.shadowBlur=0;
   // HEAVY slot visuals
   if(player){ const h=player.heavy||'beam', noseY=player.y-18, bx=player.x;
-    if(player.waveT>0){ const k=clamp(player.waveT/0.7,0,1), ww=140;
+    if(player.waveT>0){ const k=clamp(player.waveT/0.85,0,1), ww=120+((player.up&&player.up.wavePow)||1)*22;
       const g=fx.createLinearGradient(bx-ww,0,bx+ww,0); g.addColorStop(0,'rgba(0,255,65,0)'); g.addColorStop(.5,'rgba(232,255,232,'+(0.85*k+0.1)+')'); g.addColorStop(1,'rgba(0,255,65,0)');
       fx.fillStyle=g; fx.fillRect(bx-ww,0,ww*2,noseY);
       fx.fillStyle='rgba(232,255,232,'+(0.9*k)+')'; fx.fillRect(bx-30,0,60,noseY);
@@ -3079,7 +3093,7 @@ try{ if(localStorage.getItem('vanguard_mute')==='1'){Audio_.muted=true;const pmb
 })();
 
 /* starting build (outfit) */
-function saveBuild(){ try{ const b=startBuild; localStorage.setItem('vanguard_build',JSON.stringify({up:b.up,unlocked:b.unlocked,wtype:b.wtype,bombs:b.bombs,shieldHits:b.shieldHits,drone:!!b.drone,spent:b.spent})); }catch(e){} }
+function saveBuild(){ try{ const b=startBuild; localStorage.setItem('vanguard_build',JSON.stringify({up:b.up,unlocked:b.unlocked,heavyUnlocked:b.heavyUnlocked,heavy:b.heavy,wtype:b.wtype,bombs:b.bombs,shieldHits:b.shieldHits,drone:!!b.drone,spent:b.spent})); }catch(e){} }
 function refreshBuildSummary(){ const s=el('buildSummary'); if(!s)return; const n=buildCount(); const left=Math.max(0,START_BUDGET-(startBuild.spent||0));
   s.textContent=n>0?(n+' upgrade'+(n>1?'s':'')+' · '+startBuild.spent.toLocaleString()+' spent · '+left.toLocaleString()+' i¢ carried in'):('Full '+START_BUDGET.toLocaleString()+' i¢ carries into the run.'); }
 function buildOutfit(){ const box=el('outfitItems'); if(!box)return; const rem=START_BUDGET-startBuild.spent;
