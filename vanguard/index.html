@@ -163,7 +163,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 .cpips{display:flex;gap:3px;margin:1px 0}
 .cpips .pip{width:9px;height:4px;border-radius:1px;background:rgba(255,255,255,.12);border:1px solid color-mix(in srgb,var(--cc) 30%,transparent)}
 .cpips .pip.on{background:var(--cc);border-color:var(--cc);box-shadow:0 0 5px var(--cc)}
-.cdesc{font-size:9px;color:var(--dim);line-height:1.3}
+.cdesc{font-size:10px;color:var(--dim);line-height:1.3}
 .cdelta{font-size:9px;font-family:'Chakra Petch',sans-serif;font-weight:600;color:var(--gold);letter-spacing:.02em}
 .ccost{flex:0 0 auto;align-self:center;font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:11px;color:var(--gold);text-align:right;text-shadow:0 0 8px rgba(200,255,0,.35);white-space:nowrap}
 .card.off .ccost{color:var(--dim);text-shadow:none}
@@ -214,7 +214,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
   .cic{flex:0 0 38px;width:38px;height:38px}
   .cic svg{width:24px;height:24px}
   .cname{font-size:13px}
-  .cdesc{font-size:10.5px;line-height:1.35}
+  .cdesc{font-size:11px;line-height:1.35}
   .cdelta{font-size:10px}
   .ccost{font-size:12px}
   #legend{display:none}
@@ -428,7 +428,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=560,H=840; const VERSION='2550';
+const W=560,H=840; const VERSION='2551';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -1487,34 +1487,34 @@ function dropPod(x,y,fromBoss){
 }
 const WEAPONS=['spread','lance','homing','rapid'];
 function outfitOffers(){ const b=startBuild, u=b.up; const pdN=(1+(u.gun-1)*0.30), pdX=(1+u.gun*0.30); const hu=b.heavyUnlocked||{}; return [
-  {grp:'WEAPONS',name:'GUN POWER',icon:'gun',desc:'All primary weapon damage.',delta:'x'+pdN.toFixed(2)+' -> x'+pdX.toFixed(2),lv:u.gun,mx:8,cost:400+(u.gun-1)*250,can:u.gun<8,buy:()=>u.gun++},
-  {grp:'WEAPONS',name:'FLANK GUNS',icon:'flank',desc:'Wide side shots, then rear cover.',delta:'+ side guns',lv:u.flank,mx:3,cost:[450,700,1000][Math.min(u.flank,2)],can:u.flank<3,buy:()=>u.flank++},
-  {grp:'WEAPONS',name:'LANCE',icon:'w_lance',desc:'Piercing bolts, anti-line.',lv:b.unlocked.lance,mx:0,meta:b.unlocked.lance?'OWNED':'i¢600',cost:600,can:!b.unlocked.lance,buy:()=>{b.unlocked.lance=1;b.wtype='lance';}},
-  {grp:'WEAPONS',name:'HOMING',icon:'w_homing',desc:'Auto-tracking shots.',lv:b.unlocked.homing,mx:0,meta:b.unlocked.homing?'OWNED':'i¢750',cost:750,can:!b.unlocked.homing,buy:()=>{b.unlocked.homing=1;b.wtype='homing';}},
-  {grp:'WEAPONS',name:'RAPID',icon:'w_rapid',desc:'Fast narrow stream.',lv:b.unlocked.rapid,mx:0,meta:b.unlocked.rapid?'OWNED':'i¢350',cost:350,can:!b.unlocked.rapid,buy:()=>{b.unlocked.rapid=1;b.wtype='rapid';}},
-  {grp:'WEAPONS',name:'SCATTER CHOKE',icon:'w_spread',desc:'SPREAD: more pellets, tighter cone.',delta:'+1 pellet',lv:u.mSpread||0,mx:3,cost:300+(u.mSpread||0)*220,can:(u.mSpread||0)<3,buy:()=>{u.mSpread=(u.mSpread||0)+1;}},
-  ...(b.unlocked.rapid?[{grp:'WEAPONS',name:'OVERCLOCK',icon:'w_rapid',desc:'RAPID: higher fire rate.',delta:'+12% rate',lv:u.mRapid||0,mx:3,cost:300+(u.mRapid||0)*220,can:(u.mRapid||0)<3,buy:()=>{u.mRapid=(u.mRapid||0)+1;}}]:[]),
-  ...(b.unlocked.lance?[{grp:'WEAPONS',name:'HIGH-VELOCITY',icon:'w_lance',desc:'LANCE: heavier bolts.',delta:'+ bolt dmg',lv:u.mLance||0,mx:3,cost:320+(u.mLance||0)*230,can:(u.mLance||0)<3,buy:()=>{u.mLance=(u.mLance||0)+1;}}]:[]),
-  ...(b.unlocked.homing?[{grp:'WEAPONS',name:'SWARM CTRL',icon:'w_homing',desc:'HOMING: extra tracking shot.',delta:'+1 shot',lv:u.mHoming||0,mx:3,cost:320+(u.mHoming||0)*230,can:(u.mHoming||0)<3,buy:()=>{u.mHoming=(u.mHoming||0)+1;}}]:[]),
+  {grp:'WEAPONS',name:'GUN POWER',icon:'gun',desc:'Boosts damage on all primary weapons (SPREAD, LANCE, HOMING, RAPID).',delta:'x'+pdN.toFixed(2)+' -> x'+pdX.toFixed(2),lv:u.gun,mx:8,cost:400+(u.gun-1)*250,can:u.gun<8,buy:()=>u.gun++},
+  {grp:'WEAPONS',name:'FLANK GUNS',icon:'flank',desc:'Lv 1: side guns. Lv 2: diagonal fire. Lv 3: rear coverage.',delta:'+ side guns',lv:u.flank,mx:3,cost:[450,700,1000][Math.min(u.flank,2)],can:u.flank<3,buy:()=>u.flank++},
+  {grp:'WEAPONS',name:'LANCE',icon:'w_lance',desc:'Bolts pierce through a line of enemies.',lv:b.unlocked.lance,mx:0,meta:b.unlocked.lance?'OWNED':'i¢600',cost:600,can:!b.unlocked.lance,buy:()=>{b.unlocked.lance=1;b.wtype='lance';}},
+  {grp:'WEAPONS',name:'HOMING',icon:'w_homing',desc:'Shots that steer toward the nearest enemy.',lv:b.unlocked.homing,mx:0,meta:b.unlocked.homing?'OWNED':'i¢750',cost:750,can:!b.unlocked.homing,buy:()=>{b.unlocked.homing=1;b.wtype='homing';}},
+  {grp:'WEAPONS',name:'RAPID',icon:'w_rapid',desc:'Very fast, narrow stream. Best for single targets.',lv:b.unlocked.rapid,mx:0,meta:b.unlocked.rapid?'OWNED':'i¢350',cost:350,can:!b.unlocked.rapid,buy:()=>{b.unlocked.rapid=1;b.wtype='rapid';}},
+  {grp:'WEAPONS',name:'SCATTER CHOKE',icon:'w_spread',desc:'Adds a SPREAD pellet and tightens the cone for more focus.',delta:'+1 pellet',lv:u.mSpread||0,mx:3,cost:300+(u.mSpread||0)*220,can:(u.mSpread||0)<3,buy:()=>{u.mSpread=(u.mSpread||0)+1;}},
+  ...(b.unlocked.rapid?[{grp:'WEAPONS',name:'OVERCLOCK',icon:'w_rapid',desc:'Increases RAPID fire rate. Stacks with existing speed.',delta:'+12% rate',lv:u.mRapid||0,mx:3,cost:300+(u.mRapid||0)*220,can:(u.mRapid||0)<3,buy:()=>{u.mRapid=(u.mRapid||0)+1;}}]:[]),
+  ...(b.unlocked.lance?[{grp:'WEAPONS',name:'HIGH-VELOCITY',icon:'w_lance',desc:'Increases damage on each LANCE bolt.',delta:'+ bolt dmg',lv:u.mLance||0,mx:3,cost:320+(u.mLance||0)*230,can:(u.mLance||0)<3,buy:()=>{u.mLance=(u.mLance||0)+1;}}]:[]),
+  ...(b.unlocked.homing?[{grp:'WEAPONS',name:'SWARM CTRL',icon:'w_homing',desc:'Adds one more homing shot per volley.',delta:'+1 shot',lv:u.mHoming||0,mx:3,cost:320+(u.mHoming||0)*230,can:(u.mHoming||0)<3,buy:()=>{u.mHoming=(u.mHoming||0)+1;}}]:[]),
   {grp:'HEAVY',name:'RAILGUN',icon:'rail',desc:'Unlocked in-run at REFIT.',lv:0,mx:0,meta:hu.rail?'OWNED':'IN-RUN',cost:0,can:false,buy:()=>{}},
   {grp:'HEAVY',name:'TESLA',icon:'tesla',desc:'Unlocked in-run at REFIT.',lv:0,mx:0,meta:hu.tesla?'OWNED':'IN-RUN',cost:0,can:false,buy:()=>{}},
   {grp:'HEAVY',name:'SINGULARITY',icon:'singularity',desc:'Unlocked in-run at REFIT.',lv:0,mx:0,meta:hu.singularity?'OWNED':'IN-RUN',cost:0,can:false,buy:()=>{}},
   {grp:'HEAVY',name:'WAVE MOTION',icon:'wave',desc:'Unlocked in-run at REFIT.',lv:0,mx:0,meta:hu.wave?'OWNED':'IN-RUN',cost:0,can:false,buy:()=>{}},
-  {grp:'HEAVY',name:'HEAVY POWER',icon:'beampow',desc:'Rail, Tesla, Singularity, Wave damage.',delta:'+30% dmg',lv:u.heavyPow||1,mx:6,cost:350+((u.heavyPow||1)-1)*240,can:(u.heavyPow||1)<6,buy:()=>{u.heavyPow=(u.heavyPow||1)+1;}},
-  {grp:'HEAVY',name:'HEAVY SPOOL',icon:'beamspool',desc:'Faster heavy charge time.',delta:'faster charge',lv:u.heavyChg||1,mx:5,cost:300+((u.heavyChg||1)-1)*200,can:(u.heavyChg||1)<5,buy:()=>{u.heavyChg=(u.heavyChg||1)+1;}},
-  ...(hu.tesla?[{grp:'HEAVY',name:'ARC CHAIN',icon:'tesla',desc:'Tesla: more jumps and range.',delta:'+1 arc',lv:u.teslaJump||1,mx:4,cost:350+((u.teslaJump||1)-1)*220,can:(u.teslaJump||1)<4,buy:()=>{u.teslaJump=(u.teslaJump||1)+1;}}]:[]),
-  ...(hu.singularity?[{grp:'HEAVY',name:'EVENT HORIZON',icon:'singularity',desc:'Singularity: bigger pull and blast.',delta:'wider pull',lv:u.singAmp||1,mx:4,cost:350+((u.singAmp||1)-1)*240,can:(u.singAmp||1)<4,buy:()=>{u.singAmp=(u.singAmp||1)+1;}}]:[]),
-  ...(hu.wave?[{grp:'HEAVY',name:'WAVE AMP',icon:'wave',desc:'Wave Motion: more power and width.',delta:'+power/width',lv:u.wavePow||1,mx:4,cost:400+((u.wavePow||1)-1)*260,can:(u.wavePow||1)<4,buy:()=>{u.wavePow=(u.wavePow||1)+1;}}]:[]),
-  {grp:'BEAM',name:'BEAM POWER',icon:'beampow',desc:'PRISM beam damage.',delta:'+16 dps',lv:u.beamPow,mx:8,cost:320+(u.beamPow-1)*220,can:u.beamPow<8,buy:()=>u.beamPow++},
-  {grp:'BEAM',name:'BEAM CELL',icon:'beamcell',desc:'Heavy energy and recharge.',delta:'+0.55s cell',lv:u.beamCap,mx:8,cost:280+(u.beamCap-1)*200,can:u.beamCap<8,buy:()=>u.beamCap++},
-  {grp:'BEAM',name:'BEAM PIERCE',icon:'beampierce',desc:'Enemies the PRISM beam cuts through.',delta:'more pierce',lv:u.beamPierce,mx:5,cost:400+(u.beamPierce-1)*280,can:u.beamPierce<5,buy:()=>u.beamPierce++},
-  {grp:'BEAM',name:'BEAM SPOOL',icon:'beamspool',desc:'Faster PRISM spin-up, shorter cooldown.',delta:'faster spool',lv:u.beamSpool,mx:6,cost:300+(u.beamSpool-1)*210,can:u.beamSpool<6,buy:()=>u.beamSpool++},
-  {grp:'DEFENSE',name:'HULL ARMOR',icon:'hull',desc:'+1 max hull per life.',delta:'+1 max hull',lv:u.armor,mx:4,cost:400+u.armor*250,can:u.armor<4,buy:()=>u.armor++},
-  {grp:'DEFENSE',name:'SHIELD +1',icon:'shield',desc:'Absorbs one hit.',delta:'+1 shield',lv:b.shieldHits,mx:3,cost:350,can:b.shieldHits<3,buy:()=>b.shieldHits++},
-  {grp:'SYSTEMS',name:'ENGINE',icon:'engine',desc:'Ship movement speed.',delta:'+52 speed',lv:u.speed,mx:10,cost:300+(u.speed-1)*180,can:u.speed<10,buy:()=>u.speed++},
-  {grp:'SYSTEMS',name:'BOMB +1',icon:'bomb',desc:'Raises max bomb count.',delta:'+1 bomb',lv:b.bombs,mx:6,cost:200,can:b.bombs<6,buy:()=>b.bombs++},
-  {grp:'SYSTEMS',name:'BOMB CORE',icon:'bomb',desc:'Bomb blast damage.',delta:'+50% dmg',lv:u.bombPow||1,mx:5,cost:300+((u.bombPow||1)-1)*220,can:(u.bombPow||1)<5,buy:()=>{u.bombPow=(u.bombPow||1)+1;}},
-  {grp:'SYSTEMS',name:'DRONE',icon:'drone',desc:'Wingman drone that fires with you.',lv:b.drone?1:0,mx:0,meta:b.drone?'OWNED':'i¢600',cost:600,can:!b.drone,buy:()=>{b.drone={ph:0};}}
+  {grp:'HEAVY',name:'HEAVY POWER',icon:'beampow',desc:'Boosts damage on all heavy weapons.',delta:'+30% dmg',lv:u.heavyPow||1,mx:6,cost:350+((u.heavyPow||1)-1)*240,can:(u.heavyPow||1)<6,buy:()=>{u.heavyPow=(u.heavyPow||1)+1;}},
+  {grp:'HEAVY',name:'HEAVY SPOOL',icon:'beamspool',desc:'Reduces charge time for all heavy weapons.',delta:'faster charge',lv:u.heavyChg||1,mx:5,cost:300+((u.heavyChg||1)-1)*200,can:(u.heavyChg||1)<5,buy:()=>{u.heavyChg=(u.heavyChg||1)+1;}},
+  ...(hu.tesla?[{grp:'HEAVY',name:'ARC CHAIN',icon:'tesla',desc:'Tesla arcs to more targets over a wider range.',delta:'+1 arc',lv:u.teslaJump||1,mx:4,cost:350+((u.teslaJump||1)-1)*220,can:(u.teslaJump||1)<4,buy:()=>{u.teslaJump=(u.teslaJump||1)+1;}}]:[]),
+  ...(hu.singularity?[{grp:'HEAVY',name:'EVENT HORIZON',icon:'singularity',desc:'Increases Singularity pull radius and detonation damage.',delta:'wider pull',lv:u.singAmp||1,mx:4,cost:350+((u.singAmp||1)-1)*240,can:(u.singAmp||1)<4,buy:()=>{u.singAmp=(u.singAmp||1)+1;}}]:[]),
+  ...(hu.wave?[{grp:'HEAVY',name:'WAVE AMP',icon:'wave',desc:'Wave Motion beam hits harder and covers more screen width.',delta:'+power/width',lv:u.wavePow||1,mx:4,cost:400+((u.wavePow||1)-1)*260,can:(u.wavePow||1)<4,buy:()=>{u.wavePow=(u.wavePow||1)+1;}}]:[]),
+  {grp:'BEAM',name:'BEAM POWER',icon:'beampow',desc:'Increases the beam weapon\'s damage per second.',delta:'+16 dps',lv:u.beamPow,mx:8,cost:320+(u.beamPow-1)*220,can:u.beamPow<8,buy:()=>u.beamPow++},
+  {grp:'BEAM',name:'BEAM CELL',icon:'beamcell',desc:'Adds to the beam charge meter and speeds up recharge.',delta:'+0.55s cell',lv:u.beamCap,mx:8,cost:280+(u.beamCap-1)*200,can:u.beamCap<8,buy:()=>u.beamCap++},
+  {grp:'BEAM',name:'BEAM PIERCE',icon:'beampierce',desc:'Beam passes through more enemies. Levels: 1 > 2 > 3 > 5 > all.',delta:'more pierce',lv:u.beamPierce,mx:5,cost:400+(u.beamPierce-1)*280,can:u.beamPierce<5,buy:()=>u.beamPierce++},
+  {grp:'BEAM',name:'BEAM SPOOL',icon:'beamspool',desc:'Reduces beam spin-up time and cooldown between shots.',delta:'faster spool',lv:u.beamSpool,mx:6,cost:300+(u.beamSpool-1)*210,can:u.beamSpool<6,buy:()=>u.beamSpool++},
+  {grp:'DEFENSE',name:'HULL ARMOR',icon:'hull',desc:'Raises max hull per life. Each upgrade costs more.',delta:'+1 max hull',lv:u.armor,mx:4,cost:400+u.armor*250,can:u.armor<4,buy:()=>u.armor++},
+  {grp:'DEFENSE',name:'SHIELD +1',icon:'shield',desc:'Adds one shield. Each shield absorbs one hit before disappearing.',delta:'+1 shield',lv:b.shieldHits,mx:3,cost:350,can:b.shieldHits<3,buy:()=>b.shieldHits++},
+  {grp:'SYSTEMS',name:'ENGINE',icon:'engine',desc:'Increases ship speed. Higher levels feel noticeably faster.',delta:'+52 speed',lv:u.speed,mx:10,cost:300+(u.speed-1)*180,can:u.speed<10,buy:()=>u.speed++},
+  {grp:'SYSTEMS',name:'BOMB +1',icon:'bomb',desc:'Adds one to your max bomb stock.',delta:'+1 bomb',lv:b.bombs,mx:6,cost:200,can:b.bombs<6,buy:()=>b.bombs++},
+  {grp:'SYSTEMS',name:'BOMB CORE',icon:'bomb',desc:'Increases bomb damage by 50% per level.',delta:'+50% dmg',lv:u.bombPow||1,mx:5,cost:300+((u.bombPow||1)-1)*220,can:(u.bombPow||1)<5,buy:()=>{u.bombPow=(u.bombPow||1)+1;}},
+  {grp:'SYSTEMS',name:'DRONE',icon:'drone',desc:'Deploys a drone that copies your fire direction.',lv:b.drone?1:0,mx:0,meta:b.drone?'OWNED':'i¢600',cost:600,can:!b.drone,buy:()=>{b.drone={ph:0};}}
 ];}
 function buildCount(){ const u=startBuild.up,b=startBuild; const hu=b.heavyUnlocked||{}; return (u.gun-1)+(u.beamPow-1)+(u.beamCap-1)+(u.beamPierce-1)+(u.beamSpool-1)+(u.speed-1)+u.flank+u.armor+b.shieldHits+(b.bombs-2)+(b.drone?1:0)+b.unlocked.lance+b.unlocked.homing+b.unlocked.rapid+((u.heavyPow||1)-1)+((u.heavyChg||1)-1)+((u.teslaJump||1)-1)+((u.singAmp||1)-1)+((u.wavePow||1)-1)+(u.mSpread||0)+(u.mRapid||0)+(u.mLance||0)+(u.mHoming||0)+((u.bombPow||1)-1)+(hu.rail?1:0)+(hu.tesla?1:0)+(hu.singularity?1:0)+(hu.wave?1:0); }
 const WCOL={spread:COL.green,lance:COL.cyan,homing:COL.gold,rapid:COL.mat};
@@ -2488,41 +2488,41 @@ function shopCardHTML(it,i,aff,maxed,grp){ const col=shopGroupColor(grp); const 
 function renderShopGrid(container, items, ctx){ if(!container)return;
   const order=['WEAPONS','HEAVY','BEAM','DEFENSE','SYSTEMS']; const grpOf=it=>it.grp||'SYSTEMS'; let html='';
   order.forEach(g=>{ const rows=items.map((it,i)=>[it,i]).filter(p=>grpOf(p[0])===g); if(!rows.length)return;
-    html+='<div class="shophdr">'+g+'</div>';
+    html+='<div class="shophdr" style="color:'+shopGroupColor(g)+'">'+g+'</div>';
     rows.forEach(p=>{ const it=p[0],i=p[1]; const maxed=(it.mx>0&&it.lv>=it.mx)||!it.can; const aff=ctx.afford(it);
       html+=shopCardHTML(it,i,aff,maxed,g); }); });
   container.innerHTML=html;
   [...container.querySelectorAll('.card')].forEach(b=>b.addEventListener('click',()=>ctx.onBuy(+b.dataset.i,b))); }
 function refitItems(){ const u=player.up; const pdN=(1+(u.gun-1)*0.30), pdX=(1+u.gun*0.30); const hu=player.heavyUnlocked||{};
   return [
-    {grp:'WEAPONS',name:'GUN POWER',icon:'gun',desc:'All primary weapon damage.',delta:'x'+pdN.toFixed(2)+' -> x'+pdX.toFixed(2),lv:u.gun,mx:8,cost:400+(u.gun-1)*250,can:u.gun<8,buy:()=>u.gun++},
-    {grp:'WEAPONS',name:'FLANK GUNS',icon:'flank',desc:'Adds wide side shots, then rear cover.',delta:'+ side guns',lv:u.flank||0,mx:3,cost:[450,700,1000][Math.min(u.flank||0,2)],can:(u.flank||0)<3,buy:()=>{u.flank=(u.flank||0)+1;}},
-    ...['spread|SPREAD|0|w_spread|Balanced forward fan.','rapid|RAPID|350|w_rapid|Fast narrow stream.','lance|LANCE|600|w_lance|Piercing bolts, anti-line.','homing|HOMING|750|w_homing|Auto-tracking shots.'].map(s=>{const p=s.split('|'),w=p[0],owned=!!player.unlocked[w],active=player.wtype===w;return {grp:'WEAPONS',name:p[1],icon:p[3],desc:p[4],lv:0,mx:0,meta:active?'EQUIPPED':owned?'EQUIP':('i¢'+p[2]),cost:owned?0:+p[2],can:!active,buy:()=>{player.unlocked[w]=1;player.wtype=w;}};}),
-    {grp:'WEAPONS',name:'SCATTER CHOKE',icon:'w_spread',desc:'SPREAD: more pellets, tighter cone.',delta:'+1 pellet',lv:u.mSpread||0,mx:3,cost:300+(u.mSpread||0)*220,can:(u.mSpread||0)<3,buy:()=>{u.mSpread=(u.mSpread||0)+1;}},
-    ...(player.unlocked.rapid?[{grp:'WEAPONS',name:'OVERCLOCK',icon:'w_rapid',desc:'RAPID: higher fire rate.',delta:'+12% rate',lv:u.mRapid||0,mx:3,cost:300+(u.mRapid||0)*220,can:(u.mRapid||0)<3,buy:()=>{u.mRapid=(u.mRapid||0)+1;}}]:[]),
-    ...(player.unlocked.lance?[{grp:'WEAPONS',name:'HIGH-VELOCITY',icon:'w_lance',desc:'LANCE: heavier bolts.',delta:'+ bolt dmg',lv:u.mLance||0,mx:3,cost:320+(u.mLance||0)*230,can:(u.mLance||0)<3,buy:()=>{u.mLance=(u.mLance||0)+1;}}]:[]),
-    ...(player.unlocked.homing?[{grp:'WEAPONS',name:'SWARM CTRL',icon:'w_homing',desc:'HOMING: extra tracking shot.',delta:'+1 shot',lv:u.mHoming||0,mx:3,cost:320+(u.mHoming||0)*230,can:(u.mHoming||0)<3,buy:()=>{u.mHoming=(u.mHoming||0)+1;}}]:[]),
-    {grp:'HEAVY',name:'RAILGUN',icon:'rail',desc:'Charged hypervelocity slug.',lv:0,mx:0,meta:hu.rail?'OWNED':(sector<2?'SECTOR 2+':'i¢750'),cost:750,can:!hu.rail&&sector>=2,buy:()=>{player.heavyUnlocked.rail=1;player.heavy='rail';}},
-    {grp:'HEAVY',name:'TESLA',icon:'tesla',desc:'Chain lightning across enemies.',lv:0,mx:0,meta:hu.tesla?'OWNED':(sector<3?'SECTOR 3+':'i¢900'),cost:900,can:!hu.tesla&&sector>=3,buy:()=>{player.heavyUnlocked.tesla=1;player.heavy='tesla';}},
-    {grp:'HEAVY',name:'SINGULARITY',icon:'singularity',desc:'Black hole that pulls then implodes.',lv:0,mx:0,meta:hu.singularity?'OWNED':(sector<4?'SECTOR 4+':'i¢1100'),cost:1100,can:!hu.singularity&&sector>=4,buy:()=>{player.heavyUnlocked.singularity=1;player.heavy='singularity';}},
-    {grp:'HEAVY',name:'WAVE MOTION',icon:'wave',desc:'Full-meter screen-clearing beam.',lv:0,mx:0,meta:hu.wave?'OWNED':(sector<5?'SECTOR 5+':'i¢1600'),cost:1600,can:!hu.wave&&sector>=5,buy:()=>{player.heavyUnlocked.wave=1;player.heavy='wave';}},
-    {grp:'HEAVY',name:'HEAVY POWER',icon:'beampow',desc:'Rail, Tesla, Singularity, Wave damage.',delta:'+30% dmg',lv:u.heavyPow||1,mx:6,cost:350+((u.heavyPow||1)-1)*240,can:(u.heavyPow||1)<6,buy:()=>{u.heavyPow=(u.heavyPow||1)+1;}},
-    {grp:'HEAVY',name:'HEAVY SPOOL',icon:'beamspool',desc:'Faster heavy charge time.',delta:'faster charge',lv:u.heavyChg||1,mx:5,cost:300+((u.heavyChg||1)-1)*200,can:(u.heavyChg||1)<5,buy:()=>{u.heavyChg=(u.heavyChg||1)+1;}},
-    ...(hu.tesla?[{grp:'HEAVY',name:'ARC CHAIN',icon:'tesla',desc:'Tesla: more jumps and range.',delta:'+1 arc',lv:u.teslaJump||1,mx:4,cost:350+((u.teslaJump||1)-1)*220,can:(u.teslaJump||1)<4,buy:()=>{u.teslaJump=(u.teslaJump||1)+1;}}]:[]),
-    ...(hu.singularity?[{grp:'HEAVY',name:'EVENT HORIZON',icon:'singularity',desc:'Singularity: bigger pull and blast.',delta:'wider pull',lv:u.singAmp||1,mx:4,cost:350+((u.singAmp||1)-1)*240,can:(u.singAmp||1)<4,buy:()=>{u.singAmp=(u.singAmp||1)+1;}}]:[]),
-    ...(hu.wave?[{grp:'HEAVY',name:'WAVE AMP',icon:'wave',desc:'Wave Motion: more power and width.',delta:'+power/width',lv:u.wavePow||1,mx:4,cost:400+((u.wavePow||1)-1)*260,can:(u.wavePow||1)<4,buy:()=>{u.wavePow=(u.wavePow||1)+1;}}]:[]),
-    {grp:'BEAM',name:'BEAM POWER',icon:'beampow',desc:'PRISM beam damage.',delta:'+16 dps',lv:u.beamPow,mx:8,cost:320+(u.beamPow-1)*220,can:u.beamPow<8,buy:()=>u.beamPow++},
-    {grp:'BEAM',name:'BEAM CELL',icon:'beamcell',desc:'Heavy energy and recharge.',delta:'+0.55s cell',lv:u.beamCap,mx:8,cost:280+(u.beamCap-1)*200,can:u.beamCap<8,buy:()=>u.beamCap++},
-    {grp:'BEAM',name:'BEAM PIERCE',icon:'beampierce',desc:'Enemies the PRISM beam cuts through.',delta:'more pierce',lv:u.beamPierce,mx:5,cost:400+(u.beamPierce-1)*280,can:u.beamPierce<5,buy:()=>u.beamPierce++},
-    {grp:'BEAM',name:'BEAM SPOOL',icon:'beamspool',desc:'Faster PRISM spin-up, shorter cooldown.',delta:'faster spool',lv:u.beamSpool||1,mx:6,cost:300+((u.beamSpool||1)-1)*210,can:(u.beamSpool||1)<6,buy:()=>{u.beamSpool=(u.beamSpool||1)+1;}},
-    {grp:'DEFENSE',name:'SHIELD +1',icon:'shield',desc:'Absorbs one hit.',delta:'+1 shield',lv:player.shieldHits,mx:3,cost:350,can:player.shieldHits<3,buy:()=>player.shieldHits++},
-    {grp:'DEFENSE',name:'HULL ARMOR',icon:'hull',desc:'+1 max hull per life.',delta:'+1 max hull',lv:u.armor||0,mx:4,cost:400+(u.armor||0)*250,can:(u.armor||0)<4,buy:()=>{ u.armor=(u.armor||0)+1; player.armor++; }},
-    {grp:'DEFENSE',name:'REPAIR HULL',icon:'repair',desc:'Restore hull to full.',delta:'full hull',lv:0,mx:0,meta:(player.armor<player.maxArmor)?('i¢'+(130*(player.maxArmor-player.armor))):'FULL',cost:130*(player.maxArmor-player.armor),can:player.armor<player.maxArmor,buy:()=>{ player.armor=player.maxArmor; }},
-    {grp:'DEFENSE',name:'EXTRA LIFE',icon:'life',desc:'One more life (max 4).',delta:'+1 life',lv:0,mx:0,cost:2500,can:gameMode!=='hardcore'&&player.lives<4,buy:()=>player.lives++},
-    {grp:'SYSTEMS',name:'ENGINE',icon:'engine',desc:'Ship movement speed.',delta:'+52 speed',lv:u.speed,mx:10,cost:300+(u.speed-1)*180,can:u.speed<10,buy:()=>u.speed++},
-    {grp:'SYSTEMS',name:'BOMB +1',icon:'bomb',desc:'Raises max bomb count.',delta:'+1 bomb',lv:player.bombs,mx:6,cost:200,can:player.bombs<6,buy:()=>player.bombs++},
-    {grp:'SYSTEMS',name:'BOMB CORE',icon:'bomb',desc:'Bomb blast damage.',delta:'+50% dmg',lv:u.bombPow||1,mx:5,cost:300+((u.bombPow||1)-1)*220,can:(u.bombPow||1)<5,buy:()=>{u.bombPow=(u.bombPow||1)+1;}},
-    {grp:'SYSTEMS',name:player.drone?'DRONE READY':'DRONE',icon:'drone',desc:'Wingman drone that fires with you.',delta:player.drone?'':'wingman',lv:0,mx:0,meta:player.drone?'OWNED':'i¢600',cost:600,can:!player.drone,buy:()=>{player.drone={ph:0};}}
+    {grp:'WEAPONS',name:'GUN POWER',icon:'gun',desc:'Boosts damage on all primary weapons (SPREAD, LANCE, HOMING, RAPID).',delta:'x'+pdN.toFixed(2)+' -> x'+pdX.toFixed(2),lv:u.gun,mx:8,cost:400+(u.gun-1)*250,can:u.gun<8,buy:()=>u.gun++},
+    {grp:'WEAPONS',name:'FLANK GUNS',icon:'flank',desc:'Lv 1: adds side guns. Lv 2: diagonal fire. Lv 3: rear coverage.',delta:'+ side guns',lv:u.flank||0,mx:3,cost:[450,700,1000][Math.min(u.flank||0,2)],can:(u.flank||0)<3,buy:()=>{u.flank=(u.flank||0)+1;}},
+    ...['spread|SPREAD|0|w_spread|Wide pellet cone, best for clearing groups in front.','rapid|RAPID|350|w_rapid|Very fast, narrow stream. Best for single targets.','lance|LANCE|600|w_lance|Bolts pierce through a line of enemies.','homing|HOMING|750|w_homing|Shots that steer toward the nearest enemy.'].map(s=>{const p=s.split('|'),w=p[0],owned=!!player.unlocked[w],active=player.wtype===w;return {grp:'WEAPONS',name:p[1],icon:p[3],desc:p[4],lv:0,mx:0,meta:active?'EQUIPPED':owned?'EQUIP':('i¢'+p[2]),cost:owned?0:+p[2],can:!active,buy:()=>{player.unlocked[w]=1;player.wtype=w;}};}),
+    {grp:'WEAPONS',name:'SCATTER CHOKE',icon:'w_spread',desc:'Adds a SPREAD pellet and tightens the cone for more focus.',delta:'+1 pellet',lv:u.mSpread||0,mx:3,cost:300+(u.mSpread||0)*220,can:(u.mSpread||0)<3,buy:()=>{u.mSpread=(u.mSpread||0)+1;}},
+    ...(player.unlocked.rapid?[{grp:'WEAPONS',name:'OVERCLOCK',icon:'w_rapid',desc:'Increases RAPID fire rate. Stacks with existing speed.',delta:'+12% rate',lv:u.mRapid||0,mx:3,cost:300+(u.mRapid||0)*220,can:(u.mRapid||0)<3,buy:()=>{u.mRapid=(u.mRapid||0)+1;}}]:[]),
+    ...(player.unlocked.lance?[{grp:'WEAPONS',name:'HIGH-VELOCITY',icon:'w_lance',desc:'Increases damage on each LANCE bolt.',delta:'+ bolt dmg',lv:u.mLance||0,mx:3,cost:320+(u.mLance||0)*230,can:(u.mLance||0)<3,buy:()=>{u.mLance=(u.mLance||0)+1;}}]:[]),
+    ...(player.unlocked.homing?[{grp:'WEAPONS',name:'SWARM CTRL',icon:'w_homing',desc:'Adds one more homing shot per volley.',delta:'+1 shot',lv:u.mHoming||0,mx:3,cost:320+(u.mHoming||0)*230,can:(u.mHoming||0)<3,buy:()=>{u.mHoming=(u.mHoming||0)+1;}}]:[]),
+    {grp:'HEAVY',name:'RAILGUN',icon:'rail',desc:'Charges up, then fires a slug that pierces everything in a line.',lv:0,mx:0,meta:hu.rail?'OWNED':(sector<2?'SECTOR 2+':'i¢750'),cost:750,can:!hu.rail&&sector>=2,buy:()=>{player.heavyUnlocked.rail=1;player.heavy='rail';}},
+    {grp:'HEAVY',name:'TESLA',icon:'tesla',desc:'Lightning that jumps from enemy to enemy.',lv:0,mx:0,meta:hu.tesla?'OWNED':(sector<3?'SECTOR 3+':'i¢900'),cost:900,can:!hu.tesla&&sector>=3,buy:()=>{player.heavyUnlocked.tesla=1;player.heavy='tesla';}},
+    {grp:'HEAVY',name:'SINGULARITY',icon:'singularity',desc:'Pulls nearby enemies together, then detonates.',lv:0,mx:0,meta:hu.singularity?'OWNED':(sector<4?'SECTOR 4+':'i¢1100'),cost:1100,can:!hu.singularity&&sector>=4,buy:()=>{player.heavyUnlocked.singularity=1;player.heavy='singularity';}},
+    {grp:'HEAVY',name:'WAVE MOTION',icon:'wave',desc:'Drains the full heavy meter to fire a wide screen-clearing beam.',lv:0,mx:0,meta:hu.wave?'OWNED':(sector<5?'SECTOR 5+':'i¢1600'),cost:1600,can:!hu.wave&&sector>=5,buy:()=>{player.heavyUnlocked.wave=1;player.heavy='wave';}},
+    {grp:'HEAVY',name:'HEAVY POWER',icon:'beampow',desc:'Boosts damage on all heavy weapons.',delta:'+30% dmg',lv:u.heavyPow||1,mx:6,cost:350+((u.heavyPow||1)-1)*240,can:(u.heavyPow||1)<6,buy:()=>{u.heavyPow=(u.heavyPow||1)+1;}},
+    {grp:'HEAVY',name:'HEAVY SPOOL',icon:'beamspool',desc:'Reduces charge time for all heavy weapons.',delta:'faster charge',lv:u.heavyChg||1,mx:5,cost:300+((u.heavyChg||1)-1)*200,can:(u.heavyChg||1)<5,buy:()=>{u.heavyChg=(u.heavyChg||1)+1;}},
+    ...(hu.tesla?[{grp:'HEAVY',name:'ARC CHAIN',icon:'tesla',desc:'Tesla arcs to more targets over a wider range.',delta:'+1 arc',lv:u.teslaJump||1,mx:4,cost:350+((u.teslaJump||1)-1)*220,can:(u.teslaJump||1)<4,buy:()=>{u.teslaJump=(u.teslaJump||1)+1;}}]:[]),
+    ...(hu.singularity?[{grp:'HEAVY',name:'EVENT HORIZON',icon:'singularity',desc:'Increases Singularity pull radius and detonation damage.',delta:'wider pull',lv:u.singAmp||1,mx:4,cost:350+((u.singAmp||1)-1)*240,can:(u.singAmp||1)<4,buy:()=>{u.singAmp=(u.singAmp||1)+1;}}]:[]),
+    ...(hu.wave?[{grp:'HEAVY',name:'WAVE AMP',icon:'wave',desc:'Wave Motion beam hits harder and covers more screen width.',delta:'+power/width',lv:u.wavePow||1,mx:4,cost:400+((u.wavePow||1)-1)*260,can:(u.wavePow||1)<4,buy:()=>{u.wavePow=(u.wavePow||1)+1;}}]:[]),
+    {grp:'BEAM',name:'BEAM POWER',icon:'beampow',desc:'Increases the beam weapon\'s damage per second.',delta:'+16 dps',lv:u.beamPow,mx:8,cost:320+(u.beamPow-1)*220,can:u.beamPow<8,buy:()=>u.beamPow++},
+    {grp:'BEAM',name:'BEAM CELL',icon:'beamcell',desc:'Adds to the beam charge meter and speeds up recharge.',delta:'+0.55s cell',lv:u.beamCap,mx:8,cost:280+(u.beamCap-1)*200,can:u.beamCap<8,buy:()=>u.beamCap++},
+    {grp:'BEAM',name:'BEAM PIERCE',icon:'beampierce',desc:'Beam passes through more enemies. Levels: 1 > 2 > 3 > 5 > all.',delta:'more pierce',lv:u.beamPierce,mx:5,cost:400+(u.beamPierce-1)*280,can:u.beamPierce<5,buy:()=>u.beamPierce++},
+    {grp:'BEAM',name:'BEAM SPOOL',icon:'beamspool',desc:'Reduces beam spin-up time and cooldown between shots.',delta:'faster spool',lv:u.beamSpool||1,mx:6,cost:300+((u.beamSpool||1)-1)*210,can:(u.beamSpool||1)<6,buy:()=>{u.beamSpool=(u.beamSpool||1)+1;}},
+    {grp:'DEFENSE',name:'SHIELD +1',icon:'shield',desc:'Adds one shield. Each shield absorbs one hit before disappearing.',delta:'+1 shield',lv:player.shieldHits,mx:3,cost:350,can:player.shieldHits<3,buy:()=>player.shieldHits++},
+    {grp:'DEFENSE',name:'HULL ARMOR',icon:'hull',desc:'Raises max hull per life. Each upgrade costs more.',delta:'+1 max hull',lv:u.armor||0,mx:4,cost:400+(u.armor||0)*250,can:(u.armor||0)<4,buy:()=>{ u.armor=(u.armor||0)+1; player.armor++; }},
+    {grp:'DEFENSE',name:'REPAIR HULL',icon:'repair',desc:'Restores hull to full. Price scales with missing hull.',delta:'full hull',lv:0,mx:0,meta:(player.armor<player.maxArmor)?('i¢'+(130*(player.maxArmor-player.armor))):'FULL',cost:130*(player.maxArmor-player.armor),can:player.armor<player.maxArmor,buy:()=>{ player.armor=player.maxArmor; }},
+    {grp:'DEFENSE',name:'EXTRA LIFE',icon:'life',desc:'One spare life. Expensive - save this for emergencies.',delta:'+1 life',lv:0,mx:0,cost:2500,can:gameMode!=='hardcore'&&player.lives<4,buy:()=>player.lives++},
+    {grp:'SYSTEMS',name:'ENGINE',icon:'engine',desc:'Increases ship speed. Higher levels feel noticeably faster.',delta:'+52 speed',lv:u.speed,mx:10,cost:300+(u.speed-1)*180,can:u.speed<10,buy:()=>u.speed++},
+    {grp:'SYSTEMS',name:'BOMB +1',icon:'bomb',desc:'Adds one to your max bomb stock.',delta:'+1 bomb',lv:player.bombs,mx:6,cost:200,can:player.bombs<6,buy:()=>player.bombs++},
+    {grp:'SYSTEMS',name:'BOMB CORE',icon:'bomb',desc:'Increases bomb damage by 50% per level.',delta:'+50% dmg',lv:u.bombPow||1,mx:5,cost:300+((u.bombPow||1)-1)*220,can:(u.bombPow||1)<5,buy:()=>{u.bombPow=(u.bombPow||1)+1;}},
+    {grp:'SYSTEMS',name:player.drone?'DRONE READY':'DRONE',icon:'drone',desc:'Deploys a drone that copies your fire direction.',delta:player.drone?'':'wingman',lv:0,mx:0,meta:player.drone?'OWNED':'i¢600',cost:600,can:!player.drone,buy:()=>{player.drone={ph:0};}}
   ];
 }
 function nextWeapon(){ const i=WEAPONS.indexOf(player.wtype); return WEAPONS[(i+1)%WEAPONS.length]; }
