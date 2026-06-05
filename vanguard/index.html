@@ -428,7 +428,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=560,H=840; const VERSION='2548';
+const W=560,H=840; const VERSION='2549';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -738,7 +738,7 @@ function drawMAT(ctx,e){ const r=e.r,v=e.variant,col=ctx.strokeStyle,lw=ctx.line
   const hob=Math.sin(ph*1.7)*r*0.04; ctx.save(); ctx.translate(0,hob);
   if(v===0){ // LENS -- camera aperture, focused bolt
     const gc=fl>0?COL.white:col;
-    const outerR=r*0.82, innerR=r*(0.18+0.06*Math.sin(ph*2.4))*(1-tell*0.5), rot=ph*0.35, nb=6, off=Math.PI/nb;
+    const outerR=r*0.82, innerR=r*(0.24+0.18*Math.sin(ph*1.8))*(1-tell*0.5), rot=ph*0.35, nb=6, off=Math.PI/nb;
     ctx.beginPath(); ctx.arc(0,0,outerR,0,Math.PI*2); ctx.fillStyle=col+'1A'; ctx.fill(); ctx.stroke();
     ctx.lineWidth=lw*0.75;
     for(let i=0;i<nb;i++){ const a=i/nb*Math.PI*2+rot, a2=a+off;
@@ -1474,7 +1474,7 @@ function impactFX(x,y,c,vx,vy){ const m=Math.hypot(vx||0,vy||0)||1, bx=-(vx||0)/
 function dropPod(x,y,fromBoss){
   let r=Math.random(); let type=null;
   if(fromBoss){ type = r<0.5?'coin' : r<0.7?'shield' : r<0.82?'pwr' : null; }
-  else { if(r<0.013) type='coin'; else if(r<0.017) type='1up'; else if(r<0.022) type='pwr'; else return; }
+  else { if(r<0.013) type='coin'; else if(r<0.017) type=(gameMode==='hardcore'?'coin':'1up'); else if(r<0.022) type='pwr'; else return; }
   if(!type)return;
   const buffs=['overdrive','scatter','magnet'];
   const buff=type==='pwr'?buffs[Math.random()*3|0]:null;
@@ -1522,7 +1522,7 @@ function applyPod(p){
   if(p.type==='core'){ const jack=90+sector*22; player.coins+=jack; addScore(jack,p.x,p.y,p.c);
     let txt='CORE  +'+jack+' i\u00a2';
     if(Math.random()<0.34){
-      if(player.lives<2){ player.lives++; txt='CORE  EXTRA LIFE'; }
+      if(gameMode!=='hardcore' && player.lives<2){ player.lives++; txt='CORE  EXTRA LIFE'; }
       else if(player.shieldHits<3){ player.shieldHits++; txt='CORE  SHIELD'; }
       else if(!player.drone){ player.drone={ph:0}; txt='CORE  DRONE'; }
       else { player.coins+=100; txt='CORE  +'+(jack+100)+' i\u00a2'; } }
@@ -1784,8 +1784,8 @@ function update(dt){
     if(fleet.arch!=='siege' && !panicking){
       if(fleet.spPhase==='idle'){ enemies.forEach(e=>{ if(e.state==='form') e.barrageGlow=0; });
         fleet.spT-=dt;
-        if(fleet.spT<=0){ const sig={pincer:'converge',swarm:'rolling',spear:'curtain',flank:'converge'}[fleet.arch];
-          const opts=['rolling','converge','curtain'].filter(m=>m!==fleet.spLast);
+        if(fleet.spT<=0){ const sig={pincer:'converge',swarm:'rolling',spear:'rolling',flank:'converge'}[fleet.arch];
+          const opts=['rolling','converge'].filter(m=>m!==fleet.spLast);
           let move; if(sig && opts.includes(sig) && Math.random()<0.6) move=sig; else move=opts[(Math.random()*opts.length)|0];
           fleet.spMove=move; fleet.spLast=move; fleet.spPhase='charge'; fleet.spCharge=(move==='converge')?0.85:0.6; fleet.spDidFire=false;
           enemies.forEach(e=>{ if(e.state==='form') e.spFired=false; });
@@ -2401,7 +2401,7 @@ function finishBoss(){ runBosses++; const b=boss;
   for(let i=0;i<30;i++){ const a=rnd(0,6.28),sp=rnd(80,360); shards.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,rot:rnd(0,6.28),vr:rnd(-10,10),len:rnd(8,22),life:rnd(.6,1.2),max:1,c:b.c}); }
   addScore(2000+sector*500,b.x,b.y,b.c);
   pods.push({x:b.x,y:b.y,vy:34,type:'core',fk:b.fk,c:b.c,bob:rnd(0,6.28),r:16,spin:0});
-  for(let i=0;i<4;i++) pods.push({x:b.x+rnd(-40,40),y:b.y+rnd(-10,20),vy:rnd(40,60),type:'coin',c:COL.gold,bob:rnd(0,6.28),r:11,magnet:true});
+  for(let i=0;i<4;i++) pods.push({x:b.x+rnd(-40,40),y:b.y+rnd(-10,20),vy:rnd(40,60),type:'coin',c:COL.gold,bob:rnd(0,6.28),r:11});
   document.getElementById('bossname').style.display='none'; document.getElementById('bossbar').style.display='none';
   boss=null; fleet=null; bossSpoils=2.8; Audio_.music(true,'ambient');
   station={x:W*0.5, y:-130, tx:W*0.5, ty:H*0.42, phase:'arrive', t:0, beam:0, hum:rnd(0,6.28), vy:0};
@@ -2516,7 +2516,7 @@ function refitItems(){ const u=player.up; const pdN=(1+(u.gun-1)*0.30), pdX=(1+u
     {grp:'DEFENSE',name:'SHIELD +1',icon:'shield',desc:'Absorbs one hit.',delta:'+1 shield',lv:player.shieldHits,mx:3,cost:350,can:player.shieldHits<3,buy:()=>player.shieldHits++},
     {grp:'DEFENSE',name:'HULL ARMOR',icon:'hull',desc:'+1 max hull per life.',delta:'+1 max hull',lv:u.armor||0,mx:4,cost:400+(u.armor||0)*250,can:(u.armor||0)<4,buy:()=>{ u.armor=(u.armor||0)+1; player.armor++; }},
     {grp:'DEFENSE',name:'REPAIR HULL',icon:'repair',desc:'Restore hull to full.',delta:'full hull',lv:0,mx:0,meta:(player.armor<player.maxArmor)?('i¢'+(130*(player.maxArmor-player.armor))):'FULL',cost:130*(player.maxArmor-player.armor),can:player.armor<player.maxArmor,buy:()=>{ player.armor=player.maxArmor; }},
-    {grp:'DEFENSE',name:'EXTRA LIFE',icon:'life',desc:'One more life (max 4).',delta:'+1 life',lv:0,mx:0,cost:2500,can:player.lives<4,buy:()=>player.lives++},
+    {grp:'DEFENSE',name:'EXTRA LIFE',icon:'life',desc:'One more life (max 4).',delta:'+1 life',lv:0,mx:0,cost:2500,can:gameMode!=='hardcore'&&player.lives<4,buy:()=>player.lives++},
     {grp:'SYSTEMS',name:'ENGINE',icon:'engine',desc:'Ship movement speed.',delta:'+52 speed',lv:u.speed,mx:10,cost:300+(u.speed-1)*180,can:u.speed<10,buy:()=>u.speed++},
     {grp:'SYSTEMS',name:'BOMB +1',icon:'bomb',desc:'Raises max bomb count.',delta:'+1 bomb',lv:player.bombs,mx:6,cost:200,can:player.bombs<6,buy:()=>player.bombs++},
     {grp:'SYSTEMS',name:'BOMB CORE',icon:'bomb',desc:'Bomb blast damage.',delta:'+50% dmg',lv:u.bombPow||1,mx:5,cost:300+((u.bombPow||1)-1)*220,can:(u.bombPow||1)<5,buy:()=>{u.bombPow=(u.bombPow||1)+1;}},
