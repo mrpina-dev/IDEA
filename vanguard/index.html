@@ -14,7 +14,7 @@
 html,body{height:100%}
 body{background:#000;display:flex;align-items:center;justify-content:center;min-height:100dvh;
   font-family:'Share Tech Mono',monospace;overflow:hidden;color:var(--white);user-select:none}
-#stage{position:relative;width:min(100vw, calc(100dvh * 2 / 3));aspect-ratio:2/3;max-height:100dvh;
+#stage{position:relative;width:min(100vw, calc(100dvh * 3 / 4));aspect-ratio:3/4;max-height:100dvh;
   overflow:hidden;background:var(--bg0);
   box-shadow:0 0 0 1px rgba(0,255,65,.20),0 0 60px rgba(0,255,65,.08),0 24px 80px rgba(0,0,0,.85)}
 #bg,#fx{position:absolute;inset:0;width:100%;height:100%;display:block}
@@ -205,7 +205,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 .conwm{font-family:'Chakra Petch',sans-serif;font-weight:700;line-height:1;margin-bottom:2px}
 .conwm .a{display:block;font-size:22px;color:var(--green);text-shadow:0 0 14px rgba(0,255,65,.6);letter-spacing:.12em}
 .conwm .b{display:block;font-size:11px;color:var(--white);letter-spacing:.4em;margin-top:3px}
-@media (min-width:1080px){
+@media (min-width:1200px){
   #cabinet{gap:22px}
   .console{display:flex}
   .shop{width:94%;max-width:640px;max-height:60vh;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:8px;align-content:start}
@@ -428,7 +428,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=560,H=840; const VERSION='2551';
+const W=630,H=840; const VERSION='2552';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
