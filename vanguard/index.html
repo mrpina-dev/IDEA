@@ -353,7 +353,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=560,H=840; const VERSION='2539';
+const W=560,H=840; const VERSION='2540';
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
 const bg=bgC.getContext('2d'), fx=fxC.getContext('2d');
@@ -2879,7 +2879,16 @@ function drawFX(){
       } else { const w=8+Math.sin(t*40)*3, full=player.beamE>0.3, topY=Math.max(0,player.beamEndY||0), hh=Math.max(0,noseY-topY);
         const g=fx.createLinearGradient(bx-24,0,bx+24,0); g.addColorStop(0,'rgba(0,255,65,0)');g.addColorStop(.5,'rgba(0,255,65,0.8)');g.addColorStop(1,'rgba(0,255,65,0)');
         fx.fillStyle=g; fx.fillRect(bx-24,topY,48,hh);
-        fx.fillStyle='rgba(232,255,232,'+(full?0.95:0.6)+')'; fx.fillRect(bx-w/2,topY,w,hh);
+        fx.save(); fx.globalCompositeOperation='lighter';
+        const bpulse=0.6+0.4*Math.sin(t*30);
+        fx.fillStyle='rgba(0,255,65,'+(0.45*bpulse)+')'; fx.fillRect(bx-w*1.7,topY,w*3.4,hh);
+        fx.fillStyle='rgba(232,255,232,0.45)';
+        for(let yy=topY-((t*900)%36); yy<noseY; yy+=36){ fx.fillRect(bx-w*0.85,yy,w*1.7,8); }
+        fx.restore();
+        fx.fillStyle='rgba(232,255,232,'+(full?0.98:0.65)+')'; fx.fillRect(bx-w/2,topY,w,hh);
+        fx.fillStyle='#fff'; fx.fillRect(bx-w*0.22,topY,w*0.44,hh);
+        fx.globalAlpha=0.45+0.45*Math.sin(t*55); fx.fillStyle='rgba(180,255,200,0.8)';
+        fx.fillRect(bx-w*0.95,topY,2,hh); fx.fillRect(bx+w*0.95-2,topY,2,hh); fx.globalAlpha=1;
         const mf=fx.createRadialGradient(bx,noseY,0,bx,noseY,30); mf.addColorStop(0,'rgba(232,255,232,0.95)');mf.addColorStop(.4,'rgba(0,255,65,0.6)');mf.addColorStop(1,'rgba(0,255,65,0)');
         fx.fillStyle=mf; fx.beginPath(); fx.arc(bx,noseY,30,0,6.28); fx.fill();
         if(topY>2){ const tf=fx.createRadialGradient(bx,topY,0,bx,topY,22); tf.addColorStop(0,'rgba(232,255,232,0.9)');tf.addColorStop(.5,'rgba(0,255,65,0.5)');tf.addColorStop(1,'rgba(0,255,65,0)'); fx.fillStyle=tf; fx.beginPath(); fx.arc(bx,topY,22,0,6.28); fx.fill(); }
