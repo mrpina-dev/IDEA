@@ -217,6 +217,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
   .cdesc{font-size:10.5px;line-height:1.35}
   .cdelta{font-size:10px}
   .ccost{font-size:12px}
+  #legend{display:none}
 }
 </style>
 </head>
@@ -229,15 +230,6 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
     <div class="cintel"><i style="background:var(--csee)"></i>CSEE</div>
     <div class="cintel"><i style="background:var(--mat)"></i>MAT</div>
     <div class="cintel"><i style="background:var(--mset)"></i>MSET</div>
-    <div class="conhdr">CONTROLS</div>
-    <div class="cref"><b>MOVE</b> WASD / ARROWS / DRAG</div>
-    <div class="cref"><b>FIRE</b> AUTO</div>
-    <div class="cref"><b>HEAVY</b> HOLD C / SPACE</div>
-    <div class="cref"><b>BOMB</b> X / SHIFT</div>
-    <div class="cref"><b>PARRY</b> Z</div>
-    <div class="cref"><b>SWITCH GUN</b> Q</div>
-    <div class="cref"><b>SWITCH HEAVY</b> E</div>
-    <div class="cref"><b>PAUSE</b> P &nbsp; <b>MUTE</b> M</div>
   </aside>
   <div id="stage">
   <canvas id="bg"></canvas>
@@ -421,9 +413,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
   </div>
   </div><!-- /stage -->
   <aside class="console right">
-    <div class="conhdr" style="margin-top:0">SYSTEM</div>
-    <div class="cref" style="color:var(--green);font-family:'Chakra Petch',sans-serif;letter-spacing:.16em;font-size:13px">IDEA // VANGUARD</div>
-    <div class="conhdr" id="cabVer">BUILD ----</div>
+    <div class="conhdr" id="cabVer" style="margin-top:0">BUILD ----</div>
     <div class="conhdr">FIELD TIPS</div>
     <div class="cref">Parry an enemy shot the instant before it lands to reflect it.</div>
     <div class="cref">Clear a boss to reach REFIT and spend your i&#162;.</div>
@@ -436,7 +426,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=560,H=840; const VERSION='2546';
+const W=560,H=840; const VERSION='2547';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
