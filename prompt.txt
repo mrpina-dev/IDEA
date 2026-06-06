@@ -1,26 +1,176 @@
-﻿Edit coins/index.html only. The Analytics sections "Activity Over Time", "Recently Active", and "Weekly Summary" render nothing. The cause is transaction date parsing: dates are read from a column name that does not exist in the CSV, so every Date is Invalid and all date filters return empty. The correct transaction date column is "Date / Time".
+VANGUARD: (A) make the title controls hint show live keybinds, (B) replace the fixed loadout presets with a customizable starting-build shop that persists. Edit only vanguard/index.html.
 
-STEP 1 - add a robust date helper.
-Find the existing helper function named pick (used like pick(r)('Name','Student',...)). Immediately after that function, add:
+First read vanguard/index.html. Treat each CURRENT block as a locator, not a byte-exact match: find the region, apply the change even if whitespace differs slightly, and report anything you cannot locate rather than failing. Then verify it loads clean and a run plays, commit "Live controls hint + custom starting build", and push origin main.
 
-function txnDateObj(r) {
-  var v = pick(r)('Date / Time', 'Date/Time', 'Date', 'Timestamp', 'date');
-  if (!v) return null;
-  var d = new Date(v);
-  return isNaN(d.getTime()) ? null : d;
+============================================================
+PART A - LIVE CONTROLS HINT
+============================================================
+A1. Add a refresh function and call it on load + after a reset. CURRENT:
+function closeKeys(){ rebindAction=null; el('ovlKeys').classList.add('hidden'); }
+(function(){
+  const done=el('keysDone'); if(done) done.addEventListener('click',e=>{e.stopPropagation();closeKeys();});
+  const rst=el('keysReset'); if(rst) rst.addEventListener('click',e=>{e.stopPropagation(); keybinds=Object.assign({},KEYS_DEFAULT); saveKeys(); buildKeyList();});
+  const tk=el('titleKeys'); if(tk) tk.addEventListener('click',e=>{e.stopPropagation();openKeys();});
+  const pk=el('pauseKeys'); if(pk) pk.addEventListener('click',e=>{e.stopPropagation();openKeys();});
+})();
+REPLACE WITH:
+function closeKeys(){ rebindAction=null; el('ovlKeys').classList.add('hidden'); }
+function refreshControlsHint(){ const p=el('ctrlsPanel'); if(!p)return; const kl=c=>keyLabel(keybinds[c]);
+  p.innerHTML='<span class="k">MOVE</span> WASD / ARROWS / DRAG &nbsp; <span class="k">FIRE</span> AUTO<br>'+
+    '<span class="k">BEAM</span> HOLD '+kl('beam')+'/SPACE &nbsp; <span class="k">BOMB</span> '+kl('bomb')+'/SHIFT &nbsp; <span class="k">PARRY</span> '+kl('parry')+' &nbsp; <span class="k">SWITCH</span> '+kl('weapon')+'<br>'+
+    '<span class="k">PAUSE</span> '+kl('pause')+'/ESC &nbsp; <span class="k">MUTE</span> '+kl('mute')+' &nbsp; <span class="k">earn i\u00a2 at REFIT after each boss</span>'; }
+(function(){
+  const done=el('keysDone'); if(done) done.addEventListener('click',e=>{e.stopPropagation();closeKeys();});
+  const rst=el('keysReset'); if(rst) rst.addEventListener('click',e=>{e.stopPropagation(); keybinds=Object.assign({},KEYS_DEFAULT); saveKeys(); buildKeyList(); refreshControlsHint();});
+  const tk=el('titleKeys'); if(tk) tk.addEventListener('click',e=>{e.stopPropagation();openKeys();});
+  const pk=el('pauseKeys'); if(pk) pk.addEventListener('click',e=>{e.stopPropagation();openKeys();});
+  refreshControlsHint();
+})();
+
+A2. Refresh the hint after a rebind. CURRENT:
+    rebindAction=null; buildKeyList(); return; }
+REPLACE WITH:
+    rebindAction=null; buildKeyList(); refreshControlsHint(); return; }
+
+============================================================
+PART B - CUSTOM STARTING BUILD (replaces presets)
+============================================================
+B1. Replace the loadout global with persistent build state. CURRENT:
+let loadout='vanguard';
+REPLACE WITH:
+const START_BUDGET=1000;
+function freshBuild(){ return { up:{gun:1,beamPow:1,beamCap:1,speed:1,beamPierce:1,beamSpool:1,flank:0,armor:0}, unlocked:{spread:1,lance:0,homing:0,rapid:0}, wtype:'spread', bombs:2, shieldHits:0, drone:null, spent:0 }; }
+let startBuild=freshBuild();
+try{ const _sb=JSON.parse(localStorage.getItem('vanguard_build')||'null'); if(_sb&&_sb.up){ startBuild=freshBuild(); startBuild.up=Object.assign(startBuild.up,_sb.up); startBuild.unlocked=Object.assign(startBuild.unlocked,_sb.unlocked||{}); startBuild.wtype=_sb.wtype||'spread'; startBuild.bombs=_sb.bombs||2; startBuild.shieldHits=_sb.shieldHits||0; startBuild.drone=_sb.drone?{ph:0}:null; startBuild.spent=_sb.spent||0; } }catch(e){}
+
+B2. Replace the LOADOUTS table with the outfit offer list. CURRENT:
+const WEAPONS=['spread','lance','homing','rapid'];
+const LOADOUTS={
+  vanguard:{name:'VANGUARD', desc:'Balanced standard rig.', apply:p=>{}},
+  gunner:{name:'GUNNER', desc:'Starts with a heavier forward gun.', apply:p=>{ p.up.gun=3; }},
+  striker:{name:'STRIKER', desc:'Piercing lance plus side guns.', apply:p=>{ p.unlocked.lance=1; p.wtype='lance'; p.up.flank=1; }},
+  warden:{name:'WARDEN', desc:'Tougher hull, a shield, an extra bomb.', apply:p=>{ p.up.armor=2; p.shieldHits=1; p.bombs=3; }}
+};
+REPLACE WITH:
+const WEAPONS=['spread','lance','homing','rapid'];
+function outfitOffers(){ const b=startBuild, u=b.up; return [
+  {grp:'WEAPONS', label:'GUN POWER', lv:u.gun, cost:400+(u.gun-1)*250, can:u.gun<8, buy:()=>u.gun++},
+  {grp:'WEAPONS', label:'FLANK GUNS', lv:u.flank, cost:[450,700,1000][u.flank]||0, can:u.flank<3, buy:()=>u.flank++},
+  {grp:'WEAPONS', label:'LANCE', lv:b.unlocked.lance, cost:600, can:!b.unlocked.lance, buy:()=>{b.unlocked.lance=1;b.wtype='lance';}},
+  {grp:'WEAPONS', label:'HOMING', lv:b.unlocked.homing, cost:750, can:!b.unlocked.homing, buy:()=>{b.unlocked.homing=1;b.wtype='homing';}},
+  {grp:'WEAPONS', label:'RAPID', lv:b.unlocked.rapid, cost:350, can:!b.unlocked.rapid, buy:()=>{b.unlocked.rapid=1;b.wtype='rapid';}},
+  {grp:'BEAM', label:'BEAM POWER', lv:u.beamPow, cost:320+(u.beamPow-1)*220, can:u.beamPow<8, buy:()=>u.beamPow++},
+  {grp:'BEAM', label:'BEAM CELL', lv:u.beamCap, cost:280+(u.beamCap-1)*200, can:u.beamCap<8, buy:()=>u.beamCap++},
+  {grp:'BEAM', label:'BEAM PIERCE', lv:u.beamPierce, cost:400+(u.beamPierce-1)*280, can:u.beamPierce<5, buy:()=>u.beamPierce++},
+  {grp:'BEAM', label:'BEAM SPOOL', lv:u.beamSpool, cost:300+(u.beamSpool-1)*210, can:u.beamSpool<6, buy:()=>u.beamSpool++},
+  {grp:'DEFENSE', label:'HULL ARMOR', lv:u.armor, cost:400+u.armor*250, can:u.armor<4, buy:()=>u.armor++},
+  {grp:'DEFENSE', label:'SHIELD +1', lv:b.shieldHits, cost:350, can:b.shieldHits<3, buy:()=>b.shieldHits++},
+  {grp:'SYSTEMS', label:'ENGINE', lv:u.speed, cost:300+(u.speed-1)*180, can:u.speed<10, buy:()=>u.speed++},
+  {grp:'SYSTEMS', label:'BOMB +1', lv:b.bombs, cost:200, can:b.bombs<6, buy:()=>b.bombs++},
+  {grp:'SYSTEMS', label:'DRONE', lv:b.drone?1:0, cost:600, can:!b.drone, buy:()=>{b.drone={ph:0};}}
+];}
+function buildCount(){ const u=startBuild.up,b=startBuild; return (u.gun-1)+(u.beamPow-1)+(u.beamCap-1)+(u.beamPierce-1)+(u.beamSpool-1)+(u.speed-1)+u.flank+u.armor+b.shieldHits+(b.bombs-2)+(b.drone?1:0)+b.unlocked.lance+b.unlocked.homing+b.unlocked.rapid; }
+
+B3. Title UI: replace the preset row with a CONFIGURE BUILD button. CURRENT:
+    <div class="lbl" style="color:var(--dim);letter-spacing:.22em">LOADOUT</div>
+    <div class="modes" id="loadSel">
+      <button class="modebtn sel" data-l="vanguard">VANGUARD</button>
+      <button class="modebtn" data-l="gunner">GUNNER</button>
+      <button class="modebtn" data-l="striker">STRIKER</button>
+      <button class="modebtn" data-l="warden">WARDEN</button>
+    </div>
+    <div class="tag" id="loadDesc" style="min-height:12px">Balanced standard rig.</div>
+REPLACE WITH:
+    <div class="lbl" style="color:var(--dim);letter-spacing:.22em">STARTING BUILD</div>
+    <button class="fbbtn" id="outfitBtn" style="border-color:var(--gold);color:var(--gold);background:rgba(200,255,0,.12);text-shadow:0 0 8px rgba(200,255,0,.5);box-shadow:0 0 12px rgba(200,255,0,.2)">CONFIGURE BUILD</button>
+    <div class="tag" id="buildSummary" style="min-height:12px">No upgrades selected.</div>
+
+B4. Outfit overlay markup (after the key-remap overlay). CURRENT:
+    <button class="obtn" id="keysDone">DONE</button>
+    <button class="mini" id="keysReset">RESET TO DEFAULTS</button>
+  </div>
+REPLACE WITH:
+    <button class="obtn" id="keysDone">DONE</button>
+    <button class="mini" id="keysReset">RESET TO DEFAULTS</button>
+  </div>
+
+  <!-- STARTING BUILD OUTFIT -->
+  <div class="ovl hidden" id="ovlOutfit">
+    <h2 class="ovh">STARTING BUILD</h2>
+    <div class="tag">SPEND YOUR STARTING i\u00a2 &nbsp;\u00b7&nbsp; BUDGET <b id="outfitBudget" style="color:var(--gold)">0</b> i\u00a2</div>
+    <div class="shop" id="outfitItems"></div>
+    <button class="obtn" id="outfitDone">DONE</button>
+    <button class="mini" id="outfitReset">RESET BUILD</button>
+  </div>
+
+B5. Replace the loadout selector IIFE with the outfit shop logic. CURRENT:
+/* loadout select */
+(function(){
+  let l; try{ l=localStorage.getItem('vanguard_loadout')||'vanguard'; }catch(e){ l='vanguard'; }
+  if(!LOADOUTS[l]) l='vanguard'; loadout=l;
+  const wrap=document.getElementById('loadSel'); if(!wrap)return;
+  const btns=[...wrap.querySelectorAll('.modebtn')]; const desc=document.getElementById('loadDesc');
+  function apply(){ btns.forEach(b=>b.classList.toggle('sel',b.dataset.l===loadout)); if(desc&&LOADOUTS[loadout]) desc.textContent=LOADOUTS[loadout].desc; }
+  btns.forEach(b=>b.addEventListener('click',ev=>{ ev.stopPropagation(); loadout=b.dataset.l; try{localStorage.setItem('vanguard_loadout',loadout);}catch(e){} apply(); Audio_.hit(); }));
+  apply();
+})();
+REPLACE WITH:
+/* starting build (outfit) */
+function saveBuild(){ try{ const b=startBuild; localStorage.setItem('vanguard_build',JSON.stringify({up:b.up,unlocked:b.unlocked,wtype:b.wtype,bombs:b.bombs,shieldHits:b.shieldHits,drone:!!b.drone,spent:b.spent})); }catch(e){} }
+function refreshBuildSummary(){ const s=el('buildSummary'); if(!s)return; const n=buildCount(); s.textContent=n>0?(n+' upgrade'+(n>1?'s':'')+' \u00b7 '+startBuild.spent.toLocaleString()+' i\u00a2 spent'):'No upgrades selected.'; }
+function buildOutfit(){ const box=el('outfitItems'); if(!box)return; const rem=START_BUDGET-startBuild.spent;
+  const bd=el('outfitBudget'); if(bd) bd.textContent=rem.toLocaleString();
+  const offers=outfitOffers(); const order=['WEAPONS','BEAM','DEFENSE','SYSTEMS']; let html='';
+  order.forEach(g=>{ const rows=offers.map((o,i)=>[o,i]).filter(p=>p[0].grp===g); if(!rows.length)return; html+='<div class="shophdr">'+g+'</div>';
+    rows.forEach(p=>{ const o=p[0],i=p[1]; const maxed=!o.can; const afford=!maxed&&rem>=o.cost;
+      const meta=maxed?(o.lv>0?'OWNED':'MAX'):('i\u00a2'+o.cost);
+      html+='<button class="shopbtn'+(afford?'':' off')+'" data-i="'+i+'"><span class="sn">'+o.label+(o.lv>0?(' \u00b7 '+o.lv):'')+'</span><span class="sm">'+meta+'</span></button>'; }); });
+  box.innerHTML=html;
+  [...box.querySelectorAll('.shopbtn')].forEach(btn=>btn.addEventListener('click',()=>{ const o=outfitOffers()[+btn.dataset.i];
+    if(!o.can||(START_BUDGET-startBuild.spent)<o.cost){ Audio_.hit(); return; }
+    startBuild.spent+=o.cost; o.buy(); saveBuild(); Audio_.pickup(); buildOutfit(); refreshBuildSummary(); }));
 }
+function openOutfit(){ el('ovlOutfit').classList.remove('hidden'); buildOutfit(); }
+function closeOutfit(){ el('ovlOutfit').classList.add('hidden'); refreshBuildSummary(); }
+function resetBuild(){ startBuild=freshBuild(); saveBuild(); buildOutfit(); refreshBuildSummary(); }
+(function(){
+  const ob=el('outfitBtn'); if(ob) ob.addEventListener('click',e=>{e.stopPropagation();openOutfit();});
+  const od=el('outfitDone'); if(od) od.addEventListener('click',e=>{e.stopPropagation();closeOutfit();});
+  const orr=el('outfitReset'); if(orr) orr.addEventListener('click',e=>{e.stopPropagation();resetBuild();});
+  refreshBuildSummary();
+})();
 
-STEP 2 - route every transaction date read through txnDateObj(r).
-Locate each of these and replace however the date is currently derived from a transaction row with a call to txnDateObj(r), and skip (continue/return) rows where it returns null:
-  a) The code that builds the "Activity Over Time" chart (groups transactions by calendar day).
-  b) The code that builds the "Recently Active" list (transactions within the last 7 days).
-  c) The code that builds the "Weekly Summary" panel (assigns each transaction to this week vs last week).
-  d) The global txnData sort inside fetchData (it currently sorts on a "Date"/"Timestamp" field; switch it to txnDateObj so the default order is correct everywhere).
+B6. Apply the saved build at run start. CURRENT:
+  resetPlayer(true);
+  if(LOADOUTS[loadout]) LOADOUTS[loadout].apply(player);
+  applyUpgrades(); player.armor=player.maxArmor; player.beamE=player.beamMax;
+  if(gameMode==='hardcore'){ player.lives=0; } else if(gameMode==='arcade'){ player.lives=8; player.coins=9000; }
+REPLACE WITH:
+  resetPlayer(true);
+  { const b=startBuild; player.up=Object.assign(player.up,b.up); player.unlocked=Object.assign(player.unlocked,b.unlocked); player.wtype=b.wtype||'spread'; player.bombs=b.bombs; player.shieldHits=b.shieldHits; if(b.drone)player.drone={ph:0}; }
+  applyUpgrades(); player.armor=player.maxArmor; player.beamE=player.beamMax;
+  if(gameMode==='hardcore'){ player.lives=0; } else if(gameMode==='arcade'){ player.lives=8; player.coins=9000; }
 
-Do not change anything other than date parsing in those four places. Do not alter the working sections (breakdown, spotlights, stats bar) except the shared sort in (d).
+B7. Ignore game keys while the outfit screen is open. CURRENT:
+  if(!document.getElementById('ovlKeys').classList.contains('hidden')) return;
+  if(!document.getElementById('ovlFeedback').classList.contains('hidden')) return;
+REPLACE WITH:
+  if(!document.getElementById('ovlKeys').classList.contains('hidden')) return;
+  if(!document.getElementById('ovlOutfit').classList.contains('hidden')) return;
+  if(!document.getElementById('ovlFeedback').classList.contains('hidden')) return;
 
-STEP 3 - if you cannot confidently locate any one of the three sections, do NOT guess. Make the changes you are sure of, then print the function name(s) and a few surrounding lines for the section you could not locate so it can be handled separately.
+============================================================
+VERSION
+============================================================
+Set VERSION to '2527' (whatever it currently is). Find:
+const W=560,H=840; const VERSION='...';
+and set the version string to '2527'.
 
-After editing, print a short summary listing each spot you changed and the old date expression you replaced.
-
-Commit with message "fix: route analytics date parsing through txnDateObj on Date / Time column" and push.
+============================================================
+VERIFY, THEN SHIP
+============================================================
+- Console clean; a run plays.
+- The title controls line shows the current bindings and updates immediately after a remap or reset.
+- CONFIGURE BUILD opens a shop with a 1000 i¢ budget grouped WEAPONS/BEAM/DEFENSE/SYSTEMS; buying deducts from the budget, the title summary updates, RESET BUILD refunds everything, and the build is remembered after reload.
+- Starting a run applies the saved build (e.g. buy GUN POWER twice and you start at gun level 3; buy LANCE and you start on lance). No fixed presets remain.
+Then: git add vanguard/index.html && git commit -m "Live controls hint + custom starting build" && git push

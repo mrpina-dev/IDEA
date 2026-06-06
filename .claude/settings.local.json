@@ -10,7 +10,13 @@
       "Bash(node -e ' *)",
       "Bash(git pull *)",
       "Bash(git stash *)",
-      "Bash(git config *)"
+      "Bash(git config *)",
+      "PowerShell(git *)",
+      "PowerShell(Test-Path *)",
+      "PowerShell(Write-Output \"idea-vanguard.html exists: $\\(Test-Path 'G:\\\\My Drive\\\\IDEA-git\\\\IDEA\\\\idea-vanguard.html'\\)\"; Write-Output \"vanguard dir exists: $\\(Test-Path 'G:\\\\My Drive\\\\IDEA-git\\\\IDEA\\\\vanguard'\\)\"; if \\(Test-Path 'G:\\\\My Drive\\\\IDEA-git\\\\IDEA\\\\idea-vanguard.html'\\) { Write-Output \"size: $\\(\\(Get-Item 'G:\\\\My Drive\\\\IDEA-git\\\\IDEA\\\\idea-vanguard.html'\\).Length\\)\" })",
+      "PowerShell(Remove-Item *)",
+      "PowerShell(Move-Item *)",
+      "Bash(grep *)"
     ]
   }
 }
