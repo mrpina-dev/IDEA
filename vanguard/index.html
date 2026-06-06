@@ -441,7 +441,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2559';
+const W=630,H=840; const VERSION='2560';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -1354,7 +1354,7 @@ function resetPlayer(full){
     player.buffs={overdrive:0,scatter:0,magnet:0}; }
 }
 function applyUpgrades(){ const u=player.up;
-  player.speed     = 200 + u.speed*52;          // L1 252 ... L10 720
+  player.speed     = 360 + u.speed*44;          // L1 404 ... L10 800 (shared by keys + mouse; primary dodge-speed knob)
   player.wlevel    = u.gun;                      // 1..8
   player.pdmg      = 1 + (u.gun-1)*0.30;         // global primary damage mult L1 1.0 ... L8 3.1
   player.beamMax   = 0.9 + u.beamCap*0.55;       // L1 1.45s ... L8 5.3s
@@ -1775,9 +1775,9 @@ function update(dt){
     let mx=0,my=0; const spd=pl.speed*(pl.beamActive?0.5:1);
     if(moveMode_pref==='lock' && plocked){ const tx=clamp(ptr.lx==null?pl.x:ptr.lx,16,W-16), ty=clamp(ptr.ly==null?pl.y:ptr.ly,H*0.16,H-40);
       const dx=tx-pl.x, dy=ty-pl.y, d=Math.hypot(dx,dy)||1;
-      const step=Math.max(spd*dt, d*Math.min(1,FOLLOW_RESP*dt)); if(d>step){ pl.x+=dx/d*step; pl.y+=dy/d*step; } else { pl.x=tx; pl.y=ty; } pl.vx=dx*0.05; }
+      const step=Math.min(spd*dt, d*Math.min(1,FOLLOW_RESP*dt)); if(d>step){ pl.x+=dx/d*step; pl.y+=dy/d*step; } else { pl.x=tx; pl.y=ty; } pl.vx=dx*0.05; }
     else if(ptr.active){ const tx=ptr.x, ty=ptr.y-46; const dx=tx-pl.x, dy=ty-pl.y, d=Math.hypot(dx,dy)||1;
-      const step=Math.max(spd*dt, d*Math.min(1,FOLLOW_RESP*dt)); if(d>step){ pl.x+=dx/d*step; pl.y+=dy/d*step; } else { pl.x=tx; pl.y=ty; } pl.vx=dx*0.05; }
+      const step=Math.min(spd*dt, d*Math.min(1,FOLLOW_RESP*dt)); if(d>step){ pl.x+=dx/d*step; pl.y+=dy/d*step; } else { pl.x=tx; pl.y=ty; } pl.vx=dx*0.05; }
     else { if(keys.ArrowLeft||keys.a)mx-=1; if(keys.ArrowRight||keys.d)mx+=1;
       if(keys.ArrowUp||keys.w)my-=1; if(keys.ArrowDown||keys.s)my+=1;
       const m=Math.hypot(mx,my)||1; pl.x+=mx/m*spd*dt; pl.y+=my/m*spd*dt; pl.vx=mx; }
