@@ -441,7 +441,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2556';
+const W=630,H=840; const VERSION='2557';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -3123,7 +3123,7 @@ function fmtTime(s){ s=Math.max(0,Math.round(s)); return Math.floor(s/60)+':'+St
 function startGameOver(){
   let k=(lastHitBy && lastHitBy.draw && !lastHitBy.dead && enemies.indexOf(lastHitBy)>=0)?lastHitBy:null;
   if(!k){ let bd=1e9; for(const e of enemies){ if(e.dead)continue; const d=dist2(e.x,e.y,player.x,player.y); if(d<bd){bd=d;k=e;} } }
-  if(k){ killerInfo={draw:k.draw,c:k.c,variant:k.variant,label:killerName(k)};
+  if(k){ killerInfo={draw:k.draw,fk:k.fk,c:k.c,variant:k.variant,label:killerName(k)};
     killer=k; k.state='celebrate'; k.celT=0; k.baseR=k.r; }
   else if(boss){ killerInfo={draw:boss.draw,fk:boss.fk,c:boss.c,variant:2,label:boss.name+' BOSS'}; killer=null; }
   else { killerInfo={draw:null,c:COL.dim,variant:0,label:'FIELD HAZARD'}; killer=null; }
@@ -3160,6 +3160,14 @@ function endRun(){
     } else { if(fb)fb.textContent='-'; if(kg)kg.style.display='none'; }
     pendingScore={score:window.scoreT,sector:sector,acc:acc};
   }catch(err){ console.error('VANGUARD endRun error:',err); pendingScore={score:window.scoreT,sector:sector,acc:0}; }
+  /* telemetry beacon - anonymous per-run gameplay metrics, no name or identifier */
+  try{ if(API_URL){
+    const tacc=shotsFired?Math.round(shotsHit/shotsFired*100):0;
+    let dc='none';
+    if(killerInfo){ dc = killerInfo.fk ? (/BOSS/.test(killerInfo.label||'') ? killerInfo.fk+'_boss' : killerInfo.fk) : 'hazard'; }
+    const tq=['action=telemetry','v='+encodeURIComponent(VERSION),'m='+encodeURIComponent(gameMode),'sec='+(sector||0),'rt='+Math.round(runTime||0),'k='+(runKills||0),'bk='+(runBosses||0),'sc='+Math.round(window.scoreT||0),'acc='+tacc,'pw='+encodeURIComponent((player&&player.wtype)||''),'hw='+encodeURIComponent((player&&player.heavy)||''),'gp='+((player&&player.up&&player.up.gun)||1),'dc='+encodeURIComponent(dc),'cb='+Date.now()].join('&');
+    new Image().src=API_URL+'?'+tq;
+  } }catch(e){}
 }
 
 /* leaderboard (local fallback + shared online board via Apps Script) */
