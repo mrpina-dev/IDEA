@@ -385,6 +385,8 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
     <div class="tag" style="color:var(--dim);max-width:280px">Auto-fire OFF: hold FIRE to shoot, release to vent RAPID heat.</div>
     <button class="mini" id="moveModeBtn" style="border-color:var(--cyan);color:var(--cyan)">MOUSE MOVE: FOLLOW</button>
     <div class="tag" style="color:var(--dim);max-width:280px">FOLLOW: ship trails the cursor while held. POINTER LOCK: cursor is captured and the mouse drives the ship directly. Press ESC to release the cursor.</div>
+    <button class="mini" id="lowfxBtn" style="border-color:var(--gold);color:var(--gold)">LOW FX: OFF</button>
+    <div class="tag" style="color:var(--dim);max-width:280px">LOW FX: disables glow and caps particles for higher frame rates on slower machines.</div>
     <div id="keyList" style="display:flex;flex-direction:column;gap:6px;width:100%;max-width:280px;max-height:40vh;overflow-y:auto"></div>
     <button class="obtn" id="keysDone">DONE</button>
     <button class="mini" id="keysReset">RESET TO DEFAULTS</button>
@@ -441,11 +443,13 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2560';
+const W=630,H=840; const VERSION='2561';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
 const bg=bgC.getContext('2d'), fx=fxC.getContext('2d');
+let LOWFX=false; try{ LOWFX = localStorage.getItem('vanguard_lowfx')==='1'; }catch(e){}
+(function(){ try{ [bg,fx].forEach(function(ctx){ var proto=Object.getPrototypeOf(ctx); var desc=Object.getOwnPropertyDescriptor(proto,'shadowBlur'); if(desc&&desc.set){ Object.defineProperty(ctx,'shadowBlur',{configurable:true, get:function(){return desc.get.call(ctx);}, set:function(v){ desc.set.call(ctx, LOWFX?0:v); }}); } }); }catch(e){} })();
 const REDUCED=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 function fit(){const dpr=Math.min(window.devicePixelRatio||1,2);
   [bgC,fxC].forEach(c=>{c.width=W*dpr;c.height=H*dpr;}); bg.setTransform(dpr,0,0,dpr,0,0); fx.setTransform(dpr,0,0,dpr,0,0);}
@@ -2021,6 +2025,7 @@ function update(dt){
 
   /* ----- particles etc ----- */
   for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.life-=dt;if(p.life<=0){parts.splice(i,1);continue;}p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.96;p.vy*=.96;}
+  if(LOWFX && parts.length>140) parts.splice(0, parts.length-140);
   for(let i=shards.length-1;i>=0;i--){const s=shards[i];s.life-=dt;if(s.life<=0){shards.splice(i,1);continue;}s.x+=s.vx*dt;s.y+=s.vy*dt;s.vx*=.97;s.vy*=.97;s.rot+=s.vr*dt;}
   for(let i=rings.length-1;i>=0;i--){const r=rings[i];r.life-=dt;if(r.life<=0){rings.splice(i,1);continue;}r.r+=r.vr*dt;
     if(r.harm&&!player.dead&&player.inv<=0){const d=Math.sqrt(dist2(r.x,r.y,player.x,player.y-2));if(d<r.r+10&&d>r.r-14){lastHitBy=null;playerHit();}}}
@@ -2563,6 +2568,7 @@ function switchWeapon(){ const list=WEAPONS.filter(w=>player.unlocked[w]); if(li
   const i=list.indexOf(player.wtype); player.wtype=list[(i+1)%list.length]; Audio_.hit(); }
 function selectWeapon(w){ if(state!=='play'||!player||!player.unlocked||!player.unlocked[w]||player.wtype===w)return; player.wtype=w; Audio_.hit(); }
 function setAutofire(v){ autofire=v; try{localStorage.setItem('vanguard_autofire',v?'1':'0');}catch(e){} const b=el('autofireBtn'); if(b)b.textContent='AUTO-FIRE: '+(v?'ON':'OFF'); }
+function setLowFX(v){ LOWFX=!!v; try{localStorage.setItem('vanguard_lowfx',v?'1':'0');}catch(e){} const b=el('lowfxBtn'); if(b)b.textContent='LOW FX: '+(v?'ON':'OFF'); }
 function setMoveMode(v){ moveMode_pref=(v==='lock'?'lock':'hold'); try{localStorage.setItem('vanguard_movemode',moveMode_pref);}catch(e){} const b=el('moveModeBtn'); if(b)b.textContent='MOUSE MOVE: '+(moveMode_pref==='lock'?'POINTER LOCK':'FOLLOW'); if(moveMode_pref!=='lock' && document.pointerLockElement){ try{document.exitPointerLock();}catch(e){} } if(typeof refreshControlsHint==='function') refreshControlsHint(); }
 function buildRefit(){ el('refitBal').textContent=player.coins.toLocaleString();
   renderShopGrid(el('refitItems'), refitItems(), {
@@ -2653,7 +2659,7 @@ function drawBG(){
   for(let y=-gs+off;y<H;y+=gs){ const d=clamp(y/H,0,1); bg.strokeStyle='rgba('+gc+','+(0.03+0.07*d)+')'; bg.lineWidth=1;
     bg.beginPath();bg.moveTo(0,y);bg.lineTo(W,y);bg.stroke(); }
   for(let x=0;x<=W;x+=gs){ bg.strokeStyle='rgba('+gc+',0.045)'; bg.beginPath();bg.moveTo(x,0);bg.lineTo(x,H);bg.stroke(); }
-  if(!REDUCED){ const sy=(t*150)%(H+120)-60; const g=bg.createLinearGradient(0,sy-40,0,sy+40);
+  if(!REDUCED && !LOWFX){ const sy=(t*150)%(H+120)-60; const g=bg.createLinearGradient(0,sy-40,0,sy+40);
     g.addColorStop(0,'rgba('+gc+',0)');g.addColorStop(.5,'rgba('+gc+',0.07)');g.addColorStop(1,'rgba('+gc+',0)');
     bg.fillStyle=g; bg.fillRect(0,sy-40,W,80); }
   // stars
@@ -2935,7 +2941,7 @@ function drawDrone(){ if(!player.drone)return; const x=player.x+58,y=player.y+24
 function drawFX(){
   fx.save();
   if(shake>0 && !REDUCED) fx.translate(rnd(-shake,shake),rnd(-shake,shake));
-  fx.globalCompositeOperation='source-over'; fx.fillStyle='rgba(2,10,4,'+(REDUCED?0.9:0.42)+')'; fx.fillRect(-20,-20,W+40,H+40);
+  fx.globalCompositeOperation='source-over'; fx.fillStyle='rgba(2,10,4,'+((REDUCED||LOWFX)?0.9:0.42)+')'; fx.fillRect(-20,-20,W+40,H+40);
   fx.globalCompositeOperation='lighter';
   // player exhaust (only when alive)
   if(state==='play' && player && !player.dead){
@@ -3475,6 +3481,8 @@ function refreshControlsHint(){ const p=el('ctrlsPanel'); if(!p)return; const kl
   setAutofire(autofire);
   const mm=el('moveModeBtn'); if(mm) mm.addEventListener('click',e=>{e.stopPropagation(); setMoveMode(moveMode_pref==='lock'?'hold':'lock');});
   setMoveMode(moveMode_pref);
+  const lf=el('lowfxBtn'); if(lf) lf.addEventListener('click',e=>{e.stopPropagation(); setLowFX(!LOWFX);});
+  setLowFX(LOWFX);
   refreshControlsHint();
 })();
 
