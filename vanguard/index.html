@@ -441,7 +441,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2558';
+const W=630,H=840; const VERSION='2559';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -542,10 +542,11 @@ const START_BUDGET=1000;
 function freshBuild(){ return { up:{gun:1,beamPow:1,beamCap:1,speed:1,beamPierce:1,beamSpool:1,flank:0,armor:0,heavyPow:1,heavyChg:1,teslaJump:1,singAmp:1,wavePow:1,mSpread:0,mRapid:0,mLance:0,mHoming:0,bombPow:1}, unlocked:{spread:1,lance:0,homing:0,rapid:0}, heavyUnlocked:{beam:1,rail:0,tesla:0,singularity:0,wave:0}, wtype:'spread', heavy:'beam', bombs:2, shieldHits:0, drone:null, spent:0 }; }
 let startBuild=freshBuild();
 try{ const _sb=JSON.parse(localStorage.getItem('vanguard_build')||'null'); if(_sb&&_sb.up){ startBuild=freshBuild(); startBuild.up=Object.assign(startBuild.up,_sb.up); startBuild.unlocked=Object.assign(startBuild.unlocked,_sb.unlocked||{}); startBuild.heavyUnlocked=Object.assign(startBuild.heavyUnlocked,_sb.heavyUnlocked||{}); startBuild.heavy=_sb.heavy||'beam'; startBuild.wtype=_sb.wtype||'spread'; startBuild.bombs=_sb.bombs||2; startBuild.shieldHits=_sb.shieldHits||0; startBuild.drone=_sb.drone?{ph:0}:null; startBuild.spent=_sb.spent||0; } }catch(e){}
-const KEYS_DEFAULT={fire:'Space', beam:'c', bomb:'x', parry:'z', weapon:'q', heavy:'e', pause:'p', mute:'m', weap1:'1', weap2:'2', weap3:'3', weap4:'4'};
+const KEYS_DEFAULT={fire:'Mouse0', beam:'Mouse2', bomb:'x', parry:'Space', weapon:'q', heavy:'e', pause:'p', mute:'m', weap1:'1', weap2:'2', weap3:'3', weap4:'4'};
 let autofire=true; try{ autofire = localStorage.getItem('vanguard_autofire')!=='0'; }catch(e){}
-let moveMode_pref='hold'; try{ moveMode_pref = localStorage.getItem('vanguard_movemode')==='lock'?'lock':'hold'; }catch(e){}
+let moveMode_pref='hold'; try{ const _mm=localStorage.getItem('vanguard_movemode'); const _touch=('ontouchstart' in window)||navigator.maxTouchPoints>0; moveMode_pref = _mm ? (_mm==='lock'?'lock':'hold') : (_touch?'hold':'lock'); }catch(e){}
 let plocked=false;
+const FOLLOW_RESP=16; // mouse-follow responsiveness: higher tracks the cursor more snappily, closer to key feel
 document.addEventListener('pointerlockchange',()=>{ plocked = (document.pointerLockElement===bgC); });
 const held={};
 function tok(e){ const k=e.key; if(k===' ')return 'Space'; return k.length===1?k.toLowerCase():k; }
@@ -1774,9 +1775,9 @@ function update(dt){
     let mx=0,my=0; const spd=pl.speed*(pl.beamActive?0.5:1);
     if(moveMode_pref==='lock' && plocked){ const tx=clamp(ptr.lx==null?pl.x:ptr.lx,16,W-16), ty=clamp(ptr.ly==null?pl.y:ptr.ly,H*0.16,H-40);
       const dx=tx-pl.x, dy=ty-pl.y, d=Math.hypot(dx,dy)||1;
-      const step=spd*dt; if(d>step){ pl.x+=dx/d*step; pl.y+=dy/d*step; } else { pl.x=tx; pl.y=ty; } pl.vx=dx*0.05; }
+      const step=Math.max(spd*dt, d*Math.min(1,FOLLOW_RESP*dt)); if(d>step){ pl.x+=dx/d*step; pl.y+=dy/d*step; } else { pl.x=tx; pl.y=ty; } pl.vx=dx*0.05; }
     else if(ptr.active){ const tx=ptr.x, ty=ptr.y-46; const dx=tx-pl.x, dy=ty-pl.y, d=Math.hypot(dx,dy)||1;
-      const step=spd*dt; if(d>step){ pl.x+=dx/d*step; pl.y+=dy/d*step; } else { pl.x=tx; pl.y=ty; } pl.vx=dx*0.05; }
+      const step=Math.max(spd*dt, d*Math.min(1,FOLLOW_RESP*dt)); if(d>step){ pl.x+=dx/d*step; pl.y+=dy/d*step; } else { pl.x=tx; pl.y=ty; } pl.vx=dx*0.05; }
     else { if(keys.ArrowLeft||keys.a)mx-=1; if(keys.ArrowRight||keys.d)mx+=1;
       if(keys.ArrowUp||keys.w)my-=1; if(keys.ArrowDown||keys.s)my+=1;
       const m=Math.hypot(mx,my)||1; pl.x+=mx/m*spd*dt; pl.y+=my/m*spd*dt; pl.vx=mx; }
