@@ -443,7 +443,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2561';
+const W=630,H=840; const VERSION='2562';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -3201,6 +3201,7 @@ function saveLocal(name,score){ const b=localBoard(); b.push({name,score}); b.so
 function boardRows(){ return (API_URL && onlineBoard)? onlineBoard : localBoard(); }
 function submitToServer(score,sec,acc){ if(!API_URL)return; try{ const img=new Image();
   img.src=API_URL+'?action=submit&name='+encodeURIComponent(curInitials)+'&score='+score+'&sector='+sec+'&acc='+acc+'&t='+Math.round(runTime)+'&mode='+gameMode+'&ver='+encodeURIComponent(VERSION)+'&nonce='+encodeURIComponent(runNonce)+'&cb='+Date.now(); }catch(e){} }
+function escHTML(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
 function renderBoard(target,highlightName,highlightScore){
   const box=el(target); if(!box)return;
   if(API_URL && !onlineBoard){ box.innerHTML='<div class="row"><span class="nm" style="color:var(--dim)">LOADING LEADERBOARD...</span></div>'; return; }
@@ -3210,13 +3211,13 @@ function renderBoard(target,highlightName,highlightScore){
   const top=b.slice(0,10);
   let html=top.map((r,i)=>{ const me=(hl&&r.name===highlightName&&r.score===highlightScore);
     const st=(r.sector!=null)?('<span class="bst">S'+r.sector+(r.acc!=null?' · '+r.acc+'%':'')+(r.ver?' · v'+r.ver:'')+'</span>'):'';
-    return '<div class="row'+(me?' me':'')+'"><span class="rk">'+(i+1)+'</span><span class="nm">'+r.name+'</span><span class="scwrap"><span class="sc">'+(r.score).toLocaleString()+'</span>'+st+'</span></div>'; }).join('');
+    return '<div class="row'+(me?' me':'')+'"><span class="rk">'+(i+1)+'</span><span class="nm">'+escHTML(r.name)+'</span><span class="scwrap"><span class="sc">'+(r.score).toLocaleString()+'</span>'+st+'</span></div>'; }).join('');
   if(hl && !top.some(r=>r.name===highlightName&&r.score===highlightScore)){
     let rank=1; for(const r of b){ if(r.score>highlightScore) rank++; }
     html+='<div class="row" style="color:var(--dim);justify-content:center;letter-spacing:.3em;padding:1px 0">···</div>';
     const mr=b.find(r=>r.name===highlightName&&r.score===highlightScore)||{};
     const mst=(mr.sector!=null)?('<span class="bst">S'+mr.sector+(mr.acc!=null?' · '+mr.acc+'%':'')+(mr.ver?' · v'+mr.ver:'')+'</span>'):'';
-    html+='<div class="row me"><span class="rk">'+rank+'</span><span class="nm">'+highlightName+'</span><span class="scwrap"><span class="sc">'+(highlightScore).toLocaleString()+'</span>'+mst+'</span></div>';
+    html+='<div class="row me"><span class="rk">'+rank+'</span><span class="nm">'+escHTML(highlightName)+'</span><span class="scwrap"><span class="sc">'+(highlightScore).toLocaleString()+'</span>'+mst+'</span></div>';
   }
   box.innerHTML=html;
 }
