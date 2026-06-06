@@ -441,7 +441,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2555';
+const W=630,H=840; const VERSION='2556';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -1315,7 +1315,7 @@ function spawnWave(){
 
 function spawnBoss(forceFk){
   const fk=forceFk || sectorTheme().fk || factionForSector(); const F=FACTIONS[fk];
-  const hp=360+sector*150 - Math.max(0,(4-sector))*24;
+  const hp=90 + sector*24 + sector*sector*24;
   boss={fk,c:F.c,draw:drawBoss,variant:2, x:W/2, y:-90, ty:128, r:60, name:F.name,
     hp:hp, maxhp:hp, core:0, phase:0, lastPhase:0, ph:0, fire:Math.max(0.18,gameMode==='hardcore'?0.3:1.0/(1+sector*0.13)), sweep:0, entering:true,
     flash:0, dead:false, dying:false, deathT:0, salvo:0,
@@ -1383,7 +1383,7 @@ function startGame(){
   window.style=0; window.styleGrace=0; window.styleRepeat=0; window.lastKillWpn=''; window.maxStyle=0; window.killSrc=null;
   runKills=0; runBosses=0; deathSlow=0; killerInfo=null;
   resetPlayer(true);
-  { const b=startBuild; player.up=Object.assign(player.up,b.up); player.unlocked=Object.assign(player.unlocked,b.unlocked); player.heavyUnlocked=Object.assign(player.heavyUnlocked,b.heavyUnlocked||{}); player.heavy=(b.heavyUnlocked&&b.heavyUnlocked[b.heavy])?b.heavy:'beam'; player.wtype=b.wtype||'spread'; player.bombs=b.bombs; player.shieldHits=b.shieldHits; if(b.drone)player.drone={ph:0}; }
+  { const b=startBuild; player.up=Object.assign(player.up,b.up); player.unlocked={spread:1,lance:0,homing:0,rapid:0}; player.heavyUnlocked=Object.assign(player.heavyUnlocked,b.heavyUnlocked||{}); player.heavy=(b.heavyUnlocked&&b.heavyUnlocked[b.heavy])?b.heavy:'beam'; player.wtype='spread'; player.bombs=b.bombs; player.shieldHits=b.shieldHits; if(b.drone)player.drone={ph:0}; }
   applyUpgrades(); player.armor=player.maxArmor; player.beamE=player.beamMax;
   player.coins += Math.max(0, START_BUDGET-(startBuild.spent||0));   // unspent pre-game budget carries into the run
   if(gameMode==='hardcore'){ player.lives=0; } else if(gameMode==='dev'){ player.lives=99; player.coins=99999; player.heavyUnlocked={beam:1,rail:1,tesla:1,singularity:1,wave:1}; }
@@ -1522,9 +1522,6 @@ const WEAPONS=['spread','lance','homing','rapid'];
 function outfitOffers(){ const b=startBuild, u=b.up; const pdN=(1+(u.gun-1)*0.30), pdX=(1+u.gun*0.30); const hu=b.heavyUnlocked||{}; return [
   {grp:'WEAPONS',name:'GUN POWER',icon:'gun',desc:'Boosts damage on all primary weapons (SPREAD, LANCE, HOMING, RAPID).',delta:'x'+pdN.toFixed(2)+' -> x'+pdX.toFixed(2),lv:u.gun,mx:8,cost:400+(u.gun-1)*250,can:u.gun<8,buy:()=>u.gun++},
   {grp:'WEAPONS',name:'FLANK GUNS',icon:'flank',desc:'Lv 1: side guns. Lv 2: diagonal fire. Lv 3: rear coverage.',delta:'+ side guns',lv:u.flank,mx:3,cost:[450,700,1000][Math.min(u.flank,2)],can:u.flank<3,buy:()=>u.flank++},
-  {grp:'WEAPONS',name:'LANCE',icon:'w_lance',desc:'Bolts pierce through a line of enemies.',lv:b.unlocked.lance,mx:0,meta:b.unlocked.lance?'OWNED':'i¢600',cost:600,can:!b.unlocked.lance,buy:()=>{b.unlocked.lance=1;b.wtype='lance';}},
-  {grp:'WEAPONS',name:'HOMING',icon:'w_homing',desc:'Shots that steer toward the nearest enemy.',lv:b.unlocked.homing,mx:0,meta:b.unlocked.homing?'OWNED':'i¢750',cost:750,can:!b.unlocked.homing,buy:()=>{b.unlocked.homing=1;b.wtype='homing';}},
-  {grp:'WEAPONS',name:'RAPID',icon:'w_rapid',desc:'Very fast, narrow stream. Best for single targets.',lv:b.unlocked.rapid,mx:0,meta:b.unlocked.rapid?'OWNED':'i¢350',cost:350,can:!b.unlocked.rapid,buy:()=>{b.unlocked.rapid=1;b.wtype='rapid';}},
   {grp:'WEAPONS',name:'SCATTER CHOKE',icon:'w_spread',desc:'Adds a SPREAD pellet and tightens the cone for more focus.',delta:'+1 pellet',lv:u.mSpread||0,mx:3,cost:300+(u.mSpread||0)*220,can:(u.mSpread||0)<3,buy:()=>{u.mSpread=(u.mSpread||0)+1;}},
   ...(b.unlocked.rapid?[{grp:'WEAPONS',name:'OVERCLOCK',icon:'w_rapid',desc:'Increases RAPID fire rate. Stacks with existing speed.',delta:'+12% rate',lv:u.mRapid||0,mx:3,cost:300+(u.mRapid||0)*220,can:(u.mRapid||0)<3,buy:()=>{u.mRapid=(u.mRapid||0)+1;}}]:[]),
   ...(b.unlocked.lance?[{grp:'WEAPONS',name:'HIGH-VELOCITY',icon:'w_lance',desc:'Increases damage on each LANCE bolt.',delta:'+ bolt dmg',lv:u.mLance||0,mx:3,cost:320+(u.mLance||0)*230,can:(u.mLance||0)<3,buy:()=>{u.mLance=(u.mLance||0)+1;}}]:[]),
@@ -1607,7 +1604,7 @@ function firePrimary(){
       pbul.push({x:x+ox,y,vx:0,vy:-1050,c:COL.cyan,r:3.2+ml*0.4,dmg,pierce:true,len:22+ml*4,wt:'rail',gl}); }
     player.fireCd=.34*(1-ml*0.05); muzzle(x,y,COL.cyan,gl*1.3,cols*2);
   } else {                                 // SWARM: weak darts, hands-free, dodge while they hunt
-    const mh=u.mHoming||0; const n=Math.min(8,(lv<3?2:lv<6?3:4)+mh); const dmg=1.05*pm;
+    const mh=u.mHoming||0; const n=Math.min(8,(lv<3?2:lv<6?3:4)+mh); const dmg=0.65*pm;
     for(let i=0;i<n;i++){ const a=(i-(n-1)/2)*0.42+rnd(-0.06,0.06);
       pbul.push({x,y,vx:Math.sin(a)*150,vy:-360,c:COL.gold,r:1.8,dmg,homing:true,wt:'swarm',gl,turn:3.6}); }
     player.fireCd=.16; muzzle(x,y,COL.gold,gl,n);
@@ -1719,7 +1716,7 @@ function killEnemy(e,silent){ if(e.dead)return; runKills++; e.dead=true; e.dt=0;
   shake=Math.max(shake, 2.5+(e.variant||0)*3.5);
   factionDeathLayer(e);
   if((e.variant||0)>=2||e.fk==='foreman'||e.fk==='vector'){ hitStop=Math.max(hitStop,0.05); rings.push({x:e.x,y:e.y,r:e.r*0.4,vr:440,life:.4,max:.4,c:COL.white}); }
-  addScore(e.pts,e.x,e.y,e.c); player.coins+=Math.ceil(e.pts*0.22*styleCoinMult()); sectorKills++;
+  addScore(e.pts,e.x,e.y,e.c); player.coins+=Math.ceil(e.pts*0.14*styleCoinMult()); sectorKills++;
   if(player && !player.dead && dist2(e.x,e.y,player.x,player.y)<80*80){ player.repair=Math.min(1,(player.repair||0)+0.12);
     if(player.repair>=1 && player.armor<player.maxArmor){ player.repair=0; player.armor++; Audio_.power();
       rings.push({x:player.x,y:player.y,r:8,vr:120,life:.4,max:.4,c:COL.green}); } }
@@ -2529,7 +2526,7 @@ function refitItems(){ const u=player.up; const pdN=(1+(u.gun-1)*0.30), pdX=(1+u
   return [
     {grp:'WEAPONS',name:'GUN POWER',icon:'gun',desc:'Boosts damage on all primary weapons (SPREAD, LANCE, HOMING, RAPID).',delta:'x'+pdN.toFixed(2)+' -> x'+pdX.toFixed(2),lv:u.gun,mx:8,cost:400+(u.gun-1)*250,can:u.gun<8,buy:()=>u.gun++},
     {grp:'WEAPONS',name:'FLANK GUNS',icon:'flank',desc:'Lv 1: adds side guns. Lv 2: diagonal fire. Lv 3: rear coverage.',delta:'+ side guns',lv:u.flank||0,mx:3,cost:[450,700,1000][Math.min(u.flank||0,2)],can:(u.flank||0)<3,buy:()=>{u.flank=(u.flank||0)+1;}},
-    ...['spread|SPREAD|0|w_spread|Wide pellet cone, best for clearing groups in front.','rapid|RAPID|350|w_rapid|Very fast, narrow stream. Best for single targets.','lance|LANCE|600|w_lance|Bolts pierce through a line of enemies.','homing|HOMING|750|w_homing|Shots that steer toward the nearest enemy.'].map(s=>{const p=s.split('|'),w=p[0],owned=!!player.unlocked[w],active=player.wtype===w;return {grp:'WEAPONS',name:p[1],icon:p[3],desc:p[4],lv:0,mx:0,meta:active?'EQUIPPED':owned?'EQUIP':('i¢'+p[2]),cost:owned?0:+p[2],can:!active,buy:()=>{player.unlocked[w]=1;player.wtype=w;}};}),
+    ...['spread|SPREAD|0|w_spread|Wide pellet cone, best for clearing groups in front.|1','rapid|RAPID|350|w_rapid|Very fast, narrow stream. Best for single targets.|2','lance|LANCE|600|w_lance|Bolts pierce through a line of enemies.|3','homing|HOMING|750|w_homing|Auto-aiming darts. Good for crowds, weak per shot.|5'].map(s=>{const p=s.split('|'),w=p[0],owned=!!player.unlocked[w],active=player.wtype===w,minS=+p[5],gated=!owned&&sector<minS;return {grp:'WEAPONS',name:p[1],icon:p[3],desc:p[4],lv:0,mx:0,meta:active?'EQUIPPED':owned?'EQUIP':gated?('SECTOR '+minS+'+'):('i¢'+p[2]),cost:owned?0:+p[2],can:!active&&!gated,buy:()=>{player.unlocked[w]=1;player.wtype=w;}};}),
     {grp:'WEAPONS',name:'SCATTER CHOKE',icon:'w_spread',desc:'Adds a SPREAD pellet and tightens the cone for more focus.',delta:'+1 pellet',lv:u.mSpread||0,mx:3,cost:300+(u.mSpread||0)*220,can:(u.mSpread||0)<3,buy:()=>{u.mSpread=(u.mSpread||0)+1;}},
     ...(player.unlocked.rapid?[{grp:'WEAPONS',name:'OVERCLOCK',icon:'w_rapid',desc:'Increases RAPID fire rate. Stacks with existing speed.',delta:'+12% rate',lv:u.mRapid||0,mx:3,cost:300+(u.mRapid||0)*220,can:(u.mRapid||0)<3,buy:()=>{u.mRapid=(u.mRapid||0)+1;}}]:[]),
     ...(player.unlocked.lance?[{grp:'WEAPONS',name:'HIGH-VELOCITY',icon:'w_lance',desc:'Increases damage on each LANCE bolt.',delta:'+ bolt dmg',lv:u.mLance||0,mx:3,cost:320+(u.mLance||0)*230,can:(u.mLance||0)<3,buy:()=>{u.mLance=(u.mLance||0)+1;}}]:[]),
