@@ -441,7 +441,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2557';
+const W=630,H=840; const VERSION='2558';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -2694,11 +2694,6 @@ function drawBG(){
       bg.beginPath(); bg.arc(fleet.spLX,fleet.spLY,16,0,6.28); bg.stroke();
       bg.beginPath(); bg.moveTo(fleet.spLX-24,fleet.spLY); bg.lineTo(fleet.spLX+24,fleet.spLY); bg.moveTo(fleet.spLX,fleet.spLY-24); bg.lineTo(fleet.spLX,fleet.spLY+24); bg.stroke();
       bg.globalAlpha=1; bg.shadowBlur=0; bg.restore(); }
-    else if(fleet.spMove==='curtain'){ bg.save(); bg.globalAlpha=0.15+0.06*Math.sin(t*6); bg.fillStyle=COL.green;
-      bg.fillRect(fleet.spGapX-75,0,150,H);
-      bg.globalAlpha=0.3; bg.strokeStyle=COL.green; bg.lineWidth=1.5;
-      bg.beginPath(); bg.moveTo(fleet.spGapX-75,0); bg.lineTo(fleet.spGapX-75,H); bg.moveTo(fleet.spGapX+75,0); bg.lineTo(fleet.spGapX+75,H); bg.stroke();
-      bg.globalAlpha=1; bg.restore(); }
   }
 
   if(holes.length) drawHoles();
@@ -3234,9 +3229,10 @@ function refreshInitials(){ const box=el('initials'); [...box.children].forEach(
 const ptr={x:W/2,y:H-130,active:false};
 let isTouch=('ontouchstart' in window)||navigator.maxTouchPoints>0;
 function toLogical(clientX,clientY){ const r=bgC.getBoundingClientRect(); return {x:(clientX-r.left)/r.width*W,y:(clientY-r.top)/r.height*H}; }
+function uiBlocked(){ const ids=['ovlOutfit','ovlKeys','ovlBoard','ovlTut','ovlLog','ovlFeedback','ovlSuggest','ovlConfirm']; for(const id of ids){ const el2=document.getElementById(id); if(el2 && !el2.classList.contains('hidden')) return true; } return false; }
 stage.addEventListener('pointerdown',e=>{ Audio_.init(); Audio_.resume();
   if(e.target.closest('.tbtn')||e.target.closest('.ovl')||e.target.closest('.mini')||e.target.closest('.fbovl'))return;
-  if(state==='title'){ startGame(); return; }
+  if(state==='title'){ if(uiBlocked())return; startGame(); return; }
   if(state!=='play')return;
   if(e.pointerType==='mouse' && e.button!==0) return;
   if(moveMode_pref==='lock' && e.pointerType==='mouse'){ if(player){ptr.lx=player.x; ptr.ly=player.y;} try{bgC.requestPointerLock();}catch(_){ } return; }
@@ -3279,8 +3275,9 @@ window.addEventListener('keydown',e=>{ Audio_.init(); Audio_.resume();
   if(!document.getElementById('ovlConfirm').classList.contains('hidden')){
     if(e.key==='Enter') doRestart(); else if(e.key==='Escape') cancelRestart();
     e.preventDefault(); return; }
-  if((e.key===' '||e.key==='Enter')&&state==='title'){ startGame(); e.preventDefault(); return; }
+  if((e.key===' '||e.key==='Enter')&&state==='title'){ if(!uiBlocked()) startGame(); e.preventDefault(); return; }
   if(state==='play'){
+    if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key) || Object.values(keybinds).includes(tk)) e.preventDefault();
     if(tk===keybinds.beam){ if(!player.beamOn){player.beamOn=true; if(!player.beamLock)Audio_.beam();} e.preventDefault(); }
     if(tk===keybinds.fire){ e.preventDefault(); }
     if(tk===keybinds.bomb){ fireBomb(); }
@@ -3339,7 +3336,7 @@ function toTitle(){ state='title'; showOverlay('ovlTitle'); Audio_.music(true,'a
   document.getElementById('touch').classList.add('hidden'); boardRetries=0; renderBoard('titleBoard'); refreshBoard('titleBoard'); updateGamesPlayed(); }
 el('quitBtn').addEventListener('click',toTitle);
 el('menuBtn').addEventListener('click',toTitle);
-el('startCta').addEventListener('click',()=>{ if(state==='title')startGame(); });
+el('startCta').addEventListener('click',()=>{ if(state==='title' && !uiBlocked())startGame(); });
 el('submitBtn').addEventListener('click',submitScore);
 el('againBtn').addEventListener('click',()=>{ startGame(); });
 function mergeScore(name,score){ const b=(onlineBoard?onlineBoard.slice():[]);
