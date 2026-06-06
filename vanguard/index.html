@@ -443,7 +443,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2562';
+const W=630,H=840; const VERSION='2563';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -3223,14 +3223,14 @@ function renderBoard(target,highlightName,highlightScore){
 }
 
 /* initials entry */
-let curInitials='AAA', selSlot=0, pendingScore=null; const NAMELEN=6;
-function padName(s){ return ((s||'AAA')+'      ').slice(0,NAMELEN); }
-function trimName(s){ return ((s||'').replace(/\s+$/,'').replace(/\s/g,'')||'AAA').slice(0,NAMELEN); }
+let curInitials='AAA', selSlot=0, pendingScore=null; const NAMELEN=12;
+function padName(s){ return ((s||'AAA')+' '.repeat(NAMELEN)).slice(0,NAMELEN); }
+function trimName(s){ return ((s||'').replace(/^\s+|\s+$/g,'')||'AAA').slice(0,NAMELEN); }
 function buildInitials(){ let s='AAA'; try{ s=localStorage.getItem('vanguard_lastInitials')||'AAA'; }catch(e){}
   curInitials=padName(s); selSlot=0; const box=el('initials'); box.innerHTML='';
   for(let i=0;i<NAMELEN;i++){ const d=document.createElement('div'); d.className='slot'+(i===0?' sel':''); d.dataset.i=i;
     d.addEventListener('pointerdown',ev=>{ev.preventDefault(); selSlot=i; cycleSlot(i); refreshInitials();}); box.appendChild(d); } refreshInitials(); }
-function cycleSlot(i){ const cur=curInitials[i]; let idx=cur===' '?26:cur.charCodeAt(0)-65; if(idx<0||idx>26)idx=26; idx=(idx+1)%27; const nc=idx===26?' ':String.fromCharCode(65+idx); curInitials=curInitials.substring(0,i)+nc+curInitials.substring(i+1); }
+function cycleSlot(i){ const A='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 '; const cur=curInitials[i]||' '; let idx=A.indexOf(cur); if(idx<0)idx=A.length-1; idx=(idx+1)%A.length; curInitials=curInitials.substring(0,i)+A[idx]+curInitials.substring(i+1); }
 function refreshInitials(){ const box=el('initials'); [...box.children].forEach((d,i)=>{ const c=curInitials[i]; d.textContent=(c===' '||c===undefined)?'_':c; d.classList.toggle('blank',c===' '||c===undefined); d.classList.toggle('sel',i===selSlot); }); }
 
 /* ============================= input ============================= */
@@ -3302,7 +3302,7 @@ window.addEventListener('keydown',e=>{ Audio_.init(); Audio_.resume();
   } else if(state==='refit'){
     if(e.key==='Enter'){ launchFromRefit(); }
   } else if(state==='over'){
-    if(/^[a-z0-9]$/.test(k)){ curInitials=curInitials.substring(0,selSlot)+k.toUpperCase()+curInitials.substring(selSlot+1); selSlot=Math.min(NAMELEN-1,selSlot+1); refreshInitials(); }
+    if(/^[a-z0-9 .!?_*+\-]$/.test(k)){ curInitials=curInitials.substring(0,selSlot)+k.toUpperCase()+curInitials.substring(selSlot+1); selSlot=Math.min(NAMELEN-1,selSlot+1); refreshInitials(); e.preventDefault(); }
     else if(e.key==='Backspace'){ curInitials=curInitials.substring(0,selSlot)+' '+curInitials.substring(selSlot+1); selSlot=Math.max(0,selSlot-1); refreshInitials(); }
     else if(e.key==='Enter'){ submitScore(); }
     else if(e.key==='ArrowLeft'){ selSlot=Math.max(0,selSlot-1); refreshInitials(); }
