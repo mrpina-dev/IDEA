@@ -20,7 +20,9 @@
       "PowerShell($src = \\(Get-Command node -ErrorAction SilentlyContinue\\); if\\($src\\){ $src.Source } else { \"node not found\" })",
       "PowerShell(foreach\\($c in 'deno','bun','npx'\\){ $g=Get-Command $c -ErrorAction SilentlyContinue; if\\($g\\){ \"$c -> $\\($g.Source\\)\" } else { \"$c not found\" } })",
       "PowerShell(git diff *)",
-      "PowerShell(git diff -- .claude/settings.local.json; \"---- tracked? ----\"; git ls-files --error-unmatch .claude/settings.local.json 2>&1)"
+      "PowerShell(git diff -- .claude/settings.local.json; \"---- tracked? ----\"; git ls-files --error-unmatch .claude/settings.local.json 2>&1)",
+      "PowerShell($nodeCmd = Get-Command node -ErrorAction SilentlyContinue; if\\($nodeCmd\\){ $nodeCmd.Source } else { \"no node\" })",
+      "PowerShell(Get-Command *)"
     ]
   }
 }

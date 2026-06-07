@@ -183,6 +183,9 @@ Each faction is a Bosco Tech pathway made hostile. Identity table is in
 - Classroom loop: students play, scores hit the Sheets leaderboard, the
   suggestion box feeds development, the UPDATE LOG shows them the game evolving.
   This feedback loop is a feature; protect it.
+- DEV mode is student-facing by design: a visible creative/sandbox mode for
+  exploring the game deeply. It is never ranked and sends no telemetry. Do not
+  gate it behind secrets or hide it from students.
 
 ---
 
