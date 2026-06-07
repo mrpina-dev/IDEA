@@ -443,7 +443,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2569';
+const W=630,H=840; const VERSION='2570';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -1321,6 +1321,14 @@ function spawnWave(){
     let arch; const _pf=_prefs?_prefs.filter(a=>a!==spawnWave._lastArch):[];
     if(_pf.length && Math.random()<0.6) arch=pick(_pf); else arch=pick(_poolAll);
     spawnWave._lastArch=arch;
+    startFormationWave(arch);
+  } else if(type==='stream'){
+    startStreamWave();
+  } else { // sweep
+    startSweepWave();
+  }
+}
+function startFormationWave(arch){
     const cfg={
       pincer:{holdY:H*0.30,sweep:30,phRate:0.5,descend:6,advancing:false,squeeze:true,spread:1.3,spreadTarget:0.55,volleyMul:1.0,diveMul:1.7,diveCount:1},
       siege:{holdY:H*0.66,sweep:20,phRate:0.4,descend:40,advancing:true,squeeze:false,volleyMul:0.7,diveMul:2.2,diveCount:2},
@@ -1338,16 +1346,17 @@ function spawnWave(){
     slots.forEach((s,i)=>{ if(i===anchorIdx)return; const rr=Math.random(); s.role=rr<0.34?'rusher':rr<0.67?'zoner':'grunt'; });
     refill=new Array(slots.length).fill(0); reconfTimer=999; volleyTimer=1.6*fleet.volleyMul; diveTimer=2.2*fleet.diveMul;
     for(let i=0;i<slots.length;i++) spawnFormationOccupant(i,true);
-  } else if(type==='stream'){
+}
+function startStreamWave(){
     const fk=waveFk; const n=10+Math.min(sector*2,14); const baseX=rnd(80,W-80); const dir=Math.random()<.5?1:-1;
     for(let i=0;i<n;i++){ const e=makeEnemy(fk,0, baseX, -30-i*54, 'weave');
       e.vy=110+sector*8; e.amp=rnd(40,90); e.freq=rnd(1.2,2.0); e.phase=i*0.5; e.baseX=baseX; e.wdir=dir;
       e.fire=0.8+i*0.2; enemies.push(e); }
-  } else { // sweep
+}
+function startSweepWave(){
     const fk=waveFk; const n=8+Math.min(sector,8); const side=Math.random()<.5?-1:1; const y0=rnd(110,260);
     for(let i=0;i<n;i++){ const e=makeEnemy(fk,0, side<0?-30-i*42:W+30+i*42, y0+i*8, 'strafe');
       e.vx=side*(165+sector*10); e.vy=22; e.fire=(gameMode==='hardcore'?0.2+i*0.12:0.4+i*0.18); enemies.push(e); }
-  }
 }
 
 function spawnBoss(forceFk){
@@ -1425,7 +1434,7 @@ function startGame(){
   applyUpgrades(); player.armor=player.maxArmor; player.beamE=player.beamMax;
   player.coins += Math.max(0, START_BUDGET-(startBuild.spent||0));   // unspent pre-game budget carries into the run
   if(gameMode==='hardcore'){ player.lives=0; } else if(gameMode==='dev'){ player.lives=99; player.coins=99999; player.heavyUnlocked={beam:1,rail:1,tesla:1,singularity:1,wave:1}; }
-  window.__devTime=1; window.__devStep=false;
+  window.__devTime=1; window.__devStep=false; window.__devNoSpawn=false;
   envGrid=[0,255,65]; lastSec=-1; initBackdrop(); triggerBanner();
   showOverlay(null);
   requestNonce(); fetchOnline();
@@ -1443,7 +1452,7 @@ function nextSectorCheck(dt){
       for(const e of enemies){ if(e.dead)continue; e.state='retreat'; e.vx=(e.x<W/2?-1:1)*rnd(220,300); e.vy=-rnd(40,120); }
     } else {
       waveTimer-=dt;
-      if(alive<6 && waveTimer<=0){ spawnWave(); waveTimer=rnd(1.3,2.3); }
+      if(alive<6 && waveTimer<=0 && !(gameMode==='dev' && window.__devNoSpawn)){ spawnWave(); waveTimer=rnd(1.3,2.3); }
     }
   } else {
     waveTimer-=dt;
@@ -3623,6 +3632,10 @@ requestAnimationFrame(frame);
   function devHurt(){ if(!boss||boss.dying||boss.entering) return;
     if(boss.plates>0){ boss.plateHp=0; damageBoss(1); return; }
     boss.hp=Math.max(boss.maxhp*0.04, boss.hp-boss.maxhp*0.22); }
+  window.__devNoSpawn=false;
+  function devWave(fk,arch){ if(state!=='play')return; waveFk=fk; clearField(); startFormationWave(arch); }
+  function devStream(fk){ if(state!=='play')return; waveFk=fk; clearField(); startStreamWave(); }
+  function devSweep(fk){ if(state!=='play')return; waveFk=fk; clearField(); startSweepWave(); }
   panel.appendChild(hdr('SPAWN'));
   const grid=document.createElement('div'); grid.className='dgrid';
   FKEYS.forEach(fk=>{ for(let v=0;v<3;v++){ const nm=(TYPENAMES[fk]&&TYPENAMES[fk][v])||(fk+v);
@@ -3633,6 +3646,29 @@ requestAnimationFrame(frame);
   hg.appendChild(mk('FOREMAN',()=>{ if(state==='play')devHybrid('foreman'); }));
   hg.appendChild(mk('VECTOR',()=>{ if(state==='play')devHybrid('vector'); }));
   panel.appendChild(hg);
+
+  /* ---- WAVE FACTION (radio) ---- */
+  let devWaveFk='ace';
+  const wfBtns={};
+  function setWaveFk(fk){ devWaveFk=fk; FKEYS.forEach(k=>{ if(wfBtns[k]) wfBtns[k].classList.toggle('on',k===fk); }); }
+  panel.appendChild(hdr('WAVE FACTION'));
+  const wfg=document.createElement('div'); wfg.className='dgrid';
+  FKEYS.forEach(fk=>{ const b=mk(fk.toUpperCase(),()=>setWaveFk(fk)); wfBtns[fk]=b; wfg.appendChild(b); });
+  panel.appendChild(wfg);
+  setWaveFk('ace');
+
+  /* ---- WAVE ---- */
+  function toggleAuto(){ window.__devNoSpawn=!window.__devNoSpawn; autoBtn.classList.toggle('on',!!window.__devNoSpawn); }
+  panel.appendChild(hdr('WAVE'));
+  const wvg=document.createElement('div'); wvg.className='dgrid';
+  [['PINCER','pincer'],['SIEGE','siege'],['SWARM','swarm'],['FLANK','flank'],['SPEAR','spear']].forEach(p=>{
+    wvg.appendChild(mk(p[0],()=>devWave(devWaveFk,p[1]))); });
+  wvg.appendChild(mk('STREAM',()=>devStream(devWaveFk)));
+  wvg.appendChild(mk('SWEEP',()=>devSweep(devWaveFk)));
+  const autoBtn=mk('AUTO',()=>toggleAuto());
+  wvg.appendChild(autoBtn);
+  panel.appendChild(wvg);
+
   panel.appendChild(hdr('BOSS'));
   const bgr=document.createElement('div'); bgr.className='dgrid';
   [['ace','RAISE'],['bmet','BLOOM'],['csee','AMP'],['mat','FRAME'],['mset','SCOPE']].forEach(p=>{
@@ -3745,7 +3781,7 @@ requestAnimationFrame(frame);
   function runCmd(raw){ const cmd=raw.trim(); if(!cmd)return '';
     const parts=cmd.split(/\s+/), c=parts[0].toLowerCase(), a1=parts[1], a2=parts[2];
     switch(c){
-      case 'help': return 'spawn hybrid boss sec god heal clear clrfire kill hurt give max wpn heavy gun time step hitbox perf core pwr';
+      case 'help': return 'spawn hybrid boss sec god heal clear clrfire kill hurt give max wpn heavy gun time step hitbox perf core pwr wave stream sweep auto';
       case 'spawn': { if(state!=='play')return 'not in play'; const fk=(a1||'').toLowerCase(); if(FKEYS.indexOf(fk)<0)return 'bad fk: '+(a1||''); const v=clamp(parseInt(a2||'0',10)||0,0,2); devEnemy(fk,v); return 'spawned '+fk+' v'+v; }
       case 'hybrid': { if(state!=='play')return 'not in play'; const h=(a1||'').toLowerCase(); if(h!=='foreman'&&h!=='vector')return 'bad hybrid'; devHybrid(h); return 'spawned '+h; }
       case 'boss': { if(state!=='play')return 'not in play'; const nick={raise:'ace',bloom:'bmet',amp:'csee',frame:'mat',scope:'mset',ace:'ace',bmet:'bmet',csee:'csee',mat:'mat',mset:'mset'}; const fk=nick[(a1||'').toLowerCase()]; if(!fk)return 'bad boss'; devBoss(fk); return 'boss '+fk; }
@@ -3767,6 +3803,10 @@ requestAnimationFrame(frame);
       case 'perf': togglePerf(); return 'perf '+(perfOn?'on':'off');
       case 'core': spawnCore(); return 'core dropped';
       case 'pwr': spawnPwr(); return 'pwr dropped';
+      case 'wave': { if(state!=='play')return 'not in play'; const arch=(a1||'').toLowerCase(); if(['pincer','siege','swarm','flank','spear'].indexOf(arch)<0)return 'bad arch'; let fk=devWaveFk; if(a2){ const f=a2.toLowerCase(); if(FKEYS.indexOf(f)<0)return 'bad fk: '+a2; setWaveFk(f); fk=f; } devWave(fk,arch); return 'wave '+arch+' '+fk; }
+      case 'stream': { if(state!=='play')return 'not in play'; let fk=devWaveFk; if(a1){ const f=a1.toLowerCase(); if(FKEYS.indexOf(f)<0)return 'bad fk: '+a1; setWaveFk(f); fk=f; } devStream(fk); return 'stream '+fk; }
+      case 'sweep': { if(state!=='play')return 'not in play'; let fk=devWaveFk; if(a1){ const f=a1.toLowerCase(); if(FKEYS.indexOf(f)<0)return 'bad fk: '+a1; setWaveFk(f); fk=f; } devSweep(fk); return 'sweep '+fk; }
+      case 'auto': toggleAuto(); return 'auto-spawn '+(window.__devNoSpawn?'off':'on');
       default: return 'unknown: '+c+' (try help)';
     }
   }
