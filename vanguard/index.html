@@ -443,7 +443,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2564';
+const W=630,H=840; const VERSION='2565';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -468,6 +468,17 @@ const ROMAN=['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII
 function roman(n){return ROMAN[(n-1)%ROMAN.length]+(n>ROMAN.length?'+':'');}
 
 /* ============================= audio ============================= */
+const MUSIC={
+  title:['title_battlethemea.ogg'],
+  idea:['idea_blue_dawn.ogg','idea_hatch.ogg','idea_marauder.ogg','idea_nightbreed.ogg','idea_nomad.ogg','idea_runner05.ogg','idea_signals.ogg','idea_slither.ogg','idea_tunnels.ogg'],
+  ace:['ace_battleloop2.ogg','ace_bosstheme_wo_low.ogg','ace_determined_pursuit_loop.ogg'],
+  bmet:['bmet_juhani_junkala_epic_boss_battle.ogg','bmet_last_battle_145bpm.ogg'],
+  csee:['csee_dustfall.ogg','csee_mound.ogg'],
+  mat:['mat_evil_approach.ogg','mat_lament_of_the_war.ogg'],
+  mset:['mset_vehicle_oga_col_legno.ogg','mset_casualty_loop_1.ogg'],
+  boss:['boss_battle_2_metal_loop.ogg'],
+  refit:['refit_heaven_69bpm.ogg','refit_meander.ogg','refit_casualty_loop_3.ogg']
+};
 const Audio_={ctx:null,muted:false,master:null,
   init(){ if(this.ctx)return; try{ this.ctx=new (window.AudioContext||window.webkitAudioContext)();
     const m=this.ctx.createGain(); m.gain.value=0.9;
@@ -531,6 +542,20 @@ const Audio_={ctx:null,muted:false,master:null,
       try{ a.volume=Math.max(0,Math.min(1, v+(target>v?0.045:-0.045))); }catch(e){} },30);
   },
   applyMute(){ if(this._bgmTimer){clearInterval(this._bgmTimer);this._bgmTimer=null;} if(this._bgm){ try{ this._bgm.volume=this.muted?0:this.musicVol; }catch(e){} } },
+  _bgmLane:null,
+  lane(name){
+    if(!name){ this._bgmLane=null; this.music(false); return; }
+    let folder=(MUSIC[name]&&MUSIC[name].length)?name:'idea';
+    let list=MUSIC[folder]||[];
+    if(!list.length){ this._bgmLane=null; this.music(false); return; }
+    if(this._bgmLane===name && this._bgm && !this._bgm.paused) return;
+    this._bgmLane=name; this._bgmTrack=null;
+    const file=list[(Math.random()*list.length)|0];
+    if(!this._bgm){ try{ this._bgm=new Audio(); this._bgm.loop=true; this._bgm.preload='auto'; this._bgm.volume=0; }catch(e){ return; } }
+    const a=this._bgm, A=this, src='audio/'+folder+'/'+file;
+    const swap=()=>{ try{ a.src=src; a.currentTime=0; const p=a.play(); if(p&&p.catch)p.catch(()=>{}); }catch(e){} A._mfade(A.muted?0:A.musicVol,null); };
+    if(a.src && !a.paused){ this._mfade(0,swap); } else { swap(); }
+  },
 };
 
 /* ============================= state ============================= */
@@ -1282,6 +1307,7 @@ function slotFilled(i){ for(const e of enemies) if(!e.dead && e.slot===i) return
 function spawnWave(){
   waveIdx++;
   waveFk=runFactionSeq.length?runFactionSeq[(waveIdx-1)%runFactionSeq.length]:FKEYS[0];
+  if(state==='play' && !boss) Audio_.lane(waveFk);
   const pool=['formation','stream','sweep'].filter(t=>t!==spawnWave._last);
   const type=pick(pool); spawnWave._last=type;
   if(type==='formation'){
@@ -1338,7 +1364,7 @@ function spawnBoss(forceFk){
     bi.style.background=F.c; bi.style.boxShadow='0 0 10px '+F.c; bi.style.transform='scaleX(1)'; }
   warpT=Math.max(warpT,1.0);
   bossCard={mode:'enter',name:(BOSSNAME[fk]||F.name),sub:'SECTOR BOSS',c:F.c,t:0,dur:2.4};
-  Audio_.music(true,'boss_'+fk);
+  Audio_.lane('boss');
 }
 
 /* ============================= player ============================= */
@@ -1398,7 +1424,7 @@ function startGame(){
   showOverlay(null);
   requestNonce(); fetchOnline();
   document.getElementById('touch').classList.toggle('hidden', !isTouch);
-  Audio_.init(); Audio_.resume(); Audio_.music(true);
+  Audio_.init(); Audio_.resume(); Audio_.lane('idea');
 }
 
 function nextSectorCheck(dt){
@@ -2444,7 +2470,7 @@ function finishBoss(){ runBosses++; const b=boss;
   pods.push({x:b.x,y:b.y,vy:34,type:'core',fk:b.fk,c:b.c,bob:rnd(0,6.28),r:16,spin:0});
   for(let i=0;i<4;i++) pods.push({x:b.x+rnd(-40,40),y:b.y+rnd(-10,20),vy:rnd(40,60),type:'coin',c:COL.gold,bob:rnd(0,6.28),r:11});
   document.getElementById('bossname').style.display='none'; document.getElementById('bossbar').style.display='none';
-  boss=null; fleet=null; bossSpoils=2.8; Audio_.music(true,'ambient');
+  boss=null; fleet=null; bossSpoils=2.8; Audio_.lane(waveFk||'idea');
   station={x:W*0.5, y:-130, tx:W*0.5, ty:H*0.42, phase:'arrive', t:0, beam:0, hum:rnd(0,6.28), vy:0};
 }
 function updateStation(dt){ const st=station; if(!st)return; st.t+=dt; st.hum+=dt*1.4;
@@ -2480,11 +2506,11 @@ function drawStation(){ const st=station; if(!st)return; const x=st.x,y=st.y,r=3
 function openRefit(){ state='refit'; document.getElementById('touch').classList.add('hidden');
   el('refitNext').textContent=roman(sector+1); buildRefit(); showOverlay('ovlRefit');
   const w=el('refitWrap'); if(w){ w.classList.remove('warp'); void w.offsetWidth; w.classList.add('warp'); }
-  Audio_.power(); }
+  Audio_.power(); Audio_.lane('refit'); }
 function launchFromRefit(){ sector++; waveIdx=0; waveTimer=1.6; bossPending=false; fleet=null;
   sectorKills=0; killsForBoss=48+sector*14; hybridTimer=rnd(6,10);
   if(station){ station.phase='depart'; station.vy=-60; }
-  player.beamE=player.beamMax; triggerBanner(); state='play'; showOverlay(null);
+  player.beamE=player.beamMax; triggerBanner(); state='play'; showOverlay(null); Audio_.lane(waveFk||'idea');
   document.getElementById('touch').classList.toggle('hidden', !isTouch); }
 /* ---- shared shop rendering (icons + cards + previews) ---- */
 function svgI(p){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+p+'</svg>'; }
@@ -3137,7 +3163,7 @@ function startGameOver(){
 }
 function endRun(){
   try{ if(document.pointerLockElement) document.exitPointerLock(); }catch(e){}
-  state='over'; player.dead=true; Audio_.music(true,'ambient');
+  state='over'; player.dead=true; Audio_.lane(null);
   document.getElementById('touch').classList.add('hidden');
   document.getElementById('bossname').style.display='none'; document.getElementById('bossbar').style.display='none';
   buildInitials(); showOverlay('ovlOver');
@@ -3345,7 +3371,7 @@ function doRestart(){ document.getElementById('ovlConfirm').classList.add('hidde
 el('restartBtn').addEventListener('click',e=>{ e.stopPropagation(); showRestartConfirm(); });
 el('confirmRestartBtn').addEventListener('click',e=>{ e.stopPropagation(); doRestart(); });
 el('cancelRestartBtn').addEventListener('click',e=>{ e.stopPropagation(); cancelRestart(); });
-function toTitle(){ state='title'; showOverlay('ovlTitle'); Audio_.music(true,'ambient');
+function toTitle(){ state='title'; showOverlay('ovlTitle'); Audio_.lane('title');
   document.getElementById('bossname').style.display='none'; document.getElementById('bossbar').style.display='none';
   document.getElementById('touch').classList.add('hidden'); boardRetries=0; renderBoard('titleBoard'); refreshBoard('titleBoard'); updateGamesPlayed(); }
 el('quitBtn').addEventListener('click',toTitle);
