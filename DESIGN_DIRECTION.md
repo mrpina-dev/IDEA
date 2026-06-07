@@ -120,6 +120,8 @@ clean, or friendly sounds anywhere in the SFX set.
 - Raw source swaps get ~70% of the way; budget light processing (layered
   transient + body + sub + tail, saturated, compressed, trimmed tight) for
   the last 30%.
+- Sustained actions (beam, tesla, charge, boss beams) use gated loops that stop
+  with the action; one-shot tails on sustained actions are bugs.
 
 ### Music Direction (the Matrix lane)
 
@@ -210,7 +212,7 @@ Decisions already made; do not re-propose without new evidence:
 - No STYLE damage/fire-rate buffs.
 - No playfield resizing.
 - No extra lives in HARDCORE.
-- No pre-game weapon unlocks in CONFIGURE BUILD (runs start SPREAD-only).
+- No pre-game weapon unlocks in CONFIGURE BUILD for ranked modes (runs start SPREAD-only). DEV mode is exempt: unlimited budget, all unlocks apply.
 - No full Code.gs rewrites, no new Apps Script deployments.
 - Upgrade-driven ship appearance: concept to be rethought, do not build as
   originally scoped.
