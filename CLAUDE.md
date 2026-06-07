@@ -24,3 +24,10 @@ git push
 - Main file is index.html in the repo root
 - All changes go to the main branch
 - No build step required - changes are live after push
+
+## DESIGN_DIRECTION.md maintenance
+
+DESIGN_DIRECTION.md at the repo root is the design north star. When a prompt
+includes edits to it, apply them as routine surgical changes (no confirmation
+needed, same as code edits). Never rewrite the file wholesale. Never delete
+entries from "Standing Rejections" unless the prompt explicitly says to.
