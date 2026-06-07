@@ -186,6 +186,12 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 .fbovl.hidden{display:none!important}
 .fbsel,.fbtxt{background:rgba(5,15,7,.9);border:1px solid rgba(0,255,65,.3);color:var(--white);font-family:'Share Tech Mono',monospace;font-size:11px;padding:6px 10px;border-radius:3px;width:100%;max-width:280px;box-sizing:border-box}
 .fbtxt{resize:vertical;min-height:72px}
+.fbslot{width:100%;max-width:300px;display:flex;justify-content:center;pointer-events:auto}
+.fbcompose{display:flex;flex-direction:column;gap:4px;width:100%;max-width:300px;pointer-events:auto}
+.fbrow{display:flex;gap:6px;align-items:stretch}
+.fbtxt.fbinline{flex:1;min-height:32px;height:32px;max-height:64px;resize:none;line-height:1.3;overflow-y:auto;padding:7px 9px}
+.fbcount{color:var(--dim);font-size:9px;text-align:right;letter-spacing:.04em}
+.fbcompose .fbbtn{align-self:stretch;display:flex;align-items:center;white-space:nowrap}
 .keyrow{display:flex;justify-content:space-between;align-items:center;gap:12px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--white);letter-spacing:.06em}
 .keyrow .kb{font-family:'Chakra Petch',sans-serif;font-weight:700;min-width:60px;text-align:center;border:1px solid var(--cyan);color:var(--cyan);padding:5px 10px;border-radius:4px;cursor:pointer;background:rgba(0,240,255,.08)}
 .keyrow .kb.cap{border-color:var(--gold);color:var(--gold);animation:lockpulse .5s steps(2,start) infinite}
@@ -307,8 +313,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
     <button class="mini" id="howtoBtn" style="border-color:var(--cyan);color:var(--cyan)">HOW TO PLAY</button>
     <button class="mini" id="logBtn">UPDATE LOG</button>
     <div class="tag" style="color:var(--cyan);letter-spacing:.12em;margin-top:2px">FOUND A BUG OR HAVE AN IDEA?</div>
-    <button class="fbbtn" id="titleFeedback">SEND FEEDBACK</button>
-    <button class="fbbtn" id="titleSuggest" style="border-color:var(--gold);color:var(--gold);background:rgba(200,255,0,.12);text-shadow:0 0 8px rgba(200,255,0,.5);box-shadow:0 0 12px rgba(200,255,0,.2)">SUGGEST AN IDEA</button>
+    <div class="fbslot" id="fbTitle"></div>
   </div>
 
   <!-- PAUSE -->
@@ -320,7 +325,8 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
     <button class="mini" id="pauseKeys">REMAP KEYS</button>
     <button class="mini" id="restartBtn">RESTART RUN</button>
     <button class="mini" id="quitBtn">QUIT TO TITLE</button>
-    <button class="fbbtn" id="pauseFeedback">SEND FEEDBACK</button>
+    <div class="tag" style="color:var(--cyan);letter-spacing:.12em;margin-top:2px">FOUND A BUG OR HAVE AN IDEA?</div>
+    <div class="fbslot" id="fbPause"></div>
   </div>
 
   <!-- REFIT (post-boss upgrade shop) -->
@@ -345,28 +351,8 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
     <div class="tag" id="enterHint">ENTER INITIALS</div>
     <div class="initials" id="initials"></div>
     <button class="obtn sub" id="submitBtn">SUBMIT</button>
-    <button class="fbbtn" id="overFeedback">SEND FEEDBACK</button>
-  </div>
-
-  <!-- FEEDBACK MODAL -->
-  <div class="fbovl hidden" id="ovlFeedback">
-    <h2 class="ovh">SEND FEEDBACK</h2>
-    <div class="tag">HELP IMPROVE VANGUARD</div>
-    <select id="fbCat" class="fbsel"><option value="balance">Balance</option><option value="bug">Bug</option><option value="idea">Idea</option><option value="other">Other</option></select>
-    <textarea id="fbMsg" class="fbtxt" maxlength="500" placeholder="What's on your mind?"></textarea>
-    <div class="tag"><span id="fbCount">0</span> / 500</div>
-    <button class="obtn" id="fbSend">SEND</button>
-    <button class="mini" id="fbCancel">CANCEL</button>
-  </div>
-
-  <!-- SUGGESTION BOX -->
-  <div class="fbovl hidden" id="ovlSuggest">
-    <h2 class="ovh">SUGGEST AN IDEA</h2>
-    <div class="tag">HOW SHOULD VANGUARD GROW?</div>
-    <textarea id="sgMsg" class="fbtxt" maxlength="500" placeholder="Your idea for a feature, enemy, or weapon..."></textarea>
-    <div class="tag"><span id="sgCount">0</span> / 500</div>
-    <button class="obtn" id="sgSend">SEND</button>
-    <button class="mini" id="sgCancel">CANCEL</button>
+    <div class="tag" style="color:var(--cyan);letter-spacing:.12em;margin-top:2px">FOUND A BUG OR HAVE AN IDEA?</div>
+    <div class="fbslot" id="fbOver"></div>
   </div>
 
   <!-- RESTART CONFIRM -->
@@ -443,7 +429,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2570';
+const W=630,H=840; const VERSION='2571';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -1437,7 +1423,8 @@ function startGame(){
   window.__devTime=1; window.__devStep=false; window.__devNoSpawn=false;
   envGrid=[0,255,65]; lastSec=-1; initBackdrop(); triggerBanner();
   showOverlay(null);
-  requestNonce(); fetchOnline();
+  fetchOnline();
+  window.__telemSent=false;
   document.getElementById('touch').classList.toggle('hidden', !isTouch);
   Audio_.init(); Audio_.resume(); Audio_.lane('idea');
 }
@@ -3178,6 +3165,8 @@ function startGameOver(){
   gameOverT=1.9;
 }
 function endRun(){
+  { const _dc = killerInfo ? (killerInfo.fk ? (/BOSS/.test(killerInfo.label||'') ? killerInfo.fk+'_boss' : killerInfo.fk) : 'hazard') : 'none';
+    sendTelemetry(_dc); }
   try{ if(document.pointerLockElement) document.exitPointerLock(); }catch(e){}
   state='over'; player.dead=true; Audio_.lane(null);
   document.getElementById('touch').classList.add('hidden');
@@ -3208,21 +3197,42 @@ function endRun(){
     } else { if(fb)fb.textContent='-'; if(kg)kg.style.display='none'; }
     pendingScore={score:window.scoreT,sector:sector,acc:acc};
   }catch(err){ console.error('VANGUARD endRun error:',err); pendingScore={score:window.scoreT,sector:sector,acc:0}; }
-  /* telemetry beacon - anonymous per-run gameplay metrics, no name or identifier */
-  try{ if(API_URL && gameMode!=='dev'){
+}
+/* telemetry beacon - anonymous per-run gameplay metrics, no name or identifier.
+   Fires once per run on any termination: death, quit, restart, or page abandon. */
+function inActiveRun(){ return state==='play'||state==='pause'||state==='refit'; }
+function sendTelemetry(dc){
+  if(!API_URL || gameMode==='dev' || !inActiveRun() || window.__telemSent) return;
+  window.__telemSent=true;
+  try{
     const tacc=shotsFired?Math.round(shotsHit/shotsFired*100):0;
-    let dc='none';
-    if(killerInfo){ dc = killerInfo.fk ? (/BOSS/.test(killerInfo.label||'') ? killerInfo.fk+'_boss' : killerInfo.fk) : 'hazard'; }
     let _ps='D'; { const _ms=window.maxStyle||0; for(const k of STYLE_RANKS){ if(_ms>=k.min)_ps=k.g; } }
     const _bsp=(startBuild&&startBuild.spent)||0, _bct=buildCount();
-    const tq=['action=telemetry','v='+encodeURIComponent(VERSION),'m='+encodeURIComponent(gameMode),'sec='+(sector||0),'rt='+Math.round(runTime||0),'k='+(runKills||0),'bk='+(runBosses||0),'sc='+Math.round(window.scoreT||0),'acc='+tacc,'pw='+encodeURIComponent((player&&player.wtype)||''),'hw='+encodeURIComponent((player&&player.heavy)||''),'gp='+((player&&player.up&&player.up.gun)||1),'dc='+encodeURIComponent(dc),'ce='+(runCoinsEarned||0),'cs='+(runCoinsSpent||0),'pa='+(runParryAtt||0),'pry='+(runParries||0),'ppr='+(runPerfect||0),'ht='+(runHits||0),'bmb='+(runBombs||0),'oh='+(runOverheats||0),'lu='+(runLivesUsed||0),'ps='+encodeURIComponent(_ps),'bsp='+_bsp,'bct='+_bct,'dws='+Math.round(runDwell.spread||0),'dwl='+Math.round(runDwell.lance||0),'dwh='+Math.round(runDwell.homing||0),'dwr='+Math.round(runDwell.rapid||0),'sf='+(shotsFired||0),'sh='+(shotsHit||0),'cb='+Date.now()].join('&');
-    new Image().src=API_URL+'?'+tq;
-  } }catch(e){}
+    const u=(player&&player.up)||{}, unl=(player&&player.unlocked)||{}, hvl=(player&&player.heavyUnlocked)||{};
+    /* bld keys: g=gun e=speed(engine) f=flank a=armor(hull) b=beamPow c=beamCap p=beamPierce sp=beamSpool
+       hp=heavyPow hc=heavyChg tj=teslaJump sa=singAmp wp=wavePow ms=mSpread mr=mRapid ml=mLance mh=mHoming
+       bp=bombPow bm=bombs sd=shieldHits dr=drone(0/1) */
+    const bld='g'+(u.gun||1)+'e'+(u.speed||1)+'f'+(u.flank||0)+'a'+(u.armor||0)
+      +'b'+(u.beamPow||1)+'c'+(u.beamCap||1)+'p'+(u.beamPierce||1)+'sp'+(u.beamSpool||1)
+      +'hp'+(u.heavyPow||1)+'hc'+(u.heavyChg||1)+'tj'+(u.teslaJump||1)+'sa'+(u.singAmp||1)+'wp'+(u.wavePow||1)
+      +'ms'+(u.mSpread||0)+'mr'+(u.mRapid||0)+'ml'+(u.mLance||0)+'mh'+(u.mHoming||0)+'bp'+(u.bombPow||1)
+      +'bm'+((player&&player.bombs)||0)+'sd'+((player&&player.shieldHits)||0)+'dr'+((player&&player.drone)?1:0);
+    const wpu=['spread','lance','homing','rapid'].reduce((n,w)=>n+(unl[w]?1:0),0);
+    const hvu=['beam','rail','tesla','singularity','wave'].reduce((n,h)=>n+(hvl[h]?1:0),0);
+    const tq=['action=telemetry','v='+encodeURIComponent(VERSION),'m='+encodeURIComponent(gameMode),'sec='+(sector||0),'rt='+Math.round(runTime||0),'k='+(runKills||0),'bk='+(runBosses||0),'sc='+Math.round(window.scoreT||0),'acc='+tacc,'pw='+encodeURIComponent((player&&player.wtype)||''),'hw='+encodeURIComponent((player&&player.heavy)||''),'gp='+((player&&player.up&&player.up.gun)||1),'dc='+encodeURIComponent(dc||'none'),'ce='+(runCoinsEarned||0),'cs='+(runCoinsSpent||0),'pa='+(runParryAtt||0),'pry='+(runParries||0),'ppr='+(runPerfect||0),'ht='+(runHits||0),'bmb='+(runBombs||0),'oh='+(runOverheats||0),'lu='+(runLivesUsed||0),'ps='+encodeURIComponent(_ps),'bsp='+_bsp,'bct='+_bct,'dws='+Math.round(runDwell.spread||0),'dwl='+Math.round(runDwell.lance||0),'dwh='+Math.round(runDwell.homing||0),'dwr='+Math.round(runDwell.rapid||0),'sf='+(shotsFired||0),'sh='+(shotsHit||0),'bld='+encodeURIComponent(bld),'wpu='+wpu,'hvu='+hvu,'cb='+Date.now()].join('&');
+    const url=API_URL+'?'+tq;
+    // abandon may fire as the page unloads, where an Image request can be dropped: prefer sendBeacon there
+    if(dc==='abandon' && navigator.sendBeacon){ navigator.sendBeacon(url); } else { new Image().src=url; }
+  }catch(e){}
 }
+/* page-abandonment telemetry: never changes game state, only reports */
+(function(){ function abandon(){ if(inActiveRun() && !window.__telemSent) sendTelemetry('abandon'); }
+  window.addEventListener('pagehide', abandon);
+  document.addEventListener('visibilitychange', ()=>{ if(document.hidden) abandon(); }); })();
 
 /* leaderboard (local fallback + shared online board via Apps Script) */
 const API_URL='https://script.google.com/macros/s/AKfycbxFMp3q3BcQ4Lpwl_c4hqwzrDw0zi4AYhjxY0ieoZXWYYG1vb8nO6lZ0hoS18Co5o9_kA/exec';
-let onlineBoard=null, runNonce='', boardRetries=0;
+let onlineBoard=null, boardRetries=0;
 let boardMode='normal';
 function jsonp(url,cb,fail){ const id='vcb_'+Math.random().toString(36).slice(2); let done=false;
   const s=document.createElement('script');
@@ -3241,14 +3251,12 @@ function refreshBoard(target){
           else if(!onlineBoard){ onlineBoard=localBoard(); renderBoard(target); } }
   );
 }
-function requestNonce(){ runNonce=''; if(!API_URL)return;
-  jsonp(API_URL+'?action=nonce&callback=?&cb='+Date.now(), d=>{ if(d&&d.nonce)runNonce=d.nonce; }); }
 function localBoard(){ try{return JSON.parse(localStorage.getItem('vanguard_scores')||'[]');}catch(e){return [];} }
 function saveLocal(name,score){ const b=localBoard(); b.push({name,score}); b.sort((a,c)=>c.score-a.score);
   const top=b.slice(0,10); try{localStorage.setItem('vanguard_scores',JSON.stringify(top));}catch(e){} return top; }
 function boardRows(){ return (API_URL && onlineBoard)? onlineBoard : localBoard(); }
 function submitToServer(score,sec,acc){ if(!API_URL)return; try{ const img=new Image();
-  img.src=API_URL+'?action=submit&name='+encodeURIComponent(curInitials)+'&score='+score+'&sector='+sec+'&acc='+acc+'&t='+Math.round(runTime)+'&mode='+gameMode+'&ver='+encodeURIComponent(VERSION)+'&nonce='+encodeURIComponent(runNonce)+'&cb='+Date.now(); }catch(e){} }
+  img.src=API_URL+'?action=submit&name='+encodeURIComponent(curInitials)+'&score='+score+'&sector='+sec+'&acc='+acc+'&t='+Math.round(runTime)+'&mode='+gameMode+'&ver='+encodeURIComponent(VERSION)+'&cb='+Date.now(); }catch(e){} }
 function escHTML(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
 function renderBoard(target,highlightName,highlightScore){
   const box=el(target); if(!box)return;
@@ -3285,7 +3293,8 @@ function refreshInitials(){ const box=el('initials'); [...box.children].forEach(
 const ptr={x:W/2,y:H-130,active:false};
 let isTouch=('ontouchstart' in window)||navigator.maxTouchPoints>0;
 function toLogical(clientX,clientY){ const r=bgC.getBoundingClientRect(); return {x:(clientX-r.left)/r.width*W,y:(clientY-r.top)/r.height*H}; }
-function uiBlocked(){ const ids=['ovlOutfit','ovlKeys','ovlBoard','ovlTut','ovlLog','ovlFeedback','ovlSuggest','ovlConfirm']; for(const id of ids){ const el2=document.getElementById(id); if(el2 && !el2.classList.contains('hidden')) return true; } return false; }
+function uiBlocked(){ const ids=['ovlOutfit','ovlKeys','ovlBoard','ovlTut','ovlLog','ovlConfirm']; for(const id of ids){ const el2=document.getElementById(id); if(el2 && !el2.classList.contains('hidden')) return true; } return false; }
+function typingInField(){ const a=document.activeElement; return !!a && ((window.__devInput&&a===window.__devInput) || (a.classList&&a.classList.contains('fbinline'))); }
 stage.addEventListener('pointerdown',e=>{ Audio_.init(); Audio_.resume();
   if(e.target.closest('.tbtn')||e.target.closest('.ovl')||e.target.closest('.mini')||e.target.closest('.fbovl'))return;
   if(state==='title'){ if(uiBlocked())return; startGame(); return; }
@@ -3316,7 +3325,7 @@ stage.addEventListener('mousedown',e=>{ const tk='Mouse'+e.button;
 window.addEventListener('mouseup',e=>{ const tk='Mouse'+e.button; held[tk]=false;
   if(tk===keybinds.beam){ if(player){player.beamOn=false; player.beamLock=false;} } });
 
-window.addEventListener('keydown',e=>{ if(window.__devInput&&document.activeElement===window.__devInput) return;
+window.addEventListener('keydown',e=>{ if(typingInField()) return;
   Audio_.init(); Audio_.resume();
   const k=e.key.length===1?e.key.toLowerCase():e.key; keys[k]=true; keys[e.key]=true;
   const tk=tok(e); held[tk]=true;
@@ -3325,8 +3334,6 @@ window.addEventListener('keydown',e=>{ if(window.__devInput&&document.activeElem
     rebindAction=null; buildKeyList(); refreshControlsHint(); return; }
   if(!document.getElementById('ovlKeys').classList.contains('hidden')) return;
   if(!document.getElementById('ovlOutfit').classList.contains('hidden')) return;
-  if(!document.getElementById('ovlFeedback').classList.contains('hidden')) return;
-  if(!document.getElementById('ovlSuggest').classList.contains('hidden')) return;
   if(!document.getElementById('ovlTut').classList.contains('hidden')){ if(e.key==='Escape')closeTut(); e.preventDefault(); return; }
   if(!document.getElementById('ovlLog').classList.contains('hidden')){ if(e.key==='Escape')closeLog(); e.preventDefault(); return; }
   if(!document.getElementById('ovlConfirm').classList.contains('hidden')){
@@ -3359,7 +3366,7 @@ window.addEventListener('keydown',e=>{ if(window.__devInput&&document.activeElem
   }
   if(tk===keybinds.mute){ toggleMute(); }
 },{passive:false});
-window.addEventListener('keyup',e=>{ if(window.__devInput&&document.activeElement===window.__devInput) return;
+window.addEventListener('keyup',e=>{ if(typingInField()) return;
   const k=e.key.length===1?e.key.toLowerCase():e.key; keys[k]=false; keys[e.key]=false;
   const tk=tok(e); held[tk]=false;
   if(tk===keybinds.beam){ if(player){player.beamOn=false; player.beamLock=false;} } });
@@ -3385,11 +3392,11 @@ function pauseToggle(){ if(state==='play'||state==='pause'){ Audio_.play&&Audio_
 el('resumeBtn').addEventListener('click',pauseToggle);
 function showRestartConfirm(){ document.getElementById('ovlConfirm').classList.remove('hidden'); }
 function cancelRestart(){ document.getElementById('ovlConfirm').classList.add('hidden'); }
-function doRestart(){ document.getElementById('ovlConfirm').classList.add('hidden'); startGame(); }
+function doRestart(){ sendTelemetry('restart'); document.getElementById('ovlConfirm').classList.add('hidden'); startGame(); }
 el('restartBtn').addEventListener('click',e=>{ e.stopPropagation(); showRestartConfirm(); });
 el('confirmRestartBtn').addEventListener('click',e=>{ e.stopPropagation(); doRestart(); });
 el('cancelRestartBtn').addEventListener('click',e=>{ e.stopPropagation(); cancelRestart(); });
-function toTitle(){ state='title'; showOverlay('ovlTitle'); Audio_.lane('title');
+function toTitle(){ sendTelemetry('quit'); state='title'; showOverlay('ovlTitle'); Audio_.lane('title');
   document.getElementById('bossname').style.display='none'; document.getElementById('bossbar').style.display='none';
   document.getElementById('touch').classList.add('hidden'); boardRetries=0; renderBoard('titleBoard'); refreshBoard('titleBoard'); updateGamesPlayed(); }
 el('quitBtn').addEventListener('click',toTitle);
@@ -3463,46 +3470,33 @@ function resetBuild(){ startBuild=freshBuild(); saveBuild(); buildOutfit(); refr
   refreshBuildSummary();
 })();
 
-/* feedback */
-(function(){
-  const modal=document.getElementById('ovlFeedback');
-  const msg=document.getElementById('fbMsg');
-  const cnt=document.getElementById('fbCount');
-  const sendBtn=document.getElementById('fbSend');
-  function openFb(){ modal.classList.remove('hidden'); msg.value=''; cnt.textContent='0'; sendBtn.textContent='SEND'; sendBtn.disabled=false; }
-  function closeFb(){ modal.classList.add('hidden'); }
-  document.getElementById('titleFeedback').addEventListener('click',e=>{e.stopPropagation();openFb();});
-  document.getElementById('overFeedback').addEventListener('click',e=>{e.stopPropagation();openFb();});
-  { const pf=document.getElementById('pauseFeedback'); if(pf) pf.addEventListener('click',e=>{e.stopPropagation();openFb();}); }
-  document.getElementById('fbCancel').addEventListener('click',closeFb);
-  msg.addEventListener('input',()=>cnt.textContent=msg.value.length);
-  sendBtn.addEventListener('click',()=>{
-    const cat=document.getElementById('fbCat').value;
-    const txt=msg.value.trim().slice(0,500);
-    if(API_URL){ try{ new Image().src=API_URL+'?action=feedback&cat='+encodeURIComponent(cat)+'&msg='+encodeURIComponent(txt)+'&ver='+VERSION+'&name='+encodeURIComponent(curInitials||'---')+'&cb='+Date.now(); }catch(e){} }
-    sendBtn.textContent='THANKS!'; sendBtn.disabled=true;
-    setTimeout(closeFb,1400);
+/* unified inline feedback composer - one channel for bugs AND ideas, no dropdown, no modal */
+function buildFeedbackComposer(){
+  const wrap=document.createElement('div'); wrap.className='fbcompose';
+  const row=document.createElement('div'); row.className='fbrow';
+  const ta=document.createElement('textarea'); ta.className='fbtxt fbinline'; ta.maxLength=500; ta.rows=1; ta.placeholder='Bug or idea? Tell us…';
+  const btn=document.createElement('button'); btn.className='fbbtn'; btn.type='button'; btn.textContent='SEND';
+  row.appendChild(ta); row.appendChild(btn);
+  const cnt=document.createElement('div'); cnt.className='tag fbcount'; cnt.textContent='0 / 500';
+  wrap.appendChild(row); wrap.appendChild(cnt);
+  const MAXH=64;
+  function grow(){ ta.style.height='auto'; ta.style.height=Math.min(ta.scrollHeight,MAXH)+'px'; }
+  ta.addEventListener('input',()=>{ cnt.textContent=ta.value.length+' / 500'; grow(); });
+  // keep typing out of the game: stop bubbling, and the global key handlers also bail on .fbinline focus
+  ta.addEventListener('keydown',e=>e.stopPropagation());
+  ta.addEventListener('keyup',e=>e.stopPropagation());
+  ta.addEventListener('pointerdown',e=>e.stopPropagation());
+  btn.addEventListener('pointerdown',e=>e.stopPropagation());
+  btn.addEventListener('click',e=>{ e.stopPropagation();
+    const txt=ta.value.trim().slice(0,500); if(!txt) return;     // empty messages never send
+    if(API_URL){ try{ new Image().src=API_URL+'?action=feedback&msg='+encodeURIComponent(txt)+'&ver='+encodeURIComponent(VERSION)+'&name='+encodeURIComponent(curInitials||'---')+'&cb='+Date.now(); }catch(err){} }
+    ta.value=''; cnt.textContent='0 / 500'; grow();
+    btn.textContent='THANKS!'; btn.disabled=true;
+    setTimeout(()=>{ btn.textContent='SEND'; btn.disabled=false; },1400);
   });
-})();
-
-/* suggestion box */
-(function(){
-  const modal=document.getElementById('ovlSuggest'); if(!modal)return;
-  const msg=document.getElementById('sgMsg');
-  const cnt=document.getElementById('sgCount');
-  const sendBtn=document.getElementById('sgSend');
-  function openSg(){ modal.classList.remove('hidden'); msg.value=''; cnt.textContent='0'; sendBtn.textContent='SEND'; sendBtn.disabled=false; }
-  function closeSg(){ modal.classList.add('hidden'); }
-  { const tb=document.getElementById('titleSuggest'); if(tb) tb.addEventListener('click',e=>{e.stopPropagation();openSg();}); }
-  document.getElementById('sgCancel').addEventListener('click',closeSg);
-  msg.addEventListener('input',()=>cnt.textContent=msg.value.length);
-  sendBtn.addEventListener('click',()=>{
-    const txt=msg.value.trim().slice(0,500); if(!txt){ closeSg(); return; }
-    if(API_URL){ try{ new Image().src=API_URL+'?action=suggest&msg='+encodeURIComponent(txt)+'&ver='+VERSION+'&name='+encodeURIComponent(curInitials||'---')+'&cb='+Date.now(); }catch(e){} }
-    sendBtn.textContent='THANKS!'; sendBtn.disabled=true;
-    setTimeout(closeSg,1400);
-  });
-})();
+  return wrap;
+}
+['fbTitle','fbPause','fbOver'].forEach(id=>{ const c=el(id); if(c) c.appendChild(buildFeedbackComposer()); });
 
 /* keybind remapping */
 const KEY_ACTIONS=[['fire','FIRE (manual)'],['beam','HEAVY FIRE'],['heavy','CYCLE HEAVY'],['weapon','CYCLE WEAPON'],['weap1','> SPREAD'],['weap2','> LANCE'],['weap3','> HOMING'],['weap4','> RAPID'],['bomb','BOMB'],['parry','PARRY'],['pause','PAUSE'],['mute','MUTE']];
