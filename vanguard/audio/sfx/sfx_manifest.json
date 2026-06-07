@@ -1,0 +1,182 @@
+{
+  "fire_spread": [
+    "fire/fire_spread_1.ogg",
+    "fire/fire_spread_2.ogg"
+  ],
+  "fire_rapid": [
+    "fire/fire_rapid_1.ogg",
+    "fire/fire_rapid_2.ogg",
+    "fire/fire_rapid_3.ogg"
+  ],
+  "fire_lance": [
+    "fire/fire_lance_1.ogg",
+    "fire/fire_lance_2.ogg"
+  ],
+  "fire_homing": [
+    "fire/fire_homing_1.ogg",
+    "fire/fire_homing_2.ogg"
+  ],
+  "heavy_charge": [
+    "heavy/heavy_charge_1.ogg",
+    "heavy/heavy_charge_2.ogg"
+  ],
+  "heavy_ready": [
+    "heavy/heavy_ready_1.ogg",
+    "heavy/heavy_ready_2.ogg"
+  ],
+  "beam": [
+    "heavy/beam_1.ogg",
+    "heavy/beam_2.ogg"
+  ],
+  "rail": [
+    "heavy/rail_1.ogg",
+    "heavy/rail_2.ogg"
+  ],
+  "tesla": [
+    "heavy/tesla_1.ogg",
+    "heavy/tesla_2.ogg"
+  ],
+  "singularity": [
+    "heavy/singularity_1.ogg",
+    "heavy/singularity_2.ogg"
+  ],
+  "wave": [
+    "heavy/wave_1.ogg",
+    "heavy/wave_2.ogg"
+  ],
+  "bomb": [
+    "defense/bomb_1.ogg",
+    "defense/bomb_2.ogg",
+    "defense/bomb_3.ogg"
+  ],
+  "parry": [
+    "defense/parry_1.ogg",
+    "defense/parry_2.ogg"
+  ],
+  "parry_hit": [
+    "defense/parry_hit_1.ogg",
+    "defense/parry_hit_2.ogg"
+  ],
+  "shield_hit": [
+    "defense/shield_hit_1.ogg",
+    "defense/shield_hit_2.ogg"
+  ],
+  "shield_break": [
+    "defense/shield_break_1.ogg",
+    "defense/shield_break_2.ogg"
+  ],
+  "player_hit": [
+    "defense/player_hit_1.ogg",
+    "defense/player_hit_2.ogg"
+  ],
+  "overheat": [
+    "defense/overheat_1.ogg",
+    "defense/overheat_2.ogg"
+  ],
+  "overheat_ready": [
+    "defense/overheat_ready_1.ogg",
+    "defense/overheat_ready_2.ogg"
+  ],
+  "death": [
+    "defense/death_1.ogg",
+    "defense/death_2.ogg"
+  ],
+  "hit": [
+    "impact/hit_1.ogg",
+    "impact/hit_2.ogg",
+    "impact/hit_3.ogg"
+  ],
+  "kill": [
+    "impact/kill_1.ogg",
+    "impact/kill_2.ogg"
+  ],
+  "big": [
+    "impact/big_1.ogg",
+    "impact/big_2.ogg"
+  ],
+  "blast": [
+    "impact/blast_1.ogg",
+    "impact/blast_2.ogg"
+  ],
+  "enemy_fire": [
+    "impact/enemy_fire_1.ogg"
+  ],
+  "thump": [
+    "impact/thump_1.ogg",
+    "impact/thump_2.ogg"
+  ],
+  "wub": [
+    "impact/wub_1.ogg",
+    "impact/wub_2.ogg"
+  ],
+  "whine": [
+    "impact/whine_1.ogg",
+    "impact/whine_2.ogg"
+  ],
+  "boss_warn": [
+    "boss/boss_warn_1.ogg",
+    "boss/boss_warn_2.ogg"
+  ],
+  "boss_phase": [
+    "boss/boss_phase_1.ogg",
+    "boss/boss_phase_2.ogg"
+  ],
+  "boss_death": [
+    "boss/boss_death_1.ogg",
+    "boss/boss_death_2.ogg"
+  ],
+  "coin": [
+    "pickup/coin_1.ogg",
+    "pickup/coin_2.ogg"
+  ],
+  "core": [
+    "pickup/core_1.ogg",
+    "pickup/core_2.ogg",
+    "pickup/core_3.ogg"
+  ],
+  "powerup": [
+    "pickup/powerup_1.ogg",
+    "pickup/powerup_2.ogg"
+  ],
+  "life_up": [
+    "pickup/life_up_1.ogg",
+    "pickup/life_up_2.ogg"
+  ],
+  "shield_up": [
+    "pickup/shield_up_1.ogg",
+    "pickup/shield_up_2.ogg"
+  ],
+  "style_up": [
+    "pickup/style_up_1.ogg",
+    "pickup/style_up_2.ogg"
+  ],
+  "ui_click": [
+    "ui/ui_click_1.ogg",
+    "ui/ui_click_2.ogg"
+  ],
+  "weapon_switch": [
+    "ui/weapon_switch_1.ogg"
+  ],
+  "heavy_switch": [
+    "ui/heavy_switch_1.ogg",
+    "ui/heavy_switch_2.ogg"
+  ],
+  "refit_open": [
+    "ui/refit_open_1.ogg",
+    "ui/refit_open_2.ogg"
+  ],
+  "buy": [
+    "ui/buy_1.ogg",
+    "ui/buy_2.ogg"
+  ],
+  "buy_fail": [
+    "ui/buy_fail_1.ogg"
+  ],
+  "sector_clear": [
+    "ui/sector_clear_1.ogg",
+    "ui/sector_clear_2.ogg"
+  ],
+  "pause": [
+    "ui/pause_1.ogg"
+  ]
+}

@@ -443,7 +443,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2565';
+const W=630,H=840; const VERSION='2566';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -542,15 +542,19 @@ const Audio_={ctx:null,muted:false,master:null,
       try{ a.volume=Math.max(0,Math.min(1, v+(target>v?0.045:-0.045))); }catch(e){} },30);
   },
   applyMute(){ if(this._bgmTimer){clearInterval(this._bgmTimer);this._bgmTimer=null;} if(this._bgm){ try{ this._bgm.volume=this.muted?0:this.musicVol; }catch(e){} } },
-  _bgmLane:null,
+  _bgmLane:null, _bgmFile:null,
   lane(name){
-    if(!name){ this._bgmLane=null; this.music(false); return; }
-    let folder=(MUSIC[name]&&MUSIC[name].length)?name:'idea';
+    if(!name){ this._bgmLane=null; this._bgmFile=null; this.music(false); return; }
+    // boss lanes use a "boss:<fk>" key so they always differ from the gameplay lane and pull from that faction's folder
+    const isBoss=name.indexOf('boss:')===0, key=isBoss?name.slice(5):name;
+    let folder=(MUSIC[key]&&MUSIC[key].length)?key:(isBoss?'boss':'idea');
     let list=MUSIC[folder]||[];
-    if(!list.length){ this._bgmLane=null; this.music(false); return; }
+    if(!list.length){ this._bgmLane=null; this._bgmFile=null; this.music(false); return; }
     if(this._bgmLane===name && this._bgm && !this._bgm.paused) return;
-    this._bgmLane=name; this._bgmTrack=null;
-    const file=list[(Math.random()*list.length)|0];
+    // pick a track, avoiding the one already playing so the lane change is audible
+    let choices=(list.length>1)?list.filter(f=>f!==this._bgmFile):list; if(!choices.length)choices=list;
+    const file=choices[(Math.random()*choices.length)|0];
+    this._bgmLane=name; this._bgmFile=file; this._bgmTrack=null;
     if(!this._bgm){ try{ this._bgm=new Audio(); this._bgm.loop=true; this._bgm.preload='auto'; this._bgm.volume=0; }catch(e){ return; } }
     const a=this._bgm, A=this, src='audio/'+folder+'/'+file;
     const swap=()=>{ try{ a.src=src; a.currentTime=0; const p=a.play(); if(p&&p.catch)p.catch(()=>{}); }catch(e){} A._mfade(A.muted?0:A.musicVol,null); };
@@ -1307,7 +1311,7 @@ function slotFilled(i){ for(const e of enemies) if(!e.dead && e.slot===i) return
 function spawnWave(){
   waveIdx++;
   waveFk=runFactionSeq.length?runFactionSeq[(waveIdx-1)%runFactionSeq.length]:FKEYS[0];
-  if(state==='play' && !boss) Audio_.lane(waveFk);
+  if(state==='play' && !boss) Audio_.lane(sectorTheme().fk||'idea');
   const pool=['formation','stream','sweep'].filter(t=>t!==spawnWave._last);
   const type=pick(pool); spawnWave._last=type;
   if(type==='formation'){
@@ -1364,7 +1368,7 @@ function spawnBoss(forceFk){
     bi.style.background=F.c; bi.style.boxShadow='0 0 10px '+F.c; bi.style.transform='scaleX(1)'; }
   warpT=Math.max(warpT,1.0);
   bossCard={mode:'enter',name:(BOSSNAME[fk]||F.name),sub:'SECTOR BOSS',c:F.c,t:0,dur:2.4};
-  Audio_.lane('boss');
+  Audio_.lane('boss:'+fk);
 }
 
 /* ============================= player ============================= */
@@ -2470,7 +2474,7 @@ function finishBoss(){ runBosses++; const b=boss;
   pods.push({x:b.x,y:b.y,vy:34,type:'core',fk:b.fk,c:b.c,bob:rnd(0,6.28),r:16,spin:0});
   for(let i=0;i<4;i++) pods.push({x:b.x+rnd(-40,40),y:b.y+rnd(-10,20),vy:rnd(40,60),type:'coin',c:COL.gold,bob:rnd(0,6.28),r:11});
   document.getElementById('bossname').style.display='none'; document.getElementById('bossbar').style.display='none';
-  boss=null; fleet=null; bossSpoils=2.8; Audio_.lane(waveFk||'idea');
+  boss=null; fleet=null; bossSpoils=2.8; Audio_.lane(sectorTheme().fk||'idea');
   station={x:W*0.5, y:-130, tx:W*0.5, ty:H*0.42, phase:'arrive', t:0, beam:0, hum:rnd(0,6.28), vy:0};
 }
 function updateStation(dt){ const st=station; if(!st)return; st.t+=dt; st.hum+=dt*1.4;
@@ -2510,7 +2514,7 @@ function openRefit(){ state='refit'; document.getElementById('touch').classList.
 function launchFromRefit(){ sector++; waveIdx=0; waveTimer=1.6; bossPending=false; fleet=null;
   sectorKills=0; killsForBoss=48+sector*14; hybridTimer=rnd(6,10);
   if(station){ station.phase='depart'; station.vy=-60; }
-  player.beamE=player.beamMax; triggerBanner(); state='play'; showOverlay(null); Audio_.lane(waveFk||'idea');
+  player.beamE=player.beamMax; triggerBanner(); state='play'; showOverlay(null); Audio_.lane(sectorTheme().fk||'idea');
   document.getElementById('touch').classList.toggle('hidden', !isTouch); }
 /* ---- shared shop rendering (icons + cards + previews) ---- */
 function svgI(p){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+p+'</svg>'; }
