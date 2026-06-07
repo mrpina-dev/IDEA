@@ -443,7 +443,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2566';
+const W=630,H=840; const VERSION='2567';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -561,6 +561,7 @@ const Audio_={ctx:null,muted:false,master:null,
     if(a.src && !a.paused){ this._mfade(0,swap); } else { swap(); }
   },
 };
+window.Audio_=Audio_;
 
 /* ============================= state ============================= */
 let state='title', t=0, last=performance.now();
