@@ -1493,8 +1493,8 @@ function playerHit(){
   if(window.__devGod)return;
   if(player.inv>0||player.dead)return;
   runHits++;
-  if(player.shieldHits>0){ player.shieldHits--; player.dmgFlash=.18; player.inv=(gameMode==='hardcore'?0.25:0.4); Audio_.hit(); return; }
-  player.armor--; player.inv=(gameMode==='hardcore'?0.40:0.6); player.dmgFlash=.2; styleHit(); Audio_.hit();
+  if(player.shieldHits>0){ player.shieldHits--; player.dmgFlash=.18; player.inv=(gameMode==='hardcore'?0.25:0.4); ((player.shieldHits<=0)?((Audio_.play&&Audio_.play('shield_break'))||Audio_.hit()):((Audio_.play&&Audio_.play('shield_hit'))||Audio_.hit())); return; }
+  player.armor--; player.inv=(gameMode==='hardcore'?0.40:0.6); player.dmgFlash=.2; styleHit(); (Audio_.play&&Audio_.play('player_hit'))||Audio_.hit();
   for(let k=0;k<10;k++) parts.push({x:player.x,y:player.y,vx:rnd(-80,80),vy:rnd(-80,80),life:.25,max:.25,c:COL.green,sz:1.8});
   shake=Math.max(shake,6);
   if(player.armor<=0){ explode(player.x,player.y,COL.green,true); Audio_.big(); shake=14;
@@ -1594,14 +1594,14 @@ function applyPod(p){
       else if(player.shieldHits<3){ player.shieldHits++; txt='CORE  SHIELD'; }
       else if(!player.drone){ player.drone={ph:0}; txt='CORE  DRONE'; }
       else { player.coins+=100; runCoinsEarned+=100; txt='CORE  +'+(jack+100)+' i\u00a2'; } }
-    Audio_.pickup(); shake=Math.max(shake,5);
+    ((Audio_.play&&Audio_.play('core'))||Audio_.pickup()); shake=Math.max(shake,5);
     for(let k=0;k<18;k++) parts.push({x:p.x,y:p.y,vx:rnd(-160,160),vy:rnd(-160,160),life:.5,max:.5,c:p.c,sz:2});
     pops.push({x:p.x,y:p.y-8,txt:txt,c:p.c,life:1.4,max:1.4}); return; }
   if(p.type==='pwr'){
     player.buffs[p.buff]=8;
     pops.push({x:p.x,y:p.y-6,txt:{overdrive:'OVERDRIVE',scatter:'SCATTER',magnet:'MAGNET'}[p.buff],c:p.c,life:.8,max:.8});
-    Audio_.power(); return; }
-  Audio_.pickup();
+    (Audio_.play&&Audio_.play('powerup'))||Audio_.power(); return; }
+  (Audio_.play&&Audio_.play(p.type==='coin'?'coin':p.type==='shield'?'shield_up':p.type==='1up'?'life_up':'coin'))||Audio_.pickup();
   if(p.type==='coin'){ player.coins+=60; runCoinsEarned+=60; addScore(60,p.x,p.y,COL.gold); }
   else if(p.type==='shield'){ player.shieldHits=Math.min(3,player.shieldHits+1); }
   else if(p.type==='1up'){ player.lives=Math.min(4,player.lives+1); }
@@ -1665,7 +1665,7 @@ const HEAVYNAME={beam:'PRISM BEAM',rail:'RAILGUN',tesla:'TESLA',singularity:'SIN
 function heavyChargeTime(h){ const base=h==='wave'?1.2:h==='rail'?0.7:h==='singularity'?0.5:0.4; const lv=(player&&player.up&&player.up.heavyChg)||1; return base*(1-(lv-1)*0.13); }
 function heavyCost(h){ return h==='wave'?1.0 : h==='rail'?0.5 : h==='singularity'?0.6 : 0; }
 function cycleHeavy(){ if(!player)return; const list=HEAVIES.filter(h=>player.heavyUnlocked&&player.heavyUnlocked[h]); if(list.length<2)return;
-  const i=list.indexOf(player.heavy); player.heavy=list[(i+1)%list.length]; player.heavyCharge=0; player.beamLock=false; Audio_.hit(); }
+  const i=list.indexOf(player.heavy); player.heavy=list[(i+1)%list.length]; player.heavyCharge=0; player.beamLock=false; ((Audio_.play&&Audio_.play('heavy_switch'))||Audio_.hit()); }
 function beamColumnDamage(pl,dt){ const bx=pl.x;
   const col=enemies.filter(e=>!e.dead && Math.abs(e.x-bx)<24 && e.y<pl.y-18).sort((a,b)=>b.y-a.y);
   const np=pl.beamPierce;
@@ -1685,12 +1685,12 @@ function fireHeavyShot(pl,h,charge){
   pl.beamE -= heavyCost(h)*pl.beamMax; pl.beamCoolT=pl.beamCool||0.6; const hm=pl.heavyMult||1;
   if(h==='rail'){ const dmg=(40*hm)*(0.4+0.6*charge);
     pbul.push({x:pl.x,y:pl.y-20,vx:0,vy:-1500,c:COL.cyan,r:5,dmg,pierce:true,len:30,rail:true});
-    Audio_.blast(); shake=Math.max(shake,5+charge*6); rings.push({x:pl.x,y:pl.y-20,r:6,vr:240,life:.3,max:.3,c:COL.cyan}); }
+    ((Audio_.play&&Audio_.play('rail'))||Audio_.blast()); shake=Math.max(shake,5+charge*6); rings.push({x:pl.x,y:pl.y-20,r:6,vr:240,life:.3,max:.3,c:COL.cyan}); }
   else if(h==='singularity'){ const sa=(pl.up.singAmp||1);
     holes.push({x:pl.x,y:pl.y-30,ty:rnd(H*0.22,H*0.40),vy:-200,state:'travel',t:0,r:0,maxr:128+sa*22,pull:220+sa*42,dur:1.4+sa*0.25,dmg:(13*hm)*(0.85+sa*0.15),core:0});
-    Audio_.whine(0.5); shake=Math.max(shake,5); }
+    ((Audio_.play&&Audio_.play('singularity'))||Audio_.whine(0.5)); shake=Math.max(shake,5); }
   else if(h==='wave'){ const wp=(pl.up.wavePow||1); pl.waveT=0.6+wp*0.06; pl.beamE=0; pl.beamLock=true; pl.beamCoolT=(pl.beamCool||0.6)+2.0;
-    Audio_.big(); shake=Math.max(shake,18); bossFlash=Math.max(bossFlash,0.6); } }
+    ((Audio_.play&&Audio_.play('wave'))||Audio_.big()); shake=Math.max(shake,18); bossFlash=Math.max(bossFlash,0.6); } }
 function updateHeavy(pl,dt){ const h=pl.heavy||'beam';
   if(pl.waveT>0){ pl.waveT-=dt; const wp=(pl.up.wavePow||1), ww=120+wp*22, dps=650+wp*220;
     for(const e of enemies){ if(e.dead)continue; if(Math.abs(e.x-pl.x)<ww && e.y<pl.y){ e.hp-=dt*dps; e.flash=.1; if(e.hp<=0){ window.killSrc='wave'; killEnemy(e); } } }
@@ -2472,6 +2472,7 @@ function finishBoss(){ runBosses++; const b=boss;
   for(let i=0;i<30;i++){ const a=rnd(0,6.28),sp=rnd(80,360); shards.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,rot:rnd(0,6.28),vr:rnd(-10,10),len:rnd(8,22),life:rnd(.6,1.2),max:1,c:b.c}); }
   addScore(2000+sector*500,b.x,b.y,b.c);
   pods.push({x:b.x,y:b.y,vy:34,type:'core',fk:b.fk,c:b.c,bob:rnd(0,6.28),r:16,spin:0});
+  Audio_.play&&Audio_.play('boss_death');
   for(let i=0;i<4;i++) pods.push({x:b.x+rnd(-40,40),y:b.y+rnd(-10,20),vy:rnd(40,60),type:'coin',c:COL.gold,bob:rnd(0,6.28),r:11});
   document.getElementById('bossname').style.display='none'; document.getElementById('bossbar').style.display='none';
   boss=null; fleet=null; bossSpoils=2.8; Audio_.lane(sectorTheme().fk||'idea');
@@ -2507,7 +2508,7 @@ function drawStation(){ const st=station; if(!st)return; const x=st.x,y=st.y,r=3
   dot(bg,0,r*0.62,3*(0.6+0.4*Math.sin(hum*4)),COL.white);
   bg.shadowBlur=0; bg.restore();
 }
-function openRefit(){ state='refit'; document.getElementById('touch').classList.add('hidden');
+function openRefit(){ state='refit'; Audio_.play&&Audio_.play('refit_open'); document.getElementById('touch').classList.add('hidden');
   el('refitNext').textContent=roman(sector+1); buildRefit(); showOverlay('ovlRefit');
   const w=el('refitWrap'); if(w){ w.classList.remove('warp'); void w.offsetWidth; w.classList.add('warp'); }
   Audio_.power(); Audio_.lane('refit'); }
@@ -2599,8 +2600,8 @@ function nextWeaponName(){ const w=nextWeapon(); return w.toUpperCase()+(player.
 function weaponCost(){ return player.unlocked[nextWeapon()]?0:350; }
 function buyWeapon(){ const w=nextWeapon(); player.unlocked[w]=1; player.wtype=w; }
 function switchWeapon(){ const list=WEAPONS.filter(w=>player.unlocked[w]); if(list.length<2)return;
-  const i=list.indexOf(player.wtype); player.wtype=list[(i+1)%list.length]; Audio_.hit(); }
-function selectWeapon(w){ if(state!=='play'||!player||!player.unlocked||!player.unlocked[w]||player.wtype===w)return; player.wtype=w; Audio_.hit(); }
+  const i=list.indexOf(player.wtype); player.wtype=list[(i+1)%list.length]; ((Audio_.play&&Audio_.play('weapon_switch'))||Audio_.hit()); }
+function selectWeapon(w){ if(state!=='play'||!player||!player.unlocked||!player.unlocked[w]||player.wtype===w)return; player.wtype=w; (Audio_.play&&Audio_.play('weapon_switch'))||Audio_.hit(); }
 function setAutofire(v){ autofire=v; try{localStorage.setItem('vanguard_autofire',v?'1':'0');}catch(e){} const b=el('autofireBtn'); if(b)b.textContent='AUTO-FIRE: '+(v?'ON':'OFF'); }
 function setLowFX(v){ LOWFX=!!v; try{localStorage.setItem('vanguard_lowfx',v?'1':'0');}catch(e){} const b=el('lowfxBtn'); if(b)b.textContent='LOW FX: '+(v?'ON':'OFF'); }
 function setMoveMode(v){ moveMode_pref=(v==='lock'?'lock':'hold'); try{localStorage.setItem('vanguard_movemode',moveMode_pref);}catch(e){} const b=el('moveModeBtn'); if(b)b.textContent='MOUSE MOVE: '+(moveMode_pref==='lock'?'POINTER LOCK':'FOLLOW'); if(moveMode_pref!=='lock' && document.pointerLockElement){ try{document.exitPointerLock();}catch(e){} } if(typeof refreshControlsHint==='function') refreshControlsHint(); }
@@ -2608,8 +2609,8 @@ function buildRefit(){ el('refitBal').textContent=player.coins.toLocaleString();
   renderShopGrid(el('refitItems'), refitItems(), {
     afford:it=>{ const maxed=(it.mx>0&&it.lv>=it.mx)||!it.can; return !maxed && player.coins>=it.cost; },
     onBuy:(i)=>{ const it=refitItems()[i]; const maxed=(it.mx>0&&it.lv>=it.mx)||!it.can;
-      if(maxed||!it.can||player.coins<it.cost){ Audio_.hit(); return; }
-      player.coins-=it.cost; runCoinsSpent+=it.cost; it.buy(); applyUpgrades(); Audio_.pickup(); buildRefit(); }
+      if(maxed||!it.can||player.coins<it.cost){ (Audio_.play&&Audio_.play('buy_fail'))||Audio_.hit(); return; }
+      player.coins-=it.cost; runCoinsSpent+=it.cost; it.buy(); applyUpgrades(); ((Audio_.play&&Audio_.play('buy'))||Audio_.pickup()); buildRefit(); }
   });
 }
 const _delayed=[];
@@ -3657,6 +3658,79 @@ requestAnimationFrame(frame);
     if(active)sv.textContent='S'+sector;
     requestAnimationFrame(vis); })();
 })();
+})();
+</script>
+<script>
+/* VANGUARD SFX sample layer */
+(function(){
+  if(typeof Audio_==='undefined') return;
+  if(Audio_._sfxLayer) return;
+  Audio_._sfxLayer=true;
+  var SFX={
+    fire_spread:["fire/fire_spread_1.ogg","fire/fire_spread_2.ogg"],
+    fire_rapid:["fire/fire_rapid_1.ogg","fire/fire_rapid_2.ogg","fire/fire_rapid_3.ogg"],
+    fire_lance:["fire/fire_lance_1.ogg","fire/fire_lance_2.ogg"],
+    fire_homing:["fire/fire_homing_1.ogg","fire/fire_homing_2.ogg"],
+    heavy_charge:["heavy/heavy_charge_1.ogg","heavy/heavy_charge_2.ogg"],
+    heavy_ready:["heavy/heavy_ready_1.ogg","heavy/heavy_ready_2.ogg"],
+    beam:["heavy/beam_1.ogg","heavy/beam_2.ogg"],
+    rail:["heavy/rail_1.ogg","heavy/rail_2.ogg"],
+    tesla:["heavy/tesla_1.ogg","heavy/tesla_2.ogg"],
+    singularity:["heavy/singularity_1.ogg","heavy/singularity_2.ogg"],
+    wave:["heavy/wave_1.ogg","heavy/wave_2.ogg"],
+    bomb:["defense/bomb_1.ogg","defense/bomb_2.ogg","defense/bomb_3.ogg"],
+    parry:["defense/parry_1.ogg","defense/parry_2.ogg"],
+    parry_hit:["defense/parry_hit_1.ogg","defense/parry_hit_2.ogg"],
+    shield_hit:["defense/shield_hit_1.ogg","defense/shield_hit_2.ogg"],
+    shield_break:["defense/shield_break_1.ogg","defense/shield_break_2.ogg"],
+    player_hit:["defense/player_hit_1.ogg","defense/player_hit_2.ogg"],
+    overheat:["defense/overheat_1.ogg","defense/overheat_2.ogg"],
+    overheat_ready:["defense/overheat_ready_1.ogg","defense/overheat_ready_2.ogg"],
+    death:["defense/death_1.ogg","defense/death_2.ogg"],
+    hit:["impact/hit_1.ogg","impact/hit_2.ogg","impact/hit_3.ogg"],
+    kill:["impact/kill_1.ogg","impact/kill_2.ogg"],
+    big:["impact/big_1.ogg","impact/big_2.ogg"],
+    blast:["impact/blast_1.ogg","impact/blast_2.ogg"],
+    enemy_fire:["impact/enemy_fire_1.ogg"],
+    thump:["impact/thump_1.ogg","impact/thump_2.ogg"],
+    wub:["impact/wub_1.ogg","impact/wub_2.ogg"],
+    whine:["impact/whine_1.ogg","impact/whine_2.ogg"],
+    boss_warn:["boss/boss_warn_1.ogg","boss/boss_warn_2.ogg"],
+    boss_phase:["boss/boss_phase_1.ogg","boss/boss_phase_2.ogg"],
+    boss_death:["boss/boss_death_1.ogg","boss/boss_death_2.ogg"],
+    coin:["pickup/coin_1.ogg","pickup/coin_2.ogg"],
+    core:["pickup/core_1.ogg","pickup/core_2.ogg","pickup/core_3.ogg"],
+    powerup:["pickup/powerup_1.ogg","pickup/powerup_2.ogg"],
+    life_up:["pickup/life_up_1.ogg","pickup/life_up_2.ogg"],
+    shield_up:["pickup/shield_up_1.ogg","pickup/shield_up_2.ogg"],
+    style_up:["pickup/style_up_1.ogg","pickup/style_up_2.ogg"],
+    ui_click:["ui/ui_click_1.ogg","ui/ui_click_2.ogg"],
+    weapon_switch:["ui/weapon_switch_1.ogg"],
+    heavy_switch:["ui/heavy_switch_1.ogg","ui/heavy_switch_2.ogg"],
+    refit_open:["ui/refit_open_1.ogg","ui/refit_open_2.ogg"],
+    buy:["ui/buy_1.ogg","ui/buy_2.ogg"],
+    buy_fail:["ui/buy_fail_1.ogg"],
+    sector_clear:["ui/sector_clear_1.ogg","ui/sector_clear_2.ogg"],
+    pause:["ui/pause_1.ogg"]
+  };
+  Audio_.sfxBuf={}; Audio_.sfxGain=null; Audio_.sfxVol=0.6; Audio_._sfxLoaded=false;
+  Audio_.loadSfx=function(){ if(this._sfxLoaded||!this.ctx) return; this._sfxLoaded=true; var A=this;
+    Object.keys(SFX).forEach(function(slot){ A.sfxBuf[slot]=A.sfxBuf[slot]||[];
+      SFX[slot].forEach(function(rel){ fetch('audio/sfx/'+rel).then(function(r){return r.arrayBuffer();})
+        .then(function(ab){return A.ctx.decodeAudioData(ab);})
+        .then(function(b){A.sfxBuf[slot].push(b);}).catch(function(){}); }); }); };
+  Audio_.play=function(slot){ var list=this.sfxBuf[slot]; if(!list||!list.length) return false;
+    if(this.muted) return true; if(!this.ctx) return true;
+    try{ if(!this.sfxGain){ this.sfxGain=this.ctx.createGain(); this.sfxGain.gain.value=this.sfxVol; this.sfxGain.connect(this.ctx.destination); }
+      var s=this.ctx.createBufferSource(); s.buffer=list[(Math.random()*list.length)|0]; s.connect(this.sfxGain); s.start(); }catch(e){}
+    return true; };
+  var _init = Audio_.init ? Audio_.init.bind(Audio_) : null;
+  if(_init){ Audio_.init=function(){ _init(); try{ Audio_.loadSfx(); }catch(e){} }; }
+  if(Audio_.ctx){ try{ Audio_.loadSfx(); }catch(e){} }
+  var map={kill:'kill',big:'big',blast:'blast',beam:'beam',bomb:'bomb',parry:'parry',parryHit:'parry_hit',thump:'thump',whine:'whine',wub:'wub',phase:'boss_phase',death:'death',bossWarn:'boss_warn',sector:'sector_clear'};
+  Object.keys(map).forEach(function(m){ var slot=map[m], orig=Audio_[m]; if(typeof orig!=='function') return;
+    Audio_[m]=function(){ if(this.play(slot)) return; return orig.apply(this,arguments); }; });
+  document.addEventListener('click',function(e){ if(e.target&&e.target.closest&&e.target.closest('button,.btn,.modebtn,.btab,.mini')) Audio_.play('ui_click'); }, true);
 })();
 </script>
 </body>
