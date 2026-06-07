@@ -443,7 +443,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2567';
+const W=630,H=840; const VERSION='2568';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -3714,16 +3714,23 @@ requestAnimationFrame(frame);
     sector_clear:["ui/sector_clear_1.ogg","ui/sector_clear_2.ogg"],
     pause:["ui/pause_1.ogg"]
   };
-  Audio_.sfxBuf={}; Audio_.sfxGain=null; Audio_.sfxVol=0.6; Audio_._sfxLoaded=false;
+  Audio_.sfxBuf={}; Audio_.sfxGain=null; Audio_.sfxVol=0.3; Audio_._sfxLoaded=false; Audio_._sfxLast={}; Audio_._sfxActive={}; Audio_._sfxVoices=0;
   Audio_.loadSfx=function(){ if(this._sfxLoaded||!this.ctx) return; this._sfxLoaded=true; var A=this;
     Object.keys(SFX).forEach(function(slot){ A.sfxBuf[slot]=A.sfxBuf[slot]||[];
       SFX[slot].forEach(function(rel){ fetch('audio/sfx/'+rel).then(function(r){return r.arrayBuffer();})
         .then(function(ab){return A.ctx.decodeAudioData(ab);})
         .then(function(b){A.sfxBuf[slot].push(b);}).catch(function(){}); }); }); };
-  Audio_.play=function(slot){ var list=this.sfxBuf[slot]; if(!list||!list.length) return false;
+  Audio_.play=function(slot){ var list=this.sfxBuf[slot]; if(!list||!list.length) return false;  // not loaded -> caller falls back to synth
     if(this.muted) return true; if(!this.ctx) return true;
-    try{ if(!this.sfxGain){ this.sfxGain=this.ctx.createGain(); this.sfxGain.gain.value=this.sfxVol; this.sfxGain.connect(this.ctx.destination); }
-      var s=this.ctx.createBufferSource(); s.buffer=list[(Math.random()*list.length)|0]; s.connect(this.sfxGain); s.start(); }catch(e){}
+    var now=this.ctx.currentTime;
+    if(this._sfxLast[slot]!==undefined && now-this._sfxLast[slot]<0.05) return true;   // de-spam: same slot can't retrigger within 50ms
+    if((this._sfxActive[slot]||0)>=2) return true;                                     // cap each slot to 2 overlapping voices
+    if(this._sfxVoices>=12) return true;                                               // global voice cap
+    try{ if(!this.sfxGain){ this.sfxGain=this.ctx.createGain(); this.sfxGain.gain.value=this.sfxVol; this.sfxGain.connect(this.master||this.ctx.destination); }
+      var s=this.ctx.createBufferSource(); s.buffer=list[(Math.random()*list.length)|0]; s.connect(this.sfxGain);
+      var A=this; this._sfxLast[slot]=now; this._sfxActive[slot]=(this._sfxActive[slot]||0)+1; this._sfxVoices++;
+      s.onended=function(){ A._sfxActive[slot]=Math.max(0,(A._sfxActive[slot]||1)-1); A._sfxVoices=Math.max(0,A._sfxVoices-1); };
+      s.start(); }catch(e){ this._sfxActive[slot]=Math.max(0,(this._sfxActive[slot]||1)-1); this._sfxVoices=Math.max(0,this._sfxVoices-1); }
     return true; };
   var _init = Audio_.init ? Audio_.init.bind(Audio_) : null;
   if(_init){ Audio_.init=function(){ _init(); try{ Audio_.loadSfx(); }catch(e){} }; }
