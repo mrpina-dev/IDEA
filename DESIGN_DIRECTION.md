@@ -64,6 +64,7 @@ Locked design forks (do not re-litigate):
   set-piece fix is the precedent: spread cones with threadable gaps, prominent
   red danger zones, real wind-up time. Hard is fine; cheap is not.
 - Visual identity LOCKS before behavior/animation work begins. Always.
+- Enemies never teleport-despawn off the bottom: divers pull out and climb back (telegraphed, no-fire low, briefly non-contact). Off-screen popping is a bug.
 
 ### Pillar 3: Beautifully violent
 - The chosen feel is visceral/chunky: heavy kick, freeze-frame shock rings on

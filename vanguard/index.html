@@ -446,7 +446,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2572';
+const W=630,H=840; const VERSION='2573';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -1324,6 +1324,15 @@ function spawnFormationOccupant(i,fromTop){
   e.slot=i; enemies.push(e);
 }
 function slotFilled(i){ for(const e of enemies) if(!e.dead && e.slot===i) return true; return false; }
+function climbCount(){ let n=0; for(const e of enemies) if(!e.dead && e.state==='climb') n++; return n; }
+/* a bottom-bound diver/free enemy pulls out and climbs back instead of despawning off-screen */
+function startClimb(e){
+  if(climbCount()>=3){ e.dead=true; e.dt=0; e.gone=true; return; }   // pressure valve: 4th would crowd the bottom -> despawn
+  e.state='climb'; e.climbT=0; e.climbV0=e.vy;
+  // engine-flare telegraph: downward thrust burst + ring at the pull-out
+  for(let k=0;k<7;k++) parts.push({x:e.x+rnd(-e.r*0.4,e.r*0.4),y:e.y+e.r*0.5,vx:rnd(-30,30),vy:rnd(120,230),life:.35,max:.35,c:Math.random()<0.5?COL.cyan:e.c,sz:rnd(1.6,2.6)});
+  rings.push({x:e.x,y:e.y,r:e.r*0.5,vr:160,life:.3,max:.3,c:COL.cyan});
+}
 
 function spawnWave(){
   waveIdx++;
@@ -1991,7 +2000,14 @@ function update(dt){
     } else if(e.state==='dive'){
       e.vy+=240*dt; if(e.y<H*0.62) e.vx+=(player.x-e.x)*dt*1.6; e.vx*=0.99; e.x+=e.vx*dt; e.y+=e.vy*dt; e.bank=e.vx*0.05;
       e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(1.8,2.8)/((1+sector*0.16)*(gameMode==='hardcore'?1.25:1))); factionFire(e); }
-      if(e.y>H+40){ e.dead=true; e.dt=0; e.gone=true; }
+      if(e.vy>0 && e.y>H-70){ startClimb(e); }   // pull out instead of dropping off the bottom
+    } else if(e.state==='climb'){
+      e.climbT+=dt; const k=clamp(e.climbT/0.5,0,1);
+      e.vy=e.climbV0+(-160-e.climbV0)*k;                                   // ramp vy to a climb over 0.5s
+      let tx; if(e.slot>=0){ const s=slots[e.slot]; tx=fleet?fleet.x+(s?s.ox:0):e.x; } else { tx=(e.x<W/2)?40:W-40; }   // slot x, or nearest edge for free
+      e.vx+=(tx-e.x)*dt*2.2; e.vx*=0.95; e.x+=e.vx*dt; e.y+=e.vy*dt; e.bank=e.vx*0.05;
+      if(e.y<H*0.70){ e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(2.0,3.0)/((1+sector*0.16)*(gameMode==='hardcore'?1.25:1))); factionFire(e); } }   // no fire while low
+      if(e.y<H*0.45){ if(e.slot>=0){ e.state='reenter'; } else { e.state='free'; e.vy=Math.max(40,e.climbV0); } }   // handoff back to slot / free
     } else if(e.state==='weave'){
       e.y+=e.vy*dt; e.x=e.baseX+Math.sin(e.t*e.freq+e.phase)*e.amp*e.wdir; e.bank=Math.cos(e.t*e.freq+e.phase)*8*e.wdir;
       e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(2.5,3.5)/((1+sector*0.16)*(gameMode==='hardcore'?1.25:1))); if(e.y>0&&e.y<H*0.7) factionFire(e); }
@@ -2040,10 +2056,10 @@ function update(dt){
       if(Math.random()<0.6) parts.push({x:e.x+rnd(-br,br),y:e.y-rnd(0,br),vx:rnd(-55,55),vy:rnd(-120,-30),life:.6,max:.6,c:e.c,sz:1.9});
     } else { // free
       e.y+=e.vy*dt; e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(2.0,3.5)/((1+sector*0.16)*(gameMode==='hardcore'?1.25:1))); factionFire(e); }
-      if(e.y>H+40){ e.dead=true; e.dt=0; e.gone=true; }
+      if(e.vy>0 && e.y>H-70){ startClimb(e); }   // pull out instead of dropping off the bottom
     }
-    // contact with player
-    if(!player.dead && player.inv<=0 && dist2(e.x,e.y,player.x,player.y)<(e.r+10)*(e.r+10)){
+    // contact with player (disabled for the first 0.4s of a pull-out climb)
+    if(!e.dead && !player.dead && player.inv<=0 && !(e.state==='climb'&&e.climbT<0.4) && dist2(e.x,e.y,player.x,player.y)<(e.r+10)*(e.r+10)){
       lastHitBy=e; e.hp-=2; e.flash=.1; playerHit(); if(e.hp<=0)killEnemy(e);
     }
   });
