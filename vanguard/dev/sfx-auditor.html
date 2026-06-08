@@ -85,7 +85,7 @@ input[type=range]{accent-color:var(--green)}.vol{display:flex;align-items:center
 <body>
 <div id="busy"></div>
 <div class="bar">
-  <div class="title">IDEA<small> // </small>VANGUARD<small> SFX v8</small></div>
+  <div class="title">IDEA<small> // </small>VANGUARD<small> SFX v9</small></div>
   <button id="folderBtn" class="hot">&#128193; Folder</button><button id="addBtn">+ Files</button>
   <button id="slotsTab" class="active">Slots</button><button id="browseTab">Browser</button><button id="covTab">Coverage</button>
   <button id="audBtn">Audition</button><button id="stopBtn">&#9632; Stop</button><button id="lvlBtn" class="active">Level: ON</button>
@@ -102,64 +102,110 @@ input[type=range]{accent-color:var(--green)}.vol{display:flex;align-items:center
 <script>
 const R=(n,y)=>({n,y});
 const SLOTS=[
- {g:"PRIMARY",id:"shoot",nm:"shoot",ch:"Primary fire. Dry kinetic crack.",hunt:"gun, blaster, futuristic",tgt:120,tol:60,dtype:"oneshot",suggest:[R("PM_SFG_VOL1_WEAPON_8_2_GUN_GUNSHOT_FUTURISTIC","2020"),R("Blast Laser 2","2020")]},
- {g:"PRIMARY",id:"rapid",nm:"rapid",ch:"RAPID fire. Tight, fires fast.",hunt:"auto, smg, burst",tgt:90,tol:50,dtype:"oneshot",suggest:[R("gun_submachine_auto_shot_00_automatic_preview_01","2018")]},
- {g:"HEAVY / BEAM",id:"beam_charge",nm:"beam_charge",ch:"Spool-up. Shrinks with SPOOL upgrade: pick a LOOPABLE body, trim the seamless middle.",hunt:"charge, spool, reactor, rise",rng:[400,1500],dtype:"var",suggest:[R("wave_swell_001","2018"),R("Drone_Tonal_Enigmatic_Saw_Shepard_Tone_Pitch_Rising","2020")]},
- {g:"HEAVY / BEAM",id:"beam_fire",nm:"beam_fire",ch:"Heavy/BEAM release. Roar.",hunt:"blast, beam, plasma",tgt:700,tol:400,dtype:"oneshot",suggest:[R("CK_Blaster_Shot-226","2016"),R("Big Blast 4","2020")]},
- {g:"HEAVY / BEAM",id:"heavy_ready",nm:"heavy_ready",ch:"Heavy charged cue. Bright confirm.",hunt:"ready, confirm",tgt:300,tol:150,dtype:"oneshot",suggest:[R("G4F SFX11 - ExoInterface - Action Confirm - Long 05","2018")]},
- {g:"HEAVY / BEAM",id:"heavy_switch",nm:"heavy_switch",ch:"Switch heavy. Mechanical clunk.",hunt:"switch, latch, clunk",tgt:200,tol:120,dtype:"oneshot",suggest:[R("Bluezone_BC0268_switch_button_click_high_tech_interface_001","2020")]},
- {g:"HEAVY / BEAM",id:"overheat",nm:"overheat",ch:"Nailgun overheats. Steam/lock.",hunt:"overheat, steam, vent",tgt:500,tol:300,dtype:"oneshot",suggest:[R("OverHeating_23","2020")]},
- {g:"HEAVY / BEAM",id:"overheat_ready",nm:"overheat_ready",ch:"Cooled, ready. Short ping.",hunt:"ping, ready",tgt:180,tol:120,dtype:"oneshot",suggest:[R("Interface Sci-Fi Ping Down","2026")]},
- {g:"IMPACTS / DEATHS",id:"enemy_hit",nm:"enemy_hit",ch:"Non-lethal hit. Tight thunk (fires constantly).",hunt:"impact, thud",tgt:110,tol:70,dtype:"oneshot",suggest:[R("IMPACT_LOW_THUD_10","2020")]},
- {g:"IMPACTS / DEATHS",id:"death_ace",nm:"death_ace",ch:"ACE death. Metal crunch.",hunt:"metal, crush, bulkhead",tgt:400,tol:250,dtype:"oneshot",suggest:[R("dry hard metal impact with rust debris 20","2016")]},
- {g:"IMPACTS / DEATHS",id:"death_bmet",nm:"death_bmet",ch:"BMET death. Wet burst.",hunt:"gore, crunch, splat",tgt:400,tol:250,dtype:"oneshot",suggest:[R("Heavy Body Crunch 02","2023")]},
- {g:"IMPACTS / DEATHS",id:"death_csee",nm:"death_csee",ch:"CSEE death. Electrical fry.",hunt:"electric, glitch, arc",tgt:400,tol:250,dtype:"oneshot",suggest:[R("Arc Weld Electrical Sparks 3","2018")]},
- {g:"IMPACTS / DEATHS",id:"death_mat",nm:"death_mat",ch:"MAT death. Optic/energy snap.",hunt:"glass shard, sparkly",weak:1,tgt:350,tol:200,dtype:"oneshot",suggest:[R("TextureGlassDebris_008","2016")]},
- {g:"IMPACTS / DEATHS",id:"death_mset",nm:"death_mset",ch:"MSET death. Crystalline break.",hunt:"ice, crystal, shatter",tgt:400,tol:250,dtype:"oneshot",suggest:[R("axe_ice_005","2016")]},
- {g:"IMPACTS / DEATHS",id:"big_kill",nm:"big_kill",ch:"Elite/hybrid death. Bigger.",hunt:"explosion small, big impact",tgt:700,tol:400,dtype:"oneshot",suggest:[R("Explosion 8","2018")]},
- {g:"IMPACTS / DEATHS",id:"boss_death",nm:"boss_death",ch:"Boss death. LAYER big explosions (use layers below).",hunt:"explosion, collapse, rupture",tgt:2500,tol:1500,dtype:"oneshot",suggest:[R("Bluezone_BC0275_building_collapse_debris_falling_rock_rubble_008","2023"),R("Rupture - Bulb_Impact_03","2016"),R("Explosion Warped","2018")]},
- {g:"IMPACTS / DEATHS",id:"boss_phase",nm:"boss_phase",ch:"Boss phase shift. Heavy stinger.",hunt:"stinger, braam, shift",tgt:1200,tol:700,dtype:"oneshot",suggest:[R("Mind Bender Stingers 06","2023")]},
- {g:"PLAYER",id:"player_hit",nm:"player_hit",ch:"Took damage. Harsh alarm.",hunt:"alarm, warning",tgt:300,tol:200,dtype:"oneshot",suggest:[R("SPACESHIP-INTERIORS-ALARM-7","2023")]},
- {g:"PLAYER",id:"shield",nm:"shield",ch:"Shield absorbs hit. Energy ring.",hunt:"shield, force field",tgt:350,tol:200,dtype:"oneshot",suggest:[R("CK_Force_Field_Loop-32","2016")]},
- {g:"PLAYER",id:"shield_break",nm:"shield_break",ch:"Shield destroyed. Shatter.",hunt:"shatter, glass break",tgt:600,tol:300,dtype:"oneshot",suggest:[R("TextureGlassDebris_008","2016")]},
- {g:"PLAYER",id:"parry",nm:"parry",ch:"Successful parry. Sharp metal ring.",hunt:"metal clash, ring, clang",tgt:180,tol:100,dtype:"oneshot",suggest:[R("METLImpt_METAL SWING HIT","2026")]},
- {g:"PLAYER",id:"parry_hit",nm:"parry_hit",ch:"Parry reflect. Bright ting.",hunt:"ricochet, ping, ting",tgt:150,tol:90,dtype:"oneshot",suggest:[R("Accent,Interface,UI,Alert,Resonant,Waver","2023")]},
- {g:"PLAYER",id:"player_death",nm:"player_death",ch:"Ship destroyed. Boom + downer, long.",hunt:"explosion big, downer",tgt:2000,tol:1200,dtype:"oneshot",suggest:[R("Downer 049","2020"),R("Distant Blast 26","2018")]},
- {g:"ECONOMY / PICKUPS",id:"coin",nm:"coin",ch:"Coin grab. Tiny tick (fires constantly).",hunt:"coin, money",tgt:110,tol:70,dtype:"oneshot",suggest:[R("264604 - Stack Coin Bag 04","2023")]},
- {g:"ECONOMY / PICKUPS",id:"powerup",nm:"powerup",ch:"Upgrade pickup. Ascending.",hunt:"powerup, collect",tgt:500,tol:300,dtype:"oneshot",suggest:[R("sci-fi_device_item_power_up_flash_01","2020")]},
- {g:"ECONOMY / PICKUPS",id:"core",nm:"core",ch:"CORE jackpot/life. Reward stinger.",hunt:"reward, jackpot, confirm",tgt:1200,tol:700,dtype:"oneshot",suggest:[R("G4F SFX11 - ExoInterface - Action Confirm - Long 05","2018")]},
- {g:"ECONOMY / PICKUPS",id:"buy",nm:"buy",ch:"REFIT purchase. Cash/confirm.",hunt:"purchase, register, confirm",tgt:400,tol:250,dtype:"oneshot",suggest:[R("G4F SFX11 - ExoInterface - Process - Short 06","2018")]},
- {g:"EVENTS / UI",id:"boss_spawn",nm:"boss_spawn",ch:"Boss warning. Dread braam.",hunt:"braam, horror, dread",tgt:1800,tol:1000,dtype:"oneshot",suggest:[R("Stinger-High10","2018"),R("Braam 004 (D)","2023")]},
- {g:"EVENTS / UI",id:"sector_clear",nm:"sector_clear",ch:"Sector cleared. Transition.",hunt:"transition, whoosh",tgt:1200,tol:700,dtype:"oneshot",suggest:[R("Dark_Sci-Fi_Transition_01","2023")]},
- {g:"EVENTS / UI",id:"ui_click",nm:"ui_click",ch:"Menu select. Thin, very tight.",hunt:"interface, click, beep",tgt:80,tol:50,dtype:"oneshot",suggest:[R("User Interface Click Button 25","2018")]},
+ {g:"FIRE",id:"fire_spread",nm:"fire_spread",folder:"fire",ch:"SPREAD primary fire. Dry kinetic crack.",hunt:"gun, blaster, futuristic",tgt:120,tol:60,dtype:"oneshot",suggest:[R("PM_SFG_VOL1_WEAPON_8_2_GUN_GUNSHOT_FUTURISTIC","2020"),R("Blast Laser 2","2020")]},
+ {g:"FIRE",id:"fire_rapid",nm:"fire_rapid",folder:"fire",ch:"RAPID primary fire. Tight, fires fast.",hunt:"auto, smg, burst",tgt:90,tol:50,dtype:"oneshot",suggest:[R("gun_submachine_auto_shot_00_automatic_preview_01","2018")]},
+ {g:"FIRE",id:"fire_lance",nm:"fire_lance",folder:"fire",ch:"LANCE piercing fire. Sharp, narrow.",hunt:"laser, pierce, beam shot",tgt:130,tol:70,dtype:"oneshot",suggest:[R("Blast Laser 2","2020")]},
+ {g:"FIRE",id:"fire_homing",nm:"fire_homing",folder:"fire",ch:"HOMING fire. Softer, tracking.",hunt:"missile, soft shot",tgt:120,tol:70,dtype:"oneshot",suggest:[]},
+ {g:"FIRE",id:"fire_flak",nm:"fire_flak",folder:"fire",ch:"FLAK primary. Scattered heavy burst.",hunt:"flak, scatter, shotgun, burst",tgt:140,tol:70,dtype:"oneshot",suggest:[R("Blast Laser 2","2020")]},
+ {g:"FIRE",id:"fire_buzzsaw",nm:"fire_buzzsaw",folder:"fire",ch:"BUZZSAW primary. Grinding rapid stream.",hunt:"saw, grind, buzz, whir",tgt:100,tol:60,dtype:"oneshot",suggest:[]},
+ {g:"FIRE",id:"overheat",nm:"overheat",folder:"fire",ch:"Rapid gun overheats. Steam/lock.",hunt:"overheat, steam, vent",tgt:500,tol:300,dtype:"oneshot",suggest:[R("OverHeating_23","2020")]},
+ {g:"FIRE",id:"overheat_ready",nm:"overheat_ready",folder:"fire",ch:"Cooled, ready. Short ping.",hunt:"ping, ready",tgt:180,tol:120,dtype:"oneshot",suggest:[R("Interface Sci-Fi Ping Down","2026")]},
+ {g:"HEAVY",id:"heavy_charge",nm:"heavy_charge",folder:"heavy",ch:"Heavy spool-up. Shrinks with SPOOL upgrade: LOOPABLE body, trim seamless middle.",hunt:"charge, spool, rise",rng:[400,1500],dtype:"var",suggest:[R("wave_swell_001","2018"),R("Drone_Tonal_Enigmatic_Saw_Shepard_Tone_Pitch_Rising","2020")]},
+ {g:"HEAVY",id:"heavy_ready",nm:"heavy_ready",folder:"heavy",ch:"Heavy recharged/ready. Bright confirm.",hunt:"ready, confirm",tgt:300,tol:150,dtype:"oneshot",suggest:[R("G4F SFX11 - ExoInterface - Action Confirm - Long 05","2018")]},
+ {g:"HEAVY",id:"heavy_switch",nm:"heavy_switch",folder:"heavy",ch:"Switch heavy weapon. Mechanical clunk.",hunt:"switch, latch, clunk",tgt:200,tol:120,dtype:"oneshot",suggest:[R("Bluezone_BC0268_switch_button_click_high_tech_interface_001","2020")]},
+ {g:"HEAVY",id:"beam",nm:"beam",folder:"heavy",ch:"BEAM heavy. Sustained roar.",hunt:"beam, plasma, blast",tgt:700,tol:400,dtype:"oneshot",suggest:[R("CK_Blaster_Shot-226","2016"),R("Big Blast 4","2020")]},
+ {g:"HEAVY",id:"rail",nm:"rail",folder:"heavy",ch:"RAIL heavy. Sharp pierce/crack.",hunt:"railgun, crack, pierce",tgt:500,tol:300,dtype:"oneshot",suggest:[R("Blast Laser 4","2020")]},
+ {g:"HEAVY",id:"tesla",nm:"tesla",folder:"heavy",ch:"TESLA heavy. Electric chain.",hunt:"electric, arc, zap",tgt:600,tol:350,dtype:"oneshot",suggest:[R("Arc Weld Electrical Sparks 3","2018")]},
+ {g:"HEAVY",id:"singularity",nm:"singularity",folder:"heavy",ch:"SINGULARITY heavy. Deep gravity pull.",hunt:"deep, sub, vortex",tgt:800,tol:400,dtype:"oneshot",suggest:[]},
+ {g:"HEAVY",id:"wave",nm:"wave",folder:"heavy",ch:"WAVE heavy. Big sweeping blast.",hunt:"wave, big blast, sweep",tgt:900,tol:500,dtype:"oneshot",suggest:[R("Big Blast 4","2020")]},
+ {g:"HEAVY",id:"whine",nm:"whine",folder:"heavy",ch:"Heavy charge whine layer.",hunt:"whine, rise, charge",tgt:500,tol:300,dtype:"oneshot",suggest:[R("Drone_Tonal_Enigmatic_Saw_Shepard_Tone_Pitch_Rising","2020")]},
+ {g:"IMPACT",id:"hit",nm:"hit",folder:"impact",ch:"Non-lethal hit (fires constantly). Tight thunk.",hunt:"impact, thud, thump",tgt:110,tol:70,dtype:"oneshot",suggest:[R("IMPACT_LOW_THUD_10","2020")]},
+ {g:"IMPACT",id:"blast",nm:"blast",folder:"impact",ch:"Generic explosion/impact.",hunt:"explosion, blast",tgt:500,tol:300,dtype:"oneshot",suggest:[R("Explosion 8","2018")]},
+ {g:"IMPACT",id:"enemy_fire",nm:"enemy_fire",folder:"impact",ch:"Enemy shooting. Thin, hostile.",hunt:"enemy shot, zap",tgt:180,tol:100,dtype:"oneshot",suggest:[]},
+ {g:"IMPACT",id:"bomb",nm:"bomb",folder:"impact",ch:"Screen-clear bomb. Deep boom.",hunt:"explosion, boom, detonation",tgt:800,tol:400,dtype:"oneshot",suggest:[R("Distant Blast 26","2018")]},
+ {g:"IMPACT",id:"thump",nm:"thump",folder:"impact",ch:"Low body thump.",hunt:"thump, sub, low hit",tgt:200,tol:120,dtype:"oneshot",suggest:[]},
+ {g:"IMPACT",id:"wub",nm:"wub",folder:"impact",ch:"Bass wub effect.",hunt:"wub, bass, sub drop",tgt:400,tol:250,dtype:"oneshot",suggest:[]},
+ {g:"DEATH",id:"kill_ace",nm:"kill_ace",folder:"death",ch:"ACE death. Metal crunch.",hunt:"metal, crush, bulkhead",tgt:400,tol:250,dtype:"oneshot",suggest:[R("dry hard metal impact with rust debris 20","2016")]},
+ {g:"DEATH",id:"kill_bmet",nm:"kill_bmet",folder:"death",ch:"BMET death. Wet organic burst.",hunt:"gore, crunch, splat",tgt:400,tol:250,dtype:"oneshot",suggest:[R("Heavy Body Crunch 02","2023")]},
+ {g:"DEATH",id:"kill_csee",nm:"kill_csee",folder:"death",ch:"CSEE death. Electrical fry.",hunt:"electric, glitch, arc",tgt:400,tol:250,dtype:"oneshot",suggest:[R("Arc Weld Electrical Sparks 3","2018")]},
+ {g:"DEATH",id:"kill_mat",nm:"kill_mat",folder:"death",ch:"MAT death. Optic/energy snap.",hunt:"glass shard, sparkly",weak:1,tgt:350,tol:200,dtype:"oneshot",suggest:[R("TextureGlassDebris_008","2016")]},
+ {g:"DEATH",id:"kill_mset",nm:"kill_mset",folder:"death",ch:"MSET death. Crystalline break.",hunt:"ice, crystal, shatter",tgt:400,tol:250,dtype:"oneshot",suggest:[R("axe_ice_005","2016")]},
+ {g:"DEATH",id:"big",nm:"big",folder:"death",ch:"Big/elite enemy death. Bigger.",hunt:"explosion, big impact",tgt:700,tol:400,dtype:"oneshot",suggest:[R("Explosion 8","2018")]},
+ {g:"DEATH",id:"death",nm:"death",folder:"death",ch:"Player ship destroyed. Boom + downer, long.",hunt:"explosion big, downer",tgt:2000,tol:1200,dtype:"oneshot",suggest:[R("Downer 049","2020"),R("Distant Blast 26","2018")]},
+ {g:"BOSS",id:"boss_death",nm:"boss_death",folder:"boss",ch:"Boss death. LAYER big explosions (use layers).",hunt:"explosion, collapse, rupture",tgt:2500,tol:1500,dtype:"oneshot",suggest:[R("Bluezone_BC0275_building_collapse_debris_falling_rock_rubble_008","2023"),R("Rupture - Bulb_Impact_03","2016"),R("Explosion Warped","2018")]},
+ {g:"BOSS",id:"boss_phase",nm:"boss_phase",folder:"boss",ch:"Boss phase shift. Heavy stinger.",hunt:"stinger, braam, shift",tgt:1200,tol:700,dtype:"oneshot",suggest:[R("Mind Bender Stingers 06","2023")]},
+ {g:"BOSS",id:"boss_warn",nm:"boss_warn",folder:"boss",ch:"Boss warning/arrival. Dread braam.",hunt:"braam, horror, dread",tgt:1800,tol:1000,dtype:"oneshot",suggest:[R("Stinger-High10","2018"),R("Braam 004 (D)","2023")]},
+ {g:"DEFENSE",id:"shield_hit",nm:"shield_hit",folder:"defense",ch:"Shield absorbs hit. Energy ring.",hunt:"shield, force field",tgt:350,tol:200,dtype:"oneshot",suggest:[R("CK_Force_Field_Loop-32","2016")]},
+ {g:"DEFENSE",id:"shield_break",nm:"shield_break",folder:"defense",ch:"Shield destroyed. Shatter.",hunt:"shatter, glass break",tgt:600,tol:300,dtype:"oneshot",suggest:[R("TextureGlassDebris_008","2016")]},
+ {g:"DEFENSE",id:"player_hit",nm:"player_hit",folder:"defense",ch:"Player took damage. Harsh alarm.",hunt:"alarm, warning",tgt:300,tol:200,dtype:"oneshot",suggest:[R("SPACESHIP-INTERIORS-ALARM-7","2023")]},
+ {g:"DEFENSE",id:"parry",nm:"parry",folder:"defense",ch:"Successful parry. Sharp metal ring.",hunt:"metal clash, ring, clang",tgt:180,tol:100,dtype:"oneshot",suggest:[R("METLImpt_METAL SWING HIT","2026")]},
+ {g:"DEFENSE",id:"parry_hit",nm:"parry_hit",folder:"defense",ch:"Parry reflect. Bright ting.",hunt:"ricochet, ping, ting",tgt:150,tol:90,dtype:"oneshot",suggest:[R("Accent,Interface,UI,Alert,Resonant,Waver","2023")]},
+ {g:"PICKUP",id:"coin",nm:"coin",folder:"pickup",ch:"Coin grab (fires constantly). Tiny tick.",hunt:"coin, money",tgt:110,tol:70,dtype:"oneshot",suggest:[R("264604 - Stack Coin Bag 04","2023")]},
+ {g:"PICKUP",id:"life_up",nm:"life_up",folder:"pickup",ch:"Extra life. Positive lift.",hunt:"life up, 1up, reward",tgt:900,tol:500,dtype:"oneshot",suggest:[]},
+ {g:"PICKUP",id:"shield_up",nm:"shield_up",folder:"pickup",ch:"Shield pickup. Energy up.",hunt:"shield, energy up",tgt:400,tol:250,dtype:"oneshot",suggest:[]},
+ {g:"PICKUP",id:"style_up",nm:"style_up",folder:"pickup",ch:"Style rank up. Sharp reward.",hunt:"style, rank up, stinger",tgt:600,tol:350,dtype:"oneshot",suggest:[]},
+ {g:"PICKUP",id:"core",nm:"core",folder:"pickup",ch:"CORE jackpot/life. Reward stinger.",hunt:"reward, jackpot, confirm",tgt:1200,tol:700,dtype:"oneshot",suggest:[R("G4F SFX11 - ExoInterface - Action Confirm - Long 05","2018")]},
+ {g:"PICKUP",id:"powerup",nm:"powerup",folder:"pickup",ch:"Upgrade pickup. Ascending.",hunt:"powerup, collect",tgt:500,tol:300,dtype:"oneshot",suggest:[R("sci-fi_device_item_power_up_flash_01","2020")]},
+ {g:"UI",id:"ui_click",nm:"ui_click",folder:"ui",ch:"Menu select. Thin, very tight.",hunt:"interface, click, beep",tgt:80,tol:50,dtype:"oneshot",suggest:[R("User Interface Click Button 25","2018")]},
+ {g:"UI",id:"weapon_switch",nm:"weapon_switch",folder:"ui",ch:"Primary weapon cycle. Quick switch.",hunt:"switch, cycle, ui",tgt:200,tol:120,dtype:"oneshot",suggest:[R("Bluezone_BC0268_switch_button_click_high_tech_interface_001","2020")]},
+ {g:"UI",id:"refit_open",nm:"refit_open",folder:"ui",ch:"REFIT shop opens. Whoosh/confirm.",hunt:"open, whoosh, panel",tgt:500,tol:300,dtype:"oneshot",suggest:[]},
+ {g:"UI",id:"buy",nm:"buy",folder:"ui",ch:"REFIT purchase. Cash/confirm.",hunt:"purchase, confirm, cash",tgt:400,tol:250,dtype:"oneshot",suggest:[R("G4F SFX11 - ExoInterface - Process - Short 06","2018")]},
+ {g:"UI",id:"buy_fail",nm:"buy_fail",folder:"ui",ch:"Cannot afford. Deny buzz.",hunt:"deny, error, fail",tgt:350,tol:200,dtype:"oneshot",suggest:[]},
+ {g:"UI",id:"pause",nm:"pause",folder:"ui",ch:"Pause toggle. Soft.",hunt:"pause, soft",tgt:250,tol:150,dtype:"oneshot",suggest:[]},
+ {g:"EVENT",id:"sector_clear",nm:"sector_clear",folder:"event",ch:"Sector cleared. Transition swell.",hunt:"transition, whoosh, sweep",tgt:1200,tol:700,dtype:"oneshot",suggest:[R("Dark_Sci-Fi_Transition_01","2023")]},
 ];
 const SLOTKW={
- shoot:[["gunshot",3],["gun shot",3],["blaster",3],["plasma shot",3],["energy gun",3],["futuristic",2],["scifi",2],["sci-fi",2],["laser",2]],
- rapid:[["auto-burst",3],["auto burst",3],["machinegun",3],["machine gun",3],["submachine",3],["heavygun",3],["burst",2]],
- beam_charge:[["charge",3],["spool",3],["reactor",3],["rise",3],["swell",3],["shepard",3],["pitch rising",3]],
- beam_fire:[["big blast",3],["blast laser",3],["laser cannon",3],["recoil blast",3],["beam",2],["force field",2]],
- heavy_ready:[["action confirm",2],["charge complete",3]],heavy_switch:[["switch_button",3],["mechanism latch",3],["weapon switch",3]],
- overheat:[["overheat",3],["steam vent",3],["vent hiss",3]],overheat_ready:[["sci-fi ping",3],["ping down",3],["cooldown",3]],
- enemy_hit:[["impact_low",3],["wet impact",3],["body hit",3],["metal short slam",3],["thud",3],["thump",2]],
- death_ace:[["rust debris",3],["metal crush",3],["bulkhead",3],["metal debris",3],["scrap metal",3],["metal impact",2]],
- death_bmet:[["gore",3],["body crunch",3],["flesh",3],["bones",3],["squelch",3],["splat",3],["blood",3],["beheading",3]],
- death_csee:[["arc weld",3],["high voltage",3],["data-corruption",3],["digital_glitch",3],["electric shock",3],["glitch",2]],
- death_mat:[["glassdebris",3],["glass break",3],["glass shard",3],["sparkly_short_glitch",3],["shard",3]],
- death_mset:[["axe_ice",3],["ice_crack",3],["dry ice",3],["designed ice",3],["chipping ice",3],["crystal",3],["shatter",3]],
- big_kill:[["explosion 8",3],["deepexplosion",3],["colossal",2]],
+ fire_spread:[["gunshot",3],["gun shot",3],["blaster",3],["plasma shot",3],["energy gun",3],["futuristic",2],["scifi",2],["sci-fi",2],["laser",2]],
+ fire_rapid:[["auto-burst",3],["auto burst",3],["machinegun",3],["machine gun",3],["submachine",3],["heavygun",3],["burst",2],["automatic",2]],
+ fire_lance:[["lance",3],["pierce",3],["beam shot",3],["laser shot",2],["blast laser",2]],
+ fire_homing:[["homing",3],["missile",3],["tracking",2],["soft shot",2]],
+ fire_flak:[["flak",3],["scatter",3],["shotgun",3],["buckshot",3],["burst",2]],
+ fire_buzzsaw:[["buzzsaw",3],["saw",3],["grind",3],["whir",2],["drill",2]],
+ overheat:[["overheat",3],["steam vent",3],["vent hiss",3]],
+ overheat_ready:[["sci-fi ping",3],["ping down",3],["cooldown",3],["ready ping",3]],
+ heavy_charge:[["charge",3],["spool",3],["reactor",3],["rise",3],["swell",3],["shepard",3],["pitch rising",3]],
+ heavy_ready:[["action confirm",2],["charge complete",3],["ready",2]],
+ heavy_switch:[["switch_button",3],["mechanism latch",3],["weapon switch",3]],
+ beam:[["big blast",3],["blast laser",3],["beam",2],["plasma",2],["force field",2]],
+ rail:[["railgun",3],["rail",2],["pierce crack",3],["blast laser 4",3]],
+ tesla:[["tesla",3],["arc weld",3],["electric",2],["zap",2],["chain",2]],
+ singularity:[["singularity",3],["vortex",3],["gravity",3],["deep sub",2]],
+ wave:[["wave",3],["big blast",3],["sweep",2]],
+ whine:[["whine",3],["shepard",2],["rising tone",3]],
+ hit:[["impact_low",3],["wet impact",3],["body hit",3],["metal short slam",3],["thud",3],["thump",2]],
+ blast:[["explosion",2],["blast",2],["explosion 8",3]],
+ enemy_fire:[["enemy_fire",3],["enemy shot",3],["laser small",2]],
+ bomb:[["distant blast",3],["explosion",2],["detonat",3],["boom",2]],
+ thump:[["thump",3],["sub hit",3],["low hit",2]],
+ wub:[["wub",3],["bass drop",2],["sub drop",2]],
+ kill_ace:[["rust debris",3],["metal crush",3],["bulkhead",3],["metal debris",3],["scrap metal",3],["metal impact",2]],
+ kill_bmet:[["gore",3],["body crunch",3],["flesh",3],["bones",3],["squelch",3],["splat",3],["blood",3],["beheading",3]],
+ kill_csee:[["arc weld",3],["high voltage",3],["data-corruption",3],["digital_glitch",3],["electric shock",3],["glitch",2]],
+ kill_mat:[["glassdebris",3],["glass break",3],["glass shard",3],["sparkly_short_glitch",3],["shard",3]],
+ kill_mset:[["axe_ice",3],["ice_crack",3],["dry ice",3],["designed ice",3],["chipping ice",3],["crystal",3],["shatter",3]],
+ big:[["explosion 8",3],["deepexplosion",3],["colossal",2],["big explosion",2]],
+ death:[["distant blast",3],["downer",3],["destruction",2]],
  boss_death:[["building_collapse",3],["building collapse",3],["rupture",3],["explosion warped",3],["large explosion",3]],
  boss_phase:[["braam",3],["mind bender",3],["stinger",2]],
+ boss_warn:[["cinematic horror",3],["stinger-high",3],["stinger-low",3],["braam",3],["braams",3],["dread",3]],
+ shield_hit:[["force field",3],["forcefield",3],["shield",3],["energy_surge",2]],
+ shield_break:[["glass break",3],["glassdebris",3],["shatter",3]],
  player_hit:[["spaceship-interiors-alarm",3],["alarm_fast",3],["stall warning",3],["alarm",2],["buzzer",2]],
- shield:[["force field",3],["forcefield",3],["shield",3],["energy_surge",2]],shield_break:[["glass break",3],["glassdebris",3],["shatter",3]],
- parry:[["metal swing hit",3],["metal clash",3],["clang",3],["sword clash",3]],parry_hit:[["ricochet",3],["resonant,waver",3],["metallic ping",3]],
- player_death:[["distant blast",3],["downer",3],["destruction",2]],
+ parry:[["metal swing hit",3],["metal clash",3],["clang",3],["sword clash",3]],
+ parry_hit:[["ricochet",3],["resonant,waver",3],["metallic ping",3]],
  coin:[["coinage",3],["stack coin",3],["coin_",3],["coins_",3],["gold coins",3],["coin",2]],
- powerup:[["power_up_flash",3],["power up flash",3],["power_up",3],["powerup",3],["collect",2]],
+ life_up:[["1up",3],["life up",3],["extra life",3],["positive",2]],
+ shield_up:[["shield up",3],["energy up",2],["shield pickup",3]],
+ style_up:[["style",3],["rank up",3],["combo",2]],
  core:[["action confirm",3],["exointerface",3],["reward",3],["jackpot",3],["fanfare",3]],
- buy:[["purchase",3],["register",3],["process - short",3],["buy",2]],
- boss_spawn:[["cinematic horror",3],["stinger-high",3],["stinger-low",3],["braam",3],["braams",3],["dread",3]],
- sector_clear:[["transition whoosh",3],["sci-fi_transition",3],["sci-fi transition",3],["transition",3],["whoosh",2]],
+ powerup:[["power_up_flash",3],["power up flash",3],["power_up",3],["powerup",3],["collect",2]],
  ui_click:[["user interface",3],["interface accent",3],["button click",3],["switch_button_click",3],["interface",2]],
+ weapon_switch:[["weapon switch",3],["switch_button",2],["cycle",2]],
+ refit_open:[["refit",3],["panel open",2],["whoosh ui",2]],
+ buy:[["purchase",3],["process - short",3],["buy",2],["cash register",3]],
+ buy_fail:[["deny",3],["error",2],["buy fail",3],["fail buzz",2]],
+ pause:[["pause",3],["ui soft",2]],
+ sector_clear:[["transition whoosh",3],["sci-fi_transition",3],["sci-fi transition",3],["transition",3],["whoosh",2]],
 };
 const NOAUTO=["retro","8bit","8-bit","8 bit","chiptune","cartoon","guitar","piano","saxophone","walla","baby","coyote","greenhouse","aston","rapide","lada","niva","nissan","windshield","wiper","car_","vehicle","mower","shovel","quadcopter","river","rapids near","snow","dirt","gravel","boulder","brick","wood_impact","tree_","leaf","ghost","lettuce","printer","counting money","money bills","narrator","istanbul","traffic","endurance race"];
 const THRESHOLD=2,TARGET=Math.pow(10,-3/20),LSKEY="vanguard_sfx_auditor_v4",WAVEW=640;
@@ -392,7 +438,7 @@ function dl(blob,name){const a=document.createElement("a");a.href=URL.createObje
 async function renderBuffer(c){await ensureBuf(c);if(c.err||!c.buffer)return null;const fx=(c.fx&&!c.fx.bypass)?Object.assign({},FXDEF,c.fx):FXDEF;const rate=Math.pow(2,(fx.pitch||0)/12);const off=c.start||0,regionDur=(c.end!=null?c.end:c.dur)-off,playDur=regionDur/rate;const sr=c.buffer.sampleRate;const oc=new OfflineAudioContext(c.buffer.numberOfChannels,Math.max(1,Math.ceil(playDur*sr)),sr);buildVoice(oc,c,{dest:oc.destination,when:0});return await oc.startRendering();}
 async function renderLayers(slotId){const ls=layers[slotId]||[];const items=[];let sr=44100,nch=1,maxT=0;for(const L of ls){const c=LIB.find(x=>x.slot===slotId&&x.name===L.name);if(!c)continue;await ensureBuf(c);if(c.err)continue;sr=c.buffer.sampleRate;nch=Math.max(nch,c.buffer.numberOfChannels);const rate=Math.pow(2,((c.fx&&c.fx.pitch)||0)/12);const dur=((c.end!=null?c.end:c.dur)-(c.start||0))/rate;maxT=Math.max(maxT,(L.offsetMs||0)/1000+dur);items.push({c,L});}
  if(!items.length)return null;const oc=new OfflineAudioContext(nch,Math.ceil(maxT*sr),sr);for(const {c,L} of items){const cc=Object.assign({},c,{fx:Object.assign({},FXDEF,c.fx,{gain:((c.fx&&c.fx.gain)||0)+(L.gainDb||0)})});buildVoice(oc,cc,{dest:oc.destination,when:(L.offsetMs||0)/1000});}return await oc.startRendering();}
-async function renderAll(){setBusy(5);const files=[];let n=0;for(const s of SLOTS){let buf=null;try{if(layers[s.id]&&layers[s.id].length)buf=await renderLayers(s.id);else{const w=LIB.find(c=>c.slot===s.id&&c.name===winner[s.id]);if(w)buf=await renderBuffer(w);}}catch(e){}if(buf){files.push({name:s.id+".wav",u8:encodeWAV(buf)});}n++;setBusy(5+90*n/SLOTS.length);}
+async function renderAll(){setBusy(5);const files=[];let n=0;for(const s of SLOTS){const fold=s.folder||"sfx";try{if(layers[s.id]&&layers[s.id].length){const b=await renderLayers(s.id);if(b)files.push({name:fold+"/"+s.id+"_1.wav",u8:encodeWAV(b)});}else{const list=LIB.filter(c=>c.slot===s.id);const w=list.find(c=>c.name===winner[s.id]);if(w){const b=await renderBuffer(w);if(b)files.push({name:fold+"/"+s.id+"_1.wav",u8:encodeWAV(b)});}const alt=list.find(c=>c.name!==winner[s.id]&&c.mark==="keep");if(alt){const b2=await renderBuffer(alt);if(b2)files.push({name:fold+"/"+s.id+"_2.wav",u8:encodeWAV(b2)});}}}catch(e){}n++;setBusy(5+90*n/SLOTS.length);}
  setBusy(100);if(!files.length){toast("No winners or layers to render");return;}dl(zipStore(files),"vanguard_sfx.zip");toast("Rendered "+files.length+" WAVs");}
 
 const fileIn=document.getElementById("fileIn"),dirIn=document.getElementById("dirIn"),impIn=document.getElementById("impIn"),vol=document.getElementById("vol");
@@ -417,8 +463,13 @@ window.addEventListener("dragenter",e=>{e.preventDefault();dc++;drop.classList.a
 window.addEventListener("drop",async e=>{e.preventDefault();dc=0;drop.classList.remove("show");const items=e.dataTransfer.items;if(items&&items.length&&items[0].webkitGetAsEntry){const files=[],ents=[];for(const it of items){const en=it.webkitGetAsEntry&&it.webkitGetAsEntry();if(en)ents.push(en);}async function walk(en){if(en.isFile){await new Promise(r=>en.file(f=>{files.push(f);r();},()=>r()));}else if(en.isDirectory){const rd=en.createReader();while(true){const b=await new Promise(r=>rd.readEntries(r,()=>r([])));if(!b.length)break;for(const x of b)await walk(x);}}}setBusy(10);for(const en of ents)await walk(en);setBusy(100);intake(files);}else if(e.dataTransfer.files.length)intake(e.dataTransfer.files);});
 let toastT=null;function toast(m){let t=document.querySelector(".toast");if(!t){t=document.createElement("div");t.className="toast";document.body.appendChild(t);}t.textContent=m;clearTimeout(toastT);toastT=setTimeout(()=>t.remove(),2600);}
 
-loadState();render();
-openIDB().then(async()=>{const recs=await idbAll();if(!recs.length)return;for(const r of recs){if(LIB.some(c=>c.key===r.key))continue;const m=bestSlot(r.name);const c={uid:++uidc,key:r.key,name:r.name,lib:r.lib||"",blob:r.blob,buffer:null,peak:1,dur:0,mark:"none",slot:r.slot||(m?m.slot:null),score:m?m.score:1,start:null,end:null,fx:Object.assign({},FXDEF)};if(c.slot)applySaved(c.slot,c);LIB.push(c);}render();toast("Restored "+recs.length+" cached files");});
+const MIGRATE={shoot:'fire_spread',rapid:'fire_rapid',beam_fire:'beam',enemy_hit:'hit',death_ace:'kill_ace',death_bmet:'kill_bmet',death_csee:'kill_csee',death_mat:'kill_mat',death_mset:'kill_mset',big_kill:'big',shield:'shield_hit',player_death:'death',boss_spawn:'boss_warn'};
+const migId=id=>MIGRATE[id]||id;
+function remapObj(o){const out={};for(const k in (o||{}))out[migId(k)]=o[k];return out;}
+loadState();
+try{ if(!localStorage.getItem('vanguard_sfx_mig_v9')){ winner=remapObj(winner); savedMarks=remapObj(savedMarks); layers=remapObj(layers); notes=remapObj(notes); localStorage.setItem('vanguard_sfx_mig_v9','1'); saveState(); } }catch(e){}
+render();
+openIDB().then(async()=>{const recs=await idbAll();if(!recs.length)return;for(const r of recs){if(LIB.some(c=>c.key===r.key))continue;const m=bestSlot(r.name);const c={uid:++uidc,key:r.key,name:r.name,lib:r.lib||"",blob:r.blob,buffer:null,peak:1,dur:0,mark:"none",slot:(SLOTS.some(function(s){return s.id===migId(r.slot);})?migId(r.slot):(m?m.slot:null)),score:m?m.score:1,start:null,end:null,fx:Object.assign({},FXDEF)};if(c.slot)applySaved(c.slot,c);LIB.push(c);}render();toast("Restored "+recs.length+" cached files");});
 </script>
 </body>
 </html>
