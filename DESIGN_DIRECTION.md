@@ -204,6 +204,7 @@ Each faction is a Bosco Tech pathway made hostile. Identity table is in
 - When auditing balance, read the actual code and compute exact values
   (scripts, not estimates). Backlog and memory drift from code reality;
   the file is ground truth.
+- Telemetry carries an anonymous random device ID (localStorage hex, never linked to a name or initials) so cohort and learning-curve analysis is possible without identifying players. Identity linkage is rejected; anonymity is the locked position.
 
 ---
 

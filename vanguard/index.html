@@ -446,7 +446,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2575';
+const W=630,H=840; const VERSION='2576';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -582,6 +582,8 @@ function freshBuild(){ return { up:{gun:1,beamPow:1,beamCap:1,speed:1,beamPierce
 let startBuild=freshBuild();
 try{ const _sb=JSON.parse(localStorage.getItem('vanguard_build')||'null'); if(_sb&&_sb.up){ startBuild=freshBuild(); startBuild.up=Object.assign(startBuild.up,_sb.up); startBuild.unlocked=Object.assign(startBuild.unlocked,_sb.unlocked||{}); startBuild.heavyUnlocked=Object.assign(startBuild.heavyUnlocked,_sb.heavyUnlocked||{}); startBuild.heavy=_sb.heavy||'beam'; startBuild.wtype=_sb.wtype||'spread'; startBuild.bombs=_sb.bombs||2; startBuild.shieldHits=_sb.shieldHits||0; startBuild.drone=_sb.drone?{ph:0}:null; startBuild.spent=_sb.spent||0; } }catch(e){}
 const KEYS_DEFAULT={fire:'Mouse0', beam:'Mouse2', bomb:'x', parry:'Space', weapon:'q', heavy:'e', pause:'p', mute:'m', weap1:'1', weap2:'2', weap3:'3', weap4:'4', weap5:'5', weap6:'6'};
+let DEVICE_ID=''; try{ DEVICE_ID=localStorage.getItem('vanguard_did')||''; if(!/^[0-9a-f]{8}$/.test(DEVICE_ID)){ DEVICE_ID=Array.from(crypto.getRandomValues(new Uint8Array(4))).map(b=>b.toString(16).padStart(2,'0')).join(''); localStorage.setItem('vanguard_did',DEVICE_ID); } }catch(e){ DEVICE_ID='nodid000'; }
+/* anonymous per-device id for telemetry cohorting. random hex, never linked to a name or initials. */
 let autofire=true; try{ autofire = localStorage.getItem('vanguard_autofire')!=='0'; }catch(e){}
 let moveMode_pref='hold'; try{ const _mm=localStorage.getItem('vanguard_movemode'); const _touch=('ontouchstart' in window)||navigator.maxTouchPoints>0; moveMode_pref = _mm ? (_mm==='lock'?'lock':'hold') : (_touch?'hold':'lock'); }catch(e){}
 /* ===== user settings (single localStorage key, applied live) ===== */
@@ -607,6 +609,7 @@ try{ const _sk=JSON.parse(localStorage.getItem('vanguard_keys')||'null'); if(_sk
 let rebindAction=null;
 let shotsFired, shotsHit, runTime, runKills=0, runBosses=0, deathSlow=0, killerInfo=null, hitStop=0;
 let runCoinsEarned=0, runCoinsSpent=0, runParryAtt=0, runParries=0, runPerfect=0, runHits=0, runBombs=0, runOverheats=0, runLivesUsed=0, runDwell={spread:0,lance:0,homing:0,rapid:0,flak:0,buzzsaw:0};
+let runHeavyUse={beam:0,tesla:0,rail:0,singularity:0,wave:0}, runBossTTK=[];
 let bgScroll=0; const stars=[
   Array.from({length:34},()=>({x:rnd(0,W),y:rnd(0,H),sp:14,sz:.6,al:.30,st:0})),
   Array.from({length:24},()=>({x:rnd(0,W),y:rnd(0,H),sp:34,sz:.9,al:.5,st:6})),
@@ -1456,6 +1459,7 @@ function startGame(){
   window.style=0; window.styleGrace=0; window.styleRepeat=0; window.lastKillWpn=''; window.maxStyle=0; window.killSrc=null;
   runKills=0; runBosses=0; deathSlow=0; killerInfo=null;
   runCoinsEarned=0; runCoinsSpent=0; runParryAtt=0; runParries=0; runPerfect=0; runHits=0; runBombs=0; runOverheats=0; runLivesUsed=0; runDwell={spread:0,lance:0,homing:0,rapid:0,flak:0,buzzsaw:0};
+  runHeavyUse={beam:0,tesla:0,rail:0,singularity:0,wave:0}; runBossTTK=[]; window.__bossT0=0;
   resetPlayer(true);
   { let b=startBuild;
     if(gameMode!=='dev' && (startBuild.spent||0)>START_BUDGET) b=freshBuild();   // over-budget DEV build must not leak into ranked
@@ -1772,7 +1776,7 @@ function teslaChainDamage(pl,dt){ pl.beamEndY=pl.y-18; const jl=(pl.up.teslaJump
   if(boss && !boss.dying && !boss.entering){ const d=Math.sqrt(dist2(boss.x,boss.y,pl.x,pl.y-18)); if(d<range+60){ damageBoss(dt*dps*0.6); if(!pl.teslaArc.length)pl.teslaArc.push({x1:pl.x,y1:pl.y-18,x2:boss.x,y2:boss.y}); } } }
 function fireHeavyShot(pl,h,charge){
   if(pl.beamE < heavyCost(h)*pl.beamMax) return;
-  pl.beamE -= heavyCost(h)*pl.beamMax; pl.beamCoolT=pl.beamCool||0.6; const hm=pl.heavyMult||1;
+  pl.beamE -= heavyCost(h)*pl.beamMax; if(runHeavyUse[h]!=null)runHeavyUse[h]++; pl.beamCoolT=pl.beamCool||0.6; const hm=pl.heavyMult||1;
   if(h==='rail'){ const dmg=(40*hm)*(0.4+0.6*charge);
     pbul.push({x:pl.x,y:pl.y-20,vx:0,vy:-1500,c:COL.cyan,r:5,dmg,pierce:true,len:30,rail:true});
     ((Audio_.play&&Audio_.play('rail'))||Audio_.blast()); shake=Math.max(shake,5+charge*6); rings.push({x:pl.x,y:pl.y-20,r:6,vr:240,life:.3,max:.3,c:COL.cyan}); }
@@ -1793,7 +1797,7 @@ function updateHeavy(pl,dt){ const h=pl.heavy||'beam';
     if(pl.beamOn && pl.beamE>0.02 && !pl.beamLock){
       pl.beamWind=Math.min((pl.beamWind||0)+dt, pl.beamWindup||0.37); pl.beamActive=true;
       heavyLoopSfx(h);                                   // sustained loop starts/continues while the beam is active
-      if(pl.beamWind>=(pl.beamWindup||0.37)){ pl.beamE-=dt; pl.beamCoolT=pl.beamCool||0.6; if(pl.beamE<=0.02){ pl.beamE=0; pl.beamLock=true; pl.beamWind=0; pl.beamDrained=true; }
+      if(pl.beamWind>=(pl.beamWindup||0.37)){ pl.beamE-=dt; if(runHeavyUse[h]!=null)runHeavyUse[h]+=dt; pl.beamCoolT=pl.beamCool||0.6; if(pl.beamE<=0.02){ pl.beamE=0; pl.beamLock=true; pl.beamWind=0; pl.beamDrained=true; }
         if(h==='beam') beamColumnDamage(pl,dt); else teslaChainDamage(pl,dt); }
       else { pl.beamEndY=pl.y-18; }
       return true; }
@@ -2276,7 +2280,7 @@ function updateBoss(dt){
         rings.push({x:b.x,y:b.y,r:b.r*0.6,vr:540,life:.6,max:.6,c:COL.white}); rings.push({x:b.x,y:b.y,r:b.r,vr:340,life:.55,max:.55,c:b.c});
         for(let i=0;i<32;i++){ const a=rnd(0,6.28),sp=rnd(60,330); parts.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:.6,max:.6,c:Math.random()<0.4?COL.white:b.c,sz:rnd(1.6,2.8)}); }
         Audio_.big(); }
-      if(b.enterT>tDesc+0.45){ b.entering=false; b.gx=b.x; b.gy=b.ty;
+      if(b.enterT>tDesc+0.45){ b.entering=false; window.__bossT0=runTime; b.gx=b.x; b.gy=b.ty;
         document.getElementById('bossname').style.display='block'; document.getElementById('bossbar').style.display='block'; } }
     return; }
   // death sequence
@@ -2593,7 +2597,7 @@ function startBossDeath(){ const b=boss; b.dying=true; b.deathT=2.4; b.deathDur=
   rings.push({x:b.x,y:b.y,r:b.r*0.5,vr:300,life:.6,max:.6,c:COL.white});
   document.querySelector('#bossbar i').style.transform='scaleX(0)';
   document.getElementById('bossname').style.display='none'; document.getElementById('bossbar').style.display='none'; }
-function finishBoss(){ runBosses++; const b=boss;
+function finishBoss(){ runBosses++; runBossTTK.push(Math.max(0,Math.round(runTime-(window.__bossT0||runTime)))); const b=boss;
   explode(b.x,b.y,b.c,true); explode(b.x,b.y,COL.white,true); Audio_.big(); Audio_.death(); shake=24; bossFlash=0.85; deathSlow=Math.max(deathSlow,0.5); warpT=Math.max(warpT,0.7);
   rings.push({x:b.x,y:b.y,r:8,vr:900,life:.7,max:.7,c:COL.white}); rings.push({x:b.x,y:b.y,r:8,vr:620,life:.65,max:.65,c:b.c}); rings.push({x:b.x,y:b.y,r:8,vr:380,life:.6,max:.6,c:COL.white});
   for(let i=0;i<10;i++) setTimeoutSafe(b.x+rnd(-70,70),b.y+rnd(-60,60),Math.random()<0.5?b.c:COL.white,i*60);
@@ -3350,7 +3354,7 @@ function startGameOver(){
   gameOverT=1.9;
 }
 function endRun(){
-  { const _dc = killerInfo ? (killerInfo.fk ? (/BOSS/.test(killerInfo.label||'') ? killerInfo.fk+'_boss' : killerInfo.fk) : 'hazard') : 'none';
+  { const _dc = killerInfo ? (killerInfo.fk ? (/BOSS/.test(killerInfo.label||'') ? killerInfo.fk+'_boss' : killerInfo.fk+(killerInfo.variant!=null?String(killerInfo.variant):'')) : 'hazard') : 'none';
     sendTelemetry(_dc); }
   try{ if(document.pointerLockElement) document.exitPointerLock(); }catch(e){}
   state='over'; player.dead=true; Audio_.lane(null); if(Audio_.stopAllLoops)Audio_.stopAllLoops();
@@ -3402,9 +3406,9 @@ function sendTelemetry(dc){
       +'hp'+(u.heavyPow||1)+'hc'+(u.heavyChg||1)+'tj'+(u.teslaJump||1)+'sa'+(u.singAmp||1)+'wp'+(u.wavePow||1)
       +'ms'+(u.mSpread||0)+'mr'+(u.mRapid||0)+'ml'+(u.mLance||0)+'mh'+(u.mHoming||0)+'bp'+(u.bombPow||1)
       +'bm'+((player&&player.bombs)||0)+'sd'+((player&&player.shieldHits)||0)+'dr'+((player&&player.drone)?1:0);
-    const wpu=['spread','lance','homing','rapid'].reduce((n,w)=>n+(unl[w]?1:0),0);
+    const wpu=['spread','lance','homing','rapid','flak','buzzsaw'].reduce((n,w)=>n+(unl[w]?1:0),0);
     const hvu=['beam','rail','tesla','singularity','wave'].reduce((n,h)=>n+(hvl[h]?1:0),0);
-    const tq=['action=telemetry','v='+encodeURIComponent(VERSION),'m='+encodeURIComponent(gameMode),'sec='+(sector||0),'rt='+Math.round(runTime||0),'k='+(runKills||0),'bk='+(runBosses||0),'sc='+Math.round(window.scoreT||0),'acc='+tacc,'pw='+encodeURIComponent((player&&player.wtype)||''),'hw='+encodeURIComponent((player&&player.heavy)||''),'gp='+((player&&player.up&&player.up.gun)||1),'dc='+encodeURIComponent(dc||'none'),'ce='+(runCoinsEarned||0),'cs='+(runCoinsSpent||0),'pa='+(runParryAtt||0),'pry='+(runParries||0),'ppr='+(runPerfect||0),'ht='+(runHits||0),'bmb='+(runBombs||0),'oh='+(runOverheats||0),'lu='+(runLivesUsed||0),'ps='+encodeURIComponent(_ps),'bsp='+_bsp,'bct='+_bct,'dws='+Math.round(runDwell.spread||0),'dwl='+Math.round(runDwell.lance||0),'dwh='+Math.round(runDwell.homing||0),'dwr='+Math.round(runDwell.rapid||0),'dwf='+Math.round(runDwell.flak||0),'dwb='+Math.round(runDwell.buzzsaw||0),'sf='+(shotsFired||0),'sh='+(shotsHit||0),'bld='+encodeURIComponent(bld),'wpu='+wpu,'hvu='+hvu,'cb='+Date.now()].join('&');
+    const tq=['action=telemetry','v='+encodeURIComponent(VERSION),'m='+encodeURIComponent(gameMode),'sec='+(sector||0),'rt='+Math.round(runTime||0),'k='+(runKills||0),'bk='+(runBosses||0),'sc='+Math.round(window.scoreT||0),'acc='+tacc,'pw='+encodeURIComponent((player&&player.wtype)||''),'hw='+encodeURIComponent((player&&player.heavy)||''),'gp='+((player&&player.up&&player.up.gun)||1),'dc='+encodeURIComponent(dc||'none'),'ce='+(runCoinsEarned||0),'cs='+(runCoinsSpent||0),'pa='+(runParryAtt||0),'pry='+(runParries||0),'ppr='+(runPerfect||0),'ht='+(runHits||0),'bmb='+(runBombs||0),'oh='+(runOverheats||0),'lu='+(runLivesUsed||0),'ps='+encodeURIComponent(_ps),'bsp='+_bsp,'bct='+_bct,'dws='+Math.round(runDwell.spread||0),'dwl='+Math.round(runDwell.lance||0),'dwh='+Math.round(runDwell.homing||0),'dwr='+Math.round(runDwell.rapid||0),'dwf='+Math.round(runDwell.flak||0),'dwb='+Math.round(runDwell.buzzsaw||0),'sf='+(shotsFired||0),'sh='+(shotsHit||0),'bld='+encodeURIComponent(bld),'wpu='+wpu,'hvu='+hvu,'did='+encodeURIComponent(typeof DEVICE_ID!=='undefined'?DEVICE_ID:''),'btk='+encodeURIComponent(runBossTTK.join(',')),'hwd='+encodeURIComponent([Math.round(runHeavyUse.beam),Math.round(runHeavyUse.tesla),runHeavyUse.rail,runHeavyUse.singularity,runHeavyUse.wave].join(',')),'cb='+Date.now()].join('&');
     const url=API_URL+'?'+tq;
     // abandon may fire as the page unloads, where an Image request can be dropped: prefer sendBeacon there
     if(dc==='abandon' && navigator.sendBeacon){ navigator.sendBeacon(url); } else { new Image().src=url; }
