@@ -446,7 +446,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2573';
+const W=630,H=840; const VERSION='2574';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -510,6 +510,8 @@ const Audio_={ctx:null,muted:false,master:null,
     if(wt==='lance'){ this.tone(880+r,0.05,'sawtooth',v,{glide:520}); }
     else if(wt==='rapid'){ this.tone(1040+r,0.035,'square',v*0.8); }
     else if(wt==='homing'){ this.tone(520+r,0.06,'triangle',v,{glide:760}); }
+    else if(wt==='flak'){ this.tone(280+r,0.08,'sawtooth',v,{glide:150}); }
+    else if(wt==='buzzsaw'){ this.tone(600+r,0.035,'square',v*0.7); }
     else { this.tone(660+r,0.05,'square',v); } },
   hit(){ this.tone(240+rnd(-20,20),0.06,'square',0.03,{glide:120}); this.noise(0.04,0.05,{lp:3500}); },
   kill(){ this.noise(0.18,0.10,{lp:3200}); this.tone(150+rnd(-30,30),0.2,'sawtooth',0.04,{glide:70}); },
@@ -569,17 +571,17 @@ window.Audio_=Audio_;
 /* ============================= state ============================= */
 let state='title', t=0, last=performance.now();
 const keys={};
-let player=null, enemies=[], pbul=[], ebul=[], pods=[], parts=[], shards=[], rings=[], pops=[], boss=null, barriers=[], hazards=[], holes=[];
+let player=null, enemies=[], pbul=[], ebul=[], pods=[], parts=[], shards=[], rings=[], pops=[], boss=null, barriers=[], hazards=[], holes=[], flakClouds=[];
 let fleet=null, slots=[], refill=[], reconfTimer=0, volleyTimer=0, diveTimer=0;
 let sector, waveIdx, wavesPerSector, waveTimer, bossPending, sectorClearT, bossSpoils=0, bossFlash=0, sectorKills=0, killsForBoss=21, gameOverT=0, killer=null, lastHitBy=null;
 let runFactionSeq=[], waveFk=null;
 let hybridTimer=0;
 let gameMode='normal';
 const START_BUDGET=1000;
-function freshBuild(){ return { up:{gun:1,beamPow:1,beamCap:1,speed:1,beamPierce:1,beamSpool:1,flank:0,armor:0,heavyPow:1,heavyChg:1,teslaJump:1,singAmp:1,wavePow:1,mSpread:0,mRapid:0,mLance:0,mHoming:0,bombPow:1}, unlocked:{spread:1,lance:0,homing:0,rapid:0}, heavyUnlocked:{beam:1,rail:0,tesla:0,singularity:0,wave:0}, wtype:'spread', heavy:'beam', bombs:2, shieldHits:0, drone:null, spent:0 }; }
+function freshBuild(){ return { up:{gun:1,beamPow:1,beamCap:1,speed:1,beamPierce:1,beamSpool:1,flank:0,armor:0,heavyPow:1,heavyChg:1,teslaJump:1,singAmp:1,wavePow:1,mSpread:0,mRapid:0,mLance:0,mHoming:0,bombPow:1}, unlocked:{spread:1,lance:0,homing:0,rapid:0,flak:0,buzzsaw:0}, heavyUnlocked:{beam:1,rail:0,tesla:0,singularity:0,wave:0}, wtype:'spread', heavy:'beam', bombs:2, shieldHits:0, drone:null, spent:0 }; }
 let startBuild=freshBuild();
 try{ const _sb=JSON.parse(localStorage.getItem('vanguard_build')||'null'); if(_sb&&_sb.up){ startBuild=freshBuild(); startBuild.up=Object.assign(startBuild.up,_sb.up); startBuild.unlocked=Object.assign(startBuild.unlocked,_sb.unlocked||{}); startBuild.heavyUnlocked=Object.assign(startBuild.heavyUnlocked,_sb.heavyUnlocked||{}); startBuild.heavy=_sb.heavy||'beam'; startBuild.wtype=_sb.wtype||'spread'; startBuild.bombs=_sb.bombs||2; startBuild.shieldHits=_sb.shieldHits||0; startBuild.drone=_sb.drone?{ph:0}:null; startBuild.spent=_sb.spent||0; } }catch(e){}
-const KEYS_DEFAULT={fire:'Mouse0', beam:'Mouse2', bomb:'x', parry:'Space', weapon:'q', heavy:'e', pause:'p', mute:'m', weap1:'1', weap2:'2', weap3:'3', weap4:'4'};
+const KEYS_DEFAULT={fire:'Mouse0', beam:'Mouse2', bomb:'x', parry:'Space', weapon:'q', heavy:'e', pause:'p', mute:'m', weap1:'1', weap2:'2', weap3:'3', weap4:'4', weap5:'5', weap6:'6'};
 let autofire=true; try{ autofire = localStorage.getItem('vanguard_autofire')!=='0'; }catch(e){}
 let moveMode_pref='hold'; try{ const _mm=localStorage.getItem('vanguard_movemode'); const _touch=('ontouchstart' in window)||navigator.maxTouchPoints>0; moveMode_pref = _mm ? (_mm==='lock'?'lock':'hold') : (_touch?'hold':'lock'); }catch(e){}
 /* ===== user settings (single localStorage key, applied live) ===== */
@@ -604,7 +606,7 @@ let keybinds=Object.assign({},KEYS_DEFAULT);
 try{ const _sk=JSON.parse(localStorage.getItem('vanguard_keys')||'null'); if(_sk) keybinds=Object.assign({},KEYS_DEFAULT,_sk); }catch(e){}
 let rebindAction=null;
 let shotsFired, shotsHit, runTime, runKills=0, runBosses=0, deathSlow=0, killerInfo=null, hitStop=0;
-let runCoinsEarned=0, runCoinsSpent=0, runParryAtt=0, runParries=0, runPerfect=0, runHits=0, runBombs=0, runOverheats=0, runLivesUsed=0, runDwell={spread:0,lance:0,homing:0,rapid:0};
+let runCoinsEarned=0, runCoinsSpent=0, runParryAtt=0, runParries=0, runPerfect=0, runHits=0, runBombs=0, runOverheats=0, runLivesUsed=0, runDwell={spread:0,lance:0,homing:0,rapid:0,flak:0,buzzsaw:0};
 let bgScroll=0; const stars=[
   Array.from({length:34},()=>({x:rnd(0,W),y:rnd(0,H),sp:14,sz:.6,al:.30,st:0})),
   Array.from({length:24},()=>({x:rnd(0,W),y:rnd(0,H),sp:34,sz:.9,al:.5,st:6})),
@@ -1410,7 +1412,7 @@ function spawnBoss(forceFk){
 function resetPlayer(full){
   if(!player||full){ player={x:W/2,y:H-130, vx:0,vy:0,
     up:{gun:1,beamPow:1,beamCap:1,speed:1,beamPierce:1,beamSpool:1,flank:0,armor:0,heavyPow:1,heavyChg:1,teslaJump:1,singAmp:1,wavePow:1,mSpread:0,mRapid:0,mLance:0,mHoming:0,bombPow:1},
-    wtype:'spread', unlocked:{spread:1,lance:0,homing:0,rapid:0},
+    wtype:'spread', unlocked:{spread:1,lance:0,homing:0,rapid:0,flak:0,buzzsaw:0},
     fireCd:0, beamOn:false, beamLock:false, beamActive:false, beamE:1, beamMax:1, beamDps:46, beamWind:0, beamCoolT:0, heat:0, overheatT:0,
     heavy:'beam', heavyUnlocked:{beam:1,rail:0,tesla:0,singularity:0,wave:0}, heavyCharge:0, waveT:0, teslaArc:null,
     speed:184, wlevel:1, pdmg:1, bombs:2, shieldHits:0, drone:null,
@@ -1444,7 +1446,7 @@ function updateGamesPlayed(){ const g=el('gamesPlayed'); if(g) g.textContent='RU
 function startGame(){
   state='play';
   try{ localStorage.setItem('vanguard_games', getGames()+1); }catch(e){}
-  enemies=[]; pbul=[]; ebul=[]; pods=[]; parts=[]; shards=[]; rings=[]; pops=[]; boss=null; barriers=[]; bossSpoils=0; bossFlash=0; hitStop=0; gameOverT=0; killer=null; lastHitBy=null; hazards=[]; station=null; holes=[]; bossCard=null;
+  enemies=[]; pbul=[]; ebul=[]; pods=[]; parts=[]; shards=[]; rings=[]; pops=[]; boss=null; barriers=[]; bossSpoils=0; bossFlash=0; hitStop=0; gameOverT=0; killer=null; lastHitBy=null; hazards=[]; station=null; holes=[]; flakClouds=[]; bossCard=null;
   runFactionSeq=[...FKEYS]; for(let _i=runFactionSeq.length-1;_i>0;_i--){const _j=Math.random()*_i|0;[runFactionSeq[_i],runFactionSeq[_j]]=[runFactionSeq[_j],runFactionSeq[_i]];} waveFk=null;
   hybridTimer=rnd(6,10);
   fleet=null; slots=[]; refill=[]; reconfTimer=0; volleyTimer=2; diveTimer=2.6;
@@ -1453,7 +1455,7 @@ function startGame(){
   shotsFired=0; shotsHit=0; runTime=0; window.scoreT=0; window.scoreD=0; window.mult=1;
   window.style=0; window.styleGrace=0; window.styleRepeat=0; window.lastKillWpn=''; window.maxStyle=0; window.killSrc=null;
   runKills=0; runBosses=0; deathSlow=0; killerInfo=null;
-  runCoinsEarned=0; runCoinsSpent=0; runParryAtt=0; runParries=0; runPerfect=0; runHits=0; runBombs=0; runOverheats=0; runLivesUsed=0; runDwell={spread:0,lance:0,homing:0,rapid:0};
+  runCoinsEarned=0; runCoinsSpent=0; runParryAtt=0; runParries=0; runPerfect=0; runHits=0; runBombs=0; runOverheats=0; runLivesUsed=0; runDwell={spread:0,lance:0,homing:0,rapid:0,flak:0,buzzsaw:0};
   resetPlayer(true);
   { let b=startBuild;
     if(gameMode!=='dev' && (startBuild.spent||0)>START_BUDGET) b=freshBuild();   // over-budget DEV build must not leak into ranked
@@ -1598,12 +1600,19 @@ function dropPod(x,y,fromBoss){
   if(buff) pod.buff=buff;
   pods.push(pod);
 }
-const WEAPONS=['spread','lance','homing','rapid'];
+const WEAPONS=['spread','lance','homing','rapid','flak','buzzsaw'];
+/* ===== weapon balance, all relative to measured SPREAD baseline DPS = 7.0 (gun1: 4 pellets x 0.7 dmg x 5/s x ~2 hits @150px) ===== */
+const SPREAD_FULL_RANGE=220, SPREAD_FAR_FLOOR=0.55;                 // 100% to 220px, hard 55% floor beyond (no fade-to-nothing)
+const FLAK_BAND_MIN=240, FLAK_BAND_MAX=360, FLAK_CLOUD_R=46, FLAK_CLOUD_LIFE=0.25, FLAK_CLOUD_DPS=9.45, FLAK_EARLY=0.6, FLAK_COL='#FFB000';
+const BUZZSAW_ORBIT=54;                                            // BALANCE DIAL - do not expose as an upgrade
+const BUZZSAW_BLADE_R=10, BUZZSAW_SPEED=3.2, BUZZSAW_DPS_PER_BLADE=5.95, BUZZSAW_FWD_DMG=0.42;
 function outfitOffers(){ const b=startBuild, u=b.up; const pdN=(1+(u.gun-1)*0.30), pdX=(1+u.gun*0.30); const hu=b.heavyUnlocked||{}; const dev=(gameMode==='dev'); return [
   ...(dev?[
     {grp:'WEAPONS',name:'UNLOCK LANCE',icon:'w_lance',desc:'DEV: start with LANCE available.',lv:0,mx:0,meta:b.unlocked.lance?'OWNED':'DEV',cost:0,can:!b.unlocked.lance,buy:()=>{b.unlocked.lance=1;b.wtype='lance';}},
     {grp:'WEAPONS',name:'UNLOCK HOMING',icon:'w_homing',desc:'DEV: start with HOMING available.',lv:0,mx:0,meta:b.unlocked.homing?'OWNED':'DEV',cost:0,can:!b.unlocked.homing,buy:()=>{b.unlocked.homing=1;b.wtype='homing';}},
-    {grp:'WEAPONS',name:'UNLOCK RAPID',icon:'w_rapid',desc:'DEV: start with RAPID available.',lv:0,mx:0,meta:b.unlocked.rapid?'OWNED':'DEV',cost:0,can:!b.unlocked.rapid,buy:()=>{b.unlocked.rapid=1;b.wtype='rapid';}}
+    {grp:'WEAPONS',name:'UNLOCK RAPID',icon:'w_rapid',desc:'DEV: start with RAPID available.',lv:0,mx:0,meta:b.unlocked.rapid?'OWNED':'DEV',cost:0,can:!b.unlocked.rapid,buy:()=>{b.unlocked.rapid=1;b.wtype='rapid';}},
+    {grp:'WEAPONS',name:'UNLOCK FLAK',icon:'w_flak',desc:'DEV: start with FLAK available.',lv:0,mx:0,meta:b.unlocked.flak?'OWNED':'DEV',cost:0,can:!b.unlocked.flak,buy:()=>{b.unlocked.flak=1;b.wtype='flak';}},
+    {grp:'WEAPONS',name:'UNLOCK BUZZSAW',icon:'w_buzz',desc:'DEV: start with BUZZSAW available.',lv:0,mx:0,meta:b.unlocked.buzzsaw?'OWNED':'DEV',cost:0,can:!b.unlocked.buzzsaw,buy:()=>{b.unlocked.buzzsaw=1;b.wtype='buzzsaw';}}
   ]:[]),
   {grp:'WEAPONS',name:'GUN POWER',icon:'gun',desc:'Boosts damage on all primary weapons (SPREAD, LANCE, HOMING, RAPID).',delta:'x'+pdN.toFixed(2)+' -> x'+pdX.toFixed(2),lv:u.gun,mx:8,cost:400+(u.gun-1)*250,can:u.gun<8,buy:()=>u.gun++},
   {grp:'WEAPONS',name:'FLANK GUNS',icon:'flank',desc:'Lv 1: side guns. Lv 2: diagonal fire. Lv 3: rear coverage.',delta:'+ side guns',lv:u.flank,mx:3,cost:[450,700,1000][Math.min(u.flank,2)],can:u.flank<3,buy:()=>u.flank++},
@@ -1632,7 +1641,7 @@ function outfitOffers(){ const b=startBuild, u=b.up; const pdN=(1+(u.gun-1)*0.30
   {grp:'SYSTEMS',name:'DRONE',icon:'drone',desc:'Deploys a drone that copies your fire direction.',lv:b.drone?1:0,mx:0,meta:b.drone?'OWNED':'i¢600',cost:600,can:!b.drone,buy:()=>{b.drone={ph:0};}}
 ];}
 function buildCount(){ const u=startBuild.up,b=startBuild; const hu=b.heavyUnlocked||{}; return (u.gun-1)+(u.beamPow-1)+(u.beamCap-1)+(u.beamPierce-1)+(u.beamSpool-1)+(u.speed-1)+u.flank+u.armor+b.shieldHits+(b.bombs-2)+(b.drone?1:0)+b.unlocked.lance+b.unlocked.homing+b.unlocked.rapid+((u.heavyPow||1)-1)+((u.heavyChg||1)-1)+((u.teslaJump||1)-1)+((u.singAmp||1)-1)+((u.wavePow||1)-1)+(u.mSpread||0)+(u.mRapid||0)+(u.mLance||0)+(u.mHoming||0)+((u.bombPow||1)-1)+(hu.rail?1:0)+(hu.tesla?1:0)+(hu.singularity?1:0)+(hu.wave?1:0); }
-const WCOL={spread:COL.green,lance:COL.cyan,homing:COL.gold,rapid:COL.mat};
+const WCOL={spread:COL.green,lance:COL.cyan,homing:COL.gold,rapid:COL.mat,flak:FLAK_COL,buzzsaw:COL.green};
 function applyPod(p){
   if(p.type==='core'){ const jack=90+sector*22; player.coins+=jack; runCoinsEarned+=jack; addScore(jack,p.x,p.y,p.c);
     let txt='CORE  +'+jack+' i\u00a2';
@@ -1662,11 +1671,18 @@ function firePrimary(){
   const gun=u.gun||1, gl=1+(gun-1)*0.16;
   const prevLen=pbul.length;
   shotsFired++;
-  if(player.wtype==='spread'){            // SCRAPPER: point-blank shred, pellets fade at range
-    const ms=u.mSpread||0; const pellets=[4,4,5,5,6,7,8,9][Math.min(lv,8)-1]+ms; const dmg=0.7*pm, spread=Math.max(0.07,0.16-ms*0.018);
+  if(player.wtype==='spread'){            // SPREAD: neutral generalist baseline - flat pellet damage, soft range floor
+    const ms=u.mSpread||0; const pellets=[4,4,5,5,6,7,8,9][Math.min(lv,8)-1]+ms; const dmg=0.644*pm, spread=Math.max(0.07,0.16-ms*0.018);
     for(let i=0;i<pellets;i++){ const a=(i-(pellets-1)/2)*spread+rnd(-0.03,0.03);
-      pbul.push({x:x+Math.sin(a)*8,y,vx:Math.sin(a)*420,vy:-700-rnd(0,60),c:COL.green,r:2.0,dmg,wt:'scrap',gl,life:0.34+ms*0.02,max:0.34}); }
+      pbul.push({x:x+Math.sin(a)*8,y,vx:Math.sin(a)*420,vy:-700-rnd(0,60),c:COL.green,r:2.0,dmg,wt:'scrap',gl,ox:x,oy:y,falloff:SPREAD_FULL_RANGE,floor:SPREAD_FAR_FLOOR}); }
     player.fireCd=.2; muzzle(x,y,COL.green,gl,pellets*0.5);
+  } else if(player.wtype==='flak'){       // FLAK: committed mid-range zone control - shells airburst into a damage cloud inside the band
+    const det=rnd(FLAK_BAND_MIN,FLAK_BAND_MAX);
+    pbul.push({x,y,vx:0,vy:-680,c:FLAK_COL,r:3.0,dmg:0,wt:'flak',gl,ox:x,oy:y,detAt:det,flakDps:FLAK_CLOUD_DPS*pm,smoke:0});
+    player.fireCd=.45; muzzle(x,y,FLAK_COL,gl,2);
+  } else if(player.wtype==='buzzsaw'){    // BUZZSAW: orbiting contact blades do the work (see updateBuzzsaw); trigger fires a weak forward poke
+    pbul.push({x,y,vx:0,vy:-760,c:COL.green,r:1.7,dmg:BUZZSAW_FWD_DMG*pm,wt:'buzz',gl});
+    player.fireCd=.2; muzzle(x,y,COL.green,gl,1);
   } else if(player.wtype==='rapid'){      // OVERHEAT NAILGUN: heat ramps power, redline locks the gun
     const mr=u.mRapid||0; let heat=player.heat||0;
     const streams=(lv<4?1:lv<7?2:3)+(mr>=3?1:0); const sp=8;
@@ -1704,6 +1720,31 @@ function firePrimary(){
     if(player.up.flank>=3){ fa.push(-2.45,2.45); }
     const fd=(0.55*pm)*((player.buffs&&player.buffs.overdrive>0)?1.3:1);
     fa.forEach(a=>pbul.push({x:player.x,y:player.y-20,vx:Math.sin(a)*480,vy:-Math.cos(a)*480,c:COL.green,r:1.5,dmg:fd,wt:'scrap',gl}));
+  }
+}
+/* FLAK: airburst into a lingering damage cloud (mult scales early-contact vs full-band detonations) */
+function detonateFlak(b,mult){
+  flakClouds.push({x:b.x,y:b.y,r:FLAK_CLOUD_R,t:FLAK_CLOUD_LIFE,life:FLAK_CLOUD_LIFE,dps:(b.flakDps||FLAK_CLOUD_DPS)*mult,c:FLAK_COL});
+  for(let k=0;k<8;k++) parts.push({x:b.x,y:b.y,vx:rnd(-90,90),vy:rnd(-90,90),life:.3,max:.3,c:Math.random()<0.5?FLAK_COL:COL.white,sz:rnd(1.4,2.4)});
+  rings.push({x:b.x,y:b.y,r:6,vr:180,life:.25,max:.25,c:FLAK_COL});
+  (Audio_.play&&Audio_.play('blast'))||Audio_.blast();
+}
+function updateFlakClouds(dt){
+  for(let i=flakClouds.length-1;i>=0;i--){ const c=flakClouds[i]; c.t-=dt;
+    if(c.t<=0){ flakClouds.splice(i,1); continue; }
+    for(const e of enemies){ if(e.dead)continue; if(dist2(e.x,e.y,c.x,c.y)<(c.r+e.r)*(c.r+e.r)){ e.hp-=c.dps*dt; e.flash=.08; if(e.hp<=0){ window.killSrc='flak'; killEnemy(e); } } }
+    if(boss && !boss.dying && !boss.entering && dist2(boss.x,boss.y,c.x,c.y)<(c.r+boss.r)*(c.r+boss.r)) damageBoss(c.dps*dt*0.9);
+  }
+}
+/* BUZZSAW: two contact blades orbit the ship; they damage enemies only, never block/destroy enemy bullets */
+function updateBuzzsaw(pl,dt){
+  const ang=t*BUZZSAW_SPEED, pm=pl.pdmg||1;
+  for(let bi=0;bi<2;bi++){ const a=ang+bi*Math.PI, bx=pl.x+Math.cos(a)*BUZZSAW_ORBIT, by=pl.y+Math.sin(a)*BUZZSAW_ORBIT;
+    for(const e of enemies){ if(e.dead)continue; if(dist2(e.x,e.y,bx,by)<(BUZZSAW_BLADE_R+e.r)*(BUZZSAW_BLADE_R+e.r)){
+      e.hp-=BUZZSAW_DPS_PER_BLADE*pm*dt; e.flash=.08;
+      if(Math.random()<dt*12) impactFX(bx,by,e.c,bx-e.x,by-e.y);   // reuse the directional spark fan, throttled per tick
+      if(e.hp<=0){ window.killSrc='buzzsaw'; killEnemy(e); } } }
+    if(boss && !boss.dying && !boss.entering && dist2(boss.x,boss.y,bx,by)<(BUZZSAW_BLADE_R+boss.r)*(BUZZSAW_BLADE_R+boss.r)) damageBoss(BUZZSAW_DPS_PER_BLADE*pm*dt);
   }
 }
 /* ============================= HEAVY slot ============================= */
@@ -1882,6 +1923,7 @@ function update(dt){
       if(wantFire){ pl.fireCd-=dt; if(pl.fireCd<=0) firePrimary(); }
       else if(pl.fireCd>0) pl.fireCd=Math.max(0,pl.fireCd-dt);
     }
+    if(pl.wtype==='buzzsaw') updateBuzzsaw(pl,dt);   // blades orbit and bite passively
     if(pl.overheatT>0) pl.overheatT-=dt;
     const firingRapid = wantFire && !heavyBusy && pl.overheatT<=0 && pl.wtype==='rapid';
     if(pl.heat>0 && !firingRapid) pl.heat=Math.max(0,pl.heat-dt*0.8);
@@ -2070,6 +2112,7 @@ function update(dt){
 
   /* ----- boss ----- */
   if(boss){ updateBoss(dt); }
+  if(flakClouds.length) updateFlakClouds(dt);
   if(holes.length) updateHoles(dt);
   if(station) updateStation(dt);
   if(bossFlash>0) bossFlash-=dt*1.8;
@@ -2085,20 +2128,25 @@ function update(dt){
     b.x+=b.vx*dt; b.y+=b.vy*dt;
     if(b.y<-20||b.y>H+20||b.x<-20||b.x>W+20){pbul.splice(i,1);continue;}
     if(b.life!==undefined){ b.life-=dt; if(b.life<=0){ for(let q=0;q<2;q++)parts.push({x:b.x,y:b.y,vx:rnd(-30,30),vy:rnd(-30,30),life:.12,max:.12,c:b.c,sz:1.2}); pbul.splice(i,1); continue; } }
+    if(b.wt==='flak'){ b.smoke=(b.smoke||0)-dt; if(b.smoke<=0){ b.smoke=0.05; parts.push({x:b.x,y:b.y+4,vx:rnd(-12,12),vy:rnd(12,40),life:.22,max:.22,c:'#9a7a4a',sz:1.3}); }
+      if((b.oy-b.y)>=b.detAt){ detonateFlak(b,1.0); pbul.splice(i,1); continue; } }   // airburst in the band
+    let dmgEff=b.dmg;
+    if(b.falloff){ const dd=Math.hypot(b.x-b.ox,b.y-b.oy); if(dd>b.falloff) dmgEff=b.dmg*(b.floor||0.55); }   // SPREAD range floor
     let hit=false;
     for(const bar of barriers){ if(Math.abs(b.x-bar.x)<bar.w/2 && Math.abs(b.y-bar.y)<bar.h/2+2){ hit=true;
       for(let k=0;k<2;k++)parts.push({x:b.x,y:b.y,vx:rnd(-40,40),vy:rnd(-10,30),life:.15,max:.15,c:bar.c,sz:1.3}); break; } }
     if(!hit) for(const e of enemies){ if(e.dead)continue;
       if(dist2(e.x,e.y,b.x,b.y)<(e.r+2)*(e.r+2)){
+        if(b.wt==='flak'){ detonateFlak(b,FLAK_EARLY); hit=true; break; }   // early contact -> weak airburst
         if(b.reflected && Math.random()<0.15){ const dx=player.x-e.x,dy=player.y-e.y,mm=Math.hypot(dx,dy)||1;
           ebul.push({x:e.x,y:e.y,vx:dx/mm*300,vy:dy/mm*300,c:e.c,r:3,owner:e}); e.flash=.1; Audio_.hit();
           for(let k=0;k<3;k++)parts.push({x:e.x,y:e.y,vx:rnd(-60,60),vy:rnd(-60,60),life:.18,max:.18,c:e.c,sz:1.6});
           hit=true; break; }
-        e.hp-=b.dmg; e.flash=.1; impactFX(b.x,b.y,e.c,b.vx,b.vy);
+        e.hp-=dmgEff; e.flash=.1; impactFX(b.x,b.y,e.c,b.vx,b.vy);
         if(e.hp<=0)killEnemy(e); if(!b.pierce){hit=true;} break; } }
     if(!hit && boss && !boss.entering && !boss.dying && dist2(boss.x,boss.y,b.x,b.y)<(boss.r)*(boss.r)){
-      damageBoss(b.dmg); impactFX(b.x,b.y,boss.c,b.vx,b.vy);
-      shotsHit++; if(!b.pierce)hit=true;
+      if(b.wt==='flak'){ detonateFlak(b,FLAK_EARLY); hit=true; }
+      else { damageBoss(dmgEff); impactFX(b.x,b.y,boss.c,b.vx,b.vy); shotsHit++; if(!b.pierce)hit=true; }
     }
     if(hit)pbul.splice(i,1);
   }
@@ -2610,6 +2658,8 @@ const SHOP_ICONS={
   w_rapid: svgI('<path d="M9 3v6M12 3v8M15 3v6"/><path d="M12 21v-4"/>'),
   w_lance: svgI('<path d="M12 21V4"/><path d="M8 7l4-4 4 4"/>'),
   w_homing: svgI('<circle cx="15" cy="9" r="3"/><path d="M4 20c1-6 6-9 9-9"/>'),
+  w_flak: svgI('<circle cx="12" cy="9" r="2.5"/><path d="M12 14v6"/><path d="M7 9L4 7M17 9l3-2M9 5L8 2M15 5l1-3"/>'),
+  w_buzz: svgI('<circle cx="12" cy="12" r="5.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5.5 5.5l2 2M16.5 16.5l2 2M18.5 5.5l-2 2M7.5 16.5l-2 2"/>'),
   bomb: svgI('<circle cx="11" cy="15" r="6"/><path d="M15 10l3-4"/><path d="M18 4l1 2 1-2"/>'),
   shield: svgI('<path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/>'),
   hull: svgI('<rect x="5" y="5" width="14" height="14" rx="2"/><path d="M5 12h14M12 5v14"/>'),
@@ -2646,7 +2696,7 @@ function refitItems(){ const u=player.up; const pdN=(1+(u.gun-1)*0.30), pdX=(1+u
   return [
     {grp:'WEAPONS',name:'GUN POWER',icon:'gun',desc:'Boosts damage on all primary weapons (SPREAD, LANCE, HOMING, RAPID).',delta:'x'+pdN.toFixed(2)+' -> x'+pdX.toFixed(2),lv:u.gun,mx:8,cost:400+(u.gun-1)*250,can:u.gun<8,buy:()=>u.gun++},
     {grp:'WEAPONS',name:'FLANK GUNS',icon:'flank',desc:'Lv 1: adds side guns. Lv 2: diagonal fire. Lv 3: rear coverage.',delta:'+ side guns',lv:u.flank||0,mx:3,cost:[450,700,1000][Math.min(u.flank||0,2)],can:(u.flank||0)<3,buy:()=>{u.flank=(u.flank||0)+1;}},
-    ...['spread|SPREAD|0|w_spread|Wide pellet cone, best for clearing groups in front.|1','rapid|RAPID|350|w_rapid|Very fast, narrow stream. Best for single targets.|2','lance|LANCE|600|w_lance|Bolts pierce through a line of enemies.|3','homing|HOMING|750|w_homing|Auto-aiming darts. Good for crowds, weak per shot.|5'].map(s=>{const p=s.split('|'),w=p[0],owned=!!player.unlocked[w],active=player.wtype===w,minS=+p[5],gated=!owned&&sector<minS;return {grp:'WEAPONS',name:p[1],icon:p[3],desc:p[4],lv:0,mx:0,meta:active?'EQUIPPED':owned?'EQUIP':gated?('SECTOR '+minS+'+'):('i¢'+p[2]),cost:owned?0:+p[2],can:!active&&!gated,buy:()=>{player.unlocked[w]=1;player.wtype=w;}};}),
+    ...['spread|SPREAD|0|w_spread|Neutral generalist: flat pellet damage with a soft range floor.|1','homing|SWARM|400|w_homing|Auto-aiming darts. Good for crowds, weak per shot.|2','rapid|NAILGUN|350|w_rapid|Heat ramps power, redline locks the gun. Single-target.|2','flak|FLAK|550|w_flak|Mid-range airburst: shells pop into a damage cloud in the band.|3','lance|RAILSPIKE|650|w_lance|Slow, committed bolts that pierce a whole column.|4','buzzsaw|BUZZSAW|800|w_buzz|Contact blades orbit the ship. Hug enemies; weak forward poke.|5'].map(s=>{const p=s.split('|'),w=p[0],owned=!!player.unlocked[w],active=player.wtype===w,minS=+p[5],gated=!owned&&sector<minS;return {grp:'WEAPONS',name:p[1],icon:p[3],desc:p[4],lv:0,mx:0,meta:active?'EQUIPPED':owned?'EQUIP':gated?('SECTOR '+minS+'+'):('i¢'+p[2]),cost:owned?0:+p[2],can:!active&&!gated,buy:()=>{player.unlocked[w]=1;player.wtype=w;}};}),
     {grp:'WEAPONS',name:'SCATTER CHOKE',icon:'w_spread',desc:'Adds a SPREAD pellet and tightens the cone for more focus.',delta:'+1 pellet',lv:u.mSpread||0,mx:3,cost:300+(u.mSpread||0)*220,can:(u.mSpread||0)<3,buy:()=>{u.mSpread=(u.mSpread||0)+1;}},
     ...(player.unlocked.rapid?[{grp:'WEAPONS',name:'OVERCLOCK',icon:'w_rapid',desc:'Increases RAPID fire rate. Stacks with existing speed.',delta:'+12% rate',lv:u.mRapid||0,mx:3,cost:300+(u.mRapid||0)*220,can:(u.mRapid||0)<3,buy:()=>{u.mRapid=(u.mRapid||0)+1;}}]:[]),
     ...(player.unlocked.lance?[{grp:'WEAPONS',name:'HIGH-VELOCITY',icon:'w_lance',desc:'Increases damage on each LANCE bolt.',delta:'+ bolt dmg',lv:u.mLance||0,mx:3,cost:320+(u.mLance||0)*230,can:(u.mLance||0)<3,buy:()=>{u.mLance=(u.mLance||0)+1;}}]:[]),
@@ -3125,12 +3175,31 @@ function drawFX(){
     else if(wt==='swarm'){ fx.beginPath(); fx.ellipse(b.x,b.y,b.r,b.r*2,0,0,6.28); fx.fill();
       fx.globalAlpha=0.5; fx.fillRect(b.x-b.r*0.5,b.y,b.r,9); fx.globalAlpha=1;
       fx.fillStyle=COL.white; fx.beginPath(); fx.arc(b.x,b.y,b.r*0.5,0,6.28); fx.fill(); }
+    else if(wt==='flak'){ fx.fillStyle=b.c; fx.beginPath(); fx.ellipse(b.x,b.y,b.r*1.05,b.r*1.7,0,0,6.28); fx.fill();   // stubby amber bolt
+      fx.fillStyle=COL.white; fx.beginPath(); fx.arc(b.x,b.y-b.r*0.6,b.r*0.5,0,6.28); fx.fill(); }
     else if(b.rail){ fx.shadowBlur=16; fx.fillRect(b.x-b.r/2,b.y-(b.len||20),b.r,(b.len||20)*2);
       fx.fillStyle=COL.white; fx.fillRect(b.x-b.r*0.3,b.y-(b.len||20),b.r*0.6,(b.len||20)*2); }
     else if(b.pierce){ fx.fillRect(b.x-b.r/2,b.y-(b.len||10),b.r,(b.len||10)*2); }
     else { fx.beginPath(); fx.ellipse(b.x,b.y,b.r,b.r*1.5,0,0,6.28); fx.fill();
       fx.fillStyle=COL.white; fx.beginPath(); fx.arc(b.x,b.y,b.r*0.45,0,6.28); fx.fill(); }
     fx.restore(); });
+  // FLAK damage clouds
+  flakClouds.forEach(c=>{ const k=clamp(c.t/c.life,0,1); fx.save(); fx.globalCompositeOperation='lighter';
+    const g=fx.createRadialGradient(c.x,c.y,0,c.x,c.y,c.r); g.addColorStop(0,FLAK_COL+'cc'); g.addColorStop(.6,FLAK_COL+'55'); g.addColorStop(1,FLAK_COL+'00');
+    fx.globalAlpha=0.35+0.45*k; fx.fillStyle=g; fx.beginPath(); fx.arc(c.x,c.y,c.r*(1.05-0.1*k),0,6.28); fx.fill();
+    fx.globalAlpha=0.5*k; fx.strokeStyle=FLAK_COL; fx.lineWidth=1.5; fx.beginPath(); fx.arc(c.x,c.y,c.r,0,6.28); fx.stroke(); fx.restore(); });
+  // FLAK band guide arc + BUZZSAW blades (player-equipped only)
+  if(state==='play' && player && !player.dead){
+    if(player.wtype==='flak'){ const r0=(FLAK_BAND_MIN+FLAK_BAND_MAX)/2; fx.save(); fx.globalAlpha=0.10; fx.strokeStyle=FLAK_COL; fx.lineWidth=1; fx.setLineDash([5,9]);
+      fx.beginPath(); fx.arc(player.x,player.y,r0,-Math.PI*0.85,-Math.PI*0.15); fx.stroke(); fx.setLineDash([]); fx.restore(); }
+    if(player.wtype==='buzzsaw'){ const ang=t*BUZZSAW_SPEED; fx.save(); fx.globalCompositeOperation='lighter';
+      for(let bi=0;bi<2;bi++){ const a=ang+bi*Math.PI;
+        fx.globalAlpha=0.22; fx.strokeStyle=COL.green; fx.lineWidth=3; fx.beginPath(); fx.arc(player.x,player.y,BUZZSAW_ORBIT,a-0.9,a); fx.stroke();   // motion smear
+        const bx=player.x+Math.cos(a)*BUZZSAW_ORBIT, by=player.y+Math.sin(a)*BUZZSAW_ORBIT;
+        fx.globalAlpha=0.9; fx.fillStyle=COL.green; fx.shadowColor=COL.green; fx.shadowBlur=10; fx.beginPath(); fx.arc(bx,by,BUZZSAW_BLADE_R,0,6.28); fx.fill();
+        fx.globalAlpha=0.85; fx.fillStyle=COL.white; fx.beginPath(); fx.arc(bx,by,BUZZSAW_BLADE_R*0.4,0,6.28); fx.fill(); }
+      fx.globalAlpha=1; fx.shadowBlur=0; fx.restore(); }
+  }
   ebul.forEach(b=>{ fx.save(); fx.shadowColor=b.c; fx.shadowBlur=12; fx.fillStyle=b.c; fx.strokeStyle=b.c;
     const sh=b.shape||EBSHAPE[b.c]||'orb';
     if(sh==='dart'){ const ang=Math.atan2(b.vy,b.vx); fx.translate(b.x,b.y); fx.rotate(ang);
@@ -3334,7 +3403,7 @@ function sendTelemetry(dc){
       +'bm'+((player&&player.bombs)||0)+'sd'+((player&&player.shieldHits)||0)+'dr'+((player&&player.drone)?1:0);
     const wpu=['spread','lance','homing','rapid'].reduce((n,w)=>n+(unl[w]?1:0),0);
     const hvu=['beam','rail','tesla','singularity','wave'].reduce((n,h)=>n+(hvl[h]?1:0),0);
-    const tq=['action=telemetry','v='+encodeURIComponent(VERSION),'m='+encodeURIComponent(gameMode),'sec='+(sector||0),'rt='+Math.round(runTime||0),'k='+(runKills||0),'bk='+(runBosses||0),'sc='+Math.round(window.scoreT||0),'acc='+tacc,'pw='+encodeURIComponent((player&&player.wtype)||''),'hw='+encodeURIComponent((player&&player.heavy)||''),'gp='+((player&&player.up&&player.up.gun)||1),'dc='+encodeURIComponent(dc||'none'),'ce='+(runCoinsEarned||0),'cs='+(runCoinsSpent||0),'pa='+(runParryAtt||0),'pry='+(runParries||0),'ppr='+(runPerfect||0),'ht='+(runHits||0),'bmb='+(runBombs||0),'oh='+(runOverheats||0),'lu='+(runLivesUsed||0),'ps='+encodeURIComponent(_ps),'bsp='+_bsp,'bct='+_bct,'dws='+Math.round(runDwell.spread||0),'dwl='+Math.round(runDwell.lance||0),'dwh='+Math.round(runDwell.homing||0),'dwr='+Math.round(runDwell.rapid||0),'sf='+(shotsFired||0),'sh='+(shotsHit||0),'bld='+encodeURIComponent(bld),'wpu='+wpu,'hvu='+hvu,'cb='+Date.now()].join('&');
+    const tq=['action=telemetry','v='+encodeURIComponent(VERSION),'m='+encodeURIComponent(gameMode),'sec='+(sector||0),'rt='+Math.round(runTime||0),'k='+(runKills||0),'bk='+(runBosses||0),'sc='+Math.round(window.scoreT||0),'acc='+tacc,'pw='+encodeURIComponent((player&&player.wtype)||''),'hw='+encodeURIComponent((player&&player.heavy)||''),'gp='+((player&&player.up&&player.up.gun)||1),'dc='+encodeURIComponent(dc||'none'),'ce='+(runCoinsEarned||0),'cs='+(runCoinsSpent||0),'pa='+(runParryAtt||0),'pry='+(runParries||0),'ppr='+(runPerfect||0),'ht='+(runHits||0),'bmb='+(runBombs||0),'oh='+(runOverheats||0),'lu='+(runLivesUsed||0),'ps='+encodeURIComponent(_ps),'bsp='+_bsp,'bct='+_bct,'dws='+Math.round(runDwell.spread||0),'dwl='+Math.round(runDwell.lance||0),'dwh='+Math.round(runDwell.homing||0),'dwr='+Math.round(runDwell.rapid||0),'dwf='+Math.round(runDwell.flak||0),'dwb='+Math.round(runDwell.buzzsaw||0),'sf='+(shotsFired||0),'sh='+(shotsHit||0),'bld='+encodeURIComponent(bld),'wpu='+wpu,'hvu='+hvu,'cb='+Date.now()].join('&');
     const url=API_URL+'?'+tq;
     // abandon may fire as the page unloads, where an Image request can be dropped: prefer sendBeacon there
     if(dc==='abandon' && navigator.sendBeacon){ navigator.sendBeacon(url); } else { new Image().src=url; }
@@ -3436,6 +3505,8 @@ stage.addEventListener('mousedown',e=>{ const tk='Mouse'+e.button;
     if(tk===keybinds.weap2) selectWeapon('lance');
     if(tk===keybinds.weap3) selectWeapon('homing');
     if(tk===keybinds.weap4) selectWeapon('rapid');
+    if(tk===keybinds.weap5) selectWeapon('flak');
+    if(tk===keybinds.weap6) selectWeapon('buzzsaw');
   } });
 window.addEventListener('mouseup',e=>{ const tk='Mouse'+e.button; held[tk]=false;
   if(tk===keybinds.beam){ if(player){player.beamOn=false; player.beamLock=false;} } });
@@ -3469,6 +3540,8 @@ window.addEventListener('keydown',e=>{ if(typingInField()) return;
     if(tk===keybinds.weap2){ selectWeapon('lance'); }
     if(tk===keybinds.weap3){ selectWeapon('homing'); }
     if(tk===keybinds.weap4){ selectWeapon('rapid'); }
+    if(tk===keybinds.weap5){ selectWeapon('flak'); }
+    if(tk===keybinds.weap6){ selectWeapon('buzzsaw'); }
   } else if(state==='pause'){
     if(k===keybinds.pause||e.key==='Escape'){ pauseToggle(); }
   } else if(state==='refit'){
@@ -3616,7 +3689,7 @@ function buildFeedbackComposer(){
 ['fbTitle','fbPause','fbOver'].forEach(id=>{ const c=el(id); if(c) c.appendChild(buildFeedbackComposer()); });
 
 /* keybind remapping */
-const KEY_ACTIONS=[['fire','FIRE (manual)'],['beam','HEAVY FIRE'],['heavy','CYCLE HEAVY'],['weapon','CYCLE WEAPON'],['weap1','> SPREAD'],['weap2','> LANCE'],['weap3','> HOMING'],['weap4','> RAPID'],['bomb','BOMB'],['parry','PARRY'],['pause','PAUSE'],['mute','MUTE']];
+const KEY_ACTIONS=[['fire','FIRE (manual)'],['beam','HEAVY FIRE'],['heavy','CYCLE HEAVY'],['weapon','CYCLE WEAPON'],['weap1','> SPREAD'],['weap2','> LANCE'],['weap3','> HOMING'],['weap4','> RAPID'],['weap5','> FLAK'],['weap6','> BUZZSAW'],['bomb','BOMB'],['parry','PARRY'],['pause','PAUSE'],['mute','MUTE']];
 function keyLabel(c){ if(!c)return '—'; if(c==='Space'||c===' ')return 'SPACE';
   if(c.indexOf('Mouse')===0){ return ['L-CLICK','MID-CLICK','R-CLICK','MOUSE4','MOUSE5'][+c.slice(5)]||('MOUSE'+(+c.slice(5)+1)); }
   return c.toUpperCase(); }
@@ -3653,7 +3726,7 @@ setTimeout(applySettings,0);   // apply saved volumes after the SFX sample layer
 function refreshControlsHint(){ const p=el('ctrlsPanel'); if(!p)return; const kl=c=>keyLabel(keybinds[c]);
   p.innerHTML='<span class="k">MOVE</span> WASD / ARROWS / MOUSE ('+(moveMode_pref==='lock'?'LOCK':'FOLLOW')+') &nbsp; <span class="k">FIRE</span> '+(autofire?'AUTO':('HOLD '+kl('fire')))+'<br>'+
     '<span class="k">HEAVY</span> HOLD '+kl('beam')+' &nbsp; <span class="k">CYCLE HVY</span> '+kl('heavy')+' &nbsp; <span class="k">BOMB</span> '+kl('bomb')+' &nbsp; <span class="k">PARRY</span> '+kl('parry')+'<br>'+
-    '<span class="k">WEAPON</span> '+kl('weapon')+' &nbsp; <span class="k">SELECT</span> '+kl('weap1')+' '+kl('weap2')+' '+kl('weap3')+' '+kl('weap4')+' &nbsp; <span class="k">PAUSE</span> '+kl('pause')+'<br>'+
+    '<span class="k">WEAPON</span> '+kl('weapon')+' &nbsp; <span class="k">SELECT</span> '+kl('weap1')+' '+kl('weap2')+' '+kl('weap3')+' '+kl('weap4')+' '+kl('weap5')+' '+kl('weap6')+' &nbsp; <span class="k">PAUSE</span> '+kl('pause')+'<br>'+
     '<span class="k">REMAP KEYS supports mouse buttons and any key</span>'; }
 (function(){
   const done=el('keysDone'); if(done) done.addEventListener('click',e=>{e.stopPropagation();closeKeys();});
@@ -3981,6 +4054,8 @@ requestAnimationFrame(frame);
     fire_rapid:["fire/fire_rapid_1.ogg","fire/fire_rapid_2.ogg"],
     fire_lance:["fire/fire_lance_1.ogg","fire/fire_lance_2.ogg"],
     fire_homing:["fire/fire_homing_1.ogg"],
+    fire_flak:["fire/fire_flak_1.ogg"],
+    fire_buzzsaw:["fire/fire_buzzsaw_1.ogg"],
     heavy_charge:["heavy/heavy_charge_1.ogg"],
     beam:["heavy/beam_1.ogg","heavy/beam_2.ogg"],
     rail:["heavy/rail_1.ogg","heavy/rail_2.ogg"],

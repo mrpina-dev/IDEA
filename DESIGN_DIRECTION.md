@@ -70,10 +70,10 @@ Locked design forks (do not re-litigate):
 - The chosen feel is visceral/chunky: heavy kick, freeze-frame shock rings on
   elite kills, debris bursts, directional spark fans on every hit, muzzle
   flashes, gore-of-light.
-- Weapons are committed playstyles, not four flavors of hold-to-clear:
-  SCRAPPER (point-blank shred), OVERHEAT NAILGUN (heat-ramping stream with real
-  overheat stakes), RAILSPIKE (charge-tap pierce), SWARM (hands-free but weak,
-  frees attention for dodging).
+- Weapons are committed playstyles spanning a locked range spectrum, not
+  flavors of hold-to-clear: BUZZSAW (contact), SPREAD (neutral baseline), FLAK
+  (mid band), RAILSPIKE (column pierce), NAILGUN (heat single-target), SWARM
+  (passive utility).
 - Heavies are earned in-run, sector-gated, expensive. Commitment, not shopping.
 
 ### Pillar 4: Fair competition
@@ -94,6 +94,7 @@ Locked design forks (do not re-litigate):
 - Boss-delete buttons are bugs (the 7x bomb multiplier and Wave Motion
   precedent). No single purchase should trivialize a boss.
 - Weapon unlocks are sector-gated in-run. Runs start SPREAD-only.
+- Primary unlock schedule is locked: SPREAD start, SWARM/NAILGUN s2, FLAK s3, RAILSPIKE s4, BUZZSAW s5. New weapons are balanced as ratios against measured SPREAD baseline DPS, never as freehand constants.
 - Balance proposals always state the numbers: named constants, exact values,
   and the fastest dials to turn if the change overshoots.
 
