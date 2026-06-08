@@ -446,7 +446,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2574';
+const W=630,H=840; const VERSION='2575';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -1421,7 +1421,7 @@ function resetPlayer(full){
     buffs:{overdrive:0,scatter:0,magnet:0}};
     applyUpgrades(); player.beamE=player.beamMax; }
   else { player.x=W/2; player.y=H-130; player.armor=player.maxArmor; player.inv=1.6; player.dead=false;
-    player.beamOn=false; player.beamLock=false; player.beamActive=false; player.beamE=player.beamMax; player.beamWind=0;
+    player.beamOn=false; player.beamLock=false; player.beamActive=false; player.beamE=player.beamMax; player.beamWind=0; player.beamDrained=false;
     player.parryT=0; player.parryCd=0; player.heat=0; player.overheatT=0;
     player.buffs={overdrive:0,scatter:0,magnet:0}; }
 }
@@ -1532,7 +1532,7 @@ function styleKill(e,wpn){ let base=3+(e.variant||0)*2;
   window.lastKillWpn=wpn||window.lastKillWpn;
   if(player && dist2(e.x,e.y,player.x,player.y)<80*80) base+=3;
   addStyle(base); }
-function onKill(e){ Audio_.kill(); shotsHit++; }
+function onKill(e){ (Audio_.play&&Audio_.play('kill_'+(e&&e.fk)))||Audio_.kill(); shotsHit++; }
 function playerHit(){
   if(window.__devGod)return;
   if(player.inv>0||player.dead)return;
@@ -1698,7 +1698,7 @@ function firePrimary(){
       else { player.heat=0; player.overheatT=1.2; runOverheats++; styleHit();
         shake=Math.max(shake,7); player.dmgFlash=Math.max(player.dmgFlash,0.12);
         rings.push({x,y,r:6,vr:300,life:.35,max:.35,c:COL.mset});
-        pops.push({x:player.x,y:player.y-30,txt:'OVERHEAT',c:COL.mset,life:.9,max:.9}); Audio_.hit(); } }
+        pops.push({x:player.x,y:player.y-30,txt:'OVERHEAT',c:COL.mset,life:.9,max:.9}); (Audio_.play&&Audio_.play('overheat'))||Audio_.hit(); } }
   } else if(player.wtype==='lance'){      // RAILSPIKE: slow, committed, full-pierce columns
     const ml=u.mLance||0; const cols=lv<5?1:lv<8?2:3; const sp=12; const dmg=(2.5+ml*0.8)*pm;
     for(let i=0;i<cols;i++){ const ox=(i-(cols-1)/2)*sp;
@@ -1779,7 +1779,7 @@ function fireHeavyShot(pl,h,charge){
   else if(h==='singularity'){ const sa=(pl.up.singAmp||1);
     holes.push({x:pl.x,y:pl.y-30,ty:rnd(H*0.22,H*0.40),vy:-200,state:'travel',t:0,r:0,maxr:128+sa*22,pull:220+sa*42,dur:1.4+sa*0.25,dmg:(13*hm)*(0.85+sa*0.15),core:0});
     ((Audio_.play&&Audio_.play('singularity'))||Audio_.whine(0.5)); shake=Math.max(shake,5); }
-  else if(h==='wave'){ const wp=(pl.up.wavePow||1); pl.waveT=0.6+wp*0.06; pl.beamE=0; pl.beamLock=true; pl.beamCoolT=(pl.beamCool||0.6)+2.0;
+  else if(h==='wave'){ const wp=(pl.up.wavePow||1); pl.waveT=0.6+wp*0.06; pl.beamE=0; pl.beamLock=true; pl.beamDrained=true; pl.beamCoolT=(pl.beamCool||0.6)+2.0;
     ((Audio_.play&&Audio_.play('wave'))||Audio_.big()); shake=Math.max(shake,18); bossFlash=Math.max(bossFlash,0.6); } }
 /* gated sustained-SFX for the player heavy slot: exactly one of beam/tesla/heavy_charge (or none) loops */
 function heavyLoopSfx(active){ if(!Audio_.playLoop) return;
@@ -1793,7 +1793,7 @@ function updateHeavy(pl,dt){ const h=pl.heavy||'beam';
     if(pl.beamOn && pl.beamE>0.02 && !pl.beamLock){
       pl.beamWind=Math.min((pl.beamWind||0)+dt, pl.beamWindup||0.37); pl.beamActive=true;
       heavyLoopSfx(h);                                   // sustained loop starts/continues while the beam is active
-      if(pl.beamWind>=(pl.beamWindup||0.37)){ pl.beamE-=dt; pl.beamCoolT=pl.beamCool||0.6; if(pl.beamE<=0.02){ pl.beamE=0; pl.beamLock=true; pl.beamWind=0; }
+      if(pl.beamWind>=(pl.beamWindup||0.37)){ pl.beamE-=dt; pl.beamCoolT=pl.beamCool||0.6; if(pl.beamE<=0.02){ pl.beamE=0; pl.beamLock=true; pl.beamWind=0; pl.beamDrained=true; }
         if(h==='beam') beamColumnDamage(pl,dt); else teslaChainDamage(pl,dt); }
       else { pl.beamEndY=pl.y-18; }
       return true; }
@@ -1919,12 +1919,13 @@ function update(dt){
     const wantFire = autofire || !!held[keybinds.fire];
     if(!heavyBusy){
       if(pl.beamCoolT>0) pl.beamCoolT-=dt;
-      else if(pl.beamE<pl.beamMax) pl.beamE=Math.min(pl.beamMax, pl.beamE+dt*(pl.beamRecharge||0.25));
+      else if(pl.beamE<pl.beamMax){ pl.beamE=Math.min(pl.beamMax, pl.beamE+dt*(pl.beamRecharge||0.25));
+        if(pl.beamDrained && pl.beamE>=pl.beamMax){ pl.beamDrained=false; Audio_.play&&Audio_.play('heavy_ready'); } }   // one-shot: heavy cell recovered to full from a locked state
       if(wantFire){ pl.fireCd-=dt; if(pl.fireCd<=0) firePrimary(); }
       else if(pl.fireCd>0) pl.fireCd=Math.max(0,pl.fireCd-dt);
     }
     if(pl.wtype==='buzzsaw') updateBuzzsaw(pl,dt);   // blades orbit and bite passively
-    if(pl.overheatT>0) pl.overheatT-=dt;
+    if(pl.overheatT>0){ pl.overheatT-=dt; if(pl.overheatT<=0){ pl.overheatT=0; Audio_.play&&Audio_.play('overheat_ready'); } }
     const firingRapid = wantFire && !heavyBusy && pl.overheatT<=0 && pl.wtype==='rapid';
     if(pl.heat>0 && !firingRapid) pl.heat=Math.max(0,pl.heat-dt*0.8);
     // damage embers
@@ -3841,6 +3842,7 @@ requestAnimationFrame(frame);
   function devWave(fk,arch){ if(state!=='play')return; waveFk=fk; clearField(); startFormationWave(arch); }
   function devStream(fk){ if(state!=='play')return; waveFk=fk; clearField(); startStreamWave(); }
   function devSweep(fk){ if(state!=='play')return; waveFk=fk; clearField(); startSweepWave(); }
+  panel.appendChild(mk('SFX EDITOR', ()=>window.open('dev/sfx-auditor.html','_blank')));
   panel.appendChild(hdr('SPAWN'));
   const grid=document.createElement('div'); grid.className='dgrid';
   FKEYS.forEach(fk=>{ for(let v=0;v<3;v++){ const nm=(TYPENAMES[fk]&&TYPENAMES[fk][v])||(fk+v);
@@ -4053,27 +4055,54 @@ requestAnimationFrame(frame);
     fire_spread:["fire/fire_spread_1.ogg","fire/fire_spread_2.ogg"],
     fire_rapid:["fire/fire_rapid_1.ogg","fire/fire_rapid_2.ogg"],
     fire_lance:["fire/fire_lance_1.ogg","fire/fire_lance_2.ogg"],
-    fire_homing:["fire/fire_homing_1.ogg"],
+    fire_homing:["fire/fire_homing_1.ogg","fire/fire_homing_2.ogg"],
     fire_flak:["fire/fire_flak_1.ogg"],
     fire_buzzsaw:["fire/fire_buzzsaw_1.ogg"],
+    overheat:["fire/overheat_1.ogg"],
+    overheat_ready:["fire/overheat_ready_1.ogg"],
     heavy_charge:["heavy/heavy_charge_1.ogg"],
+    heavy_ready:["heavy/heavy_ready_1.ogg"],
+    heavy_switch:["heavy/heavy_switch_1.ogg"],
     beam:["heavy/beam_1.ogg","heavy/beam_2.ogg"],
     rail:["heavy/rail_1.ogg","heavy/rail_2.ogg"],
     tesla:["heavy/tesla_1.ogg","heavy/tesla_2.ogg"],
     singularity:["heavy/singularity_1.ogg"],
     wave:["heavy/wave_1.ogg","heavy/wave_2.ogg"],
-    shield_hit:["defense/shield_hit_1.ogg"],
+    whine:["heavy/whine_1.ogg"],
+    hit:["impact/hit_1.ogg","impact/hit_2.ogg"],
     blast:["impact/blast_1.ogg"],
     enemy_fire:["impact/enemy_fire_1.ogg","impact/enemy_fire_2.ogg"],
+    bomb:["impact/bomb_1.ogg"],
+    thump:["impact/thump_1.ogg"],
     wub:["impact/wub_1.ogg"],
+    kill_ace:["death/kill_ace_1.ogg","death/kill_ace_2.ogg"],
+    kill_bmet:["death/kill_bmet_1.ogg","death/kill_bmet_2.ogg"],
+    kill_csee:["death/kill_csee_1.ogg","death/kill_csee_2.ogg"],
+    kill_mat:["death/kill_mat_1.ogg","death/kill_mat_2.ogg"],
+    kill_mset:["death/kill_mset_1.ogg","death/kill_mset_2.ogg"],
+    big:["death/big_1.ogg"],
+    death:["death/death_1.ogg"],
     boss_death:["boss/boss_death_1.ogg","boss/boss_death_2.ogg"],
+    boss_phase:["boss/boss_phase_1.ogg"],
+    boss_warn:["boss/boss_warn_1.ogg"],
+    shield_hit:["defense/shield_hit_1.ogg"],
+    shield_break:["defense/shield_break_1.ogg"],
+    player_hit:["defense/player_hit_1.ogg"],
+    parry:["defense/parry_1.ogg"],
+    parry_hit:["defense/parry_hit_1.ogg"],
+    coin:["pickup/coin_1.ogg","pickup/coin_2.ogg"],
     life_up:["pickup/life_up_1.ogg"],
     shield_up:["pickup/shield_up_1.ogg"],
     style_up:["pickup/style_up_1.ogg"],
+    core:["pickup/core_1.ogg"],
+    powerup:["pickup/powerup_1.ogg"],
     weapon_switch:["ui/weapon_switch_1.ogg"],
     refit_open:["ui/refit_open_1.ogg"],
+    buy:["ui/buy_1.ogg"],
     buy_fail:["ui/buy_fail_1.ogg","ui/buy_fail_2.ogg"],
-    pause:["ui/pause_1.ogg"]
+    pause:["ui/pause_1.ogg"],
+    ui_click:["ui/ui_click_1.ogg"],
+    sector_clear:["event/sector_clear_1.ogg"]
   };
   Audio_.sfxBuf={}; Audio_.sfxGain=null; Audio_.sfxVol=0.3; Audio_._sfxLoaded=false; Audio_._sfxLast={}; Audio_._sfxActive={}; Audio_._sfxVoices=0;
   Audio_.loadSfx=function(){ if(this._sfxLoaded||!this.ctx) return; this._sfxLoaded=true; var A=this;
