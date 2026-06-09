@@ -85,6 +85,11 @@ Locked design forks (do not re-litigate):
   cores. Keystones and modules are IN-RUN ONLY; CONFIGURE BUILD stays the numeric
   spine and is never an identity lock. Every module is an explicit tradeoff, no
   pure upside. Keystones are sidegrades for identity, not power spikes.
+- Heavy mastery exceptions: PRISM BEAM's four-stat spine (POWER/CELL/PIERCE/SPOOL)
+  already serves as its mastery track and gets no extra branches. WAVE MOTION is
+  held to a single branch (WAVE AMP) because it is the flagged boss-delete
+  precedent; no heavy branch may raise total boss throughput enough to trivialize
+  a boss.
 
 ### Pillar 4: Fair competition
 - The playfield is FIXED (currently 630x840) for leaderboard fairness across
