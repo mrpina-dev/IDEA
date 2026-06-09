@@ -461,7 +461,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='115';
+const W=630,H=840; const VERSION='116';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -3987,6 +3987,7 @@ function closeTut(){ el('ovlTut').classList.add('hidden'); try{localStorage.setI
 { const b=el('howtoBtn'); if(b) b.addEventListener('click',e=>{ e.stopPropagation(); openTut(); }); }
 
 const CHANGELOG=[
+ {ver:'116',date:'2026',items:['FPS counter now sits beside the playfield instead of over the HUD.']},
  {ver:'115',date:'2026',items:['SINGULARITY now travels as an unstable seed and ignites into a pulling well on arrival, instead of looking active in flight.']},
  {ver:'114',date:'2026',items:['FPS counter can now be toggled on in Settings.']},
  {ver:'112',date:'2026',items:['Ship modules now unlock by reaching a sector and completing an in-run challenge, shown on each locked module.']},
@@ -4028,11 +4029,14 @@ function setBoardMode(m,target){ boardMode=m; onlineBoard=null; boardRetries=0;
 
 /* ============================= loop ============================= */
 renderBoard('titleBoard'); refreshBoard('titleBoard'); updateGamesPlayed(); initBackdrop(); buildCelestial();
-function drawFpsHud(){ const c=fx; c.save(); c.font="600 12px 'Share Tech Mono',monospace"; c.textAlign='left'; c.textBaseline='top';
+function updateFpsHud(){
+  if(!SETTINGS.showFps){ if(window.__fpsEl) window.__fpsEl.style.display='none'; return; }
+  let e=window.__fpsEl;
+  if(!e){ e=document.createElement('div'); e.id='fpsHud'; e.style.cssText="position:fixed;top:8px;left:calc(50% + min(50vw, calc(50dvh * 3 / 4)) + 8px);z-index:30;font:600 11px 'Share Tech Mono',monospace;background:rgba(2,10,4,.82);border:1px solid;border-radius:4px;padding:4px 7px;pointer-events:none;white-space:nowrap"; document.body.appendChild(e); window.__fpsEl=e; }
+  e.style.display='block';
   const fps=Math.round(window.__fps||0), ms=(window.__ms||0).toFixed(1), bad=fps<50;
-  const lines=['FPS '+fps+'   '+ms+'ms','enm '+enemies.length+'  pb '+pbul.length+'  eb '+ebul.length,'parts '+parts.length+(LOWFX?'   [LOW-FX]':'')];
-  c.fillStyle='rgba(2,10,4,.82)'; c.fillRect(6,6,156,54); c.strokeStyle=bad?COL.mset:COL.cyan; c.lineWidth=1; c.strokeRect(6,6,156,54);
-  c.fillStyle=bad?COL.mset:COL.green; lines.forEach((ln,i)=>c.fillText(ln,12,12+i*16)); c.restore();
+  e.style.color=bad?COL.mset:COL.green; e.style.borderColor=bad?COL.mset:COL.cyan;
+  e.textContent='FPS '+fps+'  '+ms+'ms · enm '+enemies.length+' pb '+pbul.length+' eb '+ebul.length+' pt '+parts.length+(LOWFX?' · LOW-FX':'');
 }
 function frame(now){ let dt=(now-last)/1000; last=now; if(dt>0.05)dt=0.05; if(!(dt>0))dt=0;
   window.__fps=(window.__fps||60)*0.92+(1/Math.max(dt,1e-4))*0.08; const _rt0=performance.now();
@@ -4049,7 +4053,7 @@ function frame(now){ let dt=(now-last)/1000; last=now; if(dt>0.05)dt=0.05; if(!(
     drawBG(); drawFX();
     if(window.__devHitbox && gameMode==='dev' && window.__devDrawHitboxes) window.__devDrawHitboxes();
     hud(dt);
-    if(SETTINGS.showFps) drawFpsHud();
+    updateFpsHud();
   }catch(err){ console.error('VANGUARD frame error:',err); }
   window.__ms=(window.__ms||0)*0.92+(performance.now()-_rt0)*0.08;
   requestAnimationFrame(frame);
@@ -4059,7 +4063,7 @@ requestAnimationFrame(frame);
 /* ============================= dev mode ============================= */
 (function(){
   const css=document.createElement('style'); css.textContent=
-   '#devPanel{position:absolute;top:118px;left:8px;z-index:11;width:172px;max-height:64%;overflow:auto;background:rgba(2,10,4,.92);border:1px solid rgba(0,240,255,.4);border-radius:6px;padding:6px;font-family:"Share Tech Mono",monospace;color:var(--white);pointer-events:auto;display:none}'
+   '#devPanel{position:fixed;top:8px;right:calc(50% + min(50vw, calc(50dvh * 3 / 4)) + 8px);z-index:30;width:172px;max-height:88vh;overflow:auto;background:rgba(2,10,4,.92);border:1px solid rgba(0,240,255,.4);border-radius:6px;padding:6px;font-family:"Share Tech Mono",monospace;color:var(--white);pointer-events:auto;display:none}'
    +'#devPanel h4{font-size:8px;letter-spacing:.16em;color:var(--cyan);margin:7px 0 3px;border-bottom:1px solid rgba(0,240,255,.25);padding-bottom:2px}'
    +'#devPanel h4:first-child{margin-top:0}'
    +'#devPanel .dgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px}'
@@ -4067,7 +4071,7 @@ requestAnimationFrame(frame);
    +'#devPanel button:active{background:rgba(0,255,65,.2)}'
    +'#devPanel button.on{border-color:var(--gold);color:var(--gold)}'
    +'#devPanel .drow{display:flex;gap:4px;align-items:center;justify-content:space-between}'
-   +'#devTab{position:absolute;top:118px;left:8px;z-index:11;font:700 9px "Chakra Petch",sans-serif;background:rgba(0,240,255,.12);border:1px solid var(--cyan);color:var(--cyan);border-radius:4px;padding:3px 8px;cursor:pointer;pointer-events:auto;display:none}';
+   +'#devTab{position:fixed;top:8px;right:calc(50% + min(50vw, calc(50dvh * 3 / 4)) + 8px);z-index:30;font:700 9px "Chakra Petch",sans-serif;background:rgba(0,240,255,.12);border:1px solid var(--cyan);color:var(--cyan);border-radius:4px;padding:3px 8px;cursor:pointer;pointer-events:auto;display:none}';
   document.head.appendChild(css);
   const panel=document.createElement('div'); panel.id='devPanel';
   const tab=document.createElement('div'); tab.id='devTab'; tab.textContent='DEV ▸';
@@ -4313,8 +4317,8 @@ requestAnimationFrame(frame);
   panel.appendChild(conIn);
 
   panel.addEventListener('pointerdown',e=>e.stopPropagation());
-  document.getElementById('stage').appendChild(panel);
-  document.getElementById('stage').appendChild(tab);
+  document.body.appendChild(panel);
+  document.body.appendChild(tab);
   let shown=true;
   tab.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();shown=true;});
   window.addEventListener('keydown',e=>{ if(window.__devInput&&document.activeElement===window.__devInput)return; if((e.key==='`'||e.key==='~')&&gameMode==='dev'){ shown=!shown; } });
