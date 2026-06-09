@@ -442,7 +442,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2591';
+const W=630,H=840; const VERSION='2592';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -3455,7 +3455,9 @@ function sendTelemetry(dc){
       +'bm'+((player&&player.bombs)||0)+'sd'+((player&&player.shieldHits)||0)+'dr'+((player&&player.drone)?1:0);
     const wpu=['spread','lance','homing','rapid','flak','buzzsaw'].reduce((n,w)=>n+(unl[w]?1:0),0);
     const hvu=['beam','rail','tesla','singularity','wave'].reduce((n,h)=>n+(hvl[h]?1:0),0);
-    const tq=['action=telemetry','v='+encodeURIComponent(VERSION),'m='+encodeURIComponent(gameMode),'sec='+(sector||0),'rt='+Math.round(runTime||0),'k='+(runKills||0),'bk='+(runBosses||0),'sc='+Math.round(window.scoreT||0),'acc='+tacc,'pw='+encodeURIComponent((player&&player.wtype)||''),'hw='+encodeURIComponent((player&&player.heavy)||''),'gp='+((player&&player.up&&player.up.gun)||1),'dc='+encodeURIComponent(dc||'none'),'ce='+(runCoinsEarned||0),'cs='+(runCoinsSpent||0),'pa='+(runParryAtt||0),'pry='+(runParries||0),'ppr='+(runPerfect||0),'ht='+(runHits||0),'bmb='+(runBombs||0),'oh='+(runOverheats||0),'lu='+(runLivesUsed||0),'ps='+encodeURIComponent(_ps),'bsp='+_bsp,'bct='+_bct,'dws='+Math.round(runDwell.spread||0),'dwl='+Math.round(runDwell.lance||0),'dwh='+Math.round(runDwell.homing||0),'dwr='+Math.round(runDwell.rapid||0),'dwf='+Math.round(runDwell.flak||0),'dwb='+Math.round(runDwell.buzzsaw||0),'sf='+(shotsFired||0),'sh='+(shotsHit||0),'bld='+encodeURIComponent(bld),'wpu='+wpu,'hvu='+hvu,'did='+encodeURIComponent(typeof DEVICE_ID!=='undefined'?DEVICE_ID:''),'btk='+encodeURIComponent(runBossTTK.join(',')),'hwd='+encodeURIComponent([Math.round(runHeavyUse.beam),Math.round(runHeavyUse.tesla),runHeavyUse.rail,runHeavyUse.singularity,runHeavyUse.wave].join(',')),'cb='+Date.now()].join('&');
+    const _ks=Object.keys((player&&player.ks)||{}).filter(w=>(player.ks[w])).map(w=>w+':'+player.ks[w]).join(',');
+    const _mod=((player&&player.modules)||[]).filter(m=>m).join(',');
+    const tq=['action=telemetry','v='+encodeURIComponent(VERSION),'m='+encodeURIComponent(gameMode),'sec='+(sector||0),'rt='+Math.round(runTime||0),'k='+(runKills||0),'bk='+(runBosses||0),'sc='+Math.round(window.scoreT||0),'acc='+tacc,'pw='+encodeURIComponent((player&&player.wtype)||''),'hw='+encodeURIComponent((player&&player.heavy)||''),'gp='+((player&&player.up&&player.up.gun)||1),'dc='+encodeURIComponent(dc||'none'),'ce='+(runCoinsEarned||0),'cs='+(runCoinsSpent||0),'pa='+(runParryAtt||0),'pry='+(runParries||0),'ppr='+(runPerfect||0),'ht='+(runHits||0),'bmb='+(runBombs||0),'oh='+(runOverheats||0),'lu='+(runLivesUsed||0),'ps='+encodeURIComponent(_ps),'bsp='+_bsp,'bct='+_bct,'dws='+Math.round(runDwell.spread||0),'dwl='+Math.round(runDwell.lance||0),'dwh='+Math.round(runDwell.homing||0),'dwr='+Math.round(runDwell.rapid||0),'dwf='+Math.round(runDwell.flak||0),'dwb='+Math.round(runDwell.buzzsaw||0),'sf='+(shotsFired||0),'sh='+(shotsHit||0),'bld='+encodeURIComponent(bld),'wpu='+wpu,'hvu='+hvu,'did='+encodeURIComponent(typeof DEVICE_ID!=='undefined'?DEVICE_ID:''),'btk='+encodeURIComponent(runBossTTK.join(',')),'hwd='+encodeURIComponent([Math.round(runHeavyUse.beam),Math.round(runHeavyUse.tesla),runHeavyUse.rail,runHeavyUse.singularity,runHeavyUse.wave].join(',')),'ks='+encodeURIComponent(_ks),'mod='+encodeURIComponent(_mod),'cb='+Date.now()].join('&');
     const url=API_URL+'?'+tq;
     // abandon may fire as the page unloads, where an Image request can be dropped: prefer sendBeacon there
     if(dc==='abandon' && navigator.sendBeacon){ navigator.sendBeacon(url); } else { new Image().src=url; }
