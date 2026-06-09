@@ -9,6 +9,7 @@
 :root{
   --green:#00FF41; --gold:#C8FF00; --cyan:#00F0FF; --white:#E8FFE8; --dim:#4A7A52; --bg0:#020A04;
   --ace:#FF7A1A; --bmet:#B24DFF; --csee:#2E9BFF; --mat:#FFD21A; --mset:#FF2E2E;
+  --teal:#19E6C8; --bg1:#020A04;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
@@ -149,8 +150,18 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 .legend i{width:9px;height:9px;display:inline-block;border-radius:2px}
 .coins{font-size:12px;color:var(--gold);text-shadow:0 0 10px rgba(200,255,0,.6);margin-top:3px}
 .coins b{font-family:'Chakra Petch',sans-serif;font-weight:700}
-.shop{display:flex;flex-direction:column;gap:6px;width:100%;max-width:344px;max-height:46vh;overflow-y:auto;padding-right:4px}
-.shop::-webkit-scrollbar{width:5px}.shop::-webkit-scrollbar-thumb{background:rgba(0,255,65,.3);border-radius:3px}
+.shop{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;max-width:344px}
+.shoptabs{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;width:100%}
+.shoptab{--cc:var(--green);font-family:'Share Tech Mono',monospace;font-size:9.5px;letter-spacing:.16em;padding:5px 9px;background:rgba(255,255,255,.04);border:1px solid color-mix(in srgb,var(--cc) 30%,transparent);color:var(--dim);cursor:pointer;border-radius:3px;pointer-events:auto}
+.shoptab.on{color:var(--cc);border-color:var(--cc);background:color-mix(in srgb,var(--cc) 14%,transparent);box-shadow:0 0 8px color-mix(in srgb,var(--cc) 28%,transparent)}
+.shopbody{display:flex;flex-direction:column;gap:6px;width:100%;max-height:42vh;overflow-y:auto;padding-right:4px}
+.shopbody::-webkit-scrollbar{width:5px}.shopbody::-webkit-scrollbar-thumb{background:rgba(0,255,65,.3);border-radius:3px}
+.forkpair{border:1px dashed color-mix(in srgb,var(--gold) 45%,transparent);border-radius:5px;padding:7px 6px 6px;position:relative;margin-top:5px}
+.forklbl{position:absolute;top:-7px;left:9px;background:var(--bg1);padding:0 6px;font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:.2em;color:var(--gold)}
+.forkrow{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.modslots{display:flex;align-items:center;gap:7px;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--dim);padding:2px}
+.modslot{width:14px;height:14px;border:1px solid var(--dim);border-radius:2px}
+.modslot.on{background:var(--teal);border-color:var(--teal);box-shadow:0 0 6px var(--teal)}
 .card{--cc:var(--green);display:flex;align-items:center;gap:9px;padding:7px 9px;cursor:pointer;text-align:left;pointer-events:auto;
   background:linear-gradient(100deg,rgba(0,20,8,.65),rgba(0,12,6,.5));border:1px solid color-mix(in srgb,var(--cc) 45%,transparent);
   border-left:3px solid var(--cc);border-radius:7px;font-family:'Share Tech Mono',monospace;color:var(--white);transition:transform .1s,box-shadow .12s,background .12s;position:relative}
@@ -221,8 +232,10 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 @media (min-width:1200px){
   #cabinet{gap:22px}
   .console{display:flex}
-  .shop{width:94%;max-width:640px;max-height:60vh;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:8px;align-content:start}
-  .shop .shophdr{grid-column:1/-1}
+  .shop{width:94%;max-width:660px;display:flex;flex-direction:column;align-items:center;gap:10px}
+  .shopbody{width:100%;max-width:660px;max-height:54vh;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:8px;align-content:start}
+  .shopbody .forkpair{grid-column:1/-1}
+  .shopbody .modslots{grid-column:1/-1}
   .card{padding:9px 11px}
   .cic{flex:0 0 38px;width:38px;height:38px}
   .cic svg{width:24px;height:24px}
@@ -442,7 +455,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2592';
+const W=630,H=840; const VERSION='2593';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -2717,19 +2730,33 @@ function shopCardHTML(it,i,aff,maxed,grp){ const col=shopGroupColor(grp); const 
     +(it.desc?('<span class="cdesc">'+it.desc+'</span>'):'')
     +((it.delta&&!maxed)?('<span class="cdelta">'+it.delta+'</span>'):'')
     +'</span><span class="ccost">'+meta+'</span></button>'; }
+let refitTab=null;
 function renderShopGrid(container, items, ctx){ if(!container)return;
-  const order=['WEAPONS','HEAVY','BEAM','DEFENSE','SYSTEMS','MODULES']; const grpOf=it=>it.grp||'SYSTEMS'; let html='';
-  order.forEach(g=>{ const rows=items.map((it,i)=>[it,i]).filter(p=>grpOf(p[0])===g); if(!rows.length)return;
-    html+='<div class="shophdr" style="color:'+shopGroupColor(g)+'">'+g+'</div>';
-    rows.forEach(p=>{ const it=p[0],i=p[1]; const maxed=(it.mx>0&&it.lv>=it.mx)||!it.can; const aff=ctx.afford(it);
-      html+=shopCardHTML(it,i,aff,maxed,g); }); });
-  container.innerHTML=html;
+  const order=['WEAPONS','HEAVY','BEAM','DEFENSE','SYSTEMS','MODULES']; const grpOf=it=>it.grp||'SYSTEMS';
+  const present=order.filter(g=>items.some(it=>grpOf(it)===g));
+  if(!present.length){ container.innerHTML=''; return; }
+  if(!refitTab || present.indexOf(refitTab)<0) refitTab=present[0];
+  let tabs='<div class="shoptabs">';
+  present.forEach(g=>{ tabs+='<button class="shoptab'+(g===refitTab?' on':'')+'" data-tab="'+g+'" style="--cc:'+shopGroupColor(g)+'">'+g+'</button>'; });
+  tabs+='</div>';
+  const rows=items.map((it,i)=>[it,i]).filter(p=>grpOf(p[0])===refitTab);
+  let body='<div class="shopbody">';
+  if(refitTab==='MODULES' && player && player.modules){ const filled=player.modules.filter(m=>m).length; let sl=''; for(let s=0;s<player.modules.length;s++) sl+='<i class="modslot'+(player.modules[s]?' on':'')+'"></i>'; body+='<div class="modslots">SLOTS '+sl+' <span style="color:var(--teal)">'+filled+'/'+player.modules.length+'</span></div>'; }
+  for(let k=0;k<rows.length;k++){ const it=rows[k][0], i=rows[k][1]; const maxed=(it.mx>0&&it.lv>=it.mx)||!it.can; const aff=ctx.afford(it);
+    if(it.fork==='pick' && rows[k+1] && rows[k+1][0].fork==='pick'){
+      const it2=rows[k+1][0], i2=rows[k+1][1]; const maxed2=(it2.mx>0&&it2.lv>=it2.mx)||!it2.can; const aff2=ctx.afford(it2);
+      body+='<div class="forkpair"><span class="forklbl">CHOOSE ONE</span><div class="forkrow">'+shopCardHTML(it,i,aff,maxed,refitTab)+shopCardHTML(it2,i2,aff2,maxed2,refitTab)+'</div></div>';
+      k++; continue; }
+    body+=shopCardHTML(it,i,aff,maxed,refitTab); }
+  body+='</div>';
+  container.innerHTML=tabs+body;
+  [...container.querySelectorAll('.shoptab')].forEach(b=>b.addEventListener('click',()=>{ refitTab=b.dataset.tab; renderShopGrid(container,items,ctx); }));
   [...container.querySelectorAll('.card')].forEach(b=>b.addEventListener('click',()=>ctx.onBuy(+b.dataset.i,b))); }
 function hasMod(id){ return !!(player&&player.modules&&player.modules.indexOf(id)>=0); }
 function modCard(id,name,icon,desc,cost){ const eq=hasMod(id), slots=(player&&player.modules)||[0,0,0], free=slots.indexOf(0)>=0;
   return {grp:'MODULES',name:name,icon:icon,desc:desc,lv:0,mx:0,meta:eq?'EQUIPPED':(free?('i¢'+cost):'NO SLOT'),cost:eq?0:cost,can:(!eq&&free),buy:()=>{ if(!hasMod(id)){ const s=player.modules; const fi=s.indexOf(0); if(fi>=0){ s[fi]=id; if(id==='munitions') player.bombs+=2; } } }}; }
 function ksCard(w,name,icon,desc,id){ const cur=(player.ks&&player.ks[w])||0, picked=(cur===id), taken=(cur&&!picked);
-  return {grp:'WEAPONS',name:name,icon:icon,desc:desc,lv:0,mx:0,meta:picked?'ACTIVE':taken?'LOCKED':'i¢700',cost:(picked||taken)?0:700,can:!cur,buy:()=>{ if(!(player.ks&&player.ks[w])){ (player.ks=player.ks||{})[w]=id; } }}; }
+  return {grp:'WEAPONS',name:name,icon:icon,desc:desc,lv:0,mx:0,fork:'pick',meta:picked?'ACTIVE':taken?'LOCKED':'i¢700',cost:(picked||taken)?0:700,can:!cur,buy:()=>{ if(!(player.ks&&player.ks[w])){ (player.ks=player.ks||{})[w]=id; } }}; }
 function refitItems(){ const u=player.up; const pdN=(1+(u.gun-1)*0.30), pdX=(1+u.gun*0.30); const hu=player.heavyUnlocked||{};
   return [
     {grp:'WEAPONS',name:'GUN POWER',icon:'gun',desc:'Boosts damage on all primary weapons (SPREAD, LANCE, HOMING, RAPID).',delta:'x'+pdN.toFixed(2)+' -> x'+pdX.toFixed(2),lv:u.gun,mx:8,cost:400+(u.gun-1)*250,can:u.gun<8,buy:()=>u.gun++},

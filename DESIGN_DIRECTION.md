@@ -209,6 +209,11 @@ Each faction is a Bosco Tech pathway made hostile. Identity table is in
   Assets (audio) may live alongside it in the repo; game logic does not split.
 - No redundant UI. Information appears once in the layout (precedent: duplicate
   wordmarks and controls lists were stripped from the consoles).
+- The REFIT shop is organized by category tabs (WEAPONS, HEAVY, BEAM, DEFENSE,
+  SYSTEMS, MODULES), one short screen per tab, never one long scrolling list.
+  Mutually-exclusive choices (keystones) render as explicit CHOOSE ONE fork
+  pairs, and the MODULES tab shows the three slots and how many are filled.
+  Forks must read as forks, not as adjacent list rows.
 - The CONTROLS overlay is keybinds only. Player-facing toggles (auto-fire, low FX, movement mode) live in SETTINGS and are never duplicated in CONTROLS.
 - First-run players get the tutorial automatically; returning players are never
   nagged (localStorage flags).
