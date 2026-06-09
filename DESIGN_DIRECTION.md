@@ -217,7 +217,9 @@ Each faction is a Bosco Tech pathway made hostile. Identity table is in
   weapon or heavy and all of its upgrades render as one connected kit: the
   weapon is the header and its mastery branches and keystone fork are nested
   beneath it with a visible connector, so an upgrade is never separated from
-  the weapon it belongs to.
+  the weapon it belongs to. Kits are collapsible (default collapsed) so each
+  tab opens as a scannable list of weapon headers, and the shop preserves its
+  scroll position across purchases rather than jumping back to the top.
 - The CONTROLS overlay is keybinds only. Player-facing toggles (auto-fire, low FX, movement mode) live in SETTINGS and are never duplicated in CONTROLS.
 - First-run players get the tutorial automatically; returning players are never
   nagged (localStorage flags).

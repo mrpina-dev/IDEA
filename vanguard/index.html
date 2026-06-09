@@ -163,7 +163,10 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 .modslot{width:14px;height:14px;border:1px solid var(--dim);border-radius:2px}
 .modslot.on{background:var(--teal);border-color:var(--teal);box-shadow:0 0 6px var(--teal)}
 .kit{--cc:var(--green);border:1px solid color-mix(in srgb,var(--cc) 30%,transparent);border-radius:6px;background:color-mix(in srgb,var(--cc) 6%,transparent);display:flex;flex-direction:column;gap:6px;padding:6px;width:100%}
-.kit .kithead .card{background:color-mix(in srgb,var(--cc) 10%,transparent)}
+.kithead{display:flex;align-items:stretch;gap:6px}
+.kithead .card{flex:1;background:color-mix(in srgb,var(--cc) 10%,transparent)}
+.kittoggle{flex:0 0 24px;background:color-mix(in srgb,var(--cc) 8%,transparent);border:1px solid color-mix(in srgb,var(--cc) 30%,transparent);color:var(--cc);border-radius:4px;cursor:pointer;font-size:11px;line-height:1;pointer-events:auto;display:flex;align-items:center;justify-content:center}
+.kit.collapsed .kitbody{display:none}
 .kitbody{display:flex;flex-direction:column;gap:6px;margin-left:7px;padding-left:9px;border-left:2px solid color-mix(in srgb,var(--cc) 30%,transparent)}
 .kitbody .forkpair{margin-top:8px}
 .card{--cc:var(--green);display:flex;align-items:center;gap:9px;padding:7px 9px;cursor:pointer;text-align:left;pointer-events:auto;
@@ -457,7 +460,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2594';
+const W=630,H=840; const VERSION='2595';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -2732,7 +2735,7 @@ function shopCardHTML(it,i,aff,maxed,grp){ const col=shopGroupColor(grp); const 
     +(it.desc?('<span class="cdesc">'+it.desc+'</span>'):'')
     +((it.delta&&!maxed)?('<span class="cdelta">'+it.delta+'</span>'):'')
     +'</span><span class="ccost">'+meta+'</span></button>'; }
-let refitTab=null;
+let refitTab=null, refitExpand={}, _refitLastTab=null;
 function renderShopGrid(container, items, ctx){ if(!container)return;
   const order=['WEAPONS','HEAVY','BEAM','DEFENSE','SYSTEMS','MODULES']; const grpOf=it=>it.grp||'SYSTEMS';
   const present=order.filter(g=>items.some(it=>grpOf(it)===g));
@@ -2750,14 +2753,18 @@ function renderShopGrid(container, items, ctx){ if(!container)return;
   if(refitTab==='MODULES' && player && player.modules){ const filled=player.modules.filter(m=>m).length; let sl=''; for(let s=0;s<player.modules.length;s++) sl+='<i class="modslot'+(player.modules[s]?' on':'')+'"></i>'; body+='<div class="modslots">SLOTS '+sl+' <span style="color:var(--teal)">'+filled+'/'+player.modules.length+'</span></div>'; }
   groups.forEach(g=>{
     if(g.length===1){ body+=_rc(g[0]); return; }
-    body+='<div class="kit" style="--cc:'+_col+'"><div class="kithead">'+_rc(g[0])+'</div><div class="kitbody">';
+    const _ic=(g[0][0].icon||'_'), _kk=refitTab+'|'+_ic, _open=!!refitExpand[_kk];
+    body+='<div class="kit'+(_open?'':' collapsed')+'" style="--cc:'+_col+'"><div class="kithead"><button class="kittoggle" data-kit="'+_kk+'">'+(_open?'▾':'▸')+'</button>'+_rc(g[0])+'</div><div class="kitbody">';
     for(let k=1;k<g.length;k++){ const p=g[k];
       if(p[0].fork==='pick' && g[k+1] && g[k+1][0].fork==='pick'){ body+='<div class="forkpair"><span class="forklbl">CHOOSE ONE</span><div class="forkrow">'+_rc(p)+_rc(g[k+1])+'</div></div>'; k++; continue; }
       body+=_rc(p); }
     body+='</div></div>'; });
   body+='</div>';
+  const _sbOld=container.querySelector('.shopbody'); const _st=_sbOld?_sbOld.scrollTop:0; const _same=(_refitLastTab===refitTab); _refitLastTab=refitTab;
   container.innerHTML=tabs+body;
+  const _sbNew=container.querySelector('.shopbody'); if(_sbNew) _sbNew.scrollTop=_same?_st:0;
   [...container.querySelectorAll('.shoptab')].forEach(b=>b.addEventListener('click',()=>{ refitTab=b.dataset.tab; renderShopGrid(container,items,ctx); }));
+  [...container.querySelectorAll('.kittoggle')].forEach(b=>b.addEventListener('click',()=>{ const k=b.dataset.kit; refitExpand[k]=!refitExpand[k]; const kit=b.closest('.kit'); if(kit) kit.classList.toggle('collapsed', !refitExpand[k]); b.textContent=refitExpand[k]?'▾':'▸'; }));
   [...container.querySelectorAll('.card')].forEach(b=>b.addEventListener('click',()=>ctx.onBuy(+b.dataset.i,b))); }
 function hasMod(id){ return !!(player&&player.modules&&player.modules.indexOf(id)>=0); }
 function modCard(id,name,icon,desc,cost){ const eq=hasMod(id), slots=(player&&player.modules)||[0,0,0], free=slots.indexOf(0)>=0;
