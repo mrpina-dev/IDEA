@@ -94,7 +94,9 @@ Locked design forks (do not re-litigate):
   behavioral keystones after at least two mastery levels are invested in it.
   Offered only in REFIT (in-run), flat one-time cost, and picking one locks the
   other for the run. Keystones change how a weapon works; they are never pure
-  stat boosts (those are the mastery branches).
+  stat boosts (those are the mastery branches). Keystones cover all six
+  primaries and the three forkable heavies (RAILGUN, TESLA, SINGULARITY);
+  PRISM BEAM and WAVE MOTION keep their existing single-track exceptions.
 - Ship modules (Tier 3): three module slots, filled in-run from a shared pool of
   global tradeoff cores. Picks are permanent for the run (no swapping), offered
   in a MODULES group in REFIT only. Every module is an explicit tradeoff with a

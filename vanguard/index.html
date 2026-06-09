@@ -460,7 +460,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2596';
+const W=630,H=840; const VERSION='2597';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -1495,6 +1495,7 @@ function startGame(){
     player.heavy=(player.heavyUnlocked&&player.heavyUnlocked[b.heavy])?b.heavy:'beam'; player.bombs=b.bombs; player.shieldHits=b.shieldHits; if(b.drone)player.drone={ph:0}; }
   applyUpgrades(); player.armor=player.maxArmor; player.beamE=player.beamMax;
   player.ks={};   // keystone picks are per-run, in-run only
+  player.hks={};   // heavy keystone picks, per-run, in-run only
   player.modules=[0,0,0];   // ship module slots, per-run, in-run only
   player.coins += Math.max(0, START_BUDGET-(startBuild.spent||0));   // unspent pre-game budget carries into the run
   if(gameMode==='hardcore'){ player.lives=0; } else if(gameMode==='dev'){ player.lives=99; player.coins=99999; player.heavyUnlocked={beam:1,rail:1,tesla:1,singularity:1,wave:1}; }
@@ -1808,7 +1809,8 @@ function beamColumnDamage(pl,dt){ const bx=pl.x;
   for(let k=0;k<col.length && k<np;k++){ const e=col[k]; e.hp-=dt*pl.beamDps; e.flash=.1; if(e.hp<=0){ window.killSrc='beam'; killEnemy(e); } }
   pl.beamEndY=(col.length>np)?col[np-1].y:-20;
   if(boss && !boss.dying && !boss.entering && Math.abs(boss.x-bx)<54 && boss.y>pl.beamEndY){ damageBoss(dt*pl.beamDps*0.9); pl.beamEndY=boss.y; } }
-function teslaChainDamage(pl,dt){ pl.beamEndY=pl.y-18; const jl=(pl.up.teslaJump||1), tv=(pl.up.teslaDps||1); const range=200+jl*20, jump=115+jl*16, maxT=2+jl, dps=58*(1+0.16*(tv-1))*(pl.heavyMult||1);
+function teslaChainDamage(pl,dt){ pl.beamEndY=pl.y-18; const jl=(pl.up.teslaJump||1), tv=(pl.up.teslaDps||1), _hk=(pl.hks&&pl.hks.tesla)||0; let range=200+jl*20, jump=115+jl*16, maxT=2+jl, dps=58*(1+0.16*(tv-1))*(pl.heavyMult||1);
+  if(_hk==='super'){ maxT+=3; jump+=60; dps*=0.7; } else if(_hk==='focus'){ maxT=1; dps*=2.2; }
   let from={x:pl.x,y:pl.y-18}; const hit=[]; pl.teslaArc=[];   // tesla audio is now a gated loop (see heavyLoopSfx)
   for(let n=0;n<maxT;n++){ let best=null,bd=(n===0?range:jump);
     for(const e of enemies){ if(e.dead||hit.indexOf(e)>=0)continue; const d=Math.sqrt(dist2(e.x,e.y,from.x,from.y)); if(d<bd){bd=d;best=e;} }
@@ -1819,11 +1821,13 @@ function teslaChainDamage(pl,dt){ pl.beamEndY=pl.y-18; const jl=(pl.up.teslaJump
 function fireHeavyShot(pl,h,charge){
   if(pl.beamE < heavyCost(h)*pl.beamMax) return;
   pl.beamE -= heavyCost(h)*pl.beamMax; if(runHeavyUse[h]!=null)runHeavyUse[h]++; pl.beamCoolT=pl.beamCool||0.6; const hm=pl.heavyMult||1;
-  if(h==='rail'){ const rp=(pl.up.railPow||1), rc=(pl.up.railCap||1), flr=0.4+0.10*(rc-1); const dmg=(40*hm)*(1+0.18*(rp-1))*(flr+(1-flr)*charge);
-    pbul.push({x:pl.x,y:pl.y-20,vx:0,vy:-1500,c:COL.cyan,r:5,dmg,pierce:true,len:30,rail:true});
+  if(h==='rail'){ const rp=(pl.up.railPow||1), rc=(pl.up.railCap||1), flr=0.4+0.10*(rc-1); const _hk=(pl.hks&&pl.hks.rail)||0; let dmg=(40*hm)*(1+0.18*(rp-1))*(flr+(1-flr)*charge);
+    if(_hk==='twin'){ dmg*=0.62; pbul.push({x:pl.x-9,y:pl.y-20,vx:0,vy:-1500,c:COL.cyan,r:5,dmg,pierce:true,len:30,rail:true}); pbul.push({x:pl.x+9,y:pl.y-20,vx:0,vy:-1500,c:COL.cyan,r:5,dmg,pierce:true,len:30,rail:true}); }
+    else { if(_hk==='siege'){ dmg*=1.5; pl.beamCoolT=(pl.beamCool||0.6)+0.4; } pbul.push({x:pl.x,y:pl.y-20,vx:0,vy:-1500,c:COL.cyan,r:5,dmg,pierce:true,len:30,rail:true}); }
     ((Audio_.play&&Audio_.play('rail'))||Audio_.blast()); shake=Math.max(shake,5+charge*6); rings.push({x:pl.x,y:pl.y-20,r:6,vr:240,life:.3,max:.3,c:COL.cyan}); }
-  else if(h==='singularity'){ const sa=(pl.up.singAmp||1), sc=(pl.up.singCrush||1);
-    holes.push({x:pl.x,y:pl.y-30,ty:rnd(H*0.22,H*0.40),vy:-200,state:'travel',t:0,r:0,maxr:128+sa*22,pull:220+sa*42,dur:1.4+sa*0.25,dmg:(13*hm)*(0.85+sa*0.15),crush:1+0.15*(sc-1),core:0});
+  else if(h==='singularity'){ const sa=(pl.up.singAmp||1), sc=(pl.up.singCrush||1), _hk=(pl.hks&&pl.hks.singularity)||0; let _dur=1.4+sa*0.25, _pull=220+sa*42, _cr=1+0.15*(sc-1);
+    if(_hk==='burst'){ _dur*=0.4; _cr*=1.7; } else if(_hk==='well'){ _dur*=1.8; _pull*=1.3; _cr*=0.6; }
+    holes.push({x:pl.x,y:pl.y-30,ty:rnd(H*0.22,H*0.40),vy:-200,state:'travel',t:0,r:0,maxr:128+sa*22,pull:_pull,dur:_dur,dmg:(13*hm)*(0.85+sa*0.15),crush:_cr,core:0});
     ((Audio_.play&&Audio_.play('singularity'))||Audio_.whine(0.5)); shake=Math.max(shake,5); }
   else if(h==='wave'){ const wp=(pl.up.wavePow||1); pl.waveT=0.6+wp*0.06; pl.beamE=0; pl.beamLock=true; pl.beamDrained=true; pl.beamCoolT=(pl.beamCool||0.6)+2.0;
     ((Audio_.play&&Audio_.play('wave'))||Audio_.big()); shake=Math.max(shake,18); bossFlash=Math.max(bossFlash,0.6); } }
@@ -2786,6 +2790,8 @@ function modCard(id,name,icon,desc,cost){ const eq=hasMod(id), slots=(player&&pl
   return {grp:'MODULES',name:name,icon:icon,desc:desc,lv:0,mx:0,meta:eq?'EQUIPPED':(free?('i¢'+cost):'NO SLOT'),cost:eq?0:cost,can:(!eq&&free),buy:()=>{ if(!hasMod(id)){ const s=player.modules; const fi=s.indexOf(0); if(fi>=0){ s[fi]=id; if(id==='munitions') player.bombs+=2; } } }}; }
 function ksCard(w,name,icon,desc,id){ const cur=(player.ks&&player.ks[w])||0, picked=(cur===id), taken=(cur&&!picked);
   return {grp:'WEAPONS',name:name,icon:icon,desc:desc,lv:0,mx:0,fork:'pick',meta:picked?'ACTIVE':taken?'LOCKED':'i¢700',cost:(picked||taken)?0:700,can:!cur,buy:()=>{ if(!(player.ks&&player.ks[w])){ (player.ks=player.ks||{})[w]=id; } }}; }
+function hksCard(h,name,icon,desc,id){ const cur=(player.hks&&player.hks[h])||0, picked=(cur===id), taken=(cur&&!picked);
+  return {grp:'HEAVY',name:name,icon:icon,desc:desc,lv:0,mx:0,fork:'pick',meta:picked?'ACTIVE':taken?'LOCKED':'i¢900',cost:(picked||taken)?0:900,can:!cur,buy:()=>{ if(!(player.hks&&player.hks[h])){ (player.hks=player.hks||{})[h]=id; } }}; }
 function refitItems(){ const u=player.up; const pdN=(1+(u.gun-1)*0.30), pdX=(1+u.gun*0.30); const hu=player.heavyUnlocked||{};
   return [
     {grp:'WEAPONS',name:'GUN POWER',icon:'gun',desc:'Boosts damage on all primary weapons (SPREAD, LANCE, HOMING, RAPID).',delta:'x'+pdN.toFixed(2)+' -> x'+pdX.toFixed(2),lv:u.gun,mx:8,cost:400+(u.gun-1)*250,can:u.gun<8,buy:()=>u.gun++},
@@ -2805,9 +2811,9 @@ function refitItems(){ const u=player.up; const pdN=(1+(u.gun-1)*0.30), pdX=(1+u
     {grp:'HEAVY',name:'WAVE MOTION',icon:'wave',desc:'Drains the full heavy meter to fire a wide screen-clearing beam.',lv:0,mx:0,meta:hu.wave?'OWNED':(sector<5?'SECTOR 5+':'i¢1600'),cost:1600,can:!hu.wave&&sector>=5,buy:()=>{player.heavyUnlocked.wave=1;player.heavy='wave';}},
     {grp:'HEAVY',name:'HEAVY POWER',icon:'beampow',desc:'Boosts damage on all heavy weapons.',delta:'+30% dmg',lv:u.heavyPow||1,mx:6,cost:350+((u.heavyPow||1)-1)*240,can:(u.heavyPow||1)<6,buy:()=>{u.heavyPow=(u.heavyPow||1)+1;}},
     {grp:'HEAVY',name:'HEAVY SPOOL',icon:'beamspool',desc:'Reduces charge time for all heavy weapons.',delta:'faster charge',lv:u.heavyChg||1,mx:5,cost:300+((u.heavyChg||1)-1)*200,can:(u.heavyChg||1)<5,buy:()=>{u.heavyChg=(u.heavyChg||1)+1;}},
-    ...(hu.rail?[{grp:'HEAVY',name:'OVERCHARGE SLUG',icon:'rail',desc:'RAILGUN slug hits harder at full charge.',delta:'+18% dmg',lv:u.railPow||1,mx:4,cost:350+((u.railPow||1)-1)*240,can:(u.railPow||1)<4,buy:()=>{u.railPow=(u.railPow||1)+1;}},{grp:'HEAVY',name:'CAPACITOR',icon:'rail',desc:'Partial-charge RAILGUN taps keep more of their punch. Rewards rapid fire.',delta:'+tap dmg',lv:u.railCap||1,mx:4,cost:350+((u.railCap||1)-1)*240,can:(u.railCap||1)<4,buy:()=>{u.railCap=(u.railCap||1)+1;}}]:[]),
-    ...(hu.tesla?[{grp:'HEAVY',name:'ARC CHAIN',icon:'tesla',desc:'Tesla arcs to more targets over a wider range.',delta:'+1 arc',lv:u.teslaJump||1,mx:4,cost:350+((u.teslaJump||1)-1)*220,can:(u.teslaJump||1)<4,buy:()=>{u.teslaJump=(u.teslaJump||1)+1;}},{grp:'HEAVY',name:'HIGH VOLTAGE',icon:'tesla',desc:'Each Tesla arc deals more damage per second.',delta:'+16% dps',lv:u.teslaDps||1,mx:4,cost:350+((u.teslaDps||1)-1)*220,can:(u.teslaDps||1)<4,buy:()=>{u.teslaDps=(u.teslaDps||1)+1;}}]:[]),
-    ...(hu.singularity?[{grp:'HEAVY',name:'EVENT HORIZON',icon:'singularity',desc:'Increases Singularity pull radius and detonation damage.',delta:'wider pull',lv:u.singAmp||1,mx:4,cost:350+((u.singAmp||1)-1)*240,can:(u.singAmp||1)<4,buy:()=>{u.singAmp=(u.singAmp||1)+1;}},{grp:'HEAVY',name:'COLLAPSE CORE',icon:'singularity',desc:'Singularity implosion finale detonates harder.',delta:'+implosion dmg',lv:u.singCrush||1,mx:4,cost:350+((u.singCrush||1)-1)*240,can:(u.singCrush||1)<4,buy:()=>{u.singCrush=(u.singCrush||1)+1;}}]:[]),
+    ...(hu.rail?[{grp:'HEAVY',name:'OVERCHARGE SLUG',icon:'rail',desc:'RAILGUN slug hits harder at full charge.',delta:'+18% dmg',lv:u.railPow||1,mx:4,cost:350+((u.railPow||1)-1)*240,can:(u.railPow||1)<4,buy:()=>{u.railPow=(u.railPow||1)+1;}},{grp:'HEAVY',name:'CAPACITOR',icon:'rail',desc:'Partial-charge RAILGUN taps keep more of their punch. Rewards rapid fire.',delta:'+tap dmg',lv:u.railCap||1,mx:4,cost:350+((u.railCap||1)-1)*240,can:(u.railCap||1)<4,buy:()=>{u.railCap=(u.railCap||1)+1;}},...((((u.railPow||1)-1)+((u.railCap||1)-1))>=2?[hksCard('rail','SIEGE DRIVER','rail','KEYSTONE: one slow heavy slug, +50% damage. Boss breaker. Locks out TWIN RAIL.','siege'),hksCard('rail','TWIN RAIL','rail','KEYSTONE: fires two slugs side by side for wider coverage, less per slug. Locks out SIEGE DRIVER.','twin')]:[])]:[]),
+    ...(hu.tesla?[{grp:'HEAVY',name:'ARC CHAIN',icon:'tesla',desc:'Tesla arcs to more targets over a wider range.',delta:'+1 arc',lv:u.teslaJump||1,mx:4,cost:350+((u.teslaJump||1)-1)*220,can:(u.teslaJump||1)<4,buy:()=>{u.teslaJump=(u.teslaJump||1)+1;}},{grp:'HEAVY',name:'HIGH VOLTAGE',icon:'tesla',desc:'Each Tesla arc deals more damage per second.',delta:'+16% dps',lv:u.teslaDps||1,mx:4,cost:350+((u.teslaDps||1)-1)*220,can:(u.teslaDps||1)<4,buy:()=>{u.teslaDps=(u.teslaDps||1)+1;}},...((((u.teslaJump||1)-1)+((u.teslaDps||1)-1))>=2?[hksCard('tesla','SUPERCONDUCTOR','tesla','KEYSTONE: arcs jump to far more targets at lower damage each. Crowd melter. Locks out FOCUSED ARC.','super'),hksCard('tesla','FOCUSED ARC','tesla','KEYSTONE: no chaining, but massive damage to a single target. Locks out SUPERCONDUCTOR.','focus')]:[])]:[]),
+    ...(hu.singularity?[{grp:'HEAVY',name:'EVENT HORIZON',icon:'singularity',desc:'Increases Singularity pull radius and detonation damage.',delta:'wider pull',lv:u.singAmp||1,mx:4,cost:350+((u.singAmp||1)-1)*240,can:(u.singAmp||1)<4,buy:()=>{u.singAmp=(u.singAmp||1)+1;}},{grp:'HEAVY',name:'COLLAPSE CORE',icon:'singularity',desc:'Singularity implosion finale detonates harder.',delta:'+implosion dmg',lv:u.singCrush||1,mx:4,cost:350+((u.singCrush||1)-1)*240,can:(u.singCrush||1)<4,buy:()=>{u.singCrush=(u.singCrush||1)+1;}},...((((u.singAmp||1)-1)+((u.singCrush||1)-1))>=2?[hksCard('singularity','VOID BURST','singularity','KEYSTONE: collapses almost instantly into a far bigger implosion. Burst nuke. Locks out DEEP WELL.','burst'),hksCard('singularity','DEEP WELL','singularity','KEYSTONE: a long-lived, stronger vortex that holds enemies far longer, weaker finale. Locks out VOID BURST.','well')]:[])]:[]),
     ...(hu.wave?[{grp:'HEAVY',name:'WAVE AMP',icon:'wave',desc:'Wave Motion beam hits harder and covers more screen width.',delta:'+power/width',lv:u.wavePow||1,mx:4,cost:400+((u.wavePow||1)-1)*260,can:(u.wavePow||1)<4,buy:()=>{u.wavePow=(u.wavePow||1)+1;}}]:[]),
     {grp:'BEAM',name:'BEAM POWER',icon:'beampow',desc:'Increases the beam weapon\'s damage per second.',delta:'+16 dps',lv:u.beamPow,mx:8,cost:320+(u.beamPow-1)*220,can:u.beamPow<8,buy:()=>u.beamPow++},
     {grp:'BEAM',name:'BEAM CELL',icon:'beamcell',desc:'Adds to the beam charge meter and speeds up recharge.',delta:'+0.55s cell',lv:u.beamCap,mx:8,cost:280+(u.beamCap-1)*200,can:u.beamCap<8,buy:()=>u.beamCap++},
@@ -3515,7 +3521,7 @@ function sendTelemetry(dc){
       +'bm'+((player&&player.bombs)||0)+'sd'+((player&&player.shieldHits)||0)+'dr'+((player&&player.drone)?1:0);
     const wpu=['spread','lance','homing','rapid','flak','buzzsaw'].reduce((n,w)=>n+(unl[w]?1:0),0);
     const hvu=['beam','rail','tesla','singularity','wave'].reduce((n,h)=>n+(hvl[h]?1:0),0);
-    const _ks=Object.keys((player&&player.ks)||{}).filter(w=>(player.ks[w])).map(w=>w+':'+player.ks[w]).join(',');
+    const _ks=[].concat(Object.keys((player&&player.ks)||{}).filter(w=>(player.ks[w])).map(w=>w+':'+player.ks[w]), Object.keys((player&&player.hks)||{}).filter(w=>(player.hks[w])).map(w=>w+':'+player.hks[w])).join(',');
     const _mod=((player&&player.modules)||[]).filter(m=>m).join(',');
     const tq=['action=telemetry','v='+encodeURIComponent(VERSION),'m='+encodeURIComponent(gameMode),'sec='+(sector||0),'rt='+Math.round(runTime||0),'k='+(runKills||0),'bk='+(runBosses||0),'sc='+Math.round(window.scoreT||0),'acc='+tacc,'pw='+encodeURIComponent((player&&player.wtype)||''),'hw='+encodeURIComponent((player&&player.heavy)||''),'gp='+((player&&player.up&&player.up.gun)||1),'dc='+encodeURIComponent(dc||'none'),'ce='+(runCoinsEarned||0),'cs='+(runCoinsSpent||0),'pa='+(runParryAtt||0),'pry='+(runParries||0),'ppr='+(runPerfect||0),'ht='+(runHits||0),'bmb='+(runBombs||0),'oh='+(runOverheats||0),'lu='+(runLivesUsed||0),'ps='+encodeURIComponent(_ps),'bsp='+_bsp,'bct='+_bct,'dws='+Math.round(runDwell.spread||0),'dwl='+Math.round(runDwell.lance||0),'dwh='+Math.round(runDwell.homing||0),'dwr='+Math.round(runDwell.rapid||0),'dwf='+Math.round(runDwell.flak||0),'dwb='+Math.round(runDwell.buzzsaw||0),'sf='+(shotsFired||0),'sh='+(shotsHit||0),'bld='+encodeURIComponent(bld),'wpu='+wpu,'hvu='+hvu,'did='+encodeURIComponent(typeof DEVICE_ID!=='undefined'?DEVICE_ID:''),'btk='+encodeURIComponent(runBossTTK.join(',')),'hwd='+encodeURIComponent([Math.round(runHeavyUse.beam),Math.round(runHeavyUse.tesla),runHeavyUse.rail,runHeavyUse.singularity,runHeavyUse.wave].join(',')),'ks='+encodeURIComponent(_ks),'mod='+encodeURIComponent(_mod),'cb='+Date.now()].join('&');
     const url=API_URL+'?'+tq;
