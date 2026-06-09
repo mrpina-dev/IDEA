@@ -460,7 +460,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='103';
+const W=630,H=840; const VERSION='104';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -4129,6 +4129,34 @@ requestAnimationFrame(frame);
   lg.appendChild(mk('PWR',()=>spawnPwr()));
   panel.appendChild(lg);
 
+  /* ---- SFX MIX (live volume tuning, dev only) ---- */
+  const SFX_SLOTS=['fire_spread','fire_rapid','fire_lance','fire_homing','fire_flak','fire_buzzsaw','overheat','overheat_ready','heavy_charge','heavy_ready','heavy_switch','beam','rail','tesla','singularity','wave','whine','hit','blast','enemy_fire','bomb','thump','wub','kill_ace','kill_bmet','kill_csee','kill_mat','kill_mset','big','death','boss_death','boss_phase','boss_warn','shield_hit','shield_break','player_hit','parry','parry_hit','coin','life_up','shield_up','style_up','core','powerup','weapon_switch','refit_open','buy','buy_fail','pause','ui_click','sector_clear'];
+  const SFX_LS='vanguard_sfx_lvl';
+  let _lvlDefaults=null, _lvlInit=false;
+  const volRows={};
+  function lvlObj(){ if(window.Audio_){ Audio_._lvl=Audio_._lvl||{}; return Audio_._lvl; } return {}; }
+  function getDb(slot){ var L=lvlObj(); return (L[slot]!=null)?L[slot]:0; }
+  function fmtD(d){ return (d>0?'+':'')+d; }
+  function saveLvl(){ try{ var o={}; SFX_SLOTS.forEach(function(s){ var d=getDb(s); if(d!==0)o[s]=d; }); localStorage.setItem(SFX_LS,JSON.stringify(o)); }catch(e){} }
+  function setDb(slot,db){ db=Math.round(clamp(db,-24,12)*2)/2; lvlObj()[slot]=db; if(volRows[slot])volRows[slot].textContent=fmtD(db); saveLvl(); }
+  function nudge(slot,d){ setDb(slot,getDb(slot)+d); }
+  function testSfx(slot){ if(window.Audio_&&Audio_.play){ if(Audio_._sfxLast)Audio_._sfxLast[slot]=undefined; Audio_.play(slot); } }
+  function exportLvl(){ var parts=[]; SFX_SLOTS.forEach(function(s){ var d=getDb(s); if(d!==0)parts.push(s+':'+d); }); return 'Audio_._lvl={ '+parts.join(', ')+' };'; }
+  function resetLvl(){ if(_lvlDefaults){ var L=lvlObj(); SFX_SLOTS.forEach(function(s){ delete L[s]; }); Object.keys(_lvlDefaults).forEach(function(k){ L[k]=_lvlDefaults[k]; }); } try{localStorage.removeItem(SFX_LS);}catch(e){} SFX_SLOTS.forEach(function(s){ if(volRows[s])volRows[s].textContent=fmtD(getDb(s)); }); }
+  panel.appendChild(hdr('SFX MIX'));
+  const sfxWrap=document.createElement('div'); sfxWrap.style.cssText='max-height:150px;overflow:auto';
+  SFX_SLOTS.forEach(function(slot){ const row=document.createElement('div'); row.className='drow'; row.style.gap='2px';
+    const nm=document.createElement('span'); nm.textContent=slot; nm.style.cssText='flex:1;font-size:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+    const val=document.createElement('span'); val.style.cssText='font-size:9px;color:var(--gold);min-width:24px;text-align:right'; val.textContent=fmtD(getDb(slot)); volRows[slot]=val;
+    row.appendChild(nm); row.appendChild(val);
+    row.appendChild(mk('-',function(){ nudge(slot,-1); })); row.appendChild(mk('+',function(){ nudge(slot,1); })); row.appendChild(mk('▸',function(){ testSfx(slot); }));
+    sfxWrap.appendChild(row); });
+  panel.appendChild(sfxWrap);
+  const sfxBtns=document.createElement('div'); sfxBtns.className='drow'; sfxBtns.style.marginTop='4px';
+  sfxBtns.appendChild(mk('EXPORT',function(){ const t=exportLvl(); conPrint(t); try{ if(navigator.clipboard)navigator.clipboard.writeText(t); }catch(e){} conPrint('(copied to clipboard)'); }));
+  sfxBtns.appendChild(mk('RESET',function(){ resetLvl(); }));
+  panel.appendChild(sfxBtns);
+
   /* ---- VIEW ---- */
   const perfFoot=document.createElement('div'); perfFoot.id='devPerf';
   perfFoot.style.cssText='font-family:"Share Tech Mono",monospace;font-size:8px;color:var(--dim);line-height:1.5;margin-top:6px;display:none';
@@ -4167,7 +4195,7 @@ requestAnimationFrame(frame);
   function runCmd(raw){ const cmd=raw.trim(); if(!cmd)return '';
     const parts=cmd.split(/\s+/), c=parts[0].toLowerCase(), a1=parts[1], a2=parts[2];
     switch(c){
-      case 'help': return 'spawn hybrid boss sec god heal clear clrfire kill hurt give max wpn heavy gun time step hitbox perf core pwr wave stream sweep auto';
+      case 'help': return 'spawn hybrid boss sec god heal clear clrfire kill hurt give max wpn heavy gun time step hitbox perf core pwr wave stream sweep auto vol';
       case 'spawn': { if(state!=='play')return 'not in play'; const fk=(a1||'').toLowerCase(); if(FKEYS.indexOf(fk)<0)return 'bad fk: '+(a1||''); const v=clamp(parseInt(a2||'0',10)||0,0,2); devEnemy(fk,v); return 'spawned '+fk+' v'+v; }
       case 'hybrid': { if(state!=='play')return 'not in play'; const h=(a1||'').toLowerCase(); if(h!=='foreman'&&h!=='vector')return 'bad hybrid'; devHybrid(h); return 'spawned '+h; }
       case 'boss': { if(state!=='play')return 'not in play'; const nick={raise:'ace',bloom:'bmet',amp:'csee',frame:'mat',scope:'mset',ace:'ace',bmet:'bmet',csee:'csee',mat:'mat',mset:'mset'}; const fk=nick[(a1||'').toLowerCase()]; if(!fk)return 'bad boss'; devBoss(fk); return 'boss '+fk; }
@@ -4193,6 +4221,12 @@ requestAnimationFrame(frame);
       case 'stream': { if(state!=='play')return 'not in play'; let fk=devWaveFk; if(a1){ const f=a1.toLowerCase(); if(FKEYS.indexOf(f)<0)return 'bad fk: '+a1; setWaveFk(f); fk=f; } devStream(fk); return 'stream '+fk; }
       case 'sweep': { if(state!=='play')return 'not in play'; let fk=devWaveFk; if(a1){ const f=a1.toLowerCase(); if(FKEYS.indexOf(f)<0)return 'bad fk: '+a1; setWaveFk(f); fk=f; } devSweep(fk); return 'sweep '+fk; }
       case 'auto': toggleAuto(); return 'auto-spawn '+(window.__devNoSpawn?'off':'on');
+      case 'vol': { const s=(a1||'').toLowerCase();
+        if(s==='export'){ const t=exportLvl(); try{ if(navigator.clipboard)navigator.clipboard.writeText(t); }catch(e){} return t; }
+        if(s==='reset'){ resetLvl(); return 'sfx levels reset'; }
+        if(SFX_SLOTS.indexOf(s)<0) return 'bad slot (try: vol export)';
+        if(a2===undefined) return s+' = '+getDb(s)+'dB';
+        const n=parseFloat(a2); if(isNaN(n)) return 'bad db'; setDb(s,n); return s+' = '+getDb(s)+'dB'; }
       default: return 'unknown: '+c+' (try help)';
     }
   }
@@ -4214,6 +4248,7 @@ requestAnimationFrame(frame);
   (function vis(ts){ ts=ts||0;
     if(lastVis){ const d=(ts-lastVis)/1000; if(d>0) fpsEMA+=((1/d)-fpsEMA)*0.1; }
     lastVis=ts;
+    if(!_lvlInit && window.Audio_ && Audio_._lvl){ _lvlInit=true; _lvlDefaults=Object.assign({},Audio_._lvl); try{ var _sv=JSON.parse(localStorage.getItem(SFX_LS)||'{}'); Object.keys(_sv).forEach(function(k){ Audio_._lvl[k]=_sv[k]; }); }catch(e){} SFX_SLOTS.forEach(function(s){ if(volRows[s])volRows[s].textContent=fmtD(getDb(s)); }); }
     const active=(state==='play'&&gameMode==='dev');
     panel.style.display=(active&&shown)?'block':'none';
     tab.style.display=(active&&!shown)?'block':'none';
