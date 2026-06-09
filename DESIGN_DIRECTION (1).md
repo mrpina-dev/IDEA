@@ -53,6 +53,7 @@ Locked design forks (do not re-litigate):
   (the throwable-coin idea was considered and rejected).
 - Sitting still should get you killed. Aimed faction fire, bullet curtains, and
   enemy pacing all exist to punish a stationary ship.
+- A missed parry costs a longer re-arm cooldown (already in code, ~0.95s vs ~0.3s on a catch); no health penalty for whiffing (rejected as too punishing for the classroom).
 
 ### Pillar 2: Readability before everything
 - Every enemy must be instantly identifiable as its faction and tech identity.
