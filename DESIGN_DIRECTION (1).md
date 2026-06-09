@@ -190,6 +190,7 @@ menus. Selection rules for the CC0 catalog and any future additions:
 - Frame the fiction accordingly: the IDEA ship runs inside a hostile system;
   the factions are its processes. Flavor text, tutorial copy, and UPDATE LOG
   voice can lean on this.
+- The post-boss REFIT is framed as a SYSTEM HALT / ROOT ACCESS event (darkened field, code-rain surge, glitch terminal, ship patch-scan), not a physical repair station. It reinforces the fiction that the ship runs inside a hostile system being rewritten.
 
 ---
 

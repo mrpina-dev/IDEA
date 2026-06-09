@@ -460,7 +460,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='110';
+const W=630,H=840; const VERSION='111';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -2703,37 +2703,47 @@ function finishBoss(){ runBosses++; runBossTTK.push(Math.max(0,Math.round(runTim
   for(let i=0;i<4;i++) pods.push({x:b.x+rnd(-40,40),y:b.y+rnd(-10,20),vy:rnd(40,60),type:'coin',c:COL.gold,bob:rnd(0,6.28),r:11});
   document.getElementById('bossname').style.display='none'; document.getElementById('bossbar').style.display='none';
   boss=null; fleet=null; bossSpoils=2.8; Audio_.lane(sectorTheme().fk||'idea');
-  station={x:W*0.5, y:-130, tx:W*0.5, ty:H*0.42, phase:'arrive', t:0, beam:0, hum:rnd(0,6.28), vy:0};
+  station={t:0, beam:0, phase:'arrive', glitch:0};   // SYSTEM HALT overlay state
 }
-function updateStation(dt){ const st=station; if(!st)return; st.t+=dt; st.hum+=dt*1.4;
-  const dockX=clamp(player?player.x:W/2,90,W-90), dockY=clamp((player?player.y:H*0.7)-150,150,H*0.52);
-  if(st.phase==='arrive'){ st.tx=dockX; st.ty=dockY;
-    st.x+=(st.tx-st.x)*Math.min(1,dt*3.0); st.y+=(st.ty-st.y)*Math.min(1,dt*3.2);
-    if(Math.abs(st.y-st.ty)<12) st.phase='dock'; }
-  else if(st.phase==='dock'){ st.tx=dockX; st.ty=dockY;
-    st.x+=(st.tx-st.x)*Math.min(1,dt*2.2); st.y+=(st.ty-st.y)*Math.min(1,dt*2.2);
-    st.beam=Math.min(1,st.beam+dt*2.4);
-    if(player && st.beam>0.5 && Math.random()<0.6) parts.push({x:player.x+rnd(-12,12),y:player.y+rnd(-12,2),vx:rnd(-18,18),vy:rnd(-34,-8),life:.45,max:.45,c:Math.random()<0.5?COL.cyan:COL.green,sz:1.4}); }
-  else if(st.phase==='depart'){ st.beam=Math.max(0,st.beam-dt*3.5); st.vy-=900*dt; st.y+=st.vy*dt;
-    if(st.y<-170) station=null; }
+function updateStation(dt){ const st=station; if(!st)return; st.t+=dt;
+  if(st.phase==='arrive'){ st.beam=Math.min(1,st.beam+dt*2.6); if(st.beam>=1) st.phase='dock'; }
+  else if(st.phase==='dock'){ st.beam=Math.min(1,st.beam+dt*2.0);
+    if(player && Math.random()<0.7) parts.push({x:player.x+rnd(-16,16),y:player.y+rnd(-16,8),vx:rnd(-16,16),vy:rnd(-46,-12),life:.5,max:.5,c:Math.random()<0.5?COL.green:COL.cyan,sz:1.4}); }
+  else if(st.phase==='depart'){ st.beam=Math.max(0,st.beam-dt*3.2); if(st.beam<=0) station=null; }
+  st.glitch=Math.max(0,st.glitch-dt*4); if(Math.random()<0.10) st.glitch=rnd(0.4,1);
 }
-function drawStation(){ const st=station; if(!st)return; const x=st.x,y=st.y,r=34,hum=st.hum;
-  if(st.beam>0 && player && !player.dead){ const by0=y+r*0.5, by1=player.y-16, w0=10, w1=26;
-    bg.save(); bg.globalAlpha=st.beam*0.5; const g=bg.createLinearGradient(0,by0,0,by1);
-    g.addColorStop(0,'rgba(0,240,255,0.7)'); g.addColorStop(1,'rgba(0,240,255,0.05)');
-    bg.fillStyle=g; bg.beginPath(); bg.moveTo(x-w0,by0); bg.lineTo(x+w0,by0); bg.lineTo(player.x+w1,by1); bg.lineTo(player.x-w1,by1); bg.closePath(); bg.fill(); bg.restore(); }
-  bg.save(); bg.translate(x,y); bg.lineJoin='round'; bg.lineWidth=2.2; bg.strokeStyle=COL.green; bg.shadowColor=COL.green; bg.shadowBlur=14;
-  bg.beginPath(); for(let i=0;i<6;i++){ const a=i/6*6.2832; const px=Math.cos(a)*r, py=Math.sin(a)*r*0.58; i?bg.lineTo(px,py):bg.moveTo(px,py);} bg.closePath();
-  bg.fillStyle='rgba(0,255,65,0.08)'; bg.fill(); bg.stroke();
-  bg.lineWidth=1.4; bg.beginPath(); bg.moveTo(-r,0); bg.lineTo(-r*1.34,-r*0.2); bg.moveTo(r,0); bg.lineTo(r*1.34,-r*0.2); bg.stroke();
-  dot(bg,-r*1.34,-r*0.2,3,COL.gold); dot(bg,r*1.34,-r*0.2,3,COL.gold);
-  bg.strokeStyle=COL.cyan; bg.shadowColor=COL.cyan; bg.lineWidth=2;
-  bg.beginPath(); bg.arc(0,0,r*0.34,0,6.28); bg.stroke();
-  bg.save(); bg.rotate(hum*0.7); bg.beginPath(); bg.arc(0,0,r*0.52,0.3,2.5); bg.stroke(); bg.beginPath(); bg.arc(0,0,r*0.52,3.4,5.6); bg.stroke(); bg.restore();
-  for(let i=0;i<3;i++){ const lit=Math.sin(hum*3+i*2)>0; dot(bg,(i-1)*r*0.5, r*0.42, 2.4, lit?COL.gold:COL.dim); }
-  bg.beginPath(); bg.moveTo(-r*0.3,r*0.5); bg.lineTo(0,r*0.66); bg.lineTo(r*0.3,r*0.5); bg.stroke();
-  dot(bg,0,r*0.62,3*(0.6+0.4*Math.sin(hum*4)),COL.white);
-  bg.shadowBlur=0; bg.restore();
+function drawSystemHalt(){ const st=station; if(!st)return; const k=st.beam, g=COL.green;
+  bg.save();
+  bg.fillStyle='rgba(2,10,4,'+(0.62*k).toFixed(3)+')'; bg.fillRect(0,0,W,H);
+  bg.font="600 14px 'Share Tech Mono',monospace"; bg.textBaseline='top';
+  const glyphs='01<>{}[]#$%&*+=/\\|01ABCDEF'; const cw=18, ncols=Math.floor(W/cw);
+  for(let c=0;c<ncols;c++){ const seed=c*53.7, speed=120+((c*37)%90); const headY=((st.t*speed+(seed%H))%(H+120))-60; const len=8+((c*13)%10);
+    for(let r=0;r<len;r++){ const y=headY-r*16; if(y<-16||y>H) continue;
+      const ch=glyphs[(c*7+r*13+Math.floor(st.t*8+r))%glyphs.length]; const head=(r===0);
+      bg.globalAlpha=k*(head?1:Math.max(0,0.55-r*0.06)); bg.fillStyle=head?COL.white:g; bg.fillText(ch,c*cw+2,y); } }
+  bg.globalAlpha=1;
+  if(st.glitch>0.5){ for(let s=0;s<3;s++){ bg.globalAlpha=0.5*k; bg.fillStyle=Math.random()<0.5?COL.cyan:COL.mset; bg.fillRect(0,rnd(0,H),W,2); } bg.globalAlpha=1; }
+  bg.globalAlpha=0.10*k; bg.fillStyle='#000'; for(let y=0;y<H;y+=3) bg.fillRect(0,y,W,1); bg.globalAlpha=1;
+  const cy=H*0.30, gx=W/2; bg.textAlign='center';
+  const rev=(s,start,cps)=>{ const n=clamp(Math.floor((st.t-start)*cps),0,s.length); return s.slice(0,n)+((n<s.length&&Math.floor(st.t*3)%2)?'_':''); };
+  bg.save(); bg.shadowColor=g; bg.shadowBlur=18*k; bg.font="700 38px 'Chakra Petch',sans-serif";
+  const t1=rev('SYSTEM HALT',0.1,14), gj=(st.glitch>0.5?rnd(-3,3):0);
+  bg.globalAlpha=0.6*k; bg.fillStyle=COL.cyan; bg.fillText(t1,gx-3+gj,cy); bg.fillStyle=COL.mset; bg.fillText(t1,gx+3-gj,cy);
+  bg.globalAlpha=k; bg.fillStyle=COL.white; bg.fillText(t1,gx,cy); bg.restore();
+  bg.font="600 15px 'Share Tech Mono',monospace"; bg.globalAlpha=k;
+  bg.fillStyle=g; bg.fillText(rev('ROOT ACCESS GRANTED',0.7,22),gx,cy+46);
+  bg.fillStyle=COL.gold; bg.fillText(rev('PATCHING IDEA-CORE ...',1.3,20),gx,cy+68);
+  bg.globalAlpha=k; bg.strokeStyle=g; bg.lineWidth=2; const bw=220,bh=96,bx=gx-bw/2,by=cy-12,cl=16;
+  bg.beginPath();
+  bg.moveTo(bx,by+cl);bg.lineTo(bx,by);bg.lineTo(bx+cl,by);
+  bg.moveTo(bx+bw-cl,by);bg.lineTo(bx+bw,by);bg.lineTo(bx+bw,by+cl);
+  bg.moveTo(bx,by+bh-cl);bg.lineTo(bx,by+bh);bg.lineTo(bx+cl,by+bh);
+  bg.moveTo(bx+bw-cl,by+bh);bg.lineTo(bx+bw,by+bh);bg.lineTo(bx+bw,by+bh-cl);
+  bg.stroke();
+  if(player){ bg.globalAlpha=k*(0.4+0.3*Math.sin(st.t*6)); bg.strokeStyle=g; bg.shadowColor=g; bg.shadowBlur=20*k; bg.lineWidth=2;
+    bg.beginPath(); bg.arc(player.x,player.y,26+4*Math.sin(st.t*5),0,6.2832); bg.stroke();
+    const sy=player.y-22+((st.t*60)%44); bg.globalAlpha=k*0.7; bg.beginPath(); bg.moveTo(player.x-22,sy); bg.lineTo(player.x+22,sy); bg.stroke(); }
+  bg.restore();
 }
 function openRefit(){ state='refit'; try{ if(document.pointerLockElement) document.exitPointerLock(); }catch(e){} clearInput(); Audio_.play&&Audio_.play('refit_open'); document.getElementById('touch').classList.add('hidden');
   el('refitNext').textContent=roman(sector+1); buildRefit(); showOverlay('ovlRefit');
@@ -3029,8 +3039,8 @@ function drawBG(){
   // pods
   pods.forEach(p=>{ drawPod(bg,p); });
 
-  // station (post-boss repair rig)
-  if(station) drawStation();
+  // SYSTEM HALT overlay (post-boss root-access / patch sequence)
+  if(station) drawSystemHalt();
   // player
   if((state==='play'||(state==='refit'&&station)) && player && !player.dead){ drawDrone(); drawShip(); }
 
@@ -3942,6 +3952,7 @@ function closeTut(){ el('ovlTut').classList.add('hidden'); try{localStorage.setI
 { const b=el('howtoBtn'); if(b) b.addEventListener('click',e=>{ e.stopPropagation(); openTut(); }); }
 
 const CHANGELOG=[
+ {ver:'111',date:'2026',items:['The post-boss refit now opens with a SYSTEM HALT / ROOT ACCESS sequence instead of a repair rig.']},
  {ver:'110',date:'2026',items:['Rival grunts no longer flee when a boss appears. They stay and fight, and the boss damages its own forces with stray fire.']},
  {ver:'109',date:'2026',items:['NAILGUN hits harder, especially cold, so it is worth equipping right away.','Missed parries now flash a WHIFF cue.','Weapon names now read consistently everywhere (RAILSPIKE, SWARM, NAILGUN).']},
  {ver:'108',date:'2026',items:['Enemies that pull out at the bottom now re-engage instead of vanishing on the way up.','Fixed unfair collisions from enemies snapping upward at the bottom edge.','Death screen now shows AVG STYLE next to BEST STYLE.']},
