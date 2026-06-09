@@ -76,6 +76,15 @@ Locked design forks (do not re-litigate):
   (mid band), RAILSPIKE (column pierce), NAILGUN (heat single-target), SWARM
   (passive utility).
 - Heavies are earned in-run, sector-gated, expensive. Commitment, not shopping.
+- Upgrade depth is a three-tier loadout tree on top of the flat coin economy:
+  (Tier 0) the flat numeric spine (GUN POWER, ENGINE, HULL, BEAM stats, HEAVY
+  POWER/SPOOL) stays prereq-free and instantly readable; (Tier 1) every primary
+  and heavy gets a 2-branch mastery track, both branches numeric, gated only by
+  owning the weapon; (Tier 2) keystones are one-time mutually-exclusive
+  behavioral forks per weapon; (Tier 3) ship modules are global slotted tradeoff
+  cores. Keystones and modules are IN-RUN ONLY; CONFIGURE BUILD stays the numeric
+  spine and is never an identity lock. Every module is an explicit tradeoff, no
+  pure upside. Keystones are sidegrades for identity, not power spikes.
 
 ### Pillar 4: Fair competition
 - The playfield is FIXED (currently 630x840) for leaderboard fairness across

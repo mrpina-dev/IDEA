@@ -442,7 +442,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2584';
+const W=630,H=840; const VERSION='2585';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -1615,9 +1615,12 @@ function outfitOffers(){ const b=startBuild, u=b.up; const pdN=(1+(u.gun-1)*0.30
   {grp:'WEAPONS',name:'GUN POWER',icon:'gun',desc:'Boosts damage on all primary weapons (SPREAD, LANCE, HOMING, RAPID).',delta:'x'+pdN.toFixed(2)+' -> x'+pdX.toFixed(2),lv:u.gun,mx:8,cost:400+(u.gun-1)*250,can:u.gun<8,buy:()=>u.gun++},
   {grp:'WEAPONS',name:'FLANK GUNS',icon:'flank',desc:'Forward side guns that scale with GUN POWER. Lv 2 widens, Lv 3 adds rear coverage.',delta:'+ side guns',lv:u.flank,mx:3,cost:[450,700,1000][Math.min(u.flank,2)],can:u.flank<3,buy:()=>u.flank++},
   {grp:'WEAPONS',name:'SCATTER CHOKE',icon:'w_spread',desc:'Adds a SPREAD pellet and tightens the cone for more focus.',delta:'+1 pellet',lv:u.mSpread||0,mx:3,cost:300+(u.mSpread||0)*220,can:(u.mSpread||0)<3,buy:()=>{u.mSpread=(u.mSpread||0)+1;}},
-  ...(b.unlocked.rapid?[{grp:'WEAPONS',name:'OVERCLOCK',icon:'w_rapid',desc:'Increases RAPID fire rate. Stacks with existing speed.',delta:'+12% rate',lv:u.mRapid||0,mx:3,cost:300+(u.mRapid||0)*220,can:(u.mRapid||0)<3,buy:()=>{u.mRapid=(u.mRapid||0)+1;}}]:[]),
-  ...(b.unlocked.lance?[{grp:'WEAPONS',name:'HIGH-VELOCITY',icon:'w_lance',desc:'Increases damage on each LANCE bolt.',delta:'+ bolt dmg',lv:u.mLance||0,mx:3,cost:320+(u.mLance||0)*230,can:(u.mLance||0)<3,buy:()=>{u.mLance=(u.mLance||0)+1;}}]:[]),
-  ...(b.unlocked.homing?[{grp:'WEAPONS',name:'SWARM CTRL',icon:'w_homing',desc:'Adds one more homing shot per volley.',delta:'+1 shot',lv:u.mHoming||0,mx:3,cost:320+(u.mHoming||0)*230,can:(u.mHoming||0)<3,buy:()=>{u.mHoming=(u.mHoming||0)+1;}}]:[]),
+  {grp:'WEAPONS',name:'SLUG LOAD',icon:'w_spread',desc:'Heavier SPREAD pellets hit harder per hit.',delta:'+16% pellet dmg',lv:u.bSpread||0,mx:3,cost:320+(u.bSpread||0)*230,can:(u.bSpread||0)<3,buy:()=>{u.bSpread=(u.bSpread||0)+1;}},
+  ...(b.unlocked.rapid?[{grp:'WEAPONS',name:'OVERCLOCK',icon:'w_rapid',desc:'Increases RAPID fire rate. Stacks with existing speed.',delta:'+12% rate',lv:u.mRapid||0,mx:3,cost:300+(u.mRapid||0)*220,can:(u.mRapid||0)<3,buy:()=>{u.mRapid=(u.mRapid||0)+1;}},{grp:'WEAPONS',name:'THERMAL LOAD',icon:'w_rapid',desc:'NAILGUN does more damage the hotter it runs. Rewards riding the redline.',delta:'+heat dmg',lv:u.bRapid||0,mx:3,cost:300+(u.bRapid||0)*220,can:(u.bRapid||0)<3,buy:()=>{u.bRapid=(u.bRapid||0)+1;}}]:[]),
+  ...(b.unlocked.lance?[{grp:'WEAPONS',name:'HIGH-VELOCITY',icon:'w_lance',desc:'Increases damage on each LANCE bolt.',delta:'+ bolt dmg',lv:u.mLance||0,mx:3,cost:320+(u.mLance||0)*230,can:(u.mLance||0)<3,buy:()=>{u.mLance=(u.mLance||0)+1;}},{grp:'WEAPONS',name:'AUTO-RACK',icon:'w_lance',desc:'Cycles RAILSPIKE bolts faster between shots.',delta:'+7% rate',lv:u.bLance||0,mx:3,cost:320+(u.bLance||0)*230,can:(u.bLance||0)<3,buy:()=>{u.bLance=(u.bLance||0)+1;}}]:[]),
+  ...(b.unlocked.homing?[{grp:'WEAPONS',name:'SWARM CTRL',icon:'w_homing',desc:'Adds one more homing shot per volley.',delta:'+1 shot',lv:u.mHoming||0,mx:3,cost:320+(u.mHoming||0)*230,can:(u.mHoming||0)<3,buy:()=>{u.mHoming=(u.mHoming||0)+1;}},{grp:'WEAPONS',name:'WARHEAD',icon:'w_homing',desc:'Each SWARM dart carries a heavier charge.',delta:'+dart dmg',lv:u.bHoming||0,mx:3,cost:320+(u.bHoming||0)*230,can:(u.bHoming||0)<3,buy:()=>{u.bHoming=(u.bHoming||0)+1;}}]:[]),
+  ...(b.unlocked.flak?[{grp:'WEAPONS',name:'DENSE PAYLOAD',icon:'w_flak',desc:'FLAK burst cloud deals more damage per second.',delta:'+13% cloud dps',lv:u.mFlak||0,mx:3,cost:350+(u.mFlak||0)*230,can:(u.mFlak||0)<3,buy:()=>{u.mFlak=(u.mFlak||0)+1;}},{grp:'WEAPONS',name:'WIDE BURST',icon:'w_flak',desc:'FLAK cloud covers a wider area in the band.',delta:'+cloud radius',lv:u.bFlak||0,mx:3,cost:350+(u.bFlak||0)*230,can:(u.bFlak||0)<3,buy:()=>{u.bFlak=(u.bFlak||0)+1;}}]:[]),
+  ...(b.unlocked.buzzsaw?[{grp:'WEAPONS',name:'HARDENED EDGE',icon:'w_buzz',desc:'BUZZSAW blades grind through hulls faster.',delta:'+14% blade dps',lv:u.mBuzz||0,mx:3,cost:350+(u.mBuzz||0)*230,can:(u.mBuzz||0)<3,buy:()=>{u.mBuzz=(u.mBuzz||0)+1;}},{grp:'WEAPONS',name:'WIDE KERF',icon:'w_buzz',desc:'Longer blades extend BUZZSAW reach around the ship.',delta:'+blade reach',lv:u.bBuzz||0,mx:3,cost:350+(u.bBuzz||0)*230,can:(u.bBuzz||0)<3,buy:()=>{u.bBuzz=(u.bBuzz||0)+1;}}]:[]),
   {grp:'HEAVY',name:'RAILGUN',icon:'rail',desc:dev?'DEV: unlock RAILGUN.':'Unlocked in-run at REFIT.',lv:0,mx:0,meta:hu.rail?'OWNED':(dev?'DEV':'IN-RUN'),cost:0,can:dev&&!hu.rail,buy:()=>{b.heavyUnlocked.rail=1;b.heavy='rail';}},
   {grp:'HEAVY',name:'TESLA',icon:'tesla',desc:dev?'DEV: unlock TESLA.':'Unlocked in-run at REFIT.',lv:0,mx:0,meta:hu.tesla?'OWNED':(dev?'DEV':'IN-RUN'),cost:0,can:dev&&!hu.tesla,buy:()=>{b.heavyUnlocked.tesla=1;b.heavy='tesla';}},
   {grp:'HEAVY',name:'SINGULARITY',icon:'singularity',desc:dev?'DEV: unlock SINGULARITY.':'Unlocked in-run at REFIT.',lv:0,mx:0,meta:hu.singularity?'OWNED':(dev?'DEV':'IN-RUN'),cost:0,can:dev&&!hu.singularity,buy:()=>{b.heavyUnlocked.singularity=1;b.heavy='singularity';}},
@@ -1638,7 +1641,7 @@ function outfitOffers(){ const b=startBuild, u=b.up; const pdN=(1+(u.gun-1)*0.30
   {grp:'SYSTEMS',name:'BOMB CORE',icon:'bomb',desc:'Increases bomb damage by 50% per level.',delta:'+50% dmg',lv:u.bombPow||1,mx:5,cost:300+((u.bombPow||1)-1)*220,can:(u.bombPow||1)<5,buy:()=>{u.bombPow=(u.bombPow||1)+1;}},
   {grp:'SYSTEMS',name:'DRONE',icon:'drone',desc:'Auto-targeting wingman. Damage scales with GUN POWER; twins at high power.',lv:b.drone?1:0,mx:0,meta:b.drone?'OWNED':'i¢600',cost:600,can:!b.drone,buy:()=>{b.drone={ph:0};}}
 ];}
-function buildCount(){ const u=startBuild.up,b=startBuild; const hu=b.heavyUnlocked||{}; return (u.gun-1)+(u.beamPow-1)+(u.beamCap-1)+(u.beamPierce-1)+(u.beamSpool-1)+(u.speed-1)+u.flank+u.armor+b.shieldHits+(b.bombs-2)+(b.drone?1:0)+b.unlocked.lance+b.unlocked.homing+b.unlocked.rapid+((u.heavyPow||1)-1)+((u.heavyChg||1)-1)+((u.teslaJump||1)-1)+((u.singAmp||1)-1)+((u.wavePow||1)-1)+(u.mSpread||0)+(u.mRapid||0)+(u.mLance||0)+(u.mHoming||0)+((u.bombPow||1)-1)+(hu.rail?1:0)+(hu.tesla?1:0)+(hu.singularity?1:0)+(hu.wave?1:0); }
+function buildCount(){ const u=startBuild.up,b=startBuild; const hu=b.heavyUnlocked||{}; return (u.gun-1)+(u.beamPow-1)+(u.beamCap-1)+(u.beamPierce-1)+(u.beamSpool-1)+(u.speed-1)+u.flank+u.armor+b.shieldHits+(b.bombs-2)+(b.drone?1:0)+b.unlocked.lance+b.unlocked.homing+b.unlocked.rapid+((u.heavyPow||1)-1)+((u.heavyChg||1)-1)+((u.teslaJump||1)-1)+((u.singAmp||1)-1)+((u.wavePow||1)-1)+(u.mSpread||0)+(u.mRapid||0)+(u.mLance||0)+(u.mHoming||0)+(u.bSpread||0)+(u.bRapid||0)+(u.bLance||0)+(u.bHoming||0)+(u.mFlak||0)+(u.bFlak||0)+(u.mBuzz||0)+(u.bBuzz||0)+((u.bombPow||1)-1)+(hu.rail?1:0)+(hu.tesla?1:0)+(hu.singularity?1:0)+(hu.wave?1:0); }
 const WCOL={spread:COL.green,lance:COL.cyan,homing:COL.gold,rapid:COL.mat,flak:FLAK_COL,buzzsaw:COL.green};
 function applyPod(p){
   if(p.type==='core'){ const jack=90+sector*22; player.coins+=jack; runCoinsEarned+=jack; addScore(jack,p.x,p.y,p.c);
@@ -1670,13 +1673,13 @@ function firePrimary(){
   const prevLen=pbul.length;
   shotsFired++;
   if(player.wtype==='spread'){            // SPREAD: neutral generalist baseline - flat pellet damage, soft range floor
-    const ms=u.mSpread||0; const pellets=[4,4,5,5,6,7,8,9][Math.min(lv,8)-1]+ms; const dmg=0.644*pm, spread=Math.max(0.07,0.16-ms*0.018);
+    const ms=u.mSpread||0; const pellets=[4,4,5,5,6,7,8,9][Math.min(lv,8)-1]+ms; const dmg=0.644*pm*(1+0.16*(u.bSpread||0)), spread=Math.max(0.07,0.16-ms*0.018);
     for(let i=0;i<pellets;i++){ const a=(i-(pellets-1)/2)*spread+rnd(-0.03,0.03);
       pbul.push({x:x+Math.sin(a)*8,y,vx:Math.sin(a)*420,vy:-700-rnd(0,60),c:COL.green,r:2.0,dmg,wt:'scrap',gl,ox:x,oy:y,falloff:SPREAD_FULL_RANGE,floor:SPREAD_FAR_FLOOR}); }
     player.fireCd=.2; muzzle(x,y,COL.green,gl,pellets*0.5);
   } else if(player.wtype==='flak'){       // FLAK: committed mid-range zone control - shells airburst into a damage cloud inside the band
     const det=rnd(FLAK_BAND_MIN,FLAK_BAND_MAX);
-    pbul.push({x,y,vx:0,vy:-680,c:FLAK_COL,r:3.0,dmg:0,wt:'flak',gl,ox:x,oy:y,detAt:det,flakDps:FLAK_CLOUD_DPS*pm,smoke:0});
+    pbul.push({x,y,vx:0,vy:-680,c:FLAK_COL,r:3.0,dmg:0,wt:'flak',gl,ox:x,oy:y,detAt:det,flakDps:FLAK_CLOUD_DPS*pm*(1+0.13*(u.mFlak||0)),flakR:FLAK_CLOUD_R+6*(u.bFlak||0),smoke:0});
     player.fireCd=.45; muzzle(x,y,FLAK_COL,gl,2);
   } else if(player.wtype==='buzzsaw'){    // BUZZSAW: orbiting contact blades do the work (see updateBuzzsaw); trigger fires a weak forward poke
     pbul.push({x,y,vx:0,vy:-760,c:COL.green,r:1.7,dmg:BUZZSAW_FWD_DMG*pm,wt:'buzz',gl});
@@ -1684,7 +1687,7 @@ function firePrimary(){
   } else if(player.wtype==='rapid'){      // OVERHEAT NAILGUN: heat ramps power, redline locks the gun
     const mr=u.mRapid||0; let heat=player.heat||0;
     const streams=(lv<4?1:lv<7?2:3)+(mr>=3?1:0); const sp=8;
-    const dmg=(0.50+heat*0.40)*pm, hotC=heat>0.8?COL.mset:heat>0.5?COL.gold:COL.green;
+    const dmg=(0.50+heat*(0.40+0.10*(u.bRapid||0)))*pm, hotC=heat>0.8?COL.mset:heat>0.5?COL.gold:COL.green;
     for(let i=0;i<streams;i++){ const ox=(i-(streams-1)/2)*sp+rnd(-1.5,1.5);
       pbul.push({x:x+ox,y,vx:rnd(-12,12),vy:-820,c:hotC,r:1.4+heat*0.8,dmg,wt:'nail',gl,hot:heat}); }
     player.fireCd=Math.max(.042,.062*(1-heat*0.30)*(1-mr*0.1));
@@ -1701,9 +1704,9 @@ function firePrimary(){
     const ml=u.mLance||0; const cols=lv<5?1:lv<8?2:3; const sp=12; const dmg=(2.5+ml*0.8)*pm;
     for(let i=0;i<cols;i++){ const ox=(i-(cols-1)/2)*sp;
       pbul.push({x:x+ox,y,vx:0,vy:-1050,c:COL.cyan,r:3.2+ml*0.4,dmg,pierce:true,len:22+ml*4,wt:'rail',gl}); }
-    player.fireCd=.34*(1-ml*0.05); muzzle(x,y,COL.cyan,gl*1.3,cols*2);
+    player.fireCd=.34*(1-ml*0.05)*(1-0.07*(u.bLance||0)); muzzle(x,y,COL.cyan,gl*1.3,cols*2);
   } else {                                 // SWARM: weak darts, hands-free, dodge while they hunt
-    const mh=u.mHoming||0; const n=Math.min(8,(lv<3?2:lv<6?3:4)+mh); const dmg=0.65*pm;
+    const mh=u.mHoming||0; const n=Math.min(8,(lv<3?2:lv<6?3:4)+mh); const dmg=(0.65+0.12*(u.bHoming||0))*pm;
     for(let i=0;i<n;i++){ const a=(i-(n-1)/2)*0.42+rnd(-0.06,0.06);
       pbul.push({x,y,vx:Math.sin(a)*150,vy:-360,c:COL.gold,r:1.8,dmg,homing:true,wt:'swarm',gl,turn:3.6}); }
     player.fireCd=.16; muzzle(x,y,COL.gold,gl,n);
@@ -1722,7 +1725,7 @@ function firePrimary(){
 }
 /* FLAK: airburst into a lingering damage cloud (mult scales early-contact vs full-band detonations) */
 function detonateFlak(b,mult){
-  flakClouds.push({x:b.x,y:b.y,r:FLAK_CLOUD_R,t:FLAK_CLOUD_LIFE,life:FLAK_CLOUD_LIFE,dps:(b.flakDps||FLAK_CLOUD_DPS)*mult,c:FLAK_COL});
+  flakClouds.push({x:b.x,y:b.y,r:(b.flakR||FLAK_CLOUD_R),t:FLAK_CLOUD_LIFE,life:FLAK_CLOUD_LIFE,dps:(b.flakDps||FLAK_CLOUD_DPS)*mult,c:FLAK_COL});
   for(let k=0;k<8;k++) parts.push({x:b.x,y:b.y,vx:rnd(-90,90),vy:rnd(-90,90),life:.3,max:.3,c:Math.random()<0.5?FLAK_COL:COL.white,sz:rnd(1.4,2.4)});
   rings.push({x:b.x,y:b.y,r:6,vr:180,life:.25,max:.25,c:FLAK_COL});
   (Audio_.play&&Audio_.play('blast'))||Audio_.blast();
@@ -1736,13 +1739,13 @@ function updateFlakClouds(dt){
 }
 /* BUZZSAW: two contact blades orbit the ship; they damage enemies only, never block/destroy enemy bullets */
 function updateBuzzsaw(pl,dt){
-  const ang=t*BUZZSAW_SPEED, pm=pl.pdmg||1;
+  const ang=t*BUZZSAW_SPEED, pm=pl.pdmg||1, _bu=(pl.up||{}); const _bdps=BUZZSAW_DPS_PER_BLADE*(1+0.14*(_bu.mBuzz||0)), _br=BUZZSAW_BLADE_R+2*(_bu.bBuzz||0);
   for(let bi=0;bi<2;bi++){ const a=ang+bi*Math.PI, bx=pl.x+Math.cos(a)*BUZZSAW_ORBIT, by=pl.y+Math.sin(a)*BUZZSAW_ORBIT;
-    for(const e of enemies){ if(e.dead)continue; if(dist2(e.x,e.y,bx,by)<(BUZZSAW_BLADE_R+e.r)*(BUZZSAW_BLADE_R+e.r)){
-      e.hp-=BUZZSAW_DPS_PER_BLADE*pm*dt; e.flash=.08;
+    for(const e of enemies){ if(e.dead)continue; if(dist2(e.x,e.y,bx,by)<(_br+e.r)*(_br+e.r)){
+      e.hp-=_bdps*pm*dt; e.flash=.08;
       if(Math.random()<dt*12) impactFX(bx,by,e.c,bx-e.x,by-e.y);   // reuse the directional spark fan, throttled per tick
       if(e.hp<=0){ window.killSrc='buzzsaw'; killEnemy(e); } } }
-    if(boss && !boss.dying && !boss.entering && dist2(boss.x,boss.y,bx,by)<(BUZZSAW_BLADE_R+boss.r)*(BUZZSAW_BLADE_R+boss.r)) damageBoss(BUZZSAW_DPS_PER_BLADE*pm*dt);
+    if(boss && !boss.dying && !boss.entering && dist2(boss.x,boss.y,bx,by)<(_br+boss.r)*(_br+boss.r)) damageBoss(_bdps*pm*dt);
   }
 }
 /* ============================= HEAVY slot ============================= */
@@ -2702,9 +2705,12 @@ function refitItems(){ const u=player.up; const pdN=(1+(u.gun-1)*0.30), pdX=(1+u
     {grp:'WEAPONS',name:'FLANK GUNS',icon:'flank',desc:'Forward side guns that scale with GUN POWER. Lv 2 widens, Lv 3 adds rear coverage.',delta:'+ side guns',lv:u.flank||0,mx:3,cost:[450,700,1000][Math.min(u.flank||0,2)],can:(u.flank||0)<3,buy:()=>{u.flank=(u.flank||0)+1;}},
     ...['spread|SPREAD|0|w_spread|Neutral generalist: flat pellet damage with a soft range floor.|1','homing|SWARM|400|w_homing|Auto-aiming darts. Good for crowds, weak per shot.|2','rapid|NAILGUN|350|w_rapid|Heat ramps power, redline locks the gun. Single-target.|2','flak|FLAK|550|w_flak|Mid-range airburst: shells pop into a damage cloud in the band.|3','lance|RAILSPIKE|650|w_lance|Slow, committed bolts that pierce a whole column.|4','buzzsaw|BUZZSAW|800|w_buzz|Contact blades orbit the ship. Hug enemies; weak forward poke.|5'].map(s=>{const p=s.split('|'),w=p[0],owned=!!player.unlocked[w],active=player.wtype===w,minS=+p[5],gated=!owned&&sector<minS;return {grp:'WEAPONS',name:p[1],icon:p[3],desc:p[4],lv:0,mx:0,meta:active?'EQUIPPED':owned?'EQUIP':gated?('SECTOR '+minS+'+'):('i¢'+p[2]),cost:owned?0:+p[2],can:!active&&!gated,buy:()=>{player.unlocked[w]=1;player.wtype=w;}};}),
     {grp:'WEAPONS',name:'SCATTER CHOKE',icon:'w_spread',desc:'Adds a SPREAD pellet and tightens the cone for more focus.',delta:'+1 pellet',lv:u.mSpread||0,mx:3,cost:300+(u.mSpread||0)*220,can:(u.mSpread||0)<3,buy:()=>{u.mSpread=(u.mSpread||0)+1;}},
-    ...(player.unlocked.rapid?[{grp:'WEAPONS',name:'OVERCLOCK',icon:'w_rapid',desc:'Increases RAPID fire rate. Stacks with existing speed.',delta:'+12% rate',lv:u.mRapid||0,mx:3,cost:300+(u.mRapid||0)*220,can:(u.mRapid||0)<3,buy:()=>{u.mRapid=(u.mRapid||0)+1;}}]:[]),
-    ...(player.unlocked.lance?[{grp:'WEAPONS',name:'HIGH-VELOCITY',icon:'w_lance',desc:'Increases damage on each LANCE bolt.',delta:'+ bolt dmg',lv:u.mLance||0,mx:3,cost:320+(u.mLance||0)*230,can:(u.mLance||0)<3,buy:()=>{u.mLance=(u.mLance||0)+1;}}]:[]),
-    ...(player.unlocked.homing?[{grp:'WEAPONS',name:'SWARM CTRL',icon:'w_homing',desc:'Adds one more homing shot per volley.',delta:'+1 shot',lv:u.mHoming||0,mx:3,cost:320+(u.mHoming||0)*230,can:(u.mHoming||0)<3,buy:()=>{u.mHoming=(u.mHoming||0)+1;}}]:[]),
+    {grp:'WEAPONS',name:'SLUG LOAD',icon:'w_spread',desc:'Heavier SPREAD pellets hit harder per hit.',delta:'+16% pellet dmg',lv:u.bSpread||0,mx:3,cost:320+(u.bSpread||0)*230,can:(u.bSpread||0)<3,buy:()=>{u.bSpread=(u.bSpread||0)+1;}},
+    ...(player.unlocked.rapid?[{grp:'WEAPONS',name:'OVERCLOCK',icon:'w_rapid',desc:'Increases RAPID fire rate. Stacks with existing speed.',delta:'+12% rate',lv:u.mRapid||0,mx:3,cost:300+(u.mRapid||0)*220,can:(u.mRapid||0)<3,buy:()=>{u.mRapid=(u.mRapid||0)+1;}},{grp:'WEAPONS',name:'THERMAL LOAD',icon:'w_rapid',desc:'NAILGUN does more damage the hotter it runs. Rewards riding the redline.',delta:'+heat dmg',lv:u.bRapid||0,mx:3,cost:300+(u.bRapid||0)*220,can:(u.bRapid||0)<3,buy:()=>{u.bRapid=(u.bRapid||0)+1;}}]:[]),
+    ...(player.unlocked.lance?[{grp:'WEAPONS',name:'HIGH-VELOCITY',icon:'w_lance',desc:'Increases damage on each LANCE bolt.',delta:'+ bolt dmg',lv:u.mLance||0,mx:3,cost:320+(u.mLance||0)*230,can:(u.mLance||0)<3,buy:()=>{u.mLance=(u.mLance||0)+1;}},{grp:'WEAPONS',name:'AUTO-RACK',icon:'w_lance',desc:'Cycles RAILSPIKE bolts faster between shots.',delta:'+7% rate',lv:u.bLance||0,mx:3,cost:320+(u.bLance||0)*230,can:(u.bLance||0)<3,buy:()=>{u.bLance=(u.bLance||0)+1;}}]:[]),
+    ...(player.unlocked.homing?[{grp:'WEAPONS',name:'SWARM CTRL',icon:'w_homing',desc:'Adds one more homing shot per volley.',delta:'+1 shot',lv:u.mHoming||0,mx:3,cost:320+(u.mHoming||0)*230,can:(u.mHoming||0)<3,buy:()=>{u.mHoming=(u.mHoming||0)+1;}},{grp:'WEAPONS',name:'WARHEAD',icon:'w_homing',desc:'Each SWARM dart carries a heavier charge.',delta:'+dart dmg',lv:u.bHoming||0,mx:3,cost:320+(u.bHoming||0)*230,can:(u.bHoming||0)<3,buy:()=>{u.bHoming=(u.bHoming||0)+1;}}]:[]),
+    ...(player.unlocked.flak?[{grp:'WEAPONS',name:'DENSE PAYLOAD',icon:'w_flak',desc:'FLAK burst cloud deals more damage per second.',delta:'+13% cloud dps',lv:u.mFlak||0,mx:3,cost:350+(u.mFlak||0)*230,can:(u.mFlak||0)<3,buy:()=>{u.mFlak=(u.mFlak||0)+1;}},{grp:'WEAPONS',name:'WIDE BURST',icon:'w_flak',desc:'FLAK cloud covers a wider area in the band.',delta:'+cloud radius',lv:u.bFlak||0,mx:3,cost:350+(u.bFlak||0)*230,can:(u.bFlak||0)<3,buy:()=>{u.bFlak=(u.bFlak||0)+1;}}]:[]),
+    ...(player.unlocked.buzzsaw?[{grp:'WEAPONS',name:'HARDENED EDGE',icon:'w_buzz',desc:'BUZZSAW blades grind through hulls faster.',delta:'+14% blade dps',lv:u.mBuzz||0,mx:3,cost:350+(u.mBuzz||0)*230,can:(u.mBuzz||0)<3,buy:()=>{u.mBuzz=(u.mBuzz||0)+1;}},{grp:'WEAPONS',name:'WIDE KERF',icon:'w_buzz',desc:'Longer blades extend BUZZSAW reach around the ship.',delta:'+blade reach',lv:u.bBuzz||0,mx:3,cost:350+(u.bBuzz||0)*230,can:(u.bBuzz||0)<3,buy:()=>{u.bBuzz=(u.bBuzz||0)+1;}}]:[]),
     {grp:'HEAVY',name:'RAILGUN',icon:'rail',desc:'Charges up, then fires a slug that pierces everything in a line.',lv:0,mx:0,meta:hu.rail?'OWNED':(sector<2?'SECTOR 2+':'i¢750'),cost:750,can:!hu.rail&&sector>=2,buy:()=>{player.heavyUnlocked.rail=1;player.heavy='rail';}},
     {grp:'HEAVY',name:'TESLA',icon:'tesla',desc:'Lightning that jumps from enemy to enemy.',lv:0,mx:0,meta:hu.tesla?'OWNED':(sector<3?'SECTOR 3+':'i¢900'),cost:900,can:!hu.tesla&&sector>=3,buy:()=>{player.heavyUnlocked.tesla=1;player.heavy='tesla';}},
     {grp:'HEAVY',name:'SINGULARITY',icon:'singularity',desc:'Pulls nearby enemies together, then detonates.',lv:0,mx:0,meta:hu.singularity?'OWNED':(sector<4?'SECTOR 4+':'i¢1100'),cost:1100,can:!hu.singularity&&sector>=4,buy:()=>{player.heavyUnlocked.singularity=1;player.heavy='singularity';}},
