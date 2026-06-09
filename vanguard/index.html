@@ -370,7 +370,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
     <div class="go-stat">SCORE <b id="finalScore">0</b></div>
     <div class="go-stat">REACHED SECTOR <b id="finalSector">I</b> &nbsp; ACCURACY <b id="finalAcc">0%</b></div>
     <div class="go-stat">TIME <b id="finalTime">0:00</b> &nbsp; ENEMIES <b id="finalKills">0</b></div>
-    <div class="go-stat">BOSSES <b id="finalBosses">0</b> &nbsp; BEST STYLE <b id="finalCombo">D</b></div>
+    <div class="go-stat">BOSSES <b id="finalBosses">0</b> &nbsp; BEST STYLE <b id="finalCombo">D</b> &nbsp; AVG STYLE <b id="finalAvg">D</b></div>
     <div class="tag" id="enterHint">ENTER INITIALS</div>
     <div class="initials" id="initials"></div>
     <button class="obtn sub" id="submitBtn">SUBMIT</button>
@@ -460,7 +460,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='107';
+const W=630,H=840; const VERSION='108';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -1484,7 +1484,7 @@ function startGame(){
   sector=1; waveIdx=0; wavesPerSector=3; waveTimer=1.6; bossPending=false; sectorClearT=0;
   sectorKills=0; killsForBoss=48+sector*14;
   shotsFired=0; shotsHit=0; runTime=0; window.scoreT=0; window.scoreD=0; window.mult=1;
-  window.style=0; window.styleGrace=0; window.styleRepeat=0; window.lastKillWpn=''; window.maxStyle=0; window.killSrc=null;
+  window.style=0; window.styleGrace=0; window.styleRepeat=0; window.lastKillWpn=''; window.maxStyle=0; window.killSrc=null; window.styleSum=0; window.styleTime=0;
   runKills=0; runBosses=0; deathSlow=0; killerInfo=null;
   runCoinsEarned=0; runCoinsSpent=0; runParryAtt=0; runParries=0; runPerfect=0; runHits=0; runBombs=0; runOverheats=0; runLivesUsed=0; runDwell={spread:0,lance:0,homing:0,rapid:0,flak:0,buzzsaw:0};
   runHeavyUse={beam:0,tesla:0,rail:0,singularity:0,wave:0}; runBossTTK=[]; window.__bossT0=0;
@@ -2126,14 +2126,14 @@ function update(dt){
       e.x+=(hx-e.x)*Math.min(1,dt*6); e.y+=(hy+Math.sin(e.bob)*3-e.y)*Math.min(1,dt*6); e.bank=(hx-e.x)*0.4;
       e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(2.0,3.0)/((1+sector*0.16)*(gameMode==='hardcore'?1.25:1))); if(Math.random()<0.85) factionFire(e); }
     } else if(e.state==='reenter'){
-      if(!fleet){ e.dead=true; e.dt=0; e.gone=true; }
+      if(!fleet){ e.slot=-1; e.state='free'; e.vy=Math.max(70,e.climbV0||70); }
       else { const s=slots[e.slot], hx=fleet.x+(s?s.ox:0), hy=fleet.y+(s?s.oy:0);
         e.x+=(hx-e.x)*Math.min(1,dt*3.2); e.y+=(hy-e.y)*Math.min(1,dt*3.2);
         if(Math.abs(e.x-hx)<3&&Math.abs(e.y-hy)<3) e.state='form'; }
     } else if(e.state==='dive'){
       e.vy+=240*dt; if(e.y<H*0.62) e.vx+=(player.x-e.x)*dt*1.6; e.vx*=0.99; e.x+=e.vx*dt; e.y+=e.vy*dt; e.bank=e.vx*0.05;
       e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(1.8,2.8)/((1+sector*0.16)*(gameMode==='hardcore'?1.25:1))); factionFire(e); }
-      if(e.vy>0 && e.y>H-70){ startClimb(e); }   // pull out instead of dropping off the bottom
+      if(e.vy>0 && e.y>H-110){ startClimb(e); }   // pull out instead of dropping off the bottom
     } else if(e.state==='climb'){
       e.climbT+=dt; const k=clamp(e.climbT/0.5,0,1);
       e.vy=e.climbV0+(-160-e.climbV0)*k;                                   // ramp vy to a climb over 0.5s
@@ -2189,10 +2189,10 @@ function update(dt){
       if(Math.random()<0.6) parts.push({x:e.x+rnd(-br,br),y:e.y-rnd(0,br),vx:rnd(-55,55),vy:rnd(-120,-30),life:.6,max:.6,c:e.c,sz:1.9});
     } else { // free
       e.y+=e.vy*dt; e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(2.0,3.5)/((1+sector*0.16)*(gameMode==='hardcore'?1.25:1))); factionFire(e); }
-      if(e.vy>0 && e.y>H-70){ startClimb(e); }   // pull out instead of dropping off the bottom
+      if(e.vy>0 && e.y>H-110){ startClimb(e); }   // pull out instead of dropping off the bottom
     }
     // contact with player (disabled for the first 0.4s of a pull-out climb)
-    if(!e.dead && !player.dead && player.inv<=0 && !(e.state==='climb'&&e.climbT<0.4) && dist2(e.x,e.y,player.x,player.y)<(e.r+10)*(e.r+10)){
+    if(!e.dead && !player.dead && player.inv<=0 && !(e.state==='climb'&&(e.climbT<0.4||e.vy>=0)) && dist2(e.x,e.y,player.x,player.y)<(e.r+10)*(e.r+10)){
       lastHitBy=e; e.hp-=2; e.flash=.1; playerHit(); if(e.hp<=0)killEnemy(e);
     }
   });
@@ -2273,6 +2273,7 @@ function update(dt){
   if(window.styleGrace>0) window.styleGrace-=dt;
   else if(window.style>0){ window.style=Math.max(0,window.style-dt*16); window.mult=styleRankObj().mult; }
   window.maxStyle=Math.max(window.maxStyle||0,window.style||0);
+  window.styleSum=(window.styleSum||0)+(window.style||0)*dt; window.styleTime=(window.styleTime||0)+dt;
 
   nextSectorCheck(dt);
   if(gameOverT>0){ gameOverT-=dt; if(gameOverT<=0){ killer=null; endRun(); } }
@@ -3536,7 +3537,8 @@ function endRun(){
     el('finalTime').textContent=fmtTime(runTime);
     el('finalKills').textContent=runKills;
     el('finalBosses').textContent=runBosses;
-    { let br=STYLE_RANKS[0]; for(const k of STYLE_RANKS){ if((window.maxStyle||0)>=k.min)br=k; } el('finalCombo').textContent=br.g; }
+    { let br=STYLE_RANKS[0]; for(const k of STYLE_RANKS){ if((window.maxStyle||0)>=k.min)br=k; } el('finalCombo').textContent=br.g;
+      const _avg=(window.styleTime>0)?(window.styleSum/window.styleTime):0; let ar=STYLE_RANKS[0]; for(const k of STYLE_RANKS){ if(_avg>=k.min)ar=k; } const _fa=el('finalAvg'); if(_fa){ _fa.textContent=ar.g; _fa.style.color=ar.c; } }
     const fb=el('felledBy'); const kg=document.getElementById('killerGlyph');
     if(killerInfo){ fb.textContent=killerInfo.label; fb.style.color=killerInfo.c;
       if(killerInfo.draw&&kg){ const kctx=kg.getContext('2d'); kctx.clearRect(0,0,64,64);
@@ -3936,6 +3938,7 @@ function closeTut(){ el('ovlTut').classList.add('hidden'); try{localStorage.setI
 { const b=el('howtoBtn'); if(b) b.addEventListener('click',e=>{ e.stopPropagation(); openTut(); }); }
 
 const CHANGELOG=[
+ {ver:'108',date:'2026',items:['Enemies that pull out at the bottom now re-engage instead of vanishing on the way up.','Fixed unfair collisions from enemies snapping upward at the bottom edge.','Death screen now shows AVG STYLE next to BEST STYLE.']},
  {ver:'105',date:'2026',items:['Every sound effect now plays one consistent track instead of switching between variants']},
  {ver:'103',date:'2026',items:['Primary fire now plays one consistent sound instead of changing every shot','Rebalanced sound effect volumes so nothing is too loud or too quiet','Sound effects keep pace during heavy fire instead of dropping out']},
  {ver:'100',date:'2026',items:['Enemy fire now has its own sound','Hitting enemies now lands with a dedicated impact sound']},
