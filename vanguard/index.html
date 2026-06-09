@@ -460,7 +460,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='99';
+const W=630,H=840; const VERSION='100';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -2231,7 +2231,7 @@ function update(dt){
         if(b.frag){ for(const e2 of enemies){ if(e2.dead||e2===e)continue; if(dist2(e2.x,e2.y,b.x,b.y)<900){ e2.hp-=dmgEff*0.5; e2.flash=.08; if(e2.hp<=0){ window.killSrc='spread'; killEnemy(e2); } } } rings.push({x:b.x,y:b.y,r:4,vr:160,life:.18,max:.18,c:COL.green}); }
         if(b.ramp){ b.dmg=Math.min((b.dmg||0)*1.15,(b.dmg0||b.dmg)*2.5); }
         if(b.scatter){ for(let s=0;s<3;s++){ const fa=(s-1)*0.5; pbul.push({x:b.x,y:b.y,vx:Math.sin(fa)*360,vy:-820,c:COL.cyan,r:2.4,dmg:(b.dmg0||b.dmg)*0.5,len:14,wt:'rail',gl:b.gl}); } b.scatter=false; }
-        if(e.hp<=0)killEnemy(e); if(!b.pierce){hit=true;} break; } }
+        if(e.hp<=0)killEnemy(e); else if(Audio_.play)Audio_.play('hit'); if(!b.pierce){hit=true;} break; } }
     if(!hit && boss && !boss.entering && !boss.dying && dist2(boss.x,boss.y,b.x,b.y)<(boss.r)*(boss.r)){
       if(b.wt==='flak'){ detonateFlak(b,FLAK_EARLY); hit=true; }
       else { damageBoss(dmgEff); impactFX(b.x,b.y,boss.c,b.vx,b.vy); shotsHit++; if(!b.pierce)hit=true; }
@@ -2277,7 +2277,7 @@ function enemyShot(e,ang,spdMul){ if(ebul.length>=12+sector*5) return; if(sector
   e.fireFlash=0.12; const sp=(255+sector*14)*(spdMul||1);
   ebul.push({x:e.x,y:e.y+e.r*0.6,vx:Math.sin(ang||0)*sp,vy:Math.cos(ang||0)*sp,c:e.c,r:3,owner:e}); }
 function enemyAimShot(e){ if(ebul.length>=12+sector*5) return; if(sector<=1&&Math.random()<0.3) return;
-  e.fireFlash=0.12; const dx=player.x-e.x,dy=player.y-e.y,m=Math.hypot(dx,dy)||1,sp=270+sector*14;
+  e.fireFlash=0.12; if(Audio_.play)Audio_.play('enemy_fire'); const dx=player.x-e.x,dy=player.y-e.y,m=Math.hypot(dx,dy)||1,sp=270+sector*14;
   ebul.push({x:e.x,y:e.y,vx:dx/m*sp,vy:dy/m*sp,c:e.c,r:3,owner:e}); }
 
 /* faction-specific attacks */
@@ -2324,6 +2324,7 @@ function msetAttack(e){
   else { /* DENDRITE: branching fork */ const sp=260+sector*9; for(const off of [-0.22,0,0.22]){ const a=base+off; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:3.2,split:true,owner:e}); } }
 }
 function factionFire(e){
+  if(Audio_.play)Audio_.play('enemy_fire');
   switch(e.fk){
     case 'ace': aceAttack(e); break; case 'bmet': bmetAttack(e); break;
     case 'csee': cseeAttack(e); break; case 'mat': matAttack(e); break;
@@ -3929,6 +3930,7 @@ function closeTut(){ el('ovlTut').classList.add('hidden'); try{localStorage.setI
 { const b=el('howtoBtn'); if(b) b.addEventListener('click',e=>{ e.stopPropagation(); openTut(); }); }
 
 const CHANGELOG=[
+ {ver:'100',date:'2026',items:['Enemy fire now has its own sound','Hitting enemies now lands with a dedicated impact sound']},
  {ver:'99',date:'2026',items:['KEYSTONES: maxing a weapon, heavy, shield, hull, or parry line at REFIT unlocks a one-time KEYSTONE that reshapes how it plays','RUN MODULES: high-tier REFIT picks with a big upside and a real downside, up to three per run','Low-hull warning: the screen edges pulse red when your hull is one hit from going down','HOW TO PLAY refreshed for the current six primary guns and game modes']},
  {ver:'78',date:'2026',items:['New primary: FLAK - mid-range airburst that pops into a damage cloud','New primary: BUZZSAW - contact blades orbit the ship','Five earnable heavies: PRISM BEAM, RAILGUN, TESLA, SINGULARITY, WAVE MOTION','DRONE and FLANK GUNS now scale with GUN POWER and stay useful late','Kills permanently thin enemy formations; cleared waves bring the next sooner']},
  {ver:'70',date:'2026',items:['PARRY system: deflect telegraphed bolts, perfect parries fire them back','Per-weapon signature upgrade branches and a unified HEAVY power spine','Point-blank kills repair the hull; REPAIR HULL added to REFIT']},
