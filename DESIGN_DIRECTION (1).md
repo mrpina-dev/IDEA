@@ -143,6 +143,9 @@ clean, or friendly sounds anywhere in the SFX set.
   boss/death events may ring louder.
 - **Length discipline:** combat SFX under ~200ms; only big one-shot events
   (boss spawn, player death) ring out.
+- **Playback rate tracks use, not clip length:** the SFX engine voice-steals with a
+  fast 8ms fade, so a sound retriggers at its in-game rate no matter how long the
+  rendered clip is. A long tail never blocks the next trigger.
 - **Frequency lanes:** player weapons own mids + sub thump; enemy deaths own
   low-mid crunch; UI stays thin and high. No two layers fight.
 - **Per-shot pitch jitter** in code, always.
