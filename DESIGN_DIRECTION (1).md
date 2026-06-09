@@ -131,6 +131,7 @@ Locked design forks (do not re-litigate):
 - Primary unlock schedule is locked: SPREAD start, SWARM/NAILGUN s2, FLAK s3, RAILSPIKE s4, BUZZSAW s5. New weapons are balanced as ratios against measured SPREAD baseline DPS, never as freehand constants.
 - Balance proposals always state the numbers: named constants, exact values,
   and the fastest dials to turn if the change overshoots.
+- Formations carry a finite reinforcement budget (about one extra wave) and then deplete and retire. They never refill indefinitely, which previously allowed a safe coin/parry/style farm.
 
 ---
 

@@ -461,7 +461,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='116';
+const W=630,H=840; const VERSION='117';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -1388,7 +1388,7 @@ function startFormationWave(arch){
     let anchorIdx=-1;
     if(sector>=2){ let best=1e9; slots.forEach((s,i)=>{ const sc=Math.abs(s.ox)+s.oy*1.2; if(sc<best){best=sc;anchorIdx=i;} }); if(anchorIdx>=0) slots[anchorIdx].role='anchor'; }
     slots.forEach((s,i)=>{ if(i===anchorIdx)return; const rr=Math.random(); s.role=rr<0.34?'rusher':rr<0.67?'zoner':'grunt'; });
-    refill=new Array(slots.length).fill(0); reconfTimer=999; volleyTimer=1.6*fleet.volleyMul; diveTimer=2.2*fleet.diveMul;
+    refill=new Array(slots.length).fill(0); fleet.refillBudget=slots.length; reconfTimer=999; volleyTimer=1.6*fleet.volleyMul; diveTimer=2.2*fleet.diveMul;
     for(let i=0;i<slots.length;i++) spawnFormationOccupant(i,true);
 }
 function startStreamWave(){
@@ -2213,8 +2213,10 @@ function update(dt){
   });
   // recycle / refill formation
   for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];
-    if(e.dead&&e.dt<=0){ if(e.gone&&e.slot>=0&&refill&&refill.length>e.slot) refill[e.slot]=Math.max(refill[e.slot],0.6); enemies.splice(i,1); } }
-  if(fleet&&!fleet.retiring&&refill){ for(let i=0;i<slots.length;i++){ if(refill[i]>0)refill[i]-=dt; else if(!slotFilled(i)) spawnFormationOccupant(i,true); } }
+    if(e.dead&&e.dt<=0){ if(e.slot>=0&&refill&&refill.length>e.slot) refill[e.slot]=Math.max(refill[e.slot],0.6); enemies.splice(i,1); } }
+  if(fleet&&!fleet.retiring&&refill){ let anyAlive=false;
+    for(let i=0;i<slots.length;i++){ if(refill[i]>0){ refill[i]-=dt; } else if(!slotFilled(i)){ if((fleet.refillBudget||0)>0){ spawnFormationOccupant(i,true); fleet.refillBudget--; } } if(slotFilled(i)) anyAlive=true; }
+    if((fleet.refillBudget||0)<=0 && !anyAlive){ fleet.retiring=true; fleet.descend=130; } }
 
   /* ----- boss ----- */
   if(boss){ updateBoss(dt); }
@@ -3987,6 +3989,7 @@ function closeTut(){ el('ovlTut').classList.add('hidden'); try{localStorage.setI
 { const b=el('howtoBtn'); if(b) b.addEventListener('click',e=>{ e.stopPropagation(); openTut(); }); }
 
 const CHANGELOG=[
+ {ver:'117',date:'2026',items:['Enemy formations now send a limited number of reinforcements instead of refilling endlessly.']},
  {ver:'116',date:'2026',items:['FPS counter now sits beside the playfield instead of over the HUD.']},
  {ver:'115',date:'2026',items:['SINGULARITY now travels as an unstable seed and ignites into a pulling well on arrival, instead of looking active in flight.']},
  {ver:'114',date:'2026',items:['FPS counter can now be toggled on in Settings.']},
