@@ -442,7 +442,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2589';
+const W=630,H=840; const VERSION='2590';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -1437,6 +1437,7 @@ function applyUpgrades(){ const u=player.up;
   // ---- ship modules (Tier 3, in-run; see player.modules) ----
   const _M=player.modules||[]; const _has=id=>_M.indexOf(id)>=0;
   player.coinMult=1; player.scoreMult=1; player.modFireCd=1; player.modChargeMult=1;
+  player.modDuelist=_has('duelist'); player.modMuni=_has('munitions');
   if(_has('glass')){ player.pdmg*=1.30; player.heavyMult*=1.30; player.beamDps*=1.30; player.maxArmor=Math.max(1,player.maxArmor-1); }
   if(_has('kinetic')){ player.maxArmor+=1; player.speed=Math.max(360,player.speed-44); }
   if(_has('scavenger')){ player.coinMult*=1.35; player.scoreMult*=0.85; }
@@ -1849,9 +1850,10 @@ function tryParry(){ if(state!=='play'||!player||player.dead||player.parryCd>0||
 }
 function fireBomb(){
   if(player.bombs<=0||player.dead)return; player.bombs--; runBombs++;
-  const bp=(player.up.bombPow||1), dmg=(10+sector*3)*(1+(bp-1)*0.5);
+  const bp=(player.up.bombPow||1), dmg=(10+sector*3)*(1+(bp-1)*0.5)*(player.modMuni?1.25:1);
   player.inv=Math.max(player.inv,1.1);
-  ebul.length=0; shake=Math.max(shake,16); bossFlash=Math.max(bossFlash,0.55); deathSlow=Math.max(deathSlow,0.25);
+  if(!player.modMuni) ebul.length=0;
+  shake=Math.max(shake,16); bossFlash=Math.max(bossFlash,0.55); deathSlow=Math.max(deathSlow,0.25);
   Audio_.bomb(); Audio_.big();
   rings.push({x:player.x,y:player.y,r:6,vr:1100,life:.55,max:.55,c:COL.white});
   rings.push({x:player.x,y:player.y,r:6,vr:760,life:.55,max:.55,c:COL.green});
@@ -2166,7 +2168,7 @@ function update(dt){
           ebul.push({x:e.x,y:e.y,vx:dx/mm*300,vy:dy/mm*300,c:e.c,r:3,owner:e}); e.flash=.1; Audio_.hit();
           for(let k=0;k<3;k++)parts.push({x:e.x,y:e.y,vx:rnd(-60,60),vy:rnd(-60,60),life:.18,max:.18,c:e.c,sz:1.6});
           hit=true; break; }
-        e.hp-=dmgEff; e.flash=.1; impactFX(b.x,b.y,e.c,b.vx,b.vy);
+        e.hp-=dmgEff*((player.modDuelist)?(((e.variant||0)>=2||e.fk==='foreman'||e.fk==='vector')?1.25:0.85):1); e.flash=.1; impactFX(b.x,b.y,e.c,b.vx,b.vy);
         if(b.frag){ for(const e2 of enemies){ if(e2.dead||e2===e)continue; if(dist2(e2.x,e2.y,b.x,b.y)<900){ e2.hp-=dmgEff*0.5; e2.flash=.08; if(e2.hp<=0){ window.killSrc='spread'; killEnemy(e2); } } } rings.push({x:b.x,y:b.y,r:4,vr:160,life:.18,max:.18,c:COL.green}); }
         if(b.ramp){ b.dmg=Math.min((b.dmg||0)*1.15,(b.dmg0||b.dmg)*2.5); }
         if(b.scatter){ for(let s=0;s<3;s++){ const fa=(s-1)*0.5; pbul.push({x:b.x,y:b.y,vx:Math.sin(fa)*360,vy:-820,c:COL.cyan,r:2.4,dmg:(b.dmg0||b.dmg)*0.5,len:14,wt:'rail',gl:b.gl}); } b.scatter=false; }
@@ -2604,7 +2606,7 @@ function ampShockwave(phase){ const b=boss; if(!b) return; const cx=b.x, cy=b.y+
       ebul.push({x:cx,y:cy,vx:Math.cos(a)*sp2,vy:Math.sin(a)*sp2,c:COL.csee,r:3.4}); }
     rings.push({x:cx,y:cy,r:b.r*0.3,vr:sp2,life:.5,max:.5,c:COL.csee}); }
   Audio_.wub(); shake=Math.max(shake,9); bossFlash=Math.max(bossFlash,0.18); }
-function damageBoss(dmg){ const b=boss; if(!b||b.dying||b.entering||b.tT>0) return; b.flash=.08;
+function damageBoss(dmg){ const b=boss; if(!b||b.dying||b.entering||b.tT>0) return; if(player&&player.modDuelist) dmg*=1.25; b.flash=.08;
   if(b.fk==='bmet') b.regenT=1.6;
   if(b.plates>0){ b.plateHp-=dmg;
     if(b.plateHp<=0){ b.plates--; explode(b.x+rnd(-b.r,b.r),b.y+rnd(-b.r,b.r),b.c,false); Audio_.hit();
@@ -2721,7 +2723,7 @@ function renderShopGrid(container, items, ctx){ if(!container)return;
   [...container.querySelectorAll('.card')].forEach(b=>b.addEventListener('click',()=>ctx.onBuy(+b.dataset.i,b))); }
 function hasMod(id){ return !!(player&&player.modules&&player.modules.indexOf(id)>=0); }
 function modCard(id,name,icon,desc,cost){ const eq=hasMod(id), slots=(player&&player.modules)||[0,0,0], free=slots.indexOf(0)>=0;
-  return {grp:'MODULES',name:name,icon:icon,desc:desc,lv:0,mx:0,meta:eq?'EQUIPPED':(free?('i¢'+cost):'NO SLOT'),cost:eq?0:cost,can:(!eq&&free),buy:()=>{ if(!hasMod(id)){ const s=player.modules; const fi=s.indexOf(0); if(fi>=0) s[fi]=id; } }}; }
+  return {grp:'MODULES',name:name,icon:icon,desc:desc,lv:0,mx:0,meta:eq?'EQUIPPED':(free?('i¢'+cost):'NO SLOT'),cost:eq?0:cost,can:(!eq&&free),buy:()=>{ if(!hasMod(id)){ const s=player.modules; const fi=s.indexOf(0); if(fi>=0){ s[fi]=id; if(id==='munitions') player.bombs+=2; } } }}; }
 function ksCard(w,name,icon,desc,id){ const cur=(player.ks&&player.ks[w])||0, picked=(cur===id), taken=(cur&&!picked);
   return {grp:'WEAPONS',name:name,icon:icon,desc:desc,lv:0,mx:0,meta:picked?'ACTIVE':taken?'LOCKED':'i¢700',cost:(picked||taken)?0:700,can:!cur,buy:()=>{ if(!(player.ks&&player.ks[w])){ (player.ks=player.ks||{})[w]=id; } }}; }
 function refitItems(){ const u=player.up; const pdN=(1+(u.gun-1)*0.30), pdX=(1+u.gun*0.30); const hu=player.heavyUnlocked||{};
@@ -2762,7 +2764,9 @@ function refitItems(){ const u=player.up; const pdN=(1+(u.gun-1)*0.30), pdX=(1+u
     modCard('glass','GLASS REACTOR','beampow','MODULE: +30% to all weapon damage, but -1 max hull. Pick up to 3 modules per run.',1200),
     modCard('overcharge','OVERCHARGE CAP','beamspool','MODULE: heavy weapons charge 40% faster, but primary fire rate -10%.',1100),
     modCard('scavenger','SCAVENGER','beamcell','MODULE: +35% coins from kills and CORE, but -15% score.',900),
-    modCard('kinetic','KINETIC DAMPENERS','hull','MODULE: +1 max hull, but engine speed -1 tier.',1000)
+    modCard('kinetic','KINETIC DAMPENERS','hull','MODULE: +1 max hull, but engine speed -1 tier.',1000),
+    modCard('duelist','DUELIST','beampierce','MODULE: +25% damage to bosses and elites, but -15% to normal enemies.',1100),
+    modCard('munitions','MUNITIONS RACK','bomb','MODULE: +2 bombs now and +25% bomb damage, but bombs no longer clear bullets.',1000)
   ];
 }
 function nextWeapon(){ const i=WEAPONS.indexOf(player.wtype); return WEAPONS[(i+1)%WEAPONS.length]; }
