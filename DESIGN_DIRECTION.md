@@ -171,6 +171,7 @@ Each faction is a Bosco Tech pathway made hostile. Identity table is in
   visible buff tethers, priority-target gameplay, panic on death.
 - Each faction biases toward signature formations. A wave should feel like its
   faction even with eyes closed.
+- Player kills permanently thin a formation. Empty slots refill only for units lost to scroll-off, never for kills. Units that climb back to the top are the same units returning, not fresh spawns. Clearing a formation faster simply brings the next wave sooner (alive<6 gate), which rewards aggression.
 
 ---
 
