@@ -95,6 +95,11 @@ Locked design forks (do not re-litigate):
   Offered only in REFIT (in-run), flat one-time cost, and picking one locks the
   other for the run. Keystones change how a weapon works; they are never pure
   stat boosts (those are the mastery branches).
+- Ship modules (Tier 3): three module slots, filled in-run from a shared pool of
+  global tradeoff cores. Picks are permanent for the run (no swapping), offered
+  in a MODULES group in REFIT only. Every module is an explicit tradeoff with a
+  real cost, never pure upside, and none may trivialize a boss. Modules are a
+  coin sink sized so the full set is a late-run investment.
 
 ### Pillar 4: Fair competition
 - The playfield is FIXED (currently 630x840) for leaderboard fairness across

@@ -442,7 +442,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2588';
+const W=630,H=840; const VERSION='2589';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -455,7 +455,7 @@ function fit(){const dpr=Math.min(window.devicePixelRatio||1,2);
 fit(); window.addEventListener('resize',fit);
 
 const COL={green:'#00FF41',gold:'#C8FF00',cyan:'#00F0FF',white:'#E8FFE8',dim:'#4A7A52',bg:'#020A04',
-  ace:'#FF7A1A',bmet:'#B24DFF',csee:'#2E9BFF',mat:'#FFD21A',mset:'#FF2E2E'};
+  ace:'#FF7A1A',bmet:'#B24DFF',csee:'#2E9BFF',mat:'#FFD21A',mset:'#FF2E2E',teal:'#19E6C8'};
 const EBSHAPE={}; EBSHAPE[COL.ace]='dart'; EBSHAPE[COL.bmet]='spore'; EBSHAPE[COL.csee]='chip'; EBSHAPE[COL.mat]='streak'; EBSHAPE[COL.mset]='shard';
 const rnd=(a,b)=>a+Math.random()*(b-a);
 const pick=a=>a[(Math.random()*a.length)|0];
@@ -1434,6 +1434,13 @@ function applyUpgrades(){ const u=player.up;
   player.beamRecharge= 0.16 + u.beamCap*0.06;                          // CELL: recharge rate
   player.heavyMult   = 1 + ((u.heavyPow||1)-1)*0.30;   // rail/tesla/singularity/wave damage
   player.maxArmor    = 4 + (u.armor||0);
+  // ---- ship modules (Tier 3, in-run; see player.modules) ----
+  const _M=player.modules||[]; const _has=id=>_M.indexOf(id)>=0;
+  player.coinMult=1; player.scoreMult=1; player.modFireCd=1; player.modChargeMult=1;
+  if(_has('glass')){ player.pdmg*=1.30; player.heavyMult*=1.30; player.beamDps*=1.30; player.maxArmor=Math.max(1,player.maxArmor-1); }
+  if(_has('kinetic')){ player.maxArmor+=1; player.speed=Math.max(360,player.speed-44); }
+  if(_has('scavenger')){ player.coinMult*=1.35; player.scoreMult*=0.85; }
+  if(_has('overcharge')){ player.modFireCd*=1.10; player.modChargeMult*=0.60; }
   if(player.beamE>player.beamMax) player.beamE=player.beamMax;
 }
 
@@ -1463,6 +1470,7 @@ function startGame(){
     player.heavy=(player.heavyUnlocked&&player.heavyUnlocked[b.heavy])?b.heavy:'beam'; player.bombs=b.bombs; player.shieldHits=b.shieldHits; if(b.drone)player.drone={ph:0}; }
   applyUpgrades(); player.armor=player.maxArmor; player.beamE=player.beamMax;
   player.ks={};   // keystone picks are per-run, in-run only
+  player.modules=[0,0,0];   // ship module slots, per-run, in-run only
   player.coins += Math.max(0, START_BUDGET-(startBuild.spent||0));   // unspent pre-game budget carries into the run
   if(gameMode==='hardcore'){ player.lives=0; } else if(gameMode==='dev'){ player.lives=99; player.coins=99999; player.heavyUnlocked={beam:1,rail:1,tesla:1,singularity:1,wave:1}; }
   window.__devTime=1; window.__devStep=false; window.__devNoSpawn=false;
@@ -1506,7 +1514,7 @@ function spawnHybrid(){ const fk=Math.random()<0.5?'foreman':'vector';
 
 /* ============================= scoring ============================= */
 function addScore(pts,x,y,c){
-  const gain=Math.round(pts*window.mult);
+  const gain=Math.round(pts*window.mult*((player&&player.scoreMult)||1));
   window.scoreT+=gain;
   pops.push({x,y,txt:'+'+gain,c:c||COL.gold,life:.9,max:.9});
 }
@@ -1646,7 +1654,7 @@ function outfitOffers(){ const b=startBuild, u=b.up; const pdN=(1+(u.gun-1)*0.30
 function buildCount(){ const u=startBuild.up,b=startBuild; const hu=b.heavyUnlocked||{}; return (u.gun-1)+(u.beamPow-1)+(u.beamCap-1)+(u.beamPierce-1)+(u.beamSpool-1)+(u.speed-1)+u.flank+u.armor+b.shieldHits+(b.bombs-2)+(b.drone?1:0)+b.unlocked.lance+b.unlocked.homing+b.unlocked.rapid+((u.heavyPow||1)-1)+((u.heavyChg||1)-1)+((u.teslaJump||1)-1)+((u.singAmp||1)-1)+((u.wavePow||1)-1)+((u.railPow||1)-1)+((u.railCap||1)-1)+((u.teslaDps||1)-1)+((u.singCrush||1)-1)+(u.mSpread||0)+(u.mRapid||0)+(u.mLance||0)+(u.mHoming||0)+(u.bSpread||0)+(u.bRapid||0)+(u.bLance||0)+(u.bHoming||0)+(u.mFlak||0)+(u.bFlak||0)+(u.mBuzz||0)+(u.bBuzz||0)+((u.bombPow||1)-1)+(hu.rail?1:0)+(hu.tesla?1:0)+(hu.singularity?1:0)+(hu.wave?1:0); }
 const WCOL={spread:COL.green,lance:COL.cyan,homing:COL.gold,rapid:COL.mat,flak:FLAK_COL,buzzsaw:COL.green};
 function applyPod(p){
-  if(p.type==='core'){ const jack=90+sector*22; player.coins+=jack; runCoinsEarned+=jack; addScore(jack,p.x,p.y,p.c);
+  if(p.type==='core'){ const jack=Math.round((90+sector*22)*((player&&player.coinMult)||1)); player.coins+=jack; runCoinsEarned+=jack; addScore(jack,p.x,p.y,p.c);
     let txt='CORE  +'+jack+' i\u00a2';
     if(Math.random()<0.34){
       if(gameMode!=='hardcore' && player.lives<2){ player.lives++; txt='CORE  EXTRA LIFE'; }
@@ -1718,6 +1726,7 @@ function firePrimary(){
   }
   (Audio_.play&&Audio_.play('fire_'+player.wtype))||Audio_.fire(player.wtype);
   if(player.buffs && player.buffs.overdrive>0){ pbul.slice(prevLen).forEach(b=>{ if(b.dmg) b.dmg*=1.3; }); player.fireCd*=0.6; }
+  if(player.modFireCd&&player.modFireCd!==1) player.fireCd*=player.modFireCd;
   if(player.buffs && player.buffs.scatter>0){ [-0.4,-0.8,0.4,0.8].forEach(a=>pbul.push({x:player.x,y:player.y-20,vx:Math.sin(a)*480,vy:-Math.cos(a)*480,c:COL.green,r:1.5,dmg:0.6*pm,wt:'scrap',gl})); }
   if(player.up.flank>0){
     const fa=[];
@@ -1759,7 +1768,7 @@ function updateBuzzsaw(pl,dt){
 /* ============================= HEAVY slot ============================= */
 const HEAVIES=['beam','rail','tesla','singularity','wave'];
 const HEAVYNAME={beam:'PRISM BEAM',rail:'RAILGUN',tesla:'TESLA',singularity:'SINGULARITY',wave:'WAVE MOTION'};
-function heavyChargeTime(h){ const base=h==='wave'?1.2:h==='rail'?0.7:h==='singularity'?0.5:0.4; const lv=(player&&player.up&&player.up.heavyChg)||1; return base*(1-(lv-1)*0.13); }
+function heavyChargeTime(h){ const base=h==='wave'?1.2:h==='rail'?0.7:h==='singularity'?0.5:0.4; const lv=(player&&player.up&&player.up.heavyChg)||1; return base*(1-(lv-1)*0.13)*((player&&player.modChargeMult)||1); }
 function heavyCost(h){ return h==='wave'?1.0 : h==='rail'?0.5 : h==='singularity'?0.6 : 0; }
 function cycleHeavy(){ if(!player)return; const list=HEAVIES.filter(h=>player.heavyUnlocked&&player.heavyUnlocked[h]); if(list.length<2)return;
   const i=list.indexOf(player.heavy); player.heavy=list[(i+1)%list.length]; player.heavyCharge=0; player.beamLock=false;
@@ -1857,7 +1866,7 @@ function killEnemy(e,silent){ if(e.dead)return; runKills++; e.dead=true; e.dt=0;
   shake=Math.max(shake, 2.5+(e.variant||0)*3.5);
   factionDeathLayer(e);
   if((e.variant||0)>=2||e.fk==='foreman'||e.fk==='vector'){ hitStop=Math.max(hitStop,0.05); rings.push({x:e.x,y:e.y,r:e.r*0.4,vr:440,life:.4,max:.4,c:COL.white}); }
-  addScore(e.pts,e.x,e.y,e.c); { const _cg=Math.ceil(e.pts*0.14*styleCoinMult()); player.coins+=_cg; runCoinsEarned+=_cg; } sectorKills++;
+  addScore(e.pts,e.x,e.y,e.c); { const _cg=Math.ceil(e.pts*0.14*styleCoinMult()*((player.coinMult)||1)); player.coins+=_cg; runCoinsEarned+=_cg; } sectorKills++;
   if(player && !player.dead && dist2(e.x,e.y,player.x,player.y)<80*80){ player.repair=Math.min(1,(player.repair||0)+0.12);
     if(player.repair>=1 && player.armor<player.maxArmor){ player.repair=0; player.armor++; Audio_.power();
       rings.push({x:player.x,y:player.y,r:8,vr:120,life:.4,max:.4,c:COL.green}); } }
@@ -2691,7 +2700,7 @@ const SHOP_ICONS={
   default: svgI('<circle cx="12" cy="12" r="7"/>')
 };
 function shopIcon(id){ return SHOP_ICONS[id]||SHOP_ICONS.default; }
-function shopGroupColor(grp){ return ({WEAPONS:COL.green,HEAVY:COL.bmet,BEAM:COL.cyan,DEFENSE:COL.gold,SYSTEMS:COL.mat})[grp]||COL.green; }
+function shopGroupColor(grp){ return ({WEAPONS:COL.green,HEAVY:COL.bmet,BEAM:COL.cyan,DEFENSE:COL.gold,SYSTEMS:COL.mat,MODULES:COL.teal})[grp]||COL.green; }
 function shopCardHTML(it,i,aff,maxed,grp){ const col=shopGroupColor(grp); const nm=it.name||it.label||'';
   let pips=''; if(it.mx>0){ for(let k=0;k<it.mx;k++) pips+='<i class="pip'+(k<it.lv?' on':'')+'"></i>'; }
   const meta=(it.meta!==undefined)?it.meta:(maxed?'MAX':(it.cost>0?('i¢'+it.cost):'FREE'));
@@ -2703,13 +2712,16 @@ function shopCardHTML(it,i,aff,maxed,grp){ const col=shopGroupColor(grp); const 
     +((it.delta&&!maxed)?('<span class="cdelta">'+it.delta+'</span>'):'')
     +'</span><span class="ccost">'+meta+'</span></button>'; }
 function renderShopGrid(container, items, ctx){ if(!container)return;
-  const order=['WEAPONS','HEAVY','BEAM','DEFENSE','SYSTEMS']; const grpOf=it=>it.grp||'SYSTEMS'; let html='';
+  const order=['WEAPONS','HEAVY','BEAM','DEFENSE','SYSTEMS','MODULES']; const grpOf=it=>it.grp||'SYSTEMS'; let html='';
   order.forEach(g=>{ const rows=items.map((it,i)=>[it,i]).filter(p=>grpOf(p[0])===g); if(!rows.length)return;
     html+='<div class="shophdr" style="color:'+shopGroupColor(g)+'">'+g+'</div>';
     rows.forEach(p=>{ const it=p[0],i=p[1]; const maxed=(it.mx>0&&it.lv>=it.mx)||!it.can; const aff=ctx.afford(it);
       html+=shopCardHTML(it,i,aff,maxed,g); }); });
   container.innerHTML=html;
   [...container.querySelectorAll('.card')].forEach(b=>b.addEventListener('click',()=>ctx.onBuy(+b.dataset.i,b))); }
+function hasMod(id){ return !!(player&&player.modules&&player.modules.indexOf(id)>=0); }
+function modCard(id,name,icon,desc,cost){ const eq=hasMod(id), slots=(player&&player.modules)||[0,0,0], free=slots.indexOf(0)>=0;
+  return {grp:'MODULES',name:name,icon:icon,desc:desc,lv:0,mx:0,meta:eq?'EQUIPPED':(free?('i¢'+cost):'NO SLOT'),cost:eq?0:cost,can:(!eq&&free),buy:()=>{ if(!hasMod(id)){ const s=player.modules; const fi=s.indexOf(0); if(fi>=0) s[fi]=id; } }}; }
 function ksCard(w,name,icon,desc,id){ const cur=(player.ks&&player.ks[w])||0, picked=(cur===id), taken=(cur&&!picked);
   return {grp:'WEAPONS',name:name,icon:icon,desc:desc,lv:0,mx:0,meta:picked?'ACTIVE':taken?'LOCKED':'i¢700',cost:(picked||taken)?0:700,can:!cur,buy:()=>{ if(!(player.ks&&player.ks[w])){ (player.ks=player.ks||{})[w]=id; } }}; }
 function refitItems(){ const u=player.up; const pdN=(1+(u.gun-1)*0.30), pdX=(1+u.gun*0.30); const hu=player.heavyUnlocked||{};
@@ -2746,7 +2758,11 @@ function refitItems(){ const u=player.up; const pdN=(1+(u.gun-1)*0.30), pdX=(1+u
     {grp:'SYSTEMS',name:'ENGINE',icon:'engine',desc:'Increases ship speed. Higher levels feel noticeably faster.',delta:'+52 speed',lv:u.speed,mx:10,cost:300+(u.speed-1)*180,can:u.speed<10,buy:()=>u.speed++},
     {grp:'SYSTEMS',name:'BOMB +1',icon:'bomb',desc:'Adds one to your max bomb stock.',delta:'+1 bomb',lv:player.bombs,mx:6,cost:450,can:player.bombs<6,buy:()=>player.bombs++},
     {grp:'SYSTEMS',name:'BOMB CORE',icon:'bomb',desc:'Increases bomb damage by 50% per level.',delta:'+50% dmg',lv:u.bombPow||1,mx:5,cost:300+((u.bombPow||1)-1)*220,can:(u.bombPow||1)<5,buy:()=>{u.bombPow=(u.bombPow||1)+1;}},
-    {grp:'SYSTEMS',name:player.drone?'DRONE READY':'DRONE',icon:'drone',desc:'Auto-targeting wingman. Damage scales with GUN POWER; twins at high power.',delta:player.drone?'':'wingman',lv:0,mx:0,meta:player.drone?'OWNED':'i¢600',cost:600,can:!player.drone,buy:()=>{player.drone={ph:0};}}
+    {grp:'SYSTEMS',name:player.drone?'DRONE READY':'DRONE',icon:'drone',desc:'Auto-targeting wingman. Damage scales with GUN POWER; twins at high power.',delta:player.drone?'':'wingman',lv:0,mx:0,meta:player.drone?'OWNED':'i¢600',cost:600,can:!player.drone,buy:()=>{player.drone={ph:0};}},
+    modCard('glass','GLASS REACTOR','beampow','MODULE: +30% to all weapon damage, but -1 max hull. Pick up to 3 modules per run.',1200),
+    modCard('overcharge','OVERCHARGE CAP','beamspool','MODULE: heavy weapons charge 40% faster, but primary fire rate -10%.',1100),
+    modCard('scavenger','SCAVENGER','beamcell','MODULE: +35% coins from kills and CORE, but -15% score.',900),
+    modCard('kinetic','KINETIC DAMPENERS','hull','MODULE: +1 max hull, but engine speed -1 tier.',1000)
   ];
 }
 function nextWeapon(){ const i=WEAPONS.indexOf(player.wtype); return WEAPONS[(i+1)%WEAPONS.length]; }
