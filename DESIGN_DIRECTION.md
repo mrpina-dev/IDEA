@@ -46,7 +46,7 @@ CC0 or Sonniss royalty-free.
 
 ### Pillar 1: Aggression is survival
 Locked design forks (do not re-litigate):
-- Hull heals on parry and on point-blank kills. Passivity starves you.
+- Hull heals on perfect parry and on point-blank kills; normal parries heal once REPAIR PROTOCOL is purchased. Passivity starves you.
 - STYLE rank is pure reward (coins + score). It never buffs damage or fire rate.
   ULTRAKILL-purist: style measures skill, it does not snowball power.
 - Skill expression deepens through the existing PARRY system, not new mechanics
@@ -76,6 +76,7 @@ Locked design forks (do not re-litigate):
   (mid band), RAILSPIKE (column pierce), NAILGUN (heat single-target), SWARM
   (passive utility).
 - Heavies are earned in-run, sector-gated, expensive. Commitment, not shopping.
+- Defensive and utility systems (HULL, SHIELD, DRONE, PARRY) carry the same shape as weapons: two signature branches feeding a mutually-exclusive keystone fork. Defense is a build choice, not a flat stat purchase.
 - Upgrade depth is a three-tier loadout tree on top of the flat coin economy:
   (Tier 0) the flat numeric spine (GUN POWER, ENGINE, HULL, BEAM stats, HEAVY
   POWER/SPOOL) stays prereq-free and instantly readable; (Tier 1) every primary
@@ -122,6 +123,7 @@ Locked design forks (do not re-litigate):
 - Boss-delete buttons are bugs (the 7x bomb multiplier and Wave Motion
   precedent). No single purchase should trivialize a boss.
 - Weapon unlocks are sector-gated in-run. Runs start SPREAD-only.
+- Defensive keystone halves are capped (hull and shield ceilings, a per-level boss-reflect cap on parry, kill-fed not idle shield regen) so no single defensive purchase trivializes survival or deletes a boss.
 - Primary unlock schedule is locked: SPREAD start, SWARM/NAILGUN s2, FLAK s3, RAILSPIKE s4, BUZZSAW s5. New weapons are balanced as ratios against measured SPREAD baseline DPS, never as freehand constants.
 - Balance proposals always state the numbers: named constants, exact values,
   and the fastest dials to turn if the change overshoots.
