@@ -460,7 +460,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2598';
+const W=630,H=840; const VERSION='99';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -3033,6 +3033,19 @@ function drawBG(){
   if(bossFlash>0){ bg.globalAlpha=Math.min(0.7,bossFlash); bg.fillStyle='#fff'; bg.fillRect(0,0,W,H); bg.globalAlpha=1; }
   if(sectorBanner>0) drawBanner();
   if(bossCard) drawBossCard();
+  // Low-hull warning: pulsing red edge vignette when one hit from going down
+  if(state==='play' && player && !player.dead && gameOverT<=0 && player.maxArmor>0 && (player.armor/player.maxArmor)<=0.25){
+    const _p=0.5+0.5*Math.sin(performance.now()*0.009);
+    const _i=(typeof LOWFX!=='undefined'&&LOWFX?0.30:0.46)*(0.55+0.45*_p);
+    const _vg=bg.createRadialGradient(W/2,H/2,Math.min(W,H)*0.30,W/2,H/2,Math.max(W,H)*0.62);
+    _vg.addColorStop(0,'rgba(255,46,46,0)'); _vg.addColorStop(1,'rgba(255,46,46,'+_i.toFixed(3)+')');
+    bg.save(); bg.fillStyle=_vg; bg.fillRect(0,0,W,H);
+    bg.globalAlpha=0.55+0.45*_p; bg.textAlign='center'; bg.textBaseline='middle';
+    bg.font="700 13px 'Share Tech Mono',monospace"; bg.fillStyle=COL.mset;
+    bg.shadowColor='rgba(255,46,46,0.9)'; bg.shadowBlur=12;
+    bg.fillText('HULL CRITICAL', W/2, 92);
+    bg.restore();
+  }
   // Death vignette + DESTROYED text
   if(state==='play' && player && player.dead && gameOverT>0){
     const prog=clamp(1-gameOverT/1.9,0,1);
@@ -3898,11 +3911,11 @@ function refreshControlsHint(){ const p=el('ctrlsPanel'); if(!p)return; const kl
 const TUT_PAGES=[
  {h:'WELCOME, PILOT',b:'You fly the IDEA ship against five rival Bosco Tech pathways across escalating sectors. Survive, rack up score, and climb the leaderboard.'},
  {h:'MOVE & FIRE',b:'Move with WASD, the arrow keys, or by dragging. Your guns fire automatically. You can switch to manual fire under CONTROLS if you prefer.'},
- {h:'GUNS',b:'Four primary guns: SPREAD, LANCE, HOMING, RAPID. Press Q to switch between the ones you have unlocked.'},
- {h:'HEAVY WEAPON',b:'Hold C or SPACE to spin up and fire your HEAVY weapon. Press E to switch heavy type. It drains an energy cell and locks while recharging, so pick your moment.'},
+ {h:'GUNS',b:'Six primary guns: SPREAD, RAPID, LANCE, HOMING, FLAK, and BUZZSAW. You start with SPREAD and unlock the rest as you push into new sectors. Press Q to cycle the ones you have.'},
+ {h:'HEAVY WEAPON',b:'Hold C or SPACE to spin up and fire your HEAVY weapon. It drains an energy cell and locks while recharging, so pick your moment. You start with the PRISM BEAM and earn more heavies at REFIT as you clear sectors; press E to switch between the ones you own.'},
  {h:'PARRY & BOMB',b:'Tap Z the instant before an enemy shot reaches you to PARRY and reflect it. Press X to set off a BOMB that clears the screen when you are cornered.'},
  {h:'STYLE & REFIT',b:'Chain kills without taking a hit to raise your STYLE grade, which multiplies score. Kills and CORE pickups earn i¢. Clear a boss to reach REFIT and spend it. Set a permanent loadout with CONFIGURE BUILD on the title.'},
- {h:'MODES',b:'NORMAL and HARDCORE (one life) keep separate leaderboards. Pick your mode on the title screen. Good luck out there.'}
+ {h:'MODES',b:'NORMAL and HARDCORE (one life) each keep their own leaderboard. DEV is a free sandbox for trying things out and never submits scores. Pick your mode on the title screen. Good luck out there.'}
 ];
 let tutIdx=0;
 function renderTut(){ const p=TUT_PAGES[tutIdx]; el('tutTitle').textContent=p.h; el('tutBody').textContent=p.b;
@@ -3916,11 +3929,12 @@ function closeTut(){ el('ovlTut').classList.add('hidden'); try{localStorage.setI
 { const b=el('howtoBtn'); if(b) b.addEventListener('click',e=>{ e.stopPropagation(); openTut(); }); }
 
 const CHANGELOG=[
- {ver:'2578',date:'2026',items:['New primary: FLAK - mid-range airburst that pops into a damage cloud','New primary: BUZZSAW - contact blades orbit the ship','Five earnable heavies: PRISM BEAM, RAILGUN, TESLA, SINGULARITY, WAVE MOTION','DRONE and FLANK GUNS now scale with GUN POWER and stay useful late','Kills permanently thin enemy formations; cleared waves bring the next sooner']},
- {ver:'2570',date:'2026',items:['PARRY system: deflect telegraphed bolts, perfect parries fire them back','Per-weapon signature upgrade branches and a unified HEAVY power spine','Point-blank kills repair the hull; REPAIR HULL added to REFIT']},
- {ver:'2560',date:'2026',items:['Persistent STARTING BUILD loadout with a shared budget','Settings: auto-fire toggle, pointer-lock and follow mouse modes, low-FX, hit-flash reduction, screen shake','Rare cross-faction elites: FOREMAN and VECTOR','Overhauled combat audio with faction-keyed death sounds']},
- {ver:'2545',date:'2026',items:['In-game HOW TO PLAY tutorial for new pilots','This update log, reachable from the title and the desktop console']},
- {ver:'2544',date:'2026',items:['Desktop cabinet layout fills the side space with intel and status consoles','Wider, more readable two-column upgrade menu']},
+ {ver:'99',date:'2026',items:['KEYSTONES: maxing a weapon, heavy, shield, hull, or parry line at REFIT unlocks a one-time KEYSTONE that reshapes how it plays','RUN MODULES: high-tier REFIT picks with a big upside and a real downside, up to three per run','Low-hull warning: the screen edges pulse red when your hull is one hit from going down','HOW TO PLAY refreshed for the current six primary guns and game modes']},
+ {ver:'78',date:'2026',items:['New primary: FLAK - mid-range airburst that pops into a damage cloud','New primary: BUZZSAW - contact blades orbit the ship','Five earnable heavies: PRISM BEAM, RAILGUN, TESLA, SINGULARITY, WAVE MOTION','DRONE and FLANK GUNS now scale with GUN POWER and stay useful late','Kills permanently thin enemy formations; cleared waves bring the next sooner']},
+ {ver:'70',date:'2026',items:['PARRY system: deflect telegraphed bolts, perfect parries fire them back','Per-weapon signature upgrade branches and a unified HEAVY power spine','Point-blank kills repair the hull; REPAIR HULL added to REFIT']},
+ {ver:'60',date:'2026',items:['Persistent STARTING BUILD loadout with a shared budget','Settings: auto-fire toggle, pointer-lock and follow mouse modes, low-FX, hit-flash reduction, screen shake','Rare cross-faction elites: FOREMAN and VECTOR','Overhauled combat audio with faction-keyed death sounds']},
+ {ver:'45',date:'2026',items:['In-game HOW TO PLAY tutorial for new pilots','This update log, reachable from the title and the desktop console']},
+ {ver:'44',date:'2026',items:['Desktop cabinet layout fills the side space with intel and status consoles','Wider, more readable two-column upgrade menu']},
  {ver:'EARLIER',date:'',items:['HEAVY weapon system: PRISM BEAM, RAILGUN, TESLA, SINGULARITY, WAVE MOTION','Beam reworked with separate spool-up, cell, and recharge timing','Persistent CONFIGURE BUILD starting loadout','Live controls hint and full key remapping','Death screen shows your own rank even outside the top 10','Per-device runs-played counter','NORMAL and HARDCORE modes with separate boards','Feedback submission and hybrid elite enemies']}
 ];
 function renderLog(){ const box=el('logBody'); if(!box)return; box.innerHTML='';
@@ -4056,6 +4070,7 @@ requestAnimationFrame(frame);
   tg.appendChild(mk('HURT -22%',()=>{ if(state==='play')devHurt(); }));
   tg.appendChild(mk('CLEAR',()=>{ clearField(); }));
   tg.appendChild(mk('CLR FIRE',()=>{ ebul.length=0; }));
+  tg.appendChild(mk('REFIT',()=>{ if(state==='play') openRefit(); }));
   panel.appendChild(tg);
 
   /* ---- TIME ---- */
@@ -4075,7 +4090,7 @@ requestAnimationFrame(frame);
   function gunDelta(d){ if(player) setGun(player.up.gun+d); }
   panel.appendChild(hdr('WEAPON'));
   const wg=document.createElement('div'); wg.className='dgrid';
-  [['SPR','spread'],['LAN','lance'],['HOM','homing'],['RAP','rapid']].forEach(p=>{ wg.appendChild(mk(p[0],()=>setWeapon(p[1]))); });
+  [['SPR','spread'],['LAN','lance'],['HOM','homing'],['RAP','rapid'],['FLAK','flak'],['BUZZ','buzzsaw']].forEach(p=>{ wg.appendChild(mk(p[0],()=>setWeapon(p[1]))); });
   wg.appendChild(mk('GUN-',()=>gunDelta(-1)));
   wg.appendChild(mk('GUN+',()=>gunDelta(1)));
   panel.appendChild(wg);
@@ -4088,12 +4103,19 @@ requestAnimationFrame(frame);
   panel.appendChild(hvg);
 
   /* ---- LOADOUT ---- */
-  function maxBuild(){ if(!player)return; const u=player.up;
-    u.gun=8; u.beamPow=8; u.beamCap=8; u.speed=10; u.beamPierce=5; u.beamSpool=6; u.flank=3; u.armor=4;
-    u.heavyPow=6; u.heavyChg=5; u.teslaJump=4; u.singAmp=4; u.wavePow=4; u.mSpread=3; u.mRapid=3; u.mLance=3; u.mHoming=3; u.bombPow=5;
-    player.unlocked={spread:1,lance:1,homing:1,rapid:1};
+  function maxBuild(){ if(!player)return;
+    // unlock everything first so all signature/heavy branches appear in the offer list
+    player.unlocked={spread:1,lance:1,homing:1,rapid:1,flak:1,buzzsaw:1};
     player.heavyUnlocked={beam:1,rail:1,tesla:1,singularity:1,wave:1};
-    player.bombs=6; player.shieldHits=3; if(!player.drone)player.drone={ph:0};
+    // buy every purchasable upgrade straight off the live REFIT offers, so MAX BUILD
+    // never goes stale as the tree grows. Skip MODULES (capped at 3, carry downsides).
+    for(let pass=0; pass<18; pass++){
+      let bought=false;
+      refitItems().forEach(it=>{ if(it && it.can && typeof it.buy==='function' && it.grp!=='MODULES'){ it.buy(); bought=true; } });
+      if(!bought) break;
+    }
+    if(!player.unlocked[player.wtype]) player.wtype='spread';
+    player.bombs=6; player.shieldHits=Math.max(player.shieldHits||0,3); if(!player.drone)player.drone={ph:0};
     applyUpgrades(); player.armor=player.maxArmor; player.beamE=player.beamMax; }
   function spawnCore(){ pods.push({x:W/2,y:80,vy:34,type:'core',fk:'ace',c:COL.gold,bob:rnd(0,6.28),r:16,spin:0}); }
   function spawnPwr(){ pods.push({x:W/2,y:80,vy:55,type:'pwr',buff:'overdrive',c:COL.gold,bob:rnd(0,6.28),r:11}); }
