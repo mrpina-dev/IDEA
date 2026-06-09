@@ -24,7 +24,8 @@
       "PowerShell($nodeCmd = Get-Command node -ErrorAction SilentlyContinue; if\\($nodeCmd\\){ $nodeCmd.Source } else { \"no node\" })",
       "PowerShell(Get-Command *)",
       "PowerShell(git ls-tree *)",
-      "Bash(git rebase *)"
+      "Bash(git rebase *)",
+      "Bash(git rm *)"
     ]
   }
 }

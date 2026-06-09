@@ -442,7 +442,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2583';
+const W=630,H=840; const VERSION='2584';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -1325,7 +1325,6 @@ function spawnFormationOccupant(i,fromTop){
   e.slot=i; enemies.push(e);
 }
 function slotFilled(i){ for(const e of enemies) if(!e.dead && e.slot===i) return true; return false; }
-function climbCount(){ let n=0; for(const e of enemies) if(!e.dead && e.state==='climb') n++; return n; }
 /* a bottom-bound diver/free enemy pulls out and climbs back instead of despawning off-screen */
 function startClimb(e){
   e.state='climb'; e.climbT=0; e.climbV0=e.vy;
