@@ -148,7 +148,12 @@ clean, or friendly sounds anywhere in the SFX set.
   rendered clip is. A long tail never blocks the next trigger.
 - **Frequency lanes:** player weapons own mids + sub thump; enemy deaths own
   low-mid crunch; UI stays thin and high. No two layers fight.
-- **Per-shot pitch jitter** in code, always.
+- **Per-shot pitch jitter:** primary fire plays a single consistent sample with no
+  shot-to-shot variation; variant variety and jitter apply to other sounds (deaths,
+  impacts), never to primary fire.
+- **SFX mix owned in code:** the in-game SFX mix is owned by a per-slot level table
+  in the engine (Audio_._lvl, dB). Samples are rendered raw at equal peak and balanced
+  in code, so any sound's volume is tunable without re-rendering.
 - **Faction-keyed death sounds** by body type: mechanical crunch (ACE),
   organic squelch (BMET), electrical fry (CSEE), energy snap (MAT),
   crystalline break (MSET). Audio reinforces the readability pillar.

@@ -460,7 +460,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='102';
+const W=630,H=840; const VERSION='103';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -3930,7 +3930,7 @@ function closeTut(){ el('ovlTut').classList.add('hidden'); try{localStorage.setI
 { const b=el('howtoBtn'); if(b) b.addEventListener('click',e=>{ e.stopPropagation(); openTut(); }); }
 
 const CHANGELOG=[
- {ver:'102',date:'2026',items:['Sound effects keep pace during heavy fire instead of dropping out']},
+ {ver:'103',date:'2026',items:['Primary fire now plays one consistent sound instead of changing every shot','Rebalanced sound effect volumes so nothing is too loud or too quiet','Sound effects keep pace during heavy fire instead of dropping out']},
  {ver:'100',date:'2026',items:['Enemy fire now has its own sound','Hitting enemies now lands with a dedicated impact sound']},
  {ver:'99',date:'2026',items:['KEYSTONES: maxing a weapon, heavy, shield, hull, or parry line at REFIT unlocks a one-time KEYSTONE that reshapes how it plays','RUN MODULES: high-tier REFIT picks with a big upside and a real downside, up to three per run','Low-hull warning: the screen edges pulse red when your hull is one hit from going down','HOW TO PLAY refreshed for the current six primary guns and game modes']},
  {ver:'78',date:'2026',items:['New primary: FLAK - mid-range airburst that pops into a damage cloud','New primary: BUZZSAW - contact blades orbit the ship','Five earnable heavies: PRISM BEAM, RAILGUN, TESLA, SINGULARITY, WAVE MOTION','DRONE and FLANK GUNS now scale with GUN POWER and stay useful late','Kills permanently thin enemy formations; cleared waves bring the next sooner']},
@@ -4289,21 +4289,22 @@ requestAnimationFrame(frame);
       SFX[slot].forEach(function(rel){ fetch('audio/sfx/'+rel).then(function(r){return r.arrayBuffer();})
         .then(function(ab){return A.ctx.decodeAudioData(ab);})
         .then(function(b){A.sfxBuf[slot].push(b);}).catch(function(){}); }); }); };
-  Audio_.play=function(slot){ var list=this.sfxBuf[slot]; if(!list||!list.length) return false;  // not loaded -> caller falls back to synth
+  Audio_._lvl={ overheat_ready:-3, heavy_charge:1, heavy_ready:-2, heavy_switch:-3, beam:1, rail:1, tesla:1, singularity:1, wave:1, whine:1, blast:1, enemy_fire:-3, bomb:1, big:1, death:2, boss_death:2, boss_phase:1, boss_warn:1, shield_break:1, coin:-6, life_up:-5, shield_up:-5, style_up:-5, core:-2, powerup:-5, weapon_switch:-5, refit_open:-4, buy:-4, buy_fail:-4, pause:-5, ui_click:-7, sector_clear:-2 };  // per-slot mix level in dB, missing slots default to 0
+  Audio_.play=function(slot){ var list=this.sfxBuf[slot]; if(!list||!list.length) return false;
     if(this.muted) return true; if(!this.ctx) return true;
     var now=this.ctx.currentTime, A=this;
-    if(this._sfxLast[slot]!==undefined && now-this._sfxLast[slot]<0.05) return true;   // de-spam: same slot can't retrigger within 50ms
+    if(this._sfxLast[slot]!==undefined && now-this._sfxLast[slot]<0.05) return true;
     if(!this.sfxGain){ this.sfxGain=this.ctx.createGain(); this.sfxGain.gain.value=this.sfxVol; this.sfxGain.connect(this.master||this.ctx.destination); }
     if(!this._sfxNodes) this._sfxNodes={};
     var nodes=this._sfxNodes[slot]||(this._sfxNodes[slot]=[]);
-    // voice stealing: a clip longer than its retrigger interval must not block the next trigger.
-    // fast 8ms fade on the stolen voice avoids a click; play rate then tracks gameplay, not clip length.
     var steal=function(v){ try{ var g=v.g.gain; g.cancelScheduledValues(now); g.setValueAtTime(g.value,now); g.linearRampToValueAtTime(0,now+0.008); v.s.stop(now+0.012); }catch(e){ try{v.s.stop();}catch(_){} } };
-    while(nodes.length>=2){ steal(nodes.shift()); }                                    // 2 overlapping voices per slot, steal beyond
-    if(this._sfxVoices>=12){ for(var k in this._sfxNodes){ if(this._sfxNodes[k].length){ steal(this._sfxNodes[k].shift()); break; } } }  // global safety: steal oldest
+    while(nodes.length>=2){ steal(nodes.shift()); }
+    if(this._sfxVoices>=12){ for(var k in this._sfxNodes){ if(this._sfxNodes[k].length){ steal(this._sfxNodes[k].shift()); break; } } }
     try{
-      var s=this.ctx.createBufferSource(); s.buffer=list[(Math.random()*list.length)|0];
-      var vg=this.ctx.createGain(); vg.gain.value=1; s.connect(vg); vg.connect(this.sfxGain);
+      var idx=(slot.indexOf('fire_')===0)?0:(Math.random()*list.length)|0;   // primary fire uses one consistent sample, no shot-to-shot swap
+      var s=this.ctx.createBufferSource(); s.buffer=list[idx];
+      var db=(this._lvl&&this._lvl[slot]!=null)?this._lvl[slot]:0;
+      var vg=this.ctx.createGain(); vg.gain.value=Math.pow(10,db/20); s.connect(vg); vg.connect(this.sfxGain);
       var voice={s:s,g:vg};
       this._sfxLast[slot]=now; this._sfxActive[slot]=(this._sfxActive[slot]||0)+1; this._sfxVoices++; nodes.push(voice);
       s.onended=function(){ A._sfxActive[slot]=Math.max(0,(A._sfxActive[slot]||1)-1); A._sfxVoices=Math.max(0,A._sfxVoices-1); var ix=nodes.indexOf(voice); if(ix>=0)nodes.splice(ix,1); try{vg.disconnect();}catch(e){} };
