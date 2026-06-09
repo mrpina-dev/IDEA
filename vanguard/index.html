@@ -117,9 +117,9 @@ body{background:#000;display:flex;align-items:center;justify-content:center;min-
 h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;letter-spacing:.1em;color:var(--green);text-shadow:0 0 14px rgba(0,255,65,.6)}
 .go-stat{font-size:12px;color:var(--white);letter-spacing:.06em}
 .go-stat b{font-family:'Chakra Petch',sans-serif;color:var(--gold)}
-.initials{display:flex;gap:8px;margin:6px 0;flex-wrap:wrap;justify-content:center;max-width:320px}
-.slot{width:38px;height:50px;border:1.5px solid rgba(0,255,65,.45);display:flex;align-items:center;justify-content:center;
-  font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:26px;color:var(--green);text-shadow:0 0 12px rgba(0,255,65,.6);
+.initials{display:flex;gap:4px;margin:6px 0;flex-wrap:nowrap;justify-content:center;max-width:none}
+.slot{width:26px;height:36px;border:1.5px solid rgba(0,255,65,.45);display:flex;align-items:center;justify-content:center;
+  font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:18px;color:var(--green);text-shadow:0 0 12px rgba(0,255,65,.6);
   background:rgba(0,20,8,.4);cursor:pointer;touch-action:none}
 .slot.sel{border-color:var(--gold);color:var(--gold);box-shadow:0 0 14px rgba(200,255,0,.5)}
 .slot.blank{color:var(--dim);border-color:rgba(74,122,82,.45);text-shadow:none}
@@ -376,6 +376,8 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
     <button class="mini" id="setShake">SCREEN SHAKE: FULL</button>
     <button class="mini" id="setHitFlash">HIT FLASH REDUCTION: OFF</button>
     <button class="mini" id="setMove" style="border-color:var(--cyan);color:var(--cyan)">MOVEMENT: POINTER LOCK</button>
+    <button class="mini" id="autofireBtn" style="border-color:var(--gold);color:var(--gold)">AUTO-FIRE: ON</button>
+    <button class="mini" id="lowfxBtn" style="border-color:var(--gold);color:var(--gold)">LOW FX: OFF</button>
     <button class="mini" id="setRemap" style="border-color:var(--gold);color:var(--gold)">REMAP KEYS</button>
     <button class="obtn" id="setDone">DONE</button>
   </div>
@@ -384,12 +386,6 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
   <div class="fbovl hidden" id="ovlKeys">
     <h2 class="ovh">CONTROLS</h2>
     <div class="tag">CLICK AN ACTION, THEN PRESS ANY KEY OR MOUSE BUTTON</div>
-    <button class="mini" id="autofireBtn" style="border-color:var(--gold);color:var(--gold)">AUTO-FIRE: ON</button>
-    <div class="tag" style="color:var(--dim);max-width:280px">Auto-fire OFF: hold FIRE to shoot, release to vent RAPID heat.</div>
-    <button class="mini" id="moveModeBtn" style="border-color:var(--cyan);color:var(--cyan)">MOUSE MOVE: FOLLOW</button>
-    <div class="tag" style="color:var(--dim);max-width:280px">FOLLOW: ship trails the cursor while held. POINTER LOCK: cursor is captured and the mouse drives the ship directly. Press ESC to release the cursor.</div>
-    <button class="mini" id="lowfxBtn" style="border-color:var(--gold);color:var(--gold)">LOW FX: OFF</button>
-    <div class="tag" style="color:var(--dim);max-width:280px">LOW FX: disables glow and caps particles for higher frame rates on slower machines.</div>
     <div id="keyList" style="display:flex;flex-direction:column;gap:6px;width:100%;max-width:280px;max-height:40vh;overflow-y:auto"></div>
     <button class="obtn" id="keysDone">DONE</button>
     <button class="mini" id="keysReset">RESET TO DEFAULTS</button>
@@ -446,7 +442,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2578';
+const W=630,H=840; const VERSION='2579';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -3218,10 +3214,11 @@ function drawFX(){
       fx.fillStyle=COL.white; fx.beginPath(); fx.ellipse(0,0,b.r*1.0,b.r*0.3,0,0,6.28); fx.fill(); }
     else if(sh==='shard'){ const ang=Math.atan2(b.vy,b.vx); fx.translate(b.x,b.y); fx.rotate(ang);
       fx.beginPath(); fx.moveTo(b.r*1.8,0); fx.lineTo(0,b.r*0.85); fx.lineTo(-b.r*0.7,b.r*0.3); fx.lineTo(-b.r*0.7,-b.r*0.3); fx.lineTo(0,-b.r*0.85); fx.closePath(); fx.fill(); }
-    else if(sh==='bolt'){ const pz=1+Math.sin(t*12)*0.14; fx.shadowBlur=22;
-      fx.fillStyle=COL.white; fx.beginPath(); fx.arc(b.x,b.y,b.r*pz,0,6.28); fx.fill();
-      fx.fillStyle=COL.cyan; fx.beginPath(); fx.arc(b.x,b.y,b.r*0.45,0,6.28); fx.fill();
-      fx.strokeStyle=COL.cyan; fx.lineWidth=2.5; fx.globalAlpha=0.85; fx.beginPath(); fx.arc(b.x,b.y,b.r*1.6*pz,0,6.28); fx.stroke(); fx.globalAlpha=1; }
+    else if(sh==='bolt'){ const pz=1+Math.sin(t*12)*0.18, rot=t*3.2, R=b.r*1.5; fx.translate(b.x,b.y);
+      fx.shadowColor=COL.cyan; fx.shadowBlur=16; fx.strokeStyle=COL.cyan; fx.lineWidth=2.2; fx.rotate(rot);
+      fx.beginPath(); for(let i=0;i<4;i++){ const a=i/4*6.2832, px=Math.cos(a)*R*pz, py=Math.sin(a)*R*pz; if(i)fx.lineTo(px,py); else fx.moveTo(px,py); } fx.closePath(); fx.stroke();
+      fx.lineWidth=2; for(let i=0;i<4;i++){ const a=i/4*6.2832+0.7854; fx.beginPath(); fx.moveTo(Math.cos(a)*R*1.35,Math.sin(a)*R*1.35); fx.lineTo(Math.cos(a)*R*0.85,Math.sin(a)*R*0.85); fx.stroke(); }
+      fx.rotate(-rot); fx.fillStyle=COL.white; fx.beginPath(); fx.arc(0,0,b.r*0.42*pz,0,6.2832); fx.fill(); fx.shadowBlur=0; }
     else { fx.beginPath(); fx.arc(b.x,b.y,b.r,0,6.28); fx.fill();
       fx.fillStyle=COL.white; fx.beginPath(); fx.arc(b.x,b.y,b.r*0.45,0,6.28); fx.fill(); }
     fx.restore(); });

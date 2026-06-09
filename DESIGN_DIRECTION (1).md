@@ -64,17 +64,15 @@ Locked design forks (do not re-litigate):
   set-piece fix is the precedent: spread cones with threadable gaps, prominent
   red danger zones, real wind-up time. Hard is fine; cheap is not.
 - Visual identity LOCKS before behavior/animation work begins. Always.
-- Enemies never teleport-despawn off the bottom: divers pull out and climb back (telegraphed, no-fire low, briefly non-contact). Off-screen popping is a bug.
-- The parryable bolt renders as a spinning cyan reticle (hollow diamond + crosshair ticks), never a soft filled disc, so it never reads as a pickup.
 
 ### Pillar 3: Beautifully violent
 - The chosen feel is visceral/chunky: heavy kick, freeze-frame shock rings on
   elite kills, debris bursts, directional spark fans on every hit, muzzle
   flashes, gore-of-light.
-- Weapons are committed playstyles spanning a locked range spectrum, not
-  flavors of hold-to-clear: BUZZSAW (contact), SPREAD (neutral baseline), FLAK
-  (mid band), RAILSPIKE (column pierce), NAILGUN (heat single-target), SWARM
-  (passive utility).
+- Weapons are committed playstyles, not four flavors of hold-to-clear:
+  SCRAPPER (point-blank shred), OVERHEAT NAILGUN (heat-ramping stream with real
+  overheat stakes), RAILSPIKE (charge-tap pierce), SWARM (hands-free but weak,
+  frees attention for dodging).
 - Heavies are earned in-run, sector-gated, expensive. Commitment, not shopping.
 
 ### Pillar 4: Fair competition
@@ -95,7 +93,6 @@ Locked design forks (do not re-litigate):
 - Boss-delete buttons are bugs (the 7x bomb multiplier and Wave Motion
   precedent). No single purchase should trivialize a boss.
 - Weapon unlocks are sector-gated in-run. Runs start SPREAD-only.
-- Primary unlock schedule is locked: SPREAD start, SWARM/NAILGUN s2, FLAK s3, RAILSPIKE s4, BUZZSAW s5. New weapons are balanced as ratios against measured SPREAD baseline DPS, never as freehand constants.
 - Balance proposals always state the numbers: named constants, exact values,
   and the fastest dials to turn if the change overshoots.
 
@@ -123,8 +120,6 @@ clean, or friendly sounds anywhere in the SFX set.
 - Raw source swaps get ~70% of the way; budget light processing (layered
   transient + body + sub + tail, saturated, compressed, trimmed tight) for
   the last 30%.
-- Sustained actions (beam, tesla, charge, boss beams) use gated loops that stop
-  with the action; one-shot tails on sustained actions are bugs.
 
 ### Music Direction (the Matrix lane)
 
@@ -183,15 +178,11 @@ Each faction is a Bosco Tech pathway made hostile. Identity table is in
   Assets (audio) may live alongside it in the repo; game logic does not split.
 - No redundant UI. Information appears once in the layout (precedent: duplicate
   wordmarks and controls lists were stripped from the consoles).
-- The CONTROLS overlay is keybinds only. Player-facing toggles (auto-fire, low FX, movement mode) live in SETTINGS and are never duplicated in CONTROLS.
 - First-run players get the tutorial automatically; returning players are never
   nagged (localStorage flags).
 - Classroom loop: students play, scores hit the Sheets leaderboard, the
   suggestion box feeds development, the UPDATE LOG shows them the game evolving.
   This feedback loop is a feature; protect it.
-- DEV mode is student-facing by design: a visible creative/sandbox mode for
-  exploring the game deeply. It is never ranked and sends no telemetry. Do not
-  gate it behind secrets or hide it from students.
 
 ---
 
@@ -206,7 +197,6 @@ Each faction is a Bosco Tech pathway made hostile. Identity table is in
 - When auditing balance, read the actual code and compute exact values
   (scripts, not estimates). Backlog and memory drift from code reality;
   the file is ground truth.
-- Telemetry carries an anonymous random device ID (localStorage hex, never linked to a name or initials) so cohort and learning-curve analysis is possible without identifying players. Identity linkage is rejected; anonymity is the locked position.
 
 ---
 
@@ -217,7 +207,7 @@ Decisions already made; do not re-propose without new evidence:
 - No STYLE damage/fire-rate buffs.
 - No playfield resizing.
 - No extra lives in HARDCORE.
-- No pre-game weapon unlocks in CONFIGURE BUILD for ranked modes (runs start SPREAD-only). DEV mode is exempt: unlimited budget, all unlocks apply.
+- No pre-game weapon unlocks in CONFIGURE BUILD (runs start SPREAD-only).
 - No full Code.gs rewrites, no new Apps Script deployments.
 - Upgrade-driven ship appearance: concept to be rethought, do not build as
   originally scoped.
