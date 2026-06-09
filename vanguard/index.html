@@ -460,7 +460,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='106';
+const W=630,H=840; const VERSION='107';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -1951,6 +1951,12 @@ function update(dt){
 
   /* ----- player ----- */
   const pl=player;
+  // SAFEGUARD: a non-finite or stuck inv/position disables every collision check
+  // (all are gated on inv<=0) and freezes the shield, locking the run invincible.
+  // Self-heal, and leave one console breadcrumb so the root cause can be traced.
+  if(!(pl.inv>=0)||pl.inv>3){ if(!window.__invWarned){console.warn('VANGUARD safeguard: bad player.inv',pl.inv);window.__invWarned=true;} pl.inv=0; }
+  if(!isFinite(pl.x)||!isFinite(pl.y)){ if(!window.__posWarned){console.warn('VANGUARD safeguard: bad player pos',pl.x,pl.y);window.__posWarned=true;} pl.x=W/2; pl.y=H-130; pl.vx=0; pl.vy=0; }
+  if(!isFinite(pl.shieldHits)) pl.shieldHits=0; else pl.shieldHits=Math.max(0,Math.min(pl.shieldHits,(pl.shieldCap||3)));
   if(pl.inv>0)pl.inv-=dt; if(pl.dmgFlash>0)pl.dmgFlash-=dt;
   if(pl.greed>0){ pl.greedT-=dt; if(pl.greedT<=0){ pl.greed--; pl.greedT=4; } }
   if(pl.buffs){ for(const bk of ['overdrive','scatter','magnet']) if(pl.buffs[bk]>0) pl.buffs[bk]=Math.max(0,pl.buffs[bk]-dt); }
@@ -3964,7 +3970,7 @@ function setBoardMode(m,target){ boardMode=m; onlineBoard=null; boardRetries=0;
 
 /* ============================= loop ============================= */
 renderBoard('titleBoard'); refreshBoard('titleBoard'); updateGamesPlayed(); initBackdrop(); buildCelestial();
-function frame(now){ let dt=(now-last)/1000; last=now; if(dt>0.05)dt=0.05;
+function frame(now){ let dt=(now-last)/1000; last=now; if(dt>0.05)dt=0.05; if(!(dt>0))dt=0;
   try{
     for(let i=_delayed.length-1;i>=0;i--){ if(now>=_delayed[i].at){ explode(_delayed[i].x,_delayed[i].y,_delayed[i].c,true); _delayed.splice(i,1); } }
     if(deathSlow>0) deathSlow=Math.max(0,deathSlow-dt);
