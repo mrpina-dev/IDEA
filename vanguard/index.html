@@ -442,7 +442,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2582';
+const W=630,H=840; const VERSION='2583';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -3772,6 +3772,9 @@ function closeTut(){ el('ovlTut').classList.add('hidden'); try{localStorage.setI
 { const b=el('howtoBtn'); if(b) b.addEventListener('click',e=>{ e.stopPropagation(); openTut(); }); }
 
 const CHANGELOG=[
+ {ver:'2578',date:'2026',items:['New primary: FLAK - mid-range airburst that pops into a damage cloud','New primary: BUZZSAW - contact blades orbit the ship','Five earnable heavies: PRISM BEAM, RAILGUN, TESLA, SINGULARITY, WAVE MOTION','DRONE and FLANK GUNS now scale with GUN POWER and stay useful late','Kills permanently thin enemy formations; cleared waves bring the next sooner']},
+ {ver:'2570',date:'2026',items:['PARRY system: deflect telegraphed bolts, perfect parries fire them back','Per-weapon signature upgrade branches and a unified HEAVY power spine','Point-blank kills repair the hull; REPAIR HULL added to REFIT']},
+ {ver:'2560',date:'2026',items:['Persistent STARTING BUILD loadout with a shared budget','Settings: auto-fire toggle, pointer-lock and follow mouse modes, low-FX, hit-flash reduction, screen shake','Rare cross-faction elites: FOREMAN and VECTOR','Overhauled combat audio with faction-keyed death sounds']},
  {ver:'2545',date:'2026',items:['In-game HOW TO PLAY tutorial for new pilots','This update log, reachable from the title and the desktop console']},
  {ver:'2544',date:'2026',items:['Desktop cabinet layout fills the side space with intel and status consoles','Wider, more readable two-column upgrade menu']},
  {ver:'EARLIER',date:'',items:['HEAVY weapon system: PRISM BEAM, RAILGUN, TESLA, SINGULARITY, WAVE MOTION','Beam reworked with separate spool-up, cell, and recharge timing','Persistent CONFIGURE BUILD starting loadout','Live controls hint and full key remapping','Death screen shows your own rank even outside the top 10','Per-device runs-played counter','NORMAL and HARDCORE modes with separate boards','Feedback submission and hybrid elite enemies']}
