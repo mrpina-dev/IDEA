@@ -460,7 +460,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='105';
+const W=630,H=840; const VERSION='106';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -1919,7 +1919,7 @@ function killEnemy(e,silent){ if(e.dead)return; runKills++; e.dead=true; e.dt=0;
   factionDeathLayer(e);
   if((e.variant||0)>=2||e.fk==='foreman'||e.fk==='vector'){ hitStop=Math.max(hitStop,0.05); rings.push({x:e.x,y:e.y,r:e.r*0.4,vr:440,life:.4,max:.4,c:COL.white}); }
   addScore(e.pts,e.x,e.y,e.c); { const _cg=Math.ceil(e.pts*0.14*styleCoinMult()*((player.coinMult)||1)); player.coins+=_cg; runCoinsEarned+=_cg; } sectorKills++;
-  if(player && !player.dead && ((player.up&&player.up.shieldChg)||0)>0){ const _sc=player.up.shieldChg, _need=[14,10,7][Math.min(_sc,3)-1]; player.shieldKills=(player.shieldKills||0)+1; if(player.shieldKills>=_need && player.shieldHits<(player.shieldCap||3) && player.shieldHits<(player.shieldMax||0)){ player.shieldKills=0; player.shieldHits++; (Audio_.play&&Audio_.play('shield_up'))||Audio_.power(); rings.push({x:player.x,y:player.y,r:8,vr:160,life:.4,max:.4,c:COL.cyan}); } }
+  if(player && !player.dead && ((player.up&&player.up.shieldChg)||0)>0 && player.shieldHits<(player.shieldCap||3) && player.shieldHits<(player.shieldMax||0)){ const _sc=player.up.shieldChg, _need=[14,10,7][Math.min(_sc,3)-1]; player.shieldKills=(player.shieldKills||0)+1; if(player.shieldKills>=_need){ player.shieldKills=0; player.shieldHits++; (Audio_.play&&Audio_.play('shield_up'))||Audio_.power(); rings.push({x:player.x,y:player.y,r:8,vr:160,life:.4,max:.4,c:COL.cyan}); } }
   if(player && !player.dead && dist2(e.x,e.y,player.x,player.y)<80*80){ player.repair=Math.min(1,(player.repair||0)+(0.12+0.04*((player.up&&player.up.bArmor)||0))*(player.modVamp?1.5:1));
     if(player.repair>=1 && player.armor<player.maxArmor){ player.repair=0; player.armor++; Audio_.power();
       rings.push({x:player.x,y:player.y,r:8,vr:120,life:.4,max:.4,c:COL.green}); } }
