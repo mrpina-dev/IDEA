@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>IDEA // VANGUARD - SFX AUDITOR v8</title>
+<title>IDEA // VANGUARD - SFX AUDITOR v10</title>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 :root{--green:#00FF41;--gold:#C8FF00;--cyan:#00F0FF;--amber:#FF8C00;--teal:#00AA88;--white:#E8FFE8;--dim:#4A7A52;--bg0:#020A04;--bg1:#050F07;--bg2:#0A160C;--red:#FF3B3B;--mono:'Share Tech Mono',ui-monospace,Menlo,Consolas,monospace;--disp:'Rajdhani',-apple-system,sans-serif;}
@@ -35,6 +35,7 @@ input[type=range]{accent-color:var(--green)}.vol{display:flex;align-items:center
 .phead h2 .tgt{font-family:var(--mono);font-size:12px;font-weight:400;color:var(--gold)}
 .phead .hunt{color:var(--dim);font-size:12px;margin-top:2px}.phead .hunt b{color:var(--cyan)}
 .phead .note{margin-top:5px}.phead .note input{width:100%}
+.phead .svol{margin-top:6px;display:flex;align-items:center;gap:8px;color:var(--teal);font-size:11px;letter-spacing:.5px}.phead .svol input[type=range]{flex:1;max-width:240px;accent-color:var(--teal)}.phead .svol .sv{color:var(--cyan);min-width:54px}.phead .svol button{padding:2px 7px;font-size:11px}.phead .svol .svh{color:var(--dim);font-size:10px;letter-spacing:0;font-weight:400}.phead h2 .vbadge{margin-left:8px;font-size:11px;color:var(--teal);font-weight:600;letter-spacing:.5px;vertical-align:middle}
 .editor{border-bottom:1px solid var(--dim);background:var(--bg2);padding:8px 14px}
 .editor .en{font-size:12px;color:var(--cyan);margin-bottom:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .editor canvas{width:100%;height:84px;display:block;background:var(--bg0);border:1px solid var(--dim);cursor:crosshair}
@@ -85,7 +86,7 @@ input[type=range]{accent-color:var(--green)}.vol{display:flex;align-items:center
 <body>
 <div id="busy"></div>
 <div class="bar">
-  <div class="title">IDEA<small> // </small>VANGUARD<small> SFX v9</small></div>
+  <div class="title">IDEA<small> // </small>VANGUARD<small> SFX v10</small></div>
   <button id="folderBtn" class="hot">&#128193; Folder</button><button id="addBtn">+ Files</button>
   <button id="slotsTab" class="active">Slots</button><button id="browseTab">Browser</button><button id="covTab">Coverage</button>
   <button id="audBtn">Audition</button><button id="stopBtn">&#9632; Stop</button><button id="lvlBtn" class="active">Level: ON</button>
@@ -105,9 +106,9 @@ const SLOTS=[
  {g:"FIRE",id:"fire_spread",nm:"fire_spread",folder:"fire",ch:"SPREAD primary fire. Dry kinetic crack.",hunt:"gun, blaster, futuristic",tgt:120,tol:60,dtype:"oneshot",suggest:[R("PM_SFG_VOL1_WEAPON_8_2_GUN_GUNSHOT_FUTURISTIC","2020"),R("Blast Laser 2","2020")]},
  {g:"FIRE",id:"fire_rapid",nm:"fire_rapid",folder:"fire",ch:"RAPID primary fire. Tight, fires fast.",hunt:"auto, smg, burst",tgt:90,tol:50,dtype:"oneshot",suggest:[R("gun_submachine_auto_shot_00_automatic_preview_01","2018")]},
  {g:"FIRE",id:"fire_lance",nm:"fire_lance",folder:"fire",ch:"LANCE piercing fire. Sharp, narrow.",hunt:"laser, pierce, beam shot",tgt:130,tol:70,dtype:"oneshot",suggest:[R("Blast Laser 2","2020")]},
- {g:"FIRE",id:"fire_homing",nm:"fire_homing",folder:"fire",ch:"HOMING fire. Softer, tracking.",hunt:"missile, soft shot",tgt:120,tol:70,dtype:"oneshot",suggest:[]},
+ {g:"FIRE",id:"fire_homing",nm:"fire_homing",folder:"fire",ch:"HOMING fire. Softer, tracking.",hunt:"missile, soft shot",tgt:120,tol:70,dtype:"oneshot",suggest:[R("Laser Rocket 7","2023")]},
  {g:"FIRE",id:"fire_flak",nm:"fire_flak",folder:"fire",ch:"FLAK primary. Scattered heavy burst.",hunt:"flak, scatter, shotgun, burst",tgt:140,tol:70,dtype:"oneshot",suggest:[R("Blast Laser 2","2020")]},
- {g:"FIRE",id:"fire_buzzsaw",nm:"fire_buzzsaw",folder:"fire",ch:"BUZZSAW primary. Grinding rapid stream.",hunt:"saw, grind, buzz, whir",tgt:100,tol:60,dtype:"oneshot",suggest:[]},
+ {g:"FIRE",id:"fire_buzzsaw",nm:"fire_buzzsaw",folder:"fire",ch:"BUZZSAW primary. Grinding rapid stream.",hunt:"saw, grind, buzz, whir",tgt:100,tol:60,dtype:"oneshot",suggest:[R("Grinding-Lathe_01_ST_8","2020")]},
  {g:"FIRE",id:"overheat",nm:"overheat",folder:"fire",ch:"Rapid gun overheats. Steam/lock.",hunt:"overheat, steam, vent",tgt:500,tol:300,dtype:"oneshot",suggest:[R("OverHeating_23","2020")]},
  {g:"FIRE",id:"overheat_ready",nm:"overheat_ready",folder:"fire",ch:"Cooled, ready. Short ping.",hunt:"ping, ready",tgt:180,tol:120,dtype:"oneshot",suggest:[R("Interface Sci-Fi Ping Down","2026")]},
  {g:"HEAVY",id:"heavy_charge",nm:"heavy_charge",folder:"heavy",ch:"Heavy spool-up. Shrinks with SPOOL upgrade: LOOPABLE body, trim seamless middle.",hunt:"charge, spool, rise",rng:[400,1500],dtype:"var",suggest:[R("wave_swell_001","2018"),R("Drone_Tonal_Enigmatic_Saw_Shepard_Tone_Pitch_Rising","2020")]},
@@ -116,15 +117,15 @@ const SLOTS=[
  {g:"HEAVY",id:"beam",nm:"beam",folder:"heavy",ch:"BEAM heavy. Sustained roar.",hunt:"beam, plasma, blast",tgt:700,tol:400,dtype:"oneshot",suggest:[R("CK_Blaster_Shot-226","2016"),R("Big Blast 4","2020")]},
  {g:"HEAVY",id:"rail",nm:"rail",folder:"heavy",ch:"RAIL heavy. Sharp pierce/crack.",hunt:"railgun, crack, pierce",tgt:500,tol:300,dtype:"oneshot",suggest:[R("Blast Laser 4","2020")]},
  {g:"HEAVY",id:"tesla",nm:"tesla",folder:"heavy",ch:"TESLA heavy. Electric chain.",hunt:"electric, arc, zap",tgt:600,tol:350,dtype:"oneshot",suggest:[R("Arc Weld Electrical Sparks 3","2018")]},
- {g:"HEAVY",id:"singularity",nm:"singularity",folder:"heavy",ch:"SINGULARITY heavy. Deep gravity pull.",hunt:"deep, sub, vortex",tgt:800,tol:400,dtype:"oneshot",suggest:[]},
+ {g:"HEAVY",id:"singularity",nm:"singularity",folder:"heavy",ch:"SINGULARITY heavy. Deep gravity pull.",hunt:"deep, sub, vortex",tgt:800,tol:400,dtype:"oneshot",suggest:[R("Sub Drop 2","2020"),R("AAIA 33 Atmos Deep Low Spaceship Interior Rumble Growl Drone","2020")]},
  {g:"HEAVY",id:"wave",nm:"wave",folder:"heavy",ch:"WAVE heavy. Big sweeping blast.",hunt:"wave, big blast, sweep",tgt:900,tol:500,dtype:"oneshot",suggest:[R("Big Blast 4","2020")]},
  {g:"HEAVY",id:"whine",nm:"whine",folder:"heavy",ch:"Heavy charge whine layer.",hunt:"whine, rise, charge",tgt:500,tol:300,dtype:"oneshot",suggest:[R("Drone_Tonal_Enigmatic_Saw_Shepard_Tone_Pitch_Rising","2020")]},
  {g:"IMPACT",id:"hit",nm:"hit",folder:"impact",ch:"Non-lethal hit (fires constantly). Tight thunk.",hunt:"impact, thud, thump",tgt:110,tol:70,dtype:"oneshot",suggest:[R("IMPACT_LOW_THUD_10","2020")]},
  {g:"IMPACT",id:"blast",nm:"blast",folder:"impact",ch:"Generic explosion/impact.",hunt:"explosion, blast",tgt:500,tol:300,dtype:"oneshot",suggest:[R("Explosion 8","2018")]},
- {g:"IMPACT",id:"enemy_fire",nm:"enemy_fire",folder:"impact",ch:"Enemy shooting. Thin, hostile.",hunt:"enemy shot, zap",tgt:180,tol:100,dtype:"oneshot",suggest:[]},
+ {g:"IMPACT",id:"enemy_fire",nm:"enemy_fire",folder:"impact",ch:"Enemy shooting. Thin, hostile.",hunt:"enemy shot, zap",tgt:180,tol:100,dtype:"oneshot",suggest:[R("Blast Laser 2","2020")]},
  {g:"IMPACT",id:"bomb",nm:"bomb",folder:"impact",ch:"Screen-clear bomb. Deep boom.",hunt:"explosion, boom, detonation",tgt:800,tol:400,dtype:"oneshot",suggest:[R("Distant Blast 26","2018")]},
- {g:"IMPACT",id:"thump",nm:"thump",folder:"impact",ch:"Low body thump.",hunt:"thump, sub, low hit",tgt:200,tol:120,dtype:"oneshot",suggest:[]},
- {g:"IMPACT",id:"wub",nm:"wub",folder:"impact",ch:"Bass wub effect.",hunt:"wub, bass, sub drop",tgt:400,tol:250,dtype:"oneshot",suggest:[]},
+ {g:"IMPACT",id:"thump",nm:"thump",folder:"impact",ch:"Low body thump.",hunt:"thump, sub, low hit",tgt:200,tol:120,dtype:"oneshot",suggest:[R("DSGNImpt_Metal Hit Thud Thump Low Ring Geofon 1_The Noisery_Moaning Metal","2026")]},
+ {g:"IMPACT",id:"wub",nm:"wub",folder:"impact",ch:"Bass wub effect.",hunt:"wub, bass, sub drop",tgt:400,tol:250,dtype:"oneshot",suggest:[R("DSGNBass_Bass Drop & Downer Fast 16_344 Audio_Bass Drops & Downers","2026"),R("DSGNBass_Jump Start Drop 3_344 Audio_Bass Drops and Downers Vol 3","2026")]},
  {g:"DEATH",id:"kill_ace",nm:"kill_ace",folder:"death",ch:"ACE death. Metal crunch.",hunt:"metal, crush, bulkhead",tgt:400,tol:250,dtype:"oneshot",suggest:[R("dry hard metal impact with rust debris 20","2016")]},
  {g:"DEATH",id:"kill_bmet",nm:"kill_bmet",folder:"death",ch:"BMET death. Wet organic burst.",hunt:"gore, crunch, splat",tgt:400,tol:250,dtype:"oneshot",suggest:[R("Heavy Body Crunch 02","2023")]},
  {g:"DEATH",id:"kill_csee",nm:"kill_csee",folder:"death",ch:"CSEE death. Electrical fry.",hunt:"electric, glitch, arc",tgt:400,tol:250,dtype:"oneshot",suggest:[R("Arc Weld Electrical Sparks 3","2018")]},
@@ -141,17 +142,17 @@ const SLOTS=[
  {g:"DEFENSE",id:"parry",nm:"parry",folder:"defense",ch:"Successful parry. Sharp metal ring.",hunt:"metal clash, ring, clang",tgt:180,tol:100,dtype:"oneshot",suggest:[R("METLImpt_METAL SWING HIT","2026")]},
  {g:"DEFENSE",id:"parry_hit",nm:"parry_hit",folder:"defense",ch:"Parry reflect. Bright ting.",hunt:"ricochet, ping, ting",tgt:150,tol:90,dtype:"oneshot",suggest:[R("Accent,Interface,UI,Alert,Resonant,Waver","2023")]},
  {g:"PICKUP",id:"coin",nm:"coin",folder:"pickup",ch:"Coin grab (fires constantly). Tiny tick.",hunt:"coin, money",tgt:110,tol:70,dtype:"oneshot",suggest:[R("264604 - Stack Coin Bag 04","2023")]},
- {g:"PICKUP",id:"life_up",nm:"life_up",folder:"pickup",ch:"Extra life. Positive lift.",hunt:"life up, 1up, reward",tgt:900,tol:500,dtype:"oneshot",suggest:[]},
- {g:"PICKUP",id:"shield_up",nm:"shield_up",folder:"pickup",ch:"Shield pickup. Energy up.",hunt:"shield, energy up",tgt:400,tol:250,dtype:"oneshot",suggest:[]},
- {g:"PICKUP",id:"style_up",nm:"style_up",folder:"pickup",ch:"Style rank up. Sharp reward.",hunt:"style, rank up, stinger",tgt:600,tol:350,dtype:"oneshot",suggest:[]},
+ {g:"PICKUP",id:"life_up",nm:"life_up",folder:"pickup",ch:"Extra life. Positive lift.",hunt:"life up, 1up, reward",tgt:900,tol:500,dtype:"oneshot",suggest:[R("power up_level up-sound 2","2023")]},
+ {g:"PICKUP",id:"shield_up",nm:"shield_up",folder:"pickup",ch:"Shield pickup. Energy up.",hunt:"shield, energy up",tgt:400,tol:250,dtype:"oneshot",suggest:[R("Electric_Energy_Ambient_Warble_Powerup_03","2020")]},
+ {g:"PICKUP",id:"style_up",nm:"style_up",folder:"pickup",ch:"Style rank up. Sharp reward.",hunt:"style, rank up, stinger",tgt:600,tol:350,dtype:"oneshot",suggest:[R("Stinger 8","2020")]},
  {g:"PICKUP",id:"core",nm:"core",folder:"pickup",ch:"CORE jackpot/life. Reward stinger.",hunt:"reward, jackpot, confirm",tgt:1200,tol:700,dtype:"oneshot",suggest:[R("G4F SFX11 - ExoInterface - Action Confirm - Long 05","2018")]},
  {g:"PICKUP",id:"powerup",nm:"powerup",folder:"pickup",ch:"Upgrade pickup. Ascending.",hunt:"powerup, collect",tgt:500,tol:300,dtype:"oneshot",suggest:[R("sci-fi_device_item_power_up_flash_01","2020")]},
  {g:"UI",id:"ui_click",nm:"ui_click",folder:"ui",ch:"Menu select. Thin, very tight.",hunt:"interface, click, beep",tgt:80,tol:50,dtype:"oneshot",suggest:[R("User Interface Click Button 25","2018")]},
  {g:"UI",id:"weapon_switch",nm:"weapon_switch",folder:"ui",ch:"Primary weapon cycle. Quick switch.",hunt:"switch, cycle, ui",tgt:200,tol:120,dtype:"oneshot",suggest:[R("Bluezone_BC0268_switch_button_click_high_tech_interface_001","2020")]},
- {g:"UI",id:"refit_open",nm:"refit_open",folder:"ui",ch:"REFIT shop opens. Whoosh/confirm.",hunt:"open, whoosh, panel",tgt:500,tol:300,dtype:"oneshot",suggest:[]},
+ {g:"UI",id:"refit_open",nm:"refit_open",folder:"ui",ch:"REFIT shop opens. Whoosh/confirm.",hunt:"open, whoosh, panel",tgt:500,tol:300,dtype:"oneshot",suggest:[R("UIMvmt_Resonant Electric Whoosh 01_JSE_FI","2023")]},
  {g:"UI",id:"buy",nm:"buy",folder:"ui",ch:"REFIT purchase. Cash/confirm.",hunt:"purchase, confirm, cash",tgt:400,tol:250,dtype:"oneshot",suggest:[R("G4F SFX11 - ExoInterface - Process - Short 06","2018")]},
- {g:"UI",id:"buy_fail",nm:"buy_fail",folder:"ui",ch:"Cannot afford. Deny buzz.",hunt:"deny, error, fail",tgt:350,tol:200,dtype:"oneshot",suggest:[]},
- {g:"UI",id:"pause",nm:"pause",folder:"ui",ch:"Pause toggle. Soft.",hunt:"pause, soft",tgt:250,tol:150,dtype:"oneshot",suggest:[]},
+ {g:"UI",id:"buy_fail",nm:"buy_fail",folder:"ui",ch:"Cannot afford. Deny buzz.",hunt:"deny, error, fail",tgt:350,tol:200,dtype:"oneshot",suggest:[R("ERROR 13","2020"),R("Interface Deny Low Fat Dark","2026")]},
+ {g:"UI",id:"pause",nm:"pause",folder:"ui",ch:"Pause toggle. Soft.",hunt:"pause, soft",tgt:250,tol:150,dtype:"oneshot",suggest:[R("MenuSound_DDM23.1_Wav","2020")]},
  {g:"EVENT",id:"sector_clear",nm:"sector_clear",folder:"event",ch:"Sector cleared. Transition swell.",hunt:"transition, whoosh, sweep",tgt:1200,tol:700,dtype:"oneshot",suggest:[R("Dark_Sci-Fi_Transition_01","2023")]},
 ];
 const SLOTKW={
@@ -209,23 +210,32 @@ const SLOTKW={
 };
 const NOAUTO=["retro","8bit","8-bit","8 bit","chiptune","cartoon","guitar","piano","saxophone","walla","baby","coyote","greenhouse","aston","rapide","lada","niva","nissan","windshield","wiper","car_","vehicle","mower","shovel","quadcopter","river","rapids near","snow","dirt","gravel","boulder","brick","wood_impact","tree_","leaf","ghost","lettuce","printer","counting money","money bills","narrator","istanbul","traffic","endurance race"];
 const THRESHOLD=2,TARGET=Math.pow(10,-3/20),LSKEY="vanguard_sfx_auditor_v4",WAVEW=640;
-const FXDEF={drive:0,comp:0,lowcut:0,highcut:0,fadeIn:0,fadeOut:0,pitch:0,gain:0,bypass:false};
+const FXDEF={drive:0,comp:0,sub:0,lowcut:0,highcut:0,fadeIn:0,fadeOut:0,pitch:0,gain:0,reverse:false,bypass:false};
 let LIB=[],winner={},layers={},notes={},sel=0,mode="slots",restOpen={},recOpen={},edit=null;
 let levelMatch=true,actx=null,master=null,uidc=0,savedMarks={},voices=[],cur=null;
 let bSearch="",bShow="unselected",bFolder="";
 let auditioning=false,abPrev=null,cacheOn=true,idb=null,undoStack=[];
 let zoom=null; // {a,b} seconds view window
+let vols={}; // per-slot target volume overrides (dB), keyed by slot id
+let _lastSel=-1,_lastMode=""; // for scroll-position preservation across render()
 const stripExt=n=>n.toLowerCase().replace(/\.(wav|flac|aif|aiff|ogg|mp3)$/,"").trim();
 const sugSet={};SLOTS.forEach(s=>s.suggest&&s.suggest.forEach(r=>sugSet[stripExt(r.n+".wav")]=true));
 const isSuggested=n=>!!sugSet[stripExt(n)];
 const slotById=id=>SLOTS.find(s=>s.id===id);
-SLOTS.forEach(s=>{restOpen[s.id]=false;recOpen[s.id]=false;});
+SLOTS.forEach(s=>{restOpen[s.id]=false;recOpen[s.id]=!!(s.suggest&&s.suggest.length);});
+// ---- per-slot target volume (dB, relative to the -3dBFS normalized level) ----
+const VOLGRP={FIRE:0,HEAVY:1,IMPACT:0,DEATH:0,BOSS:2,DEFENSE:0,PICKUP:-5,UI:-6,EVENT:-2};
+const VOLEX={enemy_fire:-3,blast:1,bomb:1,big:1,death:2,boss_death:2,boss_warn:1,boss_phase:1,shield_break:1,core:-2,heavy_switch:-3,heavy_ready:-2,overheat_ready:-3,coin:-6,ui_click:-7,weapon_switch:-5,buy:-4,buy_fail:-4,pause:-5,refit_open:-4};
+function slotVolDefault(id){if(id in VOLEX)return VOLEX[id];const s=slotById(id);return s?(VOLGRP[s.g]||0):0;}
+function slotVol(id){return (vols&&id in vols)?vols[id]:slotVolDefault(id);}
+function fmtDb(v){return (v>0?'+':'')+v+' dB';}
+function revBuf(b){const nb=actx.createBuffer(b.numberOfChannels,b.length,b.sampleRate);for(let ch=0;ch<b.numberOfChannels;ch++){const s=b.getChannelData(ch),d=nb.getChannelData(ch),n=s.length;for(let i=0;i<n;i++)d[i]=s[n-1-i];}return nb;}
 
 function bestSlot(name){const s=name.toLowerCase();if(NOAUTO.some(r=>s.includes(r)))return null;let best=null,bs=0;for(const id in SLOTKW){let sc=0;for(const[t,w]of SLOTKW[id])if(s.includes(t))sc+=w;if(sc>bs){bs=sc;best=id;}}return bs>=THRESHOLD?{slot:best,score:bs}:null;}
 
 // ---- persistence (decisions in localStorage; audio in IndexedDB) ----
-function saveState(){try{const marks={};for(const c of LIB)if(c.slot){(marks[c.slot]=marks[c.slot]||[]).push({name:c.name,mark:c.mark,start:c.start,end:c.end,fx:c.fx});}localStorage.setItem(LSKEY,JSON.stringify({winner,marks,layers,notes}));}catch(e){}}
-function loadState(){try{const r=localStorage.getItem(LSKEY);if(!r)return;const d=JSON.parse(r);winner=d.winner||{};savedMarks=d.marks||{};layers=d.layers||{};notes=d.notes||{};}catch(e){}}
+function saveState(){try{const marks={};for(const c of LIB)if(c.slot){(marks[c.slot]=marks[c.slot]||[]).push({name:c.name,mark:c.mark,start:c.start,end:c.end,fx:c.fx});}localStorage.setItem(LSKEY,JSON.stringify({winner,marks,layers,notes,vols}));}catch(e){}}
+function loadState(){try{const r=localStorage.getItem(LSKEY);if(!r)return;const d=JSON.parse(r);winner=d.winner||{};savedMarks=d.marks||{};layers=d.layers||{};notes=d.notes||{};vols=d.vols||{};}catch(e){}}
 function applySaved(slotId,c){const a=savedMarks[slotId]||[];const m=a.find(x=>x.name===c.name);if(m){c.mark=m.mark;if(m.start!=null)c.start=m.start;if(m.end!=null)c.end=m.end;if(m.fx)c.fx=Object.assign({},FXDEF,m.fx);}}
 function openIDB(){return new Promise(res=>{try{const r=indexedDB.open("vanguard_sfx_db",1);r.onupgradeneeded=e=>{e.target.result.createObjectStore("files",{keyPath:"key"});};r.onsuccess=e=>{idb=e.target.result;res();};r.onerror=()=>res();}catch(e){res();}});}
 function idbPut(c){if(!idb||!cacheOn)return;try{idb.transaction("files","readwrite").objectStore("files").put({key:c.key,name:c.name,lib:c.lib,blob:c.blob,slot:c.slot});}catch(e){}}
@@ -250,13 +260,16 @@ function effDurMs(c){return c.dur?Math.round(effDur(c)*1000):0;}
 function buildVoice(ctx,c,opt){
  const fx=(c.fx&&!c.fx.bypass)?Object.assign({},FXDEF,c.fx):FXDEF;
  const rate=Math.pow(2,(fx.pitch||0)/12);
- const off=c.start||0,regionDur=(c.end!=null?c.end:c.dur)-off,playDur=regionDur/rate;
- const src=ctx.createBufferSource();src.buffer=c.buffer;src.playbackRate.value=rate;let node=src;
+ let buf=c.buffer,off=c.start||0;const endT=(c.end!=null?c.end:c.dur);const regionDur=endT-off,playDur=regionDur/rate;
+ if(fx.reverse){if(!c._rev||c._rev.length!==c.buffer.length)c._rev=revBuf(c.buffer);buf=c._rev;off=c.dur-endT;}
+ const src=ctx.createBufferSource();src.buffer=buf;src.playbackRate.value=rate;let node=src;
  if(fx.lowcut>20){const f=ctx.createBiquadFilter();f.type="highpass";f.frequency.value=fx.lowcut;node.connect(f);node=f;}
  if(fx.highcut>20&&fx.highcut<20000){const f=ctx.createBiquadFilter();f.type="lowpass";f.frequency.value=fx.highcut;node.connect(f);node=f;}
+ if(fx.sub>0){const f=ctx.createBiquadFilter();f.type="lowshelf";f.frequency.value=90;f.gain.value=fx.sub;node.connect(f);node=f;}
  if(fx.drive>0){const w=ctx.createWaveShaper();w.curve=makeCurve(fx.drive);w.oversample="2x";node.connect(w);node=w;}
  if(fx.comp>0){const cp=ctx.createDynamicsCompressor();cp.threshold.value=-6-24*fx.comp;cp.ratio.value=4+8*fx.comp;cp.attack.value=0.003;cp.release.value=0.12;node.connect(cp);node=cp;}
- const g=ctx.createGain();const base=(levelMatch&&c.peak>0?Math.min(TARGET/c.peak,24):1)*Math.pow(10,(fx.gain||0)/20);
+ const sv=(levelMatch&&c.slot)?slotVol(c.slot):0;
+ const g=ctx.createGain();const base=(levelMatch&&c.peak>0?Math.min(TARGET/c.peak,24):1)*Math.pow(10,((fx.gain||0)+sv)/20);
  const t0=opt.when||0,fi=Math.min((fx.fadeIn||0)/1000,playDur),fo=Math.min((fx.fadeOut||0)/1000,playDur);
  if(fi>0){g.gain.setValueAtTime(0.0001,t0);g.gain.linearRampToValueAtTime(base,t0+fi);}else g.gain.setValueAtTime(base,t0);
  if(fo>0&&!opt.loop){g.gain.setValueAtTime(base,Math.max(t0+fi,t0+playDur-fo));g.gain.linearRampToValueAtTime(0.0001,t0+playDur);}
@@ -339,7 +352,7 @@ function renderSlot(){
  const win=list.find(c=>winner[s.id]===c.name),alts=list.filter(c=>c!==win&&c.mark==="keep"),rest=list.filter(c=>c!==win&&c.mark!=="keep"&&c.mark!=="cut"),cut=list.filter(c=>c.mark==="cut");
  let foc=null;if(edit)foc=list.find(c=>c.uid===edit.uid)||null;if(!foc&&list.length){foc=win||list[0];edit={uid:foc.uid};}else if(!list.length)edit=null;
  const ls=layers[s.id]||[];
- let h=`<div class="phead"><h2>${s.nm}<span class="tgt">&#9201; target ${tgtText(s)}</span></h2><div class="hunt">${esc(s.ch)} &nbsp; <b>hunt:</b> ${esc(s.hunt)}${s.weak?' <span style="color:var(--amber)">&#9888; thin</span>':''}</div><div class="note"><input type="text" id="slotnote" placeholder="notes for this slot..." value="${esc(notes[s.id]||'')}"></div></div>`;
+ let h=`<div class="phead"><h2>${s.nm}<span class="tgt">&#9201; target ${tgtText(s)}</span><span class="vbadge">&#128266; ${fmtDb(slotVol(s.id))}</span></h2><div class="hunt">${esc(s.ch)} &nbsp; <b>hunt:</b> ${esc(s.hunt)}${s.weak?' <span style="color:var(--amber)">&#9888; thin</span>':''}</div><div class="svol"><label>TARGET VOL</label><input type="range" id="svol" min="-24" max="12" step="0.5" value="${slotVol(s.id)}"><span class="sv" id="svolv">${fmtDb(slotVol(s.id))}</span><button data-act="svolreset">reset</button><span class="svh">game-mix level &bull; bakes into render when Level: ON</span></div><div class="note"><input type="text" id="slotnote" placeholder="notes for this slot..." value="${esc(notes[s.id]||'')}"></div></div>`;
  if(foc){const c=foc;
   h+=`<div class="editor"><div class="en">${c.err?'[decode error]':(c.buffer?'EDITING: '+esc(c.name):'analyzing...')}</div>
    <canvas id="wave" width="${WAVEW}" height="84"></canvas>
@@ -348,12 +361,13 @@ function renderSlot(){
     <span id="eread" class="read ${durClass(c,s)}">${c.buffer?`region ${effDurMs(c)} ms / target ${s.dtype==="var"?tgtText(s):s.tgt+"\u00B1"+s.tol}`:''}</span></div>
    <div class="fx">
     <div class="f" style="width:auto"><label>PROCESS</label><button data-act="bypass" class="${c.fx&&c.fx.bypass?'':'active'}" style="margin-top:1px">${c.fx&&c.fx.bypass?'BYPASSED':'ON'}</button></div>
-    ${fxSlider(c,"drive","DRIVE",0,1,0.01,"")}${fxSlider(c,"comp","COMP",0,1,0.01,"")}${fxSlider(c,"lowcut","LO-CUT",0,2000,10,"hz")}${fxSlider(c,"highcut","HI-CUT",0,20000,100,"hz")}${fxSlider(c,"fadeIn","FADE IN",0,500,5,"ms")}${fxSlider(c,"fadeOut","FADE OUT",0,800,5,"ms")}${fxSlider(c,"pitch","PITCH",-12,12,1,"st")}${fxSlider(c,"gain","GAIN",-12,12,0.5,"db")}
+    <div class="f" style="width:auto"><label>REVERSE</label><button data-act="reverse" class="${c.fx&&c.fx.reverse?'active':''}" style="margin-top:1px">${c.fx&&c.fx.reverse?'ON':'OFF'}</button></div>
+    ${fxSlider(c,"drive","DRIVE",0,1,0.01,"")}${fxSlider(c,"comp","COMP",0,1,0.01,"")}${fxSlider(c,"lowcut","LO-CUT",0,2000,10,"hz")}${fxSlider(c,"highcut","HI-CUT",0,20000,100,"hz")}${fxSlider(c,"fadeIn","FADE IN",0,500,5,"ms")}${fxSlider(c,"fadeOut","FADE OUT",0,800,5,"ms")}${fxSlider(c,"pitch","PITCH",-12,12,1,"st")}${fxSlider(c,"gain","GAIN",-12,12,0.5,"db")}${fxSlider(c,"sub","SUB",0,12,0.5,"db")}
    </div>
    ${s.id==="boss_death"||ls.length?`<div class="layers"><div class="lh">&#9776; LAYERS <span style="color:var(--dim);font-weight:400">(mark tracks with L, they render mixed into one file)</span> <button data-act="playlayers">&#9654; Play Stack</button></div>${ls.length?ls.map(L=>`<div class="lrow" data-lname="${esc(L.name)}"><span class="ln">${esc(L.name)}</span>offset<input type="number" data-lp="offsetMs" value="${L.offsetMs||0}">ms gain<input type="number" data-lp="gainDb" value="${L.gainDb||0}" step="0.5">db</div>`).join(""):'<div class="lrow" style="color:var(--dim)">no layers yet</div>'}</div>`:''}
   </div>`;}
  h+=`<div class="plist">`;
- if(s.suggest&&s.suggest.length){h+=`<div class="tier rec" data-act="toggleRec">&#9670; RECOMMENDED <span class="c">${s.suggest.length} ${recOpen[s.id]?'&#9660;':'&#9658;'}</span></div>`;if(recOpen[s.id])h+=s.suggest.map(r=>{const loaded=LIB.some(c=>stripExt(c.name)===stripExt(r.n+".wav"));return `<div class="rec-row"><span class="st ${loaded?'on':''}">${loaded?'&#9679; loaded':'&#9675; find it'}</span><span class="yr">${r.y}</span><span class="rn" title="${esc(r.n)}">${esc(r.n)}</span></div>`;}).join("");}
+ if(s.suggest&&s.suggest.length){h+=`<div class="tier rec" data-act="toggleRec">&#9670; RECOMMENDED <span class="c">${s.suggest.length} ${recOpen[s.id]?'&#9660;':'&#9658;'}</span></div>`;if(recOpen[s.id])h+=s.suggest.map(r=>{const loaded=LIB.some(c=>stripExt(c.name)===stripExt(r.n+".wav"));return `<div class="rec-row" data-act="findrec" data-name="${esc(r.n)}" style="cursor:pointer" title="click to find in Browser"><span class="st ${loaded?'on':''}">${loaded?'&#9679; loaded':'&#9675; find it'}</span><span class="yr">${r.y}</span><span class="rn" title="${esc(r.n)}">${esc(r.n)}</span></div>`;}).join("");}
  if(!list.length)h+=`<div class="empty">Nothing filed here.<br>Use <b>Folder</b> or the <b>Browser</b>.</div>`;
  else{h+=`<div class="tier fav">&#9733; FAVORITE</div>`+(win?candRow(win):`<div class="empty" style="padding:10px 14px;text-align:left">No favorite yet.</div>`);
   h+=`<div class="tier alt">ALTERNATES <span class="c">${alts.length}</span></div>`+(alts.length?alts.map(candRow).join(""):`<div class="empty" style="padding:7px 14px;text-align:left">none</div>`);
@@ -362,6 +376,7 @@ function renderSlot(){
  h+=`</div><div class="help"><span>drag waveform = region</span><span><kbd>Space</kbd> region</span><span><kbd>F</kbd> full</span><span><kbd>L</kbd> loop</span><span><kbd>J</kbd> jitter</span><span><kbd>C</kbd> A/B</span><span><kbd>Esc</kbd> stop</span><span><kbd>W</kbd> favorite</span></div>`;
  pane.innerHTML=h;
  const note=document.getElementById("slotnote");if(note)note.onchange=()=>{notes[s.id]=note.value;saveState();};
+ const svol=document.getElementById("svol");if(svol){svol.oninput=()=>{const v=parseFloat(svol.value);vols[s.id]=v;const rd=document.getElementById("svolv");if(rd)rd.textContent=fmtDb(v);const vb=pane.querySelector(".phead h2 .vbadge");if(vb)vb.innerHTML="&#128266; "+fmtDb(v);saveState();};}
  if(foc&&!foc.buffer&&!foc.err){ensureBuf(foc).then(()=>{if(SLOTS[sel].id===s.id)render();});}
  if(foc&&foc.buffer)setupEditor();
 }
@@ -374,18 +389,31 @@ function renderBrowser(){const folders=[...new Set(LIB.map(c=>c.lib).filter(Bool
  h+=`</div><div class="help"><span>Set <b style="color:var(--gold)">move</b> to file a sound</span><span><kbd>Esc</kbd> stop</span></div>`;pane.innerHTML=h;
  const bsEl=document.getElementById("bs");if(bsEl){bsEl.oninput=()=>{bSearch=bsEl.value;renderBrowser();};setTimeout(()=>{bsEl.focus();bsEl.setSelectionRange(bsEl.value.length,bsEl.value.length);},0);}
  const sh=document.getElementById("bshow");if(sh)sh.onchange=()=>{bShow=sh.value;renderBrowser();};const ff=document.getElementById("bfolder");if(ff)ff.onchange=()=>{bFolder=ff.value;renderBrowser();};}
-function renderCoverage(){let done=0;let rows=SLOTS.map((s,i)=>{const ly=(layers[s.id]||[]).length;const w=LIB.find(c=>c.slot===s.id&&c.name===winner[s.id]);const has=!!(w||ly);if(has)done++;let dur="-",cls="no",stat="EMPTY";if(ly){stat="LAYERED ("+ly+")";cls="ok";dur="mix";}else if(w){const dc=durClass(w,s);cls=dc==="ok"?"ok":dc==="off"?"no":"near";stat="SET";dur=effDurMs(w)+"ms"+((w.start!=null||w.end!=null)?" \u2702":"")+((w.fx&&!w.fx.bypass&&Object.keys(FXDEF).some(k=>k!=="bypass"&&w.fx[k]))?" \u26A1":"");}const cnt=LIB.filter(c=>c.slot===s.id).length;return `<tr data-slot="${i}"><td>${s.nm}</td><td class="${has?'ok':'no'}">${has?'&#10003; '+stat:'&#10007; empty'}</td><td class="${cls}">${dur}</td><td style="color:var(--gold)">${tgtText(s)}</td><td style="color:var(--teal)">${cnt}</td></tr>`;}).join("");
- pane.innerHTML=`<div class="phead"><h2>Coverage <span class="tgt">${done} / ${SLOTS.length} slots filled</span></h2></div><div class="cov"><table><thead><tr><th>slot</th><th>status</th><th>duration</th><th>target</th><th>candidates</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+function renderCoverage(){let done=0;let rows=SLOTS.map((s,i)=>{const ly=(layers[s.id]||[]).length;const w=LIB.find(c=>c.slot===s.id&&c.name===winner[s.id]);const has=!!(w||ly);if(has)done++;let dur="-",cls="no",stat="EMPTY";if(ly){stat="LAYERED ("+ly+")";cls="ok";dur="mix";}else if(w){const dc=durClass(w,s);cls=dc==="ok"?"ok":dc==="off"?"no":"near";stat="SET";dur=effDurMs(w)+"ms"+((w.start!=null||w.end!=null)?" \u2702":"")+((w.fx&&!w.fx.bypass&&Object.keys(FXDEF).some(k=>k!=="bypass"&&w.fx[k]))?" \u26A1":"");}const cnt=LIB.filter(c=>c.slot===s.id).length;return `<tr data-slot="${i}"><td>${s.nm}</td><td class="${has?'ok':'no'}">${has?'&#10003; '+stat:'&#10007; empty'}</td><td class="${cls}">${dur}</td><td style="color:var(--gold)">${tgtText(s)}</td><td style="color:var(--teal)">${cnt}</td><td style="color:var(--cyan)">${fmtDb(slotVol(s.id))}</td></tr>`;}).join("");
+ pane.innerHTML=`<div class="phead"><h2>Coverage <span class="tgt">${done} / ${SLOTS.length} slots filled</span></h2></div><div class="cov"><table><thead><tr><th>slot</th><th>status</th><th>duration</th><th>target</th><th>candidates</th><th>vol</th></tr></thead><tbody>${rows}</tbody></table></div>`;
  pane.querySelectorAll("tr[data-slot]").forEach(tr=>tr.onclick=()=>{sel=+tr.dataset.slot;mode="slots";edit=null;document.getElementById("slotsTab").classList.add("active");document.getElementById("covTab").classList.remove("active");render();});}
-function render(){renderRail();if(mode==="slots")renderSlot();else if(mode==="browser")renderBrowser();else renderCoverage();}
+function render(){
+ const railTop=rail.scrollTop;
+ const pl=pane.querySelector('.plist');const plTop=pl?pl.scrollTop:0;
+ const sameView=(mode===_lastMode&&sel===_lastSel);
+ renderRail();if(mode==="slots")renderSlot();else if(mode==="browser")renderBrowser();else renderCoverage();
+ rail.scrollTop=railTop;
+ const np=pane.querySelector('.plist');
+ if(np){ if(sameView)np.scrollTop=plTop;
+  if(mode==="slots"){const foc=np.querySelector('.cand.foc');if(foc){const ft=foc.offsetTop,fb=ft+foc.offsetHeight;if(ft<np.scrollTop||fb>np.scrollTop+np.clientHeight)foc.scrollIntoView({block:'nearest'});}}
+ }
+ _lastMode=mode;_lastSel=sel;
+}
 
 rail.addEventListener("click",e=>{const sl=e.target.closest(".slot");if(sl){sel=+sl.dataset.slot;edit=null;zoom=null;if(mode!=="slots"){mode="slots";document.getElementById("slotsTab").classList.add("active");document.getElementById("browseTab").classList.remove("active");document.getElementById("covTab").classList.remove("active");}render();}});
 pane.addEventListener("click",e=>{const t=e.target.closest("[data-act]");
  if(t){const act=t.dataset.act;const c=edit&&findUid(edit.uid);
   if(act==="toggleRest"){restOpen[SLOTS[sel].id]=!restOpen[SLOTS[sel].id];render();return;}
   if(act==="toggleRec"){recOpen[SLOTS[sel].id]=!recOpen[SLOTS[sel].id];render();return;}
+  if(act==="findrec"){bSearch=t.dataset.name||"";bShow="all";bFolder="";setTab("browser");return;}
+  if(act==="svolreset"){delete vols[SLOTS[sel].id];saveState();render();return;}
   if(act==="playlayers"){playLayers(SLOTS[sel].id);return;}
-  if(c&&["pregion","pfull","ploop","jitter","ab","fit","resettrim","zoomr","zoomo","bypass"].includes(act)){
+  if(c&&["pregion","pfull","ploop","jitter","ab","fit","resettrim","zoomr","zoomo","bypass","reverse"].includes(act)){
    if(act==="pregion")play(c,{force:true});else if(act==="pfull"){const s2=c.start,e2=c.end;c.start=null;c.end=null;play(c,{force:true});c.start=s2;c.end=e2;}
    else if(act==="ploop")play(c,{loop:true,force:true});else if(act==="jitter")playJitter(c);else if(act==="ab")abToggle();
    else if(act==="fit"){pushUndo();const s=slotById(c.slot);const tg=(s.dtype==="var"?(s.rng[0]+s.rng[1])/2:s.tgt)/1000;c.start=c.start||0;c.end=Math.min(c.dur,c.start+tg);saveState();render();}
@@ -393,6 +421,7 @@ pane.addEventListener("click",e=>{const t=e.target.closest("[data-act]");
    else if(act==="zoomr"){zoom={a:Math.max(0,(c.start||0)-0.05),b:Math.min(c.dur,(c.end!=null?c.end:c.dur)+0.05)};render();}
    else if(act==="zoomo"){zoom=null;render();}
    else if(act==="bypass"){pushUndo();c.fx=c.fx||Object.assign({},FXDEF);c.fx.bypass=!c.fx.bypass;saveState();render();}
+   else if(act==="reverse"){pushUndo();c.fx=c.fx||Object.assign({},FXDEF);c.fx.reverse=!c.fx.reverse;saveState();render();}
    return;}
   const row=e.target.closest(".cand");if(!row)return;const uid=+row.dataset.uid;
   if(act==="play")play(findUid(uid));else if(act==="keep")setMark(uid,"keep");else if(act==="cut")setMark(uid,"cut");else if(act==="win")setWinner(uid);else if(act==="layer")toggleLayer(uid);else if(act==="rm")removeCand(uid);return;}
@@ -421,7 +450,9 @@ document.addEventListener("keydown",e=>{
  else if(e.key.toLowerCase()==="x"){if(fc)setMark(fc.uid,"cut");}
  else if(e.key.toLowerCase()==="w"||e.key==="Enter"){if(fc)setWinner(fc.uid);}
  else if(e.key==="Delete"){if(fc)removeCand(fc.uid);}
+ else if(e.key.toLowerCase()==="n"){jumpNextEmpty();}
 });
+function jumpNextEmpty(){const n=SLOTS.length;for(let k=1;k<=n;k++){const i=(sel+k)%n;const id=SLOTS[i].id;const hasWin=!!winner[id];const hasLy=!!(layers[id]&&layers[id].length);if(!hasWin&&!hasLy){sel=i;edit=null;zoom=null;if(mode!=="slots")setTab("slots");else render();toast("next empty: "+SLOTS[i].nm);return;}}toast("all slots filled");}
 
 // ---- WAV + ZIP + render ----
 function encodeWAV(buf){const nch=buf.numberOfChannels,sr=buf.sampleRate,len=buf.length,bytes=44+len*nch*2,dv=new DataView(new ArrayBuffer(bytes));let p=0;const ws=s=>{for(let i=0;i<s.length;i++)dv.setUint8(p++,s.charCodeAt(i));};const u32=v=>{dv.setUint32(p,v,true);p+=4;},u16=v=>{dv.setUint16(p,v,true);p+=2;};
@@ -454,8 +485,8 @@ document.getElementById("undoBtn").onclick=doUndo;
 vol.oninput=()=>{if(master)master.gain.value=parseFloat(vol.value);};
 document.getElementById("clrBtn").onclick=()=>{if(!confirm("Clear everything (files, marks, winners, cache)?"))return;stopAll();LIB=[];winner={};savedMarks={};layers={};notes={};edit=null;undoStack=[];idbClear();saveState();render();};
 document.getElementById("impBtn").onclick=()=>impIn.click();
-impIn.onchange=()=>{const f=impIn.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);winner=d.winner||d.winners||{};if(d.layers)layers=d.layers;if(d.notes)notes=d.notes;savedMarks={};if(d.detail){for(const id in d.detail){const dd=d.detail[id];savedMarks[id]=[...(dd.kept||[]).map(n=>({name:n,mark:"keep"})),...(dd.cut||[]).map(n=>({name:n,mark:"cut"}))];}}if(d.trims){for(const id in d.trims){const tr=d.trims[id],w=winner[id];if(w){savedMarks[id]=savedMarks[id]||[];let e2=savedMarks[id].find(x=>x.name===w);if(!e2){e2={name:w,mark:"keep"};savedMarks[id].push(e2);}e2.start=tr.start;e2.end=tr.end;}}}for(const c of LIB){if(c.slot){c.mark="none";c.start=null;c.end=null;c.fx=Object.assign({},FXDEF);applySaved(c.slot,c);}}saveState();render();toast("Imported");}catch(e){toast("Bad JSON");}};r.readAsText(f);impIn.value="";};
-document.getElementById("expBtn").onclick=()=>{const out={generated:new Date().toISOString(),winners:{},targets:{},trims:{},fx:{},layers:{},notes,detail:{}};for(const s of SLOTS){out.winners[s.id]=winner[s.id]||null;out.targets[s.id]=s.dtype==="var"?{type:"var",range_ms:s.rng}:{type:"oneshot",target_ms:s.tgt,tol_ms:s.tol};const list=LIB.filter(c=>c.slot===s.id);const w=list.find(c=>winner[s.id]===c.name);if(w&&(w.start!=null||w.end!=null))out.trims[s.id]={start:+(w.start||0).toFixed(3),end:+((w.end!=null?w.end:w.dur)||0).toFixed(3)};if(w&&w.fx&&!w.fx.bypass)out.fx[s.id]=w.fx;if(layers[s.id]&&layers[s.id].length)out.layers[s.id]=layers[s.id];out.detail[s.id]={kept:list.filter(c=>c.mark==="keep").map(c=>c.name),cut:list.filter(c=>c.mark==="cut").map(c=>c.name)};}dl(new Blob([JSON.stringify(out,null,2)],{type:"application/json"}),"vanguard_sfx_picks.json");toast("Exported");};
+impIn.onchange=()=>{const f=impIn.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);winner=d.winner||d.winners||{};if(d.layers)layers=d.layers;if(d.notes)notes=d.notes;if(d.vols)vols=d.vols;savedMarks={};if(d.detail){for(const id in d.detail){const dd=d.detail[id];savedMarks[id]=[...(dd.kept||[]).map(n=>({name:n,mark:"keep"})),...(dd.cut||[]).map(n=>({name:n,mark:"cut"}))];}}if(d.trims){for(const id in d.trims){const tr=d.trims[id],w=winner[id];if(w){savedMarks[id]=savedMarks[id]||[];let e2=savedMarks[id].find(x=>x.name===w);if(!e2){e2={name:w,mark:"keep"};savedMarks[id].push(e2);}e2.start=tr.start;e2.end=tr.end;}}}for(const c of LIB){if(c.slot){c.mark="none";c.start=null;c.end=null;c.fx=Object.assign({},FXDEF);applySaved(c.slot,c);}}saveState();render();toast("Imported");}catch(e){toast("Bad JSON");}};r.readAsText(f);impIn.value="";};
+document.getElementById("expBtn").onclick=()=>{const out={generated:new Date().toISOString(),winners:{},targets:{},trims:{},fx:{},layers:{},notes,vols:{},detail:{}};for(const s of SLOTS){out.winners[s.id]=winner[s.id]||null;out.targets[s.id]=s.dtype==="var"?{type:"var",range_ms:s.rng}:{type:"oneshot",target_ms:s.tgt,tol_ms:s.tol};const list=LIB.filter(c=>c.slot===s.id);const w=list.find(c=>winner[s.id]===c.name);if(w&&(w.start!=null||w.end!=null))out.trims[s.id]={start:+(w.start||0).toFixed(3),end:+((w.end!=null?w.end:w.dur)||0).toFixed(3)};if(w&&w.fx&&!w.fx.bypass)out.fx[s.id]=w.fx;if(layers[s.id]&&layers[s.id].length)out.layers[s.id]=layers[s.id];out.detail[s.id]={kept:list.filter(c=>c.mark==="keep").map(c=>c.name),cut:list.filter(c=>c.mark==="cut").map(c=>c.name)};out.vols[s.id]=slotVol(s.id);}dl(new Blob([JSON.stringify(out,null,2)],{type:"application/json"}),"vanguard_sfx_picks.json");toast("Exported");};
 document.getElementById("renderBtn").onclick=renderAll;
 
 const drop=document.getElementById("drop");let dc=0;function setBusy(p){const b=document.getElementById("busy");b.style.width=(p<=0?0:Math.min(100,p))+"%";if(p>=100)setTimeout(()=>b.style.width=0,500);}
