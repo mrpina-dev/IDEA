@@ -442,7 +442,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2590';
+const W=630,H=840; const VERSION='2591';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -1437,7 +1437,8 @@ function applyUpgrades(){ const u=player.up;
   // ---- ship modules (Tier 3, in-run; see player.modules) ----
   const _M=player.modules||[]; const _has=id=>_M.indexOf(id)>=0;
   player.coinMult=1; player.scoreMult=1; player.modFireCd=1; player.modChargeMult=1;
-  player.modDuelist=_has('duelist'); player.modMuni=_has('munitions');
+  player.modDuelist=_has('duelist'); player.modMuni=_has('munitions'); player.modVamp=_has('vamp'); player.modGlint=_has('glint');
+  if(player.modGlint && player.glintOn){ player.pdmg*=1.15; player.heavyMult*=1.15; player.beamDps*=1.15; }
   if(_has('glass')){ player.pdmg*=1.30; player.heavyMult*=1.30; player.beamDps*=1.30; player.maxArmor=Math.max(1,player.maxArmor-1); }
   if(_has('kinetic')){ player.maxArmor+=1; player.speed=Math.max(360,player.speed-44); }
   if(_has('scavenger')){ player.coinMult*=1.35; player.scoreMult*=0.85; }
@@ -1545,6 +1546,7 @@ function playerHit(){
   if(window.__devGod)return;
   if(player.inv>0||player.dead)return;
   runHits++;
+  player.noHitT=0; if(player.glintOn){ player.glintOn=false; applyUpgrades(); }
   if(player.shieldHits>0){ player.shieldHits--; player.dmgFlash=.18; player.inv=(gameMode==='hardcore'?0.25:0.4); ((player.shieldHits<=0)?((Audio_.play&&Audio_.play('shield_break'))||Audio_.hit()):((Audio_.play&&Audio_.play('shield_hit'))||Audio_.hit())); return; }
   player.armor--; player.inv=(gameMode==='hardcore'?0.40:0.6); player.dmgFlash=.2; styleHit(); (Audio_.play&&Audio_.play('player_hit'))||Audio_.hit();
   for(let k=0;k<10;k++) parts.push({x:player.x,y:player.y,vx:rnd(-80,80),vy:rnd(-80,80),life:.25,max:.25,c:COL.green,sz:1.8});
@@ -1845,7 +1847,7 @@ function drawHoles(){ for(const hh of holes){ const x=hh.x,y=hh.y,r=Math.max(0,h
   for(let k=0;k<3;k++){ bg.beginPath(); bg.arc(0,0,r*(0.5+0.16*k),hh.core+k*1.7,hh.core+k*1.7+4.2); bg.stroke(); }
   bg.shadowBlur=0; bg.restore(); } }
 function tryParry(){ if(state!=='play'||!player||player.dead||player.parryCd>0||player.parryT>0)return;
-  player.parryT=0.22; player.parryCd=0.95; player.parryHit=false; runParryAtt++; Audio_.parry(); player.inv=Math.max(player.inv,0.22);
+  player.parryT=0.22*(player.modVamp?0.75:1); player.parryCd=0.95; player.parryHit=false; runParryAtt++; Audio_.parry(); player.inv=Math.max(player.inv,0.22);
   rings.push({x:player.x,y:player.y,r:10,vr:150,life:.3,max:.3,c:COL.cyan}); shake=Math.max(shake,3);
 }
 function fireBomb(){
@@ -1869,7 +1871,7 @@ function killEnemy(e,silent){ if(e.dead)return; runKills++; e.dead=true; e.dt=0;
   factionDeathLayer(e);
   if((e.variant||0)>=2||e.fk==='foreman'||e.fk==='vector'){ hitStop=Math.max(hitStop,0.05); rings.push({x:e.x,y:e.y,r:e.r*0.4,vr:440,life:.4,max:.4,c:COL.white}); }
   addScore(e.pts,e.x,e.y,e.c); { const _cg=Math.ceil(e.pts*0.14*styleCoinMult()*((player.coinMult)||1)); player.coins+=_cg; runCoinsEarned+=_cg; } sectorKills++;
-  if(player && !player.dead && dist2(e.x,e.y,player.x,player.y)<80*80){ player.repair=Math.min(1,(player.repair||0)+0.12);
+  if(player && !player.dead && dist2(e.x,e.y,player.x,player.y)<80*80){ player.repair=Math.min(1,(player.repair||0)+0.12*(player.modVamp?1.5:1));
     if(player.repair>=1 && player.armor<player.maxArmor){ player.repair=0; player.armor++; Audio_.power();
       rings.push({x:player.x,y:player.y,r:8,vr:120,life:.4,max:.4,c:COL.green}); } }
   if(e.fk==='foreman'||e.fk==='vector'){ player.coins+=40; dropPod(e.x,e.y,true); }
@@ -1920,9 +1922,11 @@ function update(dt){
         caught++; if(heavy)gotBolt++; ebul.splice(i,1); } }
       if(caught>0 && !pl.parryHit){ pl.parryHit=true; runParries++; if(gotBolt)runPerfect++; hitStop=Math.max(hitStop,gotBolt?0.10:0.06);
         bossFlash=Math.max(bossFlash,gotBolt?0.6:0.32); shake=Math.max(shake,gotBolt?10:5); pl.inv=Math.max(pl.inv,0.3);
-        pl.armor=Math.min(pl.maxArmor,pl.armor+(gotBolt?1:0)); pl.parryCd=Math.min(pl.parryCd,0.3);
+        pl.armor=Math.min(pl.maxArmor,pl.armor+(gotBolt?1:0)); if(pl.modVamp){ pl.repair=Math.min(1,(pl.repair||0)+(gotBolt?0.5:0.35)); if(pl.repair>=1&&pl.armor<pl.maxArmor){ pl.repair=0; pl.armor++; } } pl.parryCd=Math.min(pl.parryCd,0.3);
         addStyle(gotBolt?20:Math.min(18,6*caught));
         pops.push({x:player.x,y:player.y-30,txt:gotBolt?'PERFECT PARRY':'PARRY',c:gotBolt?COL.white:COL.cyan,life:.9,max:.9}); Audio_.parryHit(); } }
+    // GLINT: clean-play damage bonus, re-arms 3s after a hit
+    pl.noHitT=(pl.noHitT||0)+dt; { const _g=(pl.modGlint && pl.noHitT>=3); if(_g!==!!pl.glintOn){ pl.glintOn=_g; applyUpgrades(); } }
     // movement (slowed while the beam is firing)
     let mx=0,my=0; const spd=pl.speed*(pl.beamActive?0.5:1);
     const kbMove=(keys.ArrowLeft||keys.a||keys.ArrowRight||keys.d||keys.ArrowUp||keys.w||keys.ArrowDown||keys.s);
@@ -2766,7 +2770,9 @@ function refitItems(){ const u=player.up; const pdN=(1+(u.gun-1)*0.30), pdX=(1+u
     modCard('scavenger','SCAVENGER','beamcell','MODULE: +35% coins from kills and CORE, but -15% score.',900),
     modCard('kinetic','KINETIC DAMPENERS','hull','MODULE: +1 max hull, but engine speed -1 tier.',1000),
     modCard('duelist','DUELIST','beampierce','MODULE: +25% damage to bosses and elites, but -15% to normal enemies.',1100),
-    modCard('munitions','MUNITIONS RACK','bomb','MODULE: +2 bombs now and +25% bomb damage, but bombs no longer clear bullets.',1000)
+    modCard('munitions','MUNITIONS RACK','bomb','MODULE: +2 bombs now and +25% bomb damage, but bombs no longer clear bullets.',1000),
+    modCard('vamp','VAMPIRE FRAME','repair','MODULE: +50% hull recovery from parries and point-blank kills, but the parry window is 25% shorter.',1100),
+    modCard('glint','GLINT TARGETING','w_homing','MODULE: +15% damage while you avoid all hits. Resets when hit, re-arms after 3s clean.',1000)
   ];
 }
 function nextWeapon(){ const i=WEAPONS.indexOf(player.wtype); return WEAPONS[(i+1)%WEAPONS.length]; }
