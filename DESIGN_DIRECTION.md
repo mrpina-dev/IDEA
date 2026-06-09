@@ -90,6 +90,11 @@ Locked design forks (do not re-litigate):
   held to a single branch (WAVE AMP) because it is the flagged boss-delete
   precedent; no heavy branch may raise total boss throughput enough to trivialize
   a boss.
+- Keystones: each weapon unlocks a one-time mutually-exclusive choice of two
+  behavioral keystones after at least two mastery levels are invested in it.
+  Offered only in REFIT (in-run), flat one-time cost, and picking one locks the
+  other for the run. Keystones change how a weapon works; they are never pure
+  stat boosts (those are the mastery branches).
 
 ### Pillar 4: Fair competition
 - The playfield is FIXED (currently 630x840) for leaderboard fairness across

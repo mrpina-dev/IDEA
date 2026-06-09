@@ -442,7 +442,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2586';
+const W=630,H=840; const VERSION='2587';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -1462,6 +1462,7 @@ function startGame(){
     else { player.unlocked={spread:1,lance:0,homing:0,rapid:0}; player.wtype='spread'; player.heavyUnlocked={beam:1,rail:0,tesla:0,singularity:0,wave:0}; }   // ranked: SPREAD-only start, no leaked unlocks
     player.heavy=(player.heavyUnlocked&&player.heavyUnlocked[b.heavy])?b.heavy:'beam'; player.bombs=b.bombs; player.shieldHits=b.shieldHits; if(b.drone)player.drone={ph:0}; }
   applyUpgrades(); player.armor=player.maxArmor; player.beamE=player.beamMax;
+  player.ks={};   // keystone picks are per-run, in-run only
   player.coins += Math.max(0, START_BUDGET-(startBuild.spent||0));   // unspent pre-game budget carries into the run
   if(gameMode==='hardcore'){ player.lives=0; } else if(gameMode==='dev'){ player.lives=99; player.coins=99999; player.heavyUnlocked={beam:1,rail:1,tesla:1,singularity:1,wave:1}; }
   window.__devTime=1; window.__devStep=false; window.__devNoSpawn=false;
@@ -1674,9 +1675,9 @@ function firePrimary(){
   const prevLen=pbul.length;
   shotsFired++;
   if(player.wtype==='spread'){            // SPREAD: neutral generalist baseline - flat pellet damage, soft range floor
-    const ms=u.mSpread||0; const pellets=[4,4,5,5,6,7,8,9][Math.min(lv,8)-1]+ms; const dmg=0.644*pm*(1+0.16*(u.bSpread||0)), spread=Math.max(0.07,0.16-ms*0.018);
+    const ms=u.mSpread||0; const kS=(player.ks&&player.ks.spread)||0; const pellets=[4,4,5,5,6,7,8,9][Math.min(lv,8)-1]+ms; const dmg=0.644*pm*(1+0.16*(u.bSpread||0)), spread=Math.max(0.07,0.16-ms*0.018);
     for(let i=0;i<pellets;i++){ const a=(i-(pellets-1)/2)*spread+rnd(-0.03,0.03);
-      pbul.push({x:x+Math.sin(a)*8,y,vx:Math.sin(a)*420,vy:-700-rnd(0,60),c:COL.green,r:2.0,dmg,wt:'scrap',gl,ox:x,oy:y,falloff:SPREAD_FULL_RANGE,floor:SPREAD_FAR_FLOOR}); }
+      pbul.push({x:x+Math.sin(a)*8,y,vx:Math.sin(a)*420,vy:-700-rnd(0,60),c:COL.green,r:2.0,dmg,wt:'scrap',gl,ox:x,oy:y,falloff:SPREAD_FULL_RANGE,floor:SPREAD_FAR_FLOOR,pierce:(kS==='pierce'),frag:(kS==='frag')}); }
     player.fireCd=.2; muzzle(x,y,COL.green,gl,pellets*0.5);
   } else if(player.wtype==='flak'){       // FLAK: committed mid-range zone control - shells airburst into a damage cloud inside the band
     const det=rnd(FLAK_BAND_MIN,FLAK_BAND_MAX);
@@ -1686,18 +1687,19 @@ function firePrimary(){
     pbul.push({x,y,vx:0,vy:-760,c:COL.green,r:1.7,dmg:BUZZSAW_FWD_DMG*pm,wt:'buzz',gl});
     player.fireCd=.2; muzzle(x,y,COL.green,gl,1);
   } else if(player.wtype==='rapid'){      // OVERHEAT NAILGUN: heat ramps power, redline locks the gun
-    const mr=u.mRapid||0; let heat=player.heat||0;
+    const mr=u.mRapid||0; let heat=player.heat||0; const kR=(player.ks&&player.ks.rapid)||0;
     const streams=(lv<4?1:lv<7?2:3)+(mr>=3?1:0); const sp=8;
-    const dmg=(0.50+heat*(0.40+0.10*(u.bRapid||0)))*pm, hotC=heat>0.8?COL.mset:heat>0.5?COL.gold:COL.green;
+    const dmg=(0.50+heat*((0.40+0.10*(u.bRapid||0))*(kR==='redline'?1.35:1)))*pm, hotC=heat>0.8?COL.mset:heat>0.5?COL.gold:COL.green;
     for(let i=0;i<streams;i++){ const ox=(i-(streams-1)/2)*sp+rnd(-1.5,1.5);
       pbul.push({x:x+ox,y,vx:rnd(-12,12),vy:-820,c:hotC,r:1.4+heat*0.8,dmg,wt:'nail',gl,hot:heat}); }
     player.fireCd=Math.max(.042,.062*(1-heat*0.30)*(1-mr*0.1));
-    player.heat=heat+0.052-mr*0.004;
+    player.heat=heat+(0.052-mr*0.004)*(kR==='redline'?1.5:1);
+    if(kR==='coolant') player.heat=Math.min(0.86,player.heat);
     muzzle(x,y,hotC,gl*(0.7+heat),streams);
     if(player.heat>=1){
       if(autofire){ player.heat=0; player.overheatT=0.6; player.fireCd=0.6; rings.push({x,y,r:5,vr:220,life:.28,max:.28,c:COL.gold});
         pops.push({x:player.x,y:player.y-30,txt:'VENT',c:COL.gold,life:.6,max:.6}); Audio_.hit(); }
-      else { player.heat=0; player.overheatT=1.2; runOverheats++; styleHit();
+      else { player.heat=0; player.overheatT=1.2*(kR==='redline'?1.4:1); runOverheats++; styleHit();
         shake=Math.max(shake,7); player.dmgFlash=Math.max(player.dmgFlash,0.12);
         rings.push({x,y,r:6,vr:300,life:.35,max:.35,c:COL.mset});
         pops.push({x:player.x,y:player.y-30,txt:'OVERHEAT',c:COL.mset,life:.9,max:.9}); (Audio_.play&&Audio_.play('overheat'))||Audio_.hit(); } }
@@ -2151,6 +2153,7 @@ function update(dt){
           for(let k=0;k<3;k++)parts.push({x:e.x,y:e.y,vx:rnd(-60,60),vy:rnd(-60,60),life:.18,max:.18,c:e.c,sz:1.6});
           hit=true; break; }
         e.hp-=dmgEff; e.flash=.1; impactFX(b.x,b.y,e.c,b.vx,b.vy);
+        if(b.frag){ for(const e2 of enemies){ if(e2.dead||e2===e)continue; if(dist2(e2.x,e2.y,b.x,b.y)<900){ e2.hp-=dmgEff*0.5; e2.flash=.08; if(e2.hp<=0){ window.killSrc='spread'; killEnemy(e2); } } } rings.push({x:b.x,y:b.y,r:4,vr:160,life:.18,max:.18,c:COL.green}); }
         if(e.hp<=0)killEnemy(e); if(!b.pierce){hit=true;} break; } }
     if(!hit && boss && !boss.entering && !boss.dying && dist2(boss.x,boss.y,b.x,b.y)<(boss.r)*(boss.r)){
       if(b.wt==='flak'){ detonateFlak(b,FLAK_EARLY); hit=true; }
@@ -2700,6 +2703,8 @@ function renderShopGrid(container, items, ctx){ if(!container)return;
       html+=shopCardHTML(it,i,aff,maxed,g); }); });
   container.innerHTML=html;
   [...container.querySelectorAll('.card')].forEach(b=>b.addEventListener('click',()=>ctx.onBuy(+b.dataset.i,b))); }
+function ksCard(w,name,icon,desc,id){ const cur=(player.ks&&player.ks[w])||0, picked=(cur===id), taken=(cur&&!picked);
+  return {grp:'WEAPONS',name:name,icon:icon,desc:desc,lv:0,mx:0,meta:picked?'ACTIVE':taken?'LOCKED':'i¢700',cost:(picked||taken)?0:700,can:!cur,buy:()=>{ if(!(player.ks&&player.ks[w])){ (player.ks=player.ks||{})[w]=id; } }}; }
 function refitItems(){ const u=player.up; const pdN=(1+(u.gun-1)*0.30), pdX=(1+u.gun*0.30); const hu=player.heavyUnlocked||{};
   return [
     {grp:'WEAPONS',name:'GUN POWER',icon:'gun',desc:'Boosts damage on all primary weapons (SPREAD, LANCE, HOMING, RAPID).',delta:'x'+pdN.toFixed(2)+' -> x'+pdX.toFixed(2),lv:u.gun,mx:8,cost:400+(u.gun-1)*250,can:u.gun<8,buy:()=>u.gun++},
@@ -2707,7 +2712,8 @@ function refitItems(){ const u=player.up; const pdN=(1+(u.gun-1)*0.30), pdX=(1+u
     ...['spread|SPREAD|0|w_spread|Neutral generalist: flat pellet damage with a soft range floor.|1','homing|SWARM|400|w_homing|Auto-aiming darts. Good for crowds, weak per shot.|2','rapid|NAILGUN|350|w_rapid|Heat ramps power, redline locks the gun. Single-target.|2','flak|FLAK|550|w_flak|Mid-range airburst: shells pop into a damage cloud in the band.|3','lance|RAILSPIKE|650|w_lance|Slow, committed bolts that pierce a whole column.|4','buzzsaw|BUZZSAW|800|w_buzz|Contact blades orbit the ship. Hug enemies; weak forward poke.|5'].map(s=>{const p=s.split('|'),w=p[0],owned=!!player.unlocked[w],active=player.wtype===w,minS=+p[5],gated=!owned&&sector<minS;return {grp:'WEAPONS',name:p[1],icon:p[3],desc:p[4],lv:0,mx:0,meta:active?'EQUIPPED':owned?'EQUIP':gated?('SECTOR '+minS+'+'):('i¢'+p[2]),cost:owned?0:+p[2],can:!active&&!gated,buy:()=>{player.unlocked[w]=1;player.wtype=w;}};}),
     {grp:'WEAPONS',name:'SCATTER CHOKE',icon:'w_spread',desc:'Adds a SPREAD pellet and tightens the cone for more focus.',delta:'+1 pellet',lv:u.mSpread||0,mx:3,cost:300+(u.mSpread||0)*220,can:(u.mSpread||0)<3,buy:()=>{u.mSpread=(u.mSpread||0)+1;}},
     {grp:'WEAPONS',name:'SLUG LOAD',icon:'w_spread',desc:'Heavier SPREAD pellets hit harder per hit.',delta:'+16% pellet dmg',lv:u.bSpread||0,mx:3,cost:320+(u.bSpread||0)*230,can:(u.bSpread||0)<3,buy:()=>{u.bSpread=(u.bSpread||0)+1;}},
-    ...(player.unlocked.rapid?[{grp:'WEAPONS',name:'OVERCLOCK',icon:'w_rapid',desc:'Increases RAPID fire rate. Stacks with existing speed.',delta:'+12% rate',lv:u.mRapid||0,mx:3,cost:300+(u.mRapid||0)*220,can:(u.mRapid||0)<3,buy:()=>{u.mRapid=(u.mRapid||0)+1;}},{grp:'WEAPONS',name:'THERMAL LOAD',icon:'w_rapid',desc:'NAILGUN does more damage the hotter it runs. Rewards riding the redline.',delta:'+heat dmg',lv:u.bRapid||0,mx:3,cost:300+(u.bRapid||0)*220,can:(u.bRapid||0)<3,buy:()=>{u.bRapid=(u.bRapid||0)+1;}}]:[]),
+    ...(((u.mSpread||0)+(u.bSpread||0))>=2?[ksCard('spread','PIERCE ROUNDS','w_spread','KEYSTONE: SPREAD pellets punch through enemies in a line. Locks out FRAG SHELLS.','pierce'),ksCard('spread','FRAG SHELLS','w_spread','KEYSTONE: SPREAD pellets burst on impact, splashing nearby enemies. Locks out PIERCE ROUNDS.','frag')]:[]),
+    ...(player.unlocked.rapid?[{grp:'WEAPONS',name:'OVERCLOCK',icon:'w_rapid',desc:'Increases RAPID fire rate. Stacks with existing speed.',delta:'+12% rate',lv:u.mRapid||0,mx:3,cost:300+(u.mRapid||0)*220,can:(u.mRapid||0)<3,buy:()=>{u.mRapid=(u.mRapid||0)+1;}},{grp:'WEAPONS',name:'THERMAL LOAD',icon:'w_rapid',desc:'NAILGUN does more damage the hotter it runs. Rewards riding the redline.',delta:'+heat dmg',lv:u.bRapid||0,mx:3,cost:300+(u.bRapid||0)*220,can:(u.bRapid||0)<3,buy:()=>{u.bRapid=(u.bRapid||0)+1;}},...(((u.mRapid||0)+(u.bRapid||0))>=2?[ksCard('rapid','REDLINE','w_rapid','KEYSTONE: heat builds faster and overheats longer, but peak damage spikes hard. Locks out COOLANT.','redline'),ksCard('rapid','COOLANT LOOP','w_rapid','KEYSTONE: heat never redlines so you never overheat, at a lower damage ceiling. Locks out REDLINE.','coolant')]:[])]:[]),
     ...(player.unlocked.lance?[{grp:'WEAPONS',name:'HIGH-VELOCITY',icon:'w_lance',desc:'Increases damage on each LANCE bolt.',delta:'+ bolt dmg',lv:u.mLance||0,mx:3,cost:320+(u.mLance||0)*230,can:(u.mLance||0)<3,buy:()=>{u.mLance=(u.mLance||0)+1;}},{grp:'WEAPONS',name:'AUTO-RACK',icon:'w_lance',desc:'Cycles RAILSPIKE bolts faster between shots.',delta:'+7% rate',lv:u.bLance||0,mx:3,cost:320+(u.bLance||0)*230,can:(u.bLance||0)<3,buy:()=>{u.bLance=(u.bLance||0)+1;}}]:[]),
     ...(player.unlocked.homing?[{grp:'WEAPONS',name:'SWARM CTRL',icon:'w_homing',desc:'Adds one more homing shot per volley.',delta:'+1 shot',lv:u.mHoming||0,mx:3,cost:320+(u.mHoming||0)*230,can:(u.mHoming||0)<3,buy:()=>{u.mHoming=(u.mHoming||0)+1;}},{grp:'WEAPONS',name:'WARHEAD',icon:'w_homing',desc:'Each SWARM dart carries a heavier charge.',delta:'+dart dmg',lv:u.bHoming||0,mx:3,cost:320+(u.bHoming||0)*230,can:(u.bHoming||0)<3,buy:()=>{u.bHoming=(u.bHoming||0)+1;}}]:[]),
     ...(player.unlocked.flak?[{grp:'WEAPONS',name:'DENSE PAYLOAD',icon:'w_flak',desc:'FLAK burst cloud deals more damage per second.',delta:'+13% cloud dps',lv:u.mFlak||0,mx:3,cost:350+(u.mFlak||0)*230,can:(u.mFlak||0)<3,buy:()=>{u.mFlak=(u.mFlak||0)+1;}},{grp:'WEAPONS',name:'WIDE BURST',icon:'w_flak',desc:'FLAK cloud covers a wider area in the band.',delta:'+cloud radius',lv:u.bFlak||0,mx:3,cost:350+(u.bFlak||0)*230,can:(u.bFlak||0)<3,buy:()=>{u.bFlak=(u.bFlak||0)+1;}}]:[]),
