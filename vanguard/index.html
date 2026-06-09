@@ -460,11 +460,14 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='112';
+const W=630,H=840; const VERSION='113';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
 const bg=bgC.getContext('2d'), fx=fxC.getContext('2d');
+window.__noGlow=false; window.__fpsShow=false; window.__fps=60; window.__ms=0;
+try{ const _sbd=Object.getOwnPropertyDescriptor(CanvasRenderingContext2D.prototype,'shadowBlur');
+  if(_sbd&&_sbd.set){ [bg,fx].forEach(c=>Object.defineProperty(c,'shadowBlur',{get(){return _sbd.get.call(c);},set(v){_sbd.set.call(c,window.__noGlow?0:v);},configurable:true})); } }catch(e){}
 let LOWFX=false; try{ LOWFX = localStorage.getItem('vanguard_lowfx')==='1'; }catch(e){}
 (function(){ try{ [bg,fx].forEach(function(ctx){ var proto=Object.getPrototypeOf(ctx); var desc=Object.getOwnPropertyDescriptor(proto,'shadowBlur'); if(desc&&desc.set){ Object.defineProperty(ctx,'shadowBlur',{configurable:true, get:function(){return desc.get.call(ctx);}, set:function(v){ desc.set.call(ctx, LOWFX?0:v); }}); } }); }catch(e){} })();
 const REDUCED=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -4012,7 +4015,14 @@ function setBoardMode(m,target){ boardMode=m; onlineBoard=null; boardRetries=0;
 
 /* ============================= loop ============================= */
 renderBoard('titleBoard'); refreshBoard('titleBoard'); updateGamesPlayed(); initBackdrop(); buildCelestial();
+function drawFpsHud(){ const c=fx; c.save(); c.font="600 12px 'Share Tech Mono',monospace"; c.textAlign='left'; c.textBaseline='top';
+  const fps=Math.round(window.__fps||0), ms=(window.__ms||0).toFixed(1), bad=fps<50;
+  const lines=['FPS '+fps+'   '+ms+'ms','enm '+enemies.length+'  pb '+pbul.length+'  eb '+ebul.length,'parts '+parts.length+(window.__noGlow?'   [NO-GLOW]':'')];
+  c.fillStyle='rgba(2,10,4,.82)'; c.fillRect(6,6,156,54); c.strokeStyle=bad?COL.mset:COL.cyan; c.lineWidth=1; c.strokeRect(6,6,156,54);
+  c.fillStyle=bad?COL.mset:COL.green; lines.forEach((ln,i)=>c.fillText(ln,12,12+i*16)); c.restore();
+}
 function frame(now){ let dt=(now-last)/1000; last=now; if(dt>0.05)dt=0.05; if(!(dt>0))dt=0;
+  window.__fps=(window.__fps||60)*0.92+(1/Math.max(dt,1e-4))*0.08; const _rt0=performance.now();
   try{
     for(let i=_delayed.length-1;i>=0;i--){ if(now>=_delayed[i].at){ explode(_delayed[i].x,_delayed[i].y,_delayed[i].c,true); _delayed.splice(i,1); } }
     if(deathSlow>0) deathSlow=Math.max(0,deathSlow-dt);
@@ -4026,7 +4036,9 @@ function frame(now){ let dt=(now-last)/1000; last=now; if(dt>0.05)dt=0.05; if(!(
     drawBG(); drawFX();
     if(window.__devHitbox && gameMode==='dev' && window.__devDrawHitboxes) window.__devDrawHitboxes();
     hud(dt);
+      if(gameMode==='dev' && window.__fpsShow) drawFpsHud();
   }catch(err){ console.error('VANGUARD frame error:',err); }
+  window.__ms=(window.__ms||0)*0.92+(performance.now()-_rt0)*0.08;
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
@@ -4123,6 +4135,8 @@ requestAnimationFrame(frame);
   tg.appendChild(mk('CLEAR',()=>{ clearField(); }));
   tg.appendChild(mk('CLR FIRE',()=>{ ebul.length=0; }));
   tg.appendChild(mk('REFIT',()=>{ if(state==='play') openRefit(); }));
+  const fpsBtn=mk('FPS',()=>{ window.__fpsShow=!window.__fpsShow; fpsBtn.classList.toggle('on',!!window.__fpsShow); }); tg.appendChild(fpsBtn);
+  const glowBtn=mk('NO-GLOW',()=>{ window.__noGlow=!window.__noGlow; glowBtn.classList.toggle('on',!!window.__noGlow); }); tg.appendChild(glowBtn);
   panel.appendChild(tg);
 
   /* ---- TIME ---- */
