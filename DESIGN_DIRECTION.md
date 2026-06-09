@@ -92,6 +92,7 @@ Locked design forks (do not re-litigate):
   curve is S-shaped; threat curves must be shaped against it, not linear.
 - The economy is tuned so the full upgrade tree cannot be bought by sector 3.
   Kill-coin coefficient is the master income dial (currently 0.14).
+- Support augments (DRONE, FLANK GUNS) scale with GUN POWER so they stay relevant late-game, but are tuned well below primary DPS so they never trivialize a fight.
 - Boss-delete buttons are bugs (the 7x bomb multiplier and Wave Motion
   precedent). No single purchase should trivialize a boss.
 - Weapon unlocks are sector-gated in-run. Runs start SPREAD-only.
