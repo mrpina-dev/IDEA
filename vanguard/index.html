@@ -395,7 +395,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
     <button class="mini" id="setHitFlash">HIT FLASH REDUCTION: OFF</button>
     <button class="mini" id="setMove" style="border-color:var(--cyan);color:var(--cyan)">MOVEMENT: POINTER LOCK</button>
     <button class="mini" id="autofireBtn" style="border-color:var(--gold);color:var(--gold)">AUTO-FIRE: ON</button>
-    <button class="mini" id="lowfxBtn" style="border-color:var(--gold);color:var(--gold)">LOW FX: OFF</button>
+    <button class="mini" id="lowfxBtn" style="border-color:var(--gold);color:var(--gold)">GRAPHICS: FULL</button>
     <button class="mini" id="setFps">SHOW FPS: OFF</button>
     <button class="mini" id="setRemap" style="border-color:var(--gold);color:var(--gold)">REMAP KEYS</button>
     <button class="obtn" id="setDone">DONE</button>
@@ -461,14 +461,15 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='117';
+const W=630,H=840; const VERSION='118';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
 const bg=bgC.getContext('2d'), fx=fxC.getContext('2d');
 window.__fps=60; window.__ms=0;   // FPS readout vars (display gated by SETTINGS.showFps)
-let LOWFX=false; try{ LOWFX = localStorage.getItem('vanguard_lowfx')==='1'; }catch(e){}
-(function(){ try{ [bg,fx].forEach(function(ctx){ var proto=Object.getPrototypeOf(ctx); var desc=Object.getOwnPropertyDescriptor(proto,'shadowBlur'); if(desc&&desc.set){ Object.defineProperty(ctx,'shadowBlur',{configurable:true, get:function(){return desc.get.call(ctx);}, set:function(v){ desc.set.call(ctx, LOWFX?0:v); }}); } }); }catch(e){} })();
+let GFX='full'; try{ const _g=localStorage.getItem('vanguard_gfx'); if(_g==='full'||_g==='med'||_g==='low') GFX=_g; else if(localStorage.getItem('vanguard_lowfx')==='1') GFX='low'; }catch(e){}
+let LOWFX=(GFX==='low');
+(function(){ try{ [[bg,false],[fx,true]].forEach(function(pair){ var ctx=pair[0], isFx=pair[1]; var proto=Object.getPrototypeOf(ctx); var desc=Object.getOwnPropertyDescriptor(proto,'shadowBlur'); if(desc&&desc.set){ Object.defineProperty(ctx,'shadowBlur',{configurable:true, get:function(){return desc.get.call(ctx);}, set:function(v){ var off=(GFX==='low')||(isFx&&GFX==='med'); desc.set.call(ctx, off?0:v); }}); } }); }catch(e){} })();
 const REDUCED=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 function fit(){const dpr=Math.min(window.devicePixelRatio||1,2);
   [bgC,fxC].forEach(c=>{c.width=W*dpr;c.height=H*dpr;}); bg.setTransform(dpr,0,0,dpr,0,0); fx.setTransform(dpr,0,0,dpr,0,0);}
@@ -2935,7 +2936,8 @@ function switchWeapon(){ const list=WEAPONS.filter(w=>player.unlocked[w]); if(li
   const i=list.indexOf(player.wtype); player.wtype=list[(i+1)%list.length]; ((Audio_.play&&Audio_.play('weapon_switch'))||Audio_.hit()); }
 function selectWeapon(w){ if(state!=='play'||!player||!player.unlocked||!player.unlocked[w]||player.wtype===w)return; player.wtype=w; (Audio_.play&&Audio_.play('weapon_switch'))||Audio_.hit(); }
 function setAutofire(v){ autofire=v; try{localStorage.setItem('vanguard_autofire',v?'1':'0');}catch(e){} const b=el('autofireBtn'); if(b)b.textContent='AUTO-FIRE: '+(v?'ON':'OFF'); }
-function setLowFX(v){ LOWFX=!!v; try{localStorage.setItem('vanguard_lowfx',v?'1':'0');}catch(e){} const b=el('lowfxBtn'); if(b)b.textContent='LOW FX: '+(v?'ON':'OFF'); }
+function setGfx(v){ GFX=(v==='med'||v==='low')?v:'full'; LOWFX=(GFX==='low'); try{localStorage.setItem('vanguard_gfx',GFX);}catch(e){} const b=el('lowfxBtn'); if(b)b.textContent='GRAPHICS: '+GFX.toUpperCase(); }
+function setLowFX(v){ setGfx(v?'low':'full'); }
 function setMoveMode(v){ moveMode_pref=(v==='lock'?'lock':'hold'); try{localStorage.setItem('vanguard_movemode',moveMode_pref);}catch(e){} const b=el('moveModeBtn'); if(b)b.textContent='MOUSE MOVE: '+(moveMode_pref==='lock'?'POINTER LOCK':'FOLLOW'); if(moveMode_pref!=='lock' && document.pointerLockElement){ try{document.exitPointerLock();}catch(e){} } if(typeof refreshControlsHint==='function') refreshControlsHint(); }
 function buildRefit(){ el('refitBal').textContent=player.coins.toLocaleString();
   renderShopGrid(el('refitItems'), refitItems(), {
@@ -3962,8 +3964,8 @@ function refreshControlsHint(){ const p=el('ctrlsPanel'); if(!p)return; const kl
   setAutofire(autofire);
   const mm=el('moveModeBtn'); if(mm) mm.addEventListener('click',e=>{e.stopPropagation(); setMoveMode(moveMode_pref==='lock'?'hold':'lock');});
   setMoveMode(moveMode_pref);
-  const lf=el('lowfxBtn'); if(lf) lf.addEventListener('click',e=>{e.stopPropagation(); setLowFX(!LOWFX);});
-  setLowFX(LOWFX);
+  const lf=el('lowfxBtn'); if(lf) lf.addEventListener('click',e=>{e.stopPropagation(); setGfx(GFX==='full'?'med':GFX==='med'?'low':'full');});
+  setGfx(GFX);
   refreshControlsHint();
 })();
 
@@ -3989,6 +3991,7 @@ function closeTut(){ el('ovlTut').classList.add('hidden'); try{localStorage.setI
 { const b=el('howtoBtn'); if(b) b.addEventListener('click',e=>{ e.stopPropagation(); openTut(); }); }
 
 const CHANGELOG=[
+ {ver:'118',date:'2026',items:['Graphics setting is now FULL / MED / LOW. MED keeps glow on ships, enemies, and bosses but drops it on bullets and effects for a big framerate gain.']},
  {ver:'117',date:'2026',items:['Enemy formations now send a limited number of reinforcements instead of refilling endlessly.']},
  {ver:'116',date:'2026',items:['FPS counter now sits beside the playfield instead of over the HUD.']},
  {ver:'115',date:'2026',items:['SINGULARITY now travels as an unstable seed and ignites into a pulling well on arrival, instead of looking active in flight.']},
@@ -4039,7 +4042,7 @@ function updateFpsHud(){
   e.style.display='block';
   const fps=Math.round(window.__fps||0), ms=(window.__ms||0).toFixed(1), bad=fps<50;
   e.style.color=bad?COL.mset:COL.green; e.style.borderColor=bad?COL.mset:COL.cyan;
-  e.textContent='FPS '+fps+'  '+ms+'ms · enm '+enemies.length+' pb '+pbul.length+' eb '+ebul.length+' pt '+parts.length+(LOWFX?' · LOW-FX':'');
+  e.textContent='FPS '+fps+'  '+ms+'ms · enm '+enemies.length+' pb '+pbul.length+' eb '+ebul.length+' pt '+parts.length+(GFX!=='full'?' · '+GFX.toUpperCase():'');
 }
 function frame(now){ let dt=(now-last)/1000; last=now; if(dt>0.05)dt=0.05; if(!(dt>0))dt=0;
   window.__fps=(window.__fps||60)*0.92+(1/Math.max(dt,1e-4))*0.08; const _rt0=performance.now();

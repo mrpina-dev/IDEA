@@ -194,6 +194,7 @@ menus. Selection rules for the CC0 catalog and any future additions:
   the factions are its processes. Flavor text, tutorial copy, and UPDATE LOG
   voice can lean on this.
 - The post-boss REFIT is framed as a SYSTEM HALT / ROOT ACCESS event (darkened field, code-rain surge, glitch terminal, ship patch-scan), not a physical repair station. It reinforces the fiction that the ship runs inside a hostile system being rewritten.
+- Glow is tiered for performance (FULL / MED / LOW). When cutting glow, the swarm goes first: MED keeps shadow-glow on the ship, enemies, and bosses (the bg layer, few draws) and removes it from bullets, particles, and effects (the fx layer, the per-frame cost). Readability of threats is preserved before spectacle.
 
 ---
 
