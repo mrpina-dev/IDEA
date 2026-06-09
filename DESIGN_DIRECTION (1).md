@@ -76,6 +76,7 @@ Locked design forks (do not re-litigate):
   flavors of hold-to-clear: BUZZSAW (contact), SPREAD (neutral baseline), FLAK
   (mid band), RAILSPIKE (column pierce), NAILGUN (heat single-target), SWARM
   (passive utility).
+- When a boss arrives, grunts do not flee. They convert to attackers and persist into the fight, and the boss's own fire chips them (friendly fire). Boss-collateral kills award the player no score, coins, or style (Pillar 4/5: no free farming).
 - Heavies are earned in-run, sector-gated, expensive. Commitment, not shopping.
 - Defensive and utility systems (HULL, SHIELD, DRONE, PARRY) carry the same shape as weapons: two signature branches feeding a mutually-exclusive keystone fork. Defense is a build choice, not a flat stat purchase.
 - Upgrade depth is a three-tier loadout tree on top of the flat coin economy:

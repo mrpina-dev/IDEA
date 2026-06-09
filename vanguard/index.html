@@ -460,7 +460,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='109';
+const W=630,H=840; const VERSION='110';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -1515,16 +1515,16 @@ function nextSectorCheck(dt){
   if(!bossPending){
     const alive = enemies.reduce((a,e)=>a+(e.dead?0:1),0);
     if(sectorKills>=killsForBoss){
-      bossPending=true; waveTimer=1.7;            // grunts retreat, then the boss arrives
+      bossPending=true; waveTimer=1.7;            // grunts stay and fight; the boss arrives and can hit them
       fleet=null;
-      for(const e of enemies){ if(e.dead)continue; e.state='retreat'; e.vx=(e.x<W/2?-1:1)*rnd(220,300); e.vy=-rnd(40,120); }
+      for(const e of enemies){ if(e.dead)continue; e.slot=-1; e.state='free'; e.vy=Math.max(60,Math.abs(e.vy)||60); }
     } else {
       waveTimer-=dt;
       if(alive<6 && waveTimer<=0 && !(gameMode==='dev' && window.__devNoSpawn)){ spawnWave(); waveTimer=rnd(1.3,2.3); }
     }
   } else {
     waveTimer-=dt;
-    if(waveTimer<=0){ enemies.length=0; ebul.length=0; fleet=null; spawnBoss(); bossPending=false; }
+    if(waveTimer<=0){ ebul.length=0; fleet=null; spawnBoss(); bossPending=false; }
   }
   // Hybrid elite spawning (sector 4+ only, never during boss)
   if(sector>=4&&!bossPending&&bossSpoils<=0){
@@ -1643,6 +1643,7 @@ function dropPod(x,y,fromBoss){
   pods.push(pod);
 }
 const WEAPONS=['spread','lance','homing','rapid','flak','buzzsaw'];
+const BOSS_COLLATERAL=6;   // boss friendly-fire chip damage to its own grunts (Pillar 3); kills give the player no reward (Pillar 4/5)
 /* ===== weapon balance, all relative to measured SPREAD baseline DPS = 7.0 (gun1: 4 pellets x 0.7 dmg x 5/s x ~2 hits @150px) ===== */
 const SPREAD_FULL_RANGE=220, SPREAD_FAR_FLOOR=0.55;                 // 100% to 220px, hard 55% floor beyond (no fade-to-nothing)
 const FLAK_BAND_MIN=240, FLAK_BAND_MAX=360, FLAK_CLOUD_R=46, FLAK_CLOUD_LIFE=0.25, FLAK_CLOUD_DPS=9.45, FLAK_EARLY=0.6, FLAK_COL='#FFB000';
@@ -2250,6 +2251,7 @@ function update(dt){
     if(b.seeker){ if(b.homeT===undefined)b.homeT=1.6; if(b.homeT>0){const dx=player.x-b.x,dy=player.y-b.y,m=Math.hypot(dx,dy)||1;b.vx+=(dx/m*64-b.vx)*dt*0.9;b.vy+=(dy/m*64-b.vy)*dt*0.9;b.homeT-=dt;} else {b.vy+=220*dt;} }
     if(b.y>H+12||b.y<-12||b.x<-12||b.x>W+12){ebul.splice(i,1);continue;}
     if(b.split&&b.y>H*0.45){for(let k=-1;k<=1;k++){const a=Math.atan2(b.vy,b.vx)+k*0.38;ebul.push({x:b.x,y:b.y,vx:Math.cos(a)*150,vy:Math.sin(a)*150,c:b.splitSeek?COL.bmet:b.c,r:2.5,owner:b.owner,seeker:!!b.splitSeek,homeT:1.4});}ebul.splice(i,1);continue;}
+    if(boss && !b.owner && !b._chip){ for(let qi=0;qi<enemies.length;qi++){ const ge=enemies[qi]; if(ge.dead)continue; if(dist2(b.x,b.y,ge.x,ge.y)<(ge.r+b.r)*(ge.r+b.r)){ ge.hp-=BOSS_COLLATERAL; ge.flash=.12; b._chip=1; for(let k=0;k<4;k++)parts.push({x:b.x,y:b.y,vx:rnd(-90,90),vy:rnd(-90,90),life:.22,max:.22,c:ge.c,sz:1.6}); if(ge.hp<=0){ ge.dead=true; ge.dt=0; explode(ge.x,ge.y,ge.c,ge.variant>=2); factionDeathLayer(ge); shake=Math.max(shake,3); } break; } } }
     if(!player.dead && player.inv<=0 && dist2(b.x,b.y,player.x,player.y-2)<13*13){ lastHitBy=b.owner||lastHitBy; ebul.splice(i,1); playerHit(); }
   }
 
@@ -3940,6 +3942,7 @@ function closeTut(){ el('ovlTut').classList.add('hidden'); try{localStorage.setI
 { const b=el('howtoBtn'); if(b) b.addEventListener('click',e=>{ e.stopPropagation(); openTut(); }); }
 
 const CHANGELOG=[
+ {ver:'110',date:'2026',items:['Rival grunts no longer flee when a boss appears. They stay and fight, and the boss damages its own forces with stray fire.']},
  {ver:'109',date:'2026',items:['NAILGUN hits harder, especially cold, so it is worth equipping right away.','Missed parries now flash a WHIFF cue.','Weapon names now read consistently everywhere (RAILSPIKE, SWARM, NAILGUN).']},
  {ver:'108',date:'2026',items:['Enemies that pull out at the bottom now re-engage instead of vanishing on the way up.','Fixed unfair collisions from enemies snapping upward at the bottom edge.','Death screen now shows AVG STYLE next to BEST STYLE.']},
  {ver:'105',date:'2026',items:['Every sound effect now plays one consistent track instead of switching between variants']},
