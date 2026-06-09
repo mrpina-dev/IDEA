@@ -162,6 +162,10 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 .modslots{display:flex;align-items:center;gap:7px;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--dim);padding:2px}
 .modslot{width:14px;height:14px;border:1px solid var(--dim);border-radius:2px}
 .modslot.on{background:var(--teal);border-color:var(--teal);box-shadow:0 0 6px var(--teal)}
+.kit{--cc:var(--green);border:1px solid color-mix(in srgb,var(--cc) 30%,transparent);border-radius:6px;background:color-mix(in srgb,var(--cc) 6%,transparent);display:flex;flex-direction:column;gap:6px;padding:6px;width:100%}
+.kit .kithead .card{background:color-mix(in srgb,var(--cc) 10%,transparent)}
+.kitbody{display:flex;flex-direction:column;gap:6px;margin-left:7px;padding-left:9px;border-left:2px solid color-mix(in srgb,var(--cc) 30%,transparent)}
+.kitbody .forkpair{margin-top:8px}
 .card{--cc:var(--green);display:flex;align-items:center;gap:9px;padding:7px 9px;cursor:pointer;text-align:left;pointer-events:auto;
   background:linear-gradient(100deg,rgba(0,20,8,.65),rgba(0,12,6,.5));border:1px solid color-mix(in srgb,var(--cc) 45%,transparent);
   border-left:3px solid var(--cc);border-radius:7px;font-family:'Share Tech Mono',monospace;color:var(--white);transition:transform .1s,box-shadow .12s,background .12s;position:relative}
@@ -232,10 +236,8 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 @media (min-width:1200px){
   #cabinet{gap:22px}
   .console{display:flex}
-  .shop{width:94%;max-width:660px;display:flex;flex-direction:column;align-items:center;gap:10px}
-  .shopbody{width:100%;max-width:660px;max-height:54vh;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:8px;align-content:start}
-  .shopbody .forkpair{grid-column:1/-1}
-  .shopbody .modslots{grid-column:1/-1}
+  .shop{width:94%;max-width:560px;display:flex;flex-direction:column;align-items:center;gap:10px}
+  .shopbody{width:100%;max-width:560px;max-height:56vh;display:flex;flex-direction:column;gap:8px}
   .card{padding:9px 11px}
   .cic{flex:0 0 38px;width:38px;height:38px}
   .cic svg{width:24px;height:24px}
@@ -455,7 +457,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2593';
+const W=630,H=840; const VERSION='2594';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -2740,14 +2742,19 @@ function renderShopGrid(container, items, ctx){ if(!container)return;
   present.forEach(g=>{ tabs+='<button class="shoptab'+(g===refitTab?' on':'')+'" data-tab="'+g+'" style="--cc:'+shopGroupColor(g)+'">'+g+'</button>'; });
   tabs+='</div>';
   const rows=items.map((it,i)=>[it,i]).filter(p=>grpOf(p[0])===refitTab);
+  const _rc=p=>{ const it=p[0],i=p[1]; const maxed=(it.mx>0&&it.lv>=it.mx)||!it.can; return shopCardHTML(it,i,ctx.afford(it),maxed,refitTab); };
+  const groups=[], gmap={};
+  rows.forEach(p=>{ const key=(p[0].icon||'_'); if(!(key in gmap)){ gmap[key]=groups.length; groups.push([]); } groups[gmap[key]].push(p); });
+  const _col=shopGroupColor(refitTab);
   let body='<div class="shopbody">';
   if(refitTab==='MODULES' && player && player.modules){ const filled=player.modules.filter(m=>m).length; let sl=''; for(let s=0;s<player.modules.length;s++) sl+='<i class="modslot'+(player.modules[s]?' on':'')+'"></i>'; body+='<div class="modslots">SLOTS '+sl+' <span style="color:var(--teal)">'+filled+'/'+player.modules.length+'</span></div>'; }
-  for(let k=0;k<rows.length;k++){ const it=rows[k][0], i=rows[k][1]; const maxed=(it.mx>0&&it.lv>=it.mx)||!it.can; const aff=ctx.afford(it);
-    if(it.fork==='pick' && rows[k+1] && rows[k+1][0].fork==='pick'){
-      const it2=rows[k+1][0], i2=rows[k+1][1]; const maxed2=(it2.mx>0&&it2.lv>=it2.mx)||!it2.can; const aff2=ctx.afford(it2);
-      body+='<div class="forkpair"><span class="forklbl">CHOOSE ONE</span><div class="forkrow">'+shopCardHTML(it,i,aff,maxed,refitTab)+shopCardHTML(it2,i2,aff2,maxed2,refitTab)+'</div></div>';
-      k++; continue; }
-    body+=shopCardHTML(it,i,aff,maxed,refitTab); }
+  groups.forEach(g=>{
+    if(g.length===1){ body+=_rc(g[0]); return; }
+    body+='<div class="kit" style="--cc:'+_col+'"><div class="kithead">'+_rc(g[0])+'</div><div class="kitbody">';
+    for(let k=1;k<g.length;k++){ const p=g[k];
+      if(p[0].fork==='pick' && g[k+1] && g[k+1][0].fork==='pick'){ body+='<div class="forkpair"><span class="forklbl">CHOOSE ONE</span><div class="forkrow">'+_rc(p)+_rc(g[k+1])+'</div></div>'; k++; continue; }
+      body+=_rc(p); }
+    body+='</div></div>'; });
   body+='</div>';
   container.innerHTML=tabs+body;
   [...container.querySelectorAll('.shoptab')].forEach(b=>b.addEventListener('click',()=>{ refitTab=b.dataset.tab; renderShopGrid(container,items,ctx); }));

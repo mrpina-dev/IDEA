@@ -213,7 +213,11 @@ Each faction is a Bosco Tech pathway made hostile. Identity table is in
   SYSTEMS, MODULES), one short screen per tab, never one long scrolling list.
   Mutually-exclusive choices (keystones) render as explicit CHOOSE ONE fork
   pairs, and the MODULES tab shows the three slots and how many are filled.
-  Forks must read as forks, not as adjacent list rows.
+  Forks must read as forks, not as adjacent list rows. Within a tab, every
+  weapon or heavy and all of its upgrades render as one connected kit: the
+  weapon is the header and its mastery branches and keystone fork are nested
+  beneath it with a visible connector, so an upgrade is never separated from
+  the weapon it belongs to.
 - The CONTROLS overlay is keybinds only. Player-facing toggles (auto-fire, low FX, movement mode) live in SETTINGS and are never duplicated in CONTROLS.
 - First-run players get the tutorial automatically; returning players are never
   nagged (localStorage flags).
