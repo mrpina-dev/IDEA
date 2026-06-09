@@ -460,7 +460,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2595';
+const W=630,H=840; const VERSION='2596';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -1456,7 +1456,12 @@ function applyUpgrades(){ const u=player.up;
   const _M=player.modules||[]; const _has=id=>_M.indexOf(id)>=0;
   player.coinMult=1; player.scoreMult=1; player.modFireCd=1; player.modChargeMult=1;
   player.modDuelist=_has('duelist'); player.modMuni=_has('munitions'); player.modVamp=_has('vamp'); player.modGlint=_has('glint');
+  player.modGreed=_has('greed'); player.modPhase=_has('phase'); player.modAuto=_has('autoloader'); player.modPurge=_has('purge');
   if(player.modGlint && player.glintOn){ player.pdmg*=1.15; player.heavyMult*=1.15; player.beamDps*=1.15; }
+  if(player.modPhase){ player.pdmg*=0.90; player.heavyMult*=0.90; player.beamDps*=0.90; }
+  if(player.modGreed){ player.coinMult*=0.80; }
+  if(player.modAuto){ player.modFireCd*=1.06; }
+  if(player.modPurge){ player.modFireCd*=1.05; }
   if(_has('glass')){ player.pdmg*=1.30; player.heavyMult*=1.30; player.beamDps*=1.30; player.maxArmor=Math.max(1,player.maxArmor-1); }
   if(_has('kinetic')){ player.maxArmor+=1; player.speed=Math.max(360,player.speed-44); }
   if(_has('scavenger')){ player.coinMult*=1.35; player.scoreMult*=0.85; }
@@ -1534,7 +1539,7 @@ function spawnHybrid(){ const fk=Math.random()<0.5?'foreman':'vector';
 
 /* ============================= scoring ============================= */
 function addScore(pts,x,y,c){
-  const gain=Math.round(pts*window.mult*((player&&player.scoreMult)||1));
+  const gain=Math.round(pts*window.mult*((player&&player.scoreMult)||1)*(1+((player&&player.modGreed)?(player.greed||0)*0.04:0)));
   window.scoreT+=gain;
   pops.push({x,y,txt:'+'+gain,c:c||COL.gold,life:.9,max:.9});
 }
@@ -1565,6 +1570,7 @@ function playerHit(){
   if(player.inv>0||player.dead)return;
   runHits++;
   player.noHitT=0; if(player.glintOn){ player.glintOn=false; applyUpgrades(); }
+  player.greed=0;
   if(player.shieldHits>0){ player.shieldHits--; player.dmgFlash=.18; player.inv=(gameMode==='hardcore'?0.25:0.4); ((player.shieldHits<=0)?((Audio_.play&&Audio_.play('shield_break'))||Audio_.hit()):((Audio_.play&&Audio_.play('shield_hit'))||Audio_.hit())); return; }
   player.armor--; player.inv=(gameMode==='hardcore'?0.40:0.6); player.dmgFlash=.2; styleHit(); (Audio_.play&&Audio_.play('player_hit'))||Audio_.hit();
   for(let k=0;k<10;k++) parts.push({x:player.x,y:player.y,vx:rnd(-80,80),vy:rnd(-80,80),life:.25,max:.25,c:COL.green,sz:1.8});
@@ -1675,6 +1681,7 @@ function outfitOffers(){ const b=startBuild, u=b.up; const pdN=(1+(u.gun-1)*0.30
 function buildCount(){ const u=startBuild.up,b=startBuild; const hu=b.heavyUnlocked||{}; return (u.gun-1)+(u.beamPow-1)+(u.beamCap-1)+(u.beamPierce-1)+(u.beamSpool-1)+(u.speed-1)+u.flank+u.armor+b.shieldHits+(b.bombs-2)+(b.drone?1:0)+b.unlocked.lance+b.unlocked.homing+b.unlocked.rapid+((u.heavyPow||1)-1)+((u.heavyChg||1)-1)+((u.teslaJump||1)-1)+((u.singAmp||1)-1)+((u.wavePow||1)-1)+((u.railPow||1)-1)+((u.railCap||1)-1)+((u.teslaDps||1)-1)+((u.singCrush||1)-1)+(u.mSpread||0)+(u.mRapid||0)+(u.mLance||0)+(u.mHoming||0)+(u.bSpread||0)+(u.bRapid||0)+(u.bLance||0)+(u.bHoming||0)+(u.mFlak||0)+(u.bFlak||0)+(u.mBuzz||0)+(u.bBuzz||0)+((u.bombPow||1)-1)+(hu.rail?1:0)+(hu.tesla?1:0)+(hu.singularity?1:0)+(hu.wave?1:0); }
 const WCOL={spread:COL.green,lance:COL.cyan,homing:COL.gold,rapid:COL.mat,flak:FLAK_COL,buzzsaw:COL.green};
 function applyPod(p){
+  if(player&&player.modGreed&&(p.type==='coin'||p.type==='core')){ player.greed=Math.min(10,(player.greed||0)+1); player.greedT=4; }
   if(p.type==='core'){ const jack=Math.round((90+sector*22)*((player&&player.coinMult)||1)); player.coins+=jack; runCoinsEarned+=jack; addScore(jack,p.x,p.y,p.c);
     let txt='CORE  +'+jack+' i\u00a2';
     if(Math.random()<0.34){
@@ -1865,7 +1872,7 @@ function drawHoles(){ for(const hh of holes){ const x=hh.x,y=hh.y,r=Math.max(0,h
   for(let k=0;k<3;k++){ bg.beginPath(); bg.arc(0,0,r*(0.5+0.16*k),hh.core+k*1.7,hh.core+k*1.7+4.2); bg.stroke(); }
   bg.shadowBlur=0; bg.restore(); } }
 function tryParry(){ if(state!=='play'||!player||player.dead||player.parryCd>0||player.parryT>0)return;
-  player.parryT=0.22*(player.modVamp?0.75:1); player.parryCd=0.95; player.parryHit=false; runParryAtt++; Audio_.parry(); player.inv=Math.max(player.inv,0.22);
+  player.parryT=0.22*(player.modVamp?0.75:1); player.parryCd=0.95; player.parryHit=false; runParryAtt++; Audio_.parry(); player.inv=Math.max(player.inv,player.modPhase?0.55:0.22);
   rings.push({x:player.x,y:player.y,r:10,vr:150,life:.3,max:.3,c:COL.cyan}); shake=Math.max(shake,3);
 }
 function fireBomb(){
@@ -1886,6 +1893,13 @@ function fireBomb(){
 }
 function killEnemy(e,silent){ if(e.dead)return; runKills++; e.dead=true; e.dt=0; explode(e.x,e.y,e.c,e.variant>=2);
   shake=Math.max(shake, 2.5+(e.variant||0)*3.5);
+  if(player&&player.modPurge&&!player._purge&&!player.dead){ player.purgeKills=(player.purgeKills||0)+1;
+    if(player.purgeKills>=5){ player.purgeKills=0; player._purge=1; const pd=10+sector*2;
+      rings.push({x:player.x,y:player.y,r:8,vr:900,life:.4,max:.4,c:COL.teal||COL.cyan}); shake=Math.max(shake,7);
+      for(let qi=ebul.length-1;qi>=0;qi--){ if(dist2(ebul[qi].x,ebul[qi].y,player.x,player.y)<130*130) ebul.splice(qi,1); }
+      for(const e3 of enemies){ if(e3.dead)continue; if(dist2(e3.x,e3.y,player.x,player.y)<150*150){ e3.hp-=pd; e3.flash=.1; if(e3.hp<=0){ window.killSrc='purge'; killEnemy(e3); } } }
+      if(boss&&!boss.dying&&!boss.entering&&dist2(boss.x,boss.y,player.x,player.y)<150*150) damageBoss(pd);
+      player._purge=0; } }
   factionDeathLayer(e);
   if((e.variant||0)>=2||e.fk==='foreman'||e.fk==='vector'){ hitStop=Math.max(hitStop,0.05); rings.push({x:e.x,y:e.y,r:e.r*0.4,vr:440,life:.4,max:.4,c:COL.white}); }
   addScore(e.pts,e.x,e.y,e.c); { const _cg=Math.ceil(e.pts*0.14*styleCoinMult()*((player.coinMult)||1)); player.coins+=_cg; runCoinsEarned+=_cg; } sectorKills++;
@@ -1921,6 +1935,7 @@ function update(dt){
   /* ----- player ----- */
   const pl=player;
   if(pl.inv>0)pl.inv-=dt; if(pl.dmgFlash>0)pl.dmgFlash-=dt;
+  if(pl.greed>0){ pl.greedT-=dt; if(pl.greedT<=0){ pl.greed--; pl.greedT=4; } }
   if(pl.buffs){ for(const bk of ['overdrive','scatter','magnet']) if(pl.buffs[bk]>0) pl.buffs[bk]=Math.max(0,pl.buffs[bk]-dt); }
   if(pl.dead){ pl.respawn-=dt; if(pl.respawn<=0 && pl.lives>=0){ resetPlayer(false); } }
   else {
@@ -1977,11 +1992,11 @@ function update(dt){
     if(sd>=3 && Math.random()<0.7) parts.push({x:pl.x+rnd(-6,6),y:pl.y+rnd(0,8),vx:rnd(-12,12),vy:rnd(8,34),life:.4,max:.4,c:COL.mset,sz:1.7});
     // drone fire - scales with GUN POWER, lightly tracks nearest enemy, twins at gun 4+
     if(pl.drone){ pl.drone.ph+=dt; pl.drone.cd=(pl.drone.cd||0)-dt;
-      if(pl.drone.cd<=0){ pl.drone.cd=.28; const pm=pl.pdmg||1, g=(pl.up&&pl.up.gun)||1, ddmg=0.9*pm, ox=58;
+      if(pl.drone.cd<=0){ pl.drone.cd=.28*(pl.modAuto?0.6:1); const pm=pl.pdmg||1, g=(pl.up&&pl.up.gun)||1, ddmg=0.9*pm, ox=58;
         let tgt=null,bd=1e9; for(const e of enemies){ if(e.dead)continue; const d=Math.abs(e.x-(pl.x+ox)); if(e.y<pl.y&&d<bd){bd=d;tgt=e;} }
         const aim=tgt?clamp((tgt.x-(pl.x+ox))*1.4,-180,180):0;
         pbul.push({x:pl.x+ox,y:pl.y+24-9,vx:aim,vy:-560,c:COL.green,r:1.4,dmg:ddmg});
-        if(g>=4) pbul.push({x:pl.x+ox+6,y:pl.y+24-9,vx:aim,vy:-560,c:COL.green,r:1.4,dmg:ddmg}); } }
+        if(g>=(pl.modAuto?2:4)) pbul.push({x:pl.x+ox+6,y:pl.y+24-9,vx:aim,vy:-560,c:COL.green,r:1.4,dmg:ddmg}); } }
   }
 
   /* ----- formation director ----- */
@@ -2813,7 +2828,11 @@ function refitItems(){ const u=player.up; const pdN=(1+(u.gun-1)*0.30), pdX=(1+u
     modCard('duelist','DUELIST','beampierce','MODULE: +25% damage to bosses and elites, but -15% to normal enemies.',1100),
     modCard('munitions','MUNITIONS RACK','bomb','MODULE: +2 bombs now and +25% bomb damage, but bombs no longer clear bullets.',1000),
     modCard('vamp','VAMPIRE FRAME','repair','MODULE: +50% hull recovery from parries and point-blank kills, but the parry window is 25% shorter.',1100),
-    modCard('glint','GLINT TARGETING','w_homing','MODULE: +15% damage while you avoid all hits. Resets when hit, re-arms after 3s clean.',1000)
+    modCard('glint','GLINT TARGETING','w_homing','MODULE: +15% damage while you avoid all hits. Resets when hit, re-arms after 3s clean.',1000),
+    modCard('greed','GREED ENGINE','flank','MODULE: coin pickups build a score combo up to +40% that decays and is lost when hit, but you earn 20% fewer coins.',1000),
+    modCard('phase','PHASE COIL','shield','MODULE: parries grant extra invulnerability, but all your weapon damage is -10%.',1000),
+    modCard('autoloader','AUTOLOADER','drone','MODULE: your DRONE fires far faster and twins early, at a slight cost to your own fire rate. Requires a DRONE.',900),
+    modCard('purge','SYSTEM PURGE','tesla','MODULE: every 5th kill emits a shock pulse that clears nearby fire and damages enemies, at -5% fire rate.',1000)
   ];
 }
 function nextWeapon(){ const i=WEAPONS.indexOf(player.wtype); return WEAPONS[(i+1)%WEAPONS.length]; }
