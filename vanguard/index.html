@@ -461,7 +461,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='114';
+const W=630,H=840; const VERSION='115';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -1870,8 +1870,8 @@ function updateHeavy(pl,dt){ const h=pl.heavy||'beam';
   pl.heavyCharge=0; pl.beamActive=false; heavyLoopSfx(null); return false; }   // fired / cancelled -> stop charge loop
 function updateHoles(dt){
   for(let i=holes.length-1;i>=0;i--){ const hh=holes[i]; hh.t+=dt; hh.core+=dt*4;
-    if(hh.state==='travel'){ hh.y+=hh.vy*dt; hh.r=Math.min(hh.maxr,hh.r+dt*300); if(hh.y<=hh.ty){ hh.state='active'; hh.y=hh.ty; hh.t=0; } }
-    else if(hh.state==='active'){ hh.r=hh.maxr;
+    if(hh.state==='travel'){ hh.y+=hh.vy*dt; if(hh.y<=hh.ty){ hh.state='active'; hh.y=hh.ty; hh.t=0; hh.r=0; rings.push({x:hh.x,y:hh.y,r:6,vr:620,life:.35,max:.35,c:COL.white}); rings.push({x:hh.x,y:hh.y,r:hh.maxr*0.7,vr:-300,life:.3,max:.3,c:COL.bmet}); shake=Math.max(shake,7); } }
+    else if(hh.state==='active'){ hh.r=Math.min(hh.maxr,hh.r+dt*900);
       for(const e of enemies){ if(e.dead)continue; const dx=hh.x-e.x, dy=hh.y-e.y, d=Math.hypot(dx,dy)||1;
         if(d<hh.pull){ const f=(1-d/hh.pull)*hh.pull*1.4*dt; e.x+=dx/d*f; e.y+=dy/d*f;
           if(d<hh.maxr){ e.hp-=dt*hh.dmg; e.flash=.08; if(e.hp<=0){ window.killSrc='singularity'; killEnemy(e); } } } }
@@ -1884,6 +1884,16 @@ function updateHoles(dt){
         Audio_.phase(); shake=Math.max(shake,12); bossFlash=Math.max(bossFlash,0.3); } }
     else { hh.r-=dt*600; if(hh.r<=0) holes.splice(i,1); } } }
 function drawHoles(){ for(const hh of holes){ const x=hh.x,y=hh.y,r=Math.max(0,hh.r);
+  if(hh.state==='travel'){ bg.save();
+    bg.globalAlpha=.45; bg.strokeStyle=COL.bmet; bg.lineWidth=1; bg.setLineDash([5,7]);
+    bg.beginPath(); bg.arc(x,hh.ty,hh.maxr*0.5,0,6.28); bg.stroke(); bg.setLineDash([]); bg.globalAlpha=1;
+    bg.globalCompositeOperation='lighter';
+    for(let s=1;s<=5;s++){ bg.globalAlpha=.3*(1-s/6); const tg=bg.createRadialGradient(x,y+s*9,0,x,y+s*9,9); tg.addColorStop(0,'rgba(178,77,255,.8)'); tg.addColorStop(1,'rgba(178,77,255,0)'); bg.fillStyle=tg; bg.beginPath(); bg.arc(x,y+s*9,9,0,6.28); bg.fill(); }
+    bg.globalAlpha=1; bg.translate(x,y);
+    bg.strokeStyle='rgba(205,150,255,.7)'; bg.lineWidth=1.4;
+    for(let k=0;k<6;k++){ const a=hh.core*1.6+k*1.047, rr=11+5*Math.sin(hh.core*3+k); bg.beginPath(); bg.moveTo(Math.cos(a)*rr,Math.sin(a)*rr); bg.lineTo(Math.cos(a)*3,Math.sin(a)*3); bg.stroke(); }
+    bg.shadowColor=COL.white; bg.shadowBlur=14; bg.fillStyle=COL.white; bg.beginPath(); bg.arc(0,0,3+Math.sin(hh.core*6),0,6.28); bg.fill();
+    bg.shadowBlur=0; bg.globalCompositeOperation='source-over'; bg.restore(); continue; }
   bg.save(); bg.translate(x,y); bg.globalCompositeOperation='lighter';
   const g=bg.createRadialGradient(0,0,0,0,0,r*1.6); g.addColorStop(0,'rgba(178,77,255,0)'); g.addColorStop(.7,'rgba(178,77,255,.22)'); g.addColorStop(1,'rgba(178,77,255,0)');
   bg.fillStyle=g; bg.beginPath(); bg.arc(0,0,r*1.6,0,6.28); bg.fill(); bg.globalCompositeOperation='source-over';
@@ -3977,6 +3987,7 @@ function closeTut(){ el('ovlTut').classList.add('hidden'); try{localStorage.setI
 { const b=el('howtoBtn'); if(b) b.addEventListener('click',e=>{ e.stopPropagation(); openTut(); }); }
 
 const CHANGELOG=[
+ {ver:'115',date:'2026',items:['SINGULARITY now travels as an unstable seed and ignites into a pulling well on arrival, instead of looking active in flight.']},
  {ver:'114',date:'2026',items:['FPS counter can now be toggled on in Settings.']},
  {ver:'112',date:'2026',items:['Ship modules now unlock by reaching a sector and completing an in-run challenge, shown on each locked module.']},
  {ver:'111',date:'2026',items:['The post-boss refit now opens with a SYSTEM HALT / ROOT ACCESS sequence instead of a repair rig.']},
@@ -4038,7 +4049,7 @@ function frame(now){ let dt=(now-last)/1000; last=now; if(dt>0.05)dt=0.05; if(!(
     drawBG(); drawFX();
     if(window.__devHitbox && gameMode==='dev' && window.__devDrawHitboxes) window.__devDrawHitboxes();
     hud(dt);
-      if(SETTINGS.showFps) drawFpsHud();
+    if(SETTINGS.showFps) drawFpsHud();
   }catch(err){ console.error('VANGUARD frame error:',err); }
   window.__ms=(window.__ms||0)*0.92+(performance.now()-_rt0)*0.08;
   requestAnimationFrame(frame);

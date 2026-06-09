@@ -67,6 +67,7 @@ Locked design forks (do not re-litigate):
 - Visual identity LOCKS before behavior/animation work begins. Always.
 - Enemies never teleport-despawn off the bottom: divers pull out and climb back (telegraphed, no-fire low, briefly non-contact). Off-screen popping is a bug.
 - The parryable bolt renders as a spinning cyan reticle (hollow diamond + crosshair ticks), never a soft filled disc, so it never reads as a pickup.
+- The SINGULARITY does not pull during its travel phase. Travel reads as an unstable in-flight seed and the well ignites with a ring burst only on arrival, so its visual never implies a pull it is not exerting.
 
 ### Pillar 3: Beautifully violent
 - The chosen feel is visceral/chunky: heavy kick, freeze-frame shock rings on
