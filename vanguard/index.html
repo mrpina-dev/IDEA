@@ -460,7 +460,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='111';
+const W=630,H=840; const VERSION='112';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -2826,7 +2826,28 @@ function renderShopGrid(container, items, ctx){ if(!container)return;
   [...container.querySelectorAll('.kittoggle')].forEach(b=>b.addEventListener('click',()=>{ const k=b.dataset.kit; refitExpand[k]=!refitExpand[k]; const kit=b.closest('.kit'); if(kit) kit.classList.toggle('collapsed', !refitExpand[k]); b.textContent=refitExpand[k]?'▾':'▸'; }));
   [...container.querySelectorAll('.card')].forEach(b=>b.addEventListener('click',()=>ctx.onBuy(+b.dataset.i,b))); }
 function hasMod(id){ return !!(player&&player.modules&&player.modules.indexOf(id)>=0); }
+function modGate(id){
+  const s=sector|0, ms=window.maxStyle||0;
+  const hu=runHeavyUse?((runHeavyUse.beam||0)+(runHeavyUse.rail||0)+(runHeavyUse.tesla||0)+(runHeavyUse.singularity||0)+(runHeavyUse.wave||0)):0;
+  const G={
+    glass:     {s:2, ok:ms>=65,                    need:'STYLE A'},
+    glint:     {s:3, ok:ms>=110,                   need:'STYLE S'},
+    duelist:   {s:2, ok:(runBosses||0)>=1,         need:'BEAT A BOSS'},
+    kinetic:   {s:3, ok:(runHits||0)>=10,          need:'TAKE 10 HITS'},
+    vamp:      {s:2, ok:(runPerfect||0)>=3,        need:'3 PERFECT PARRIES'},
+    phase:     {s:3, ok:(runParries||0)>=15,       need:'15 PARRIES'},
+    munitions: {s:2, ok:(runBombs||0)>=3,          need:'USE 3 BOMBS'},
+    overcharge:{s:3, ok:hu>=8,                      need:'8 HEAVY HITS'},
+    scavenger: {s:3, ok:(runCoinsEarned||0)>=2000, need:'EARN 2000 i¢'},
+    greed:     {s:2, ok:(runCoinsEarned||0)>=1200, need:'EARN 1200 i¢'},
+    autoloader:{s:2, ok:!!(player&&player.drone),  need:'OWN A DRONE'}
+  }[id];
+  if(!G) return {open:true};
+  return {open:(s>=G.s)&&G.ok, label:'S'+G.s+' + '+G.need};
+}
 function modCard(id,name,icon,desc,cost){ const eq=hasMod(id), slots=(player&&player.modules)||[0,0,0], free=slots.indexOf(0)>=0;
+  const g=modGate(id);
+  if(!eq && !g.open) return {grp:'MODULES',name:name,icon:icon,desc:desc,lv:0,mx:0,meta:'LOCK '+g.label,cost:0,can:false};
   return {grp:'MODULES',name:name,icon:icon,desc:desc,lv:0,mx:0,meta:eq?'EQUIPPED':(free?('i¢'+cost):'NO SLOT'),cost:eq?0:cost,can:(!eq&&free),buy:()=>{ if(!hasMod(id)){ const s=player.modules; const fi=s.indexOf(0); if(fi>=0){ s[fi]=id; if(id==='munitions') player.bombs+=2; } } }}; }
 function ksCard(w,name,icon,desc,id){ const cur=(player.ks&&player.ks[w])||0, picked=(cur===id), taken=(cur&&!picked);
   return {grp:'WEAPONS',name:name,icon:icon,desc:desc,lv:0,mx:0,fork:'pick',meta:picked?'ACTIVE':taken?'LOCKED':'i¢700',cost:(picked||taken)?0:700,can:!cur,buy:()=>{ if(!(player.ks&&player.ks[w])){ (player.ks=player.ks||{})[w]=id; } }}; }
@@ -3952,6 +3973,7 @@ function closeTut(){ el('ovlTut').classList.add('hidden'); try{localStorage.setI
 { const b=el('howtoBtn'); if(b) b.addEventListener('click',e=>{ e.stopPropagation(); openTut(); }); }
 
 const CHANGELOG=[
+ {ver:'112',date:'2026',items:['Ship modules now unlock by reaching a sector and completing an in-run challenge, shown on each locked module.']},
  {ver:'111',date:'2026',items:['The post-boss refit now opens with a SYSTEM HALT / ROOT ACCESS sequence instead of a repair rig.']},
  {ver:'110',date:'2026',items:['Rival grunts no longer flee when a boss appears. They stay and fight, and the boss damages its own forces with stray fire.']},
  {ver:'109',date:'2026',items:['NAILGUN hits harder, especially cold, so it is worth equipping right away.','Missed parries now flash a WHIFF cue.','Weapon names now read consistently everywhere (RAILSPIKE, SWARM, NAILGUN).']},

@@ -114,6 +114,7 @@ Locked design forks (do not re-litigate):
 - HARDCORE means hardcore: one life, no extra lives from CORE.
 - The leaderboard is the social spine of the classroom deployment. Anything
   that breaks score comparability across players is rejected.
+- Ship modules unlock per-run behind a sector threshold plus an in-run feat that demonstrates the module's playstyle (e.g. DUELIST after beating a boss, VAMPIRE FRAME after 3 perfect parries). Unlocks reset every run so no player carries a structural advantage, and the feat teaches the mechanic the module rewards.
 
 ### Pillar 5: Danger never goes away
 - Boss HP follows the derived quadratic (90 + 24s + 24s^2), built backward
