@@ -442,7 +442,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='2579';
+const W=630,H=840; const VERSION='2580';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
@@ -1905,14 +1905,15 @@ function update(dt){
         pops.push({x:player.x,y:player.y-30,txt:gotBolt?'PERFECT PARRY':'PARRY',c:gotBolt?COL.white:COL.cyan,life:.9,max:.9}); Audio_.parryHit(); } }
     // movement (slowed while the beam is firing)
     let mx=0,my=0; const spd=pl.speed*(pl.beamActive?0.5:1);
-    if(moveMode_pref==='lock' && plocked){ const tx=clamp(ptr.lx==null?pl.x:ptr.lx,16,W-16), ty=clamp(ptr.ly==null?pl.y:ptr.ly,H*0.16,H-40);
+    const kbMove=(keys.ArrowLeft||keys.a||keys.ArrowRight||keys.d||keys.ArrowUp||keys.w||keys.ArrowDown||keys.s);
+    if(kbMove){ if(keys.ArrowLeft||keys.a)mx-=1; if(keys.ArrowRight||keys.d)mx+=1;
+      if(keys.ArrowUp||keys.w)my-=1; if(keys.ArrowDown||keys.s)my+=1;
+      const m=Math.hypot(mx,my)||1; pl.x+=mx/m*spd*dt; pl.y+=my/m*spd*dt; pl.vx=mx; }
+    else if(moveMode_pref==='lock' && plocked){ const tx=clamp(ptr.lx==null?pl.x:ptr.lx,16,W-16), ty=clamp(ptr.ly==null?pl.y:ptr.ly,H*0.16,H-40);
       const dx=tx-pl.x, dy=ty-pl.y, d=Math.hypot(dx,dy)||1;
       const step=Math.min(spd*dt, d*Math.min(1,FOLLOW_RESP*dt)); if(d>step){ pl.x+=dx/d*step; pl.y+=dy/d*step; } else { pl.x=tx; pl.y=ty; } pl.vx=dx*0.05; }
     else if(ptr.active){ const tx=ptr.x, ty=ptr.y-46; const dx=tx-pl.x, dy=ty-pl.y, d=Math.hypot(dx,dy)||1;
       const step=Math.min(spd*dt, d*Math.min(1,FOLLOW_RESP*dt)); if(d>step){ pl.x+=dx/d*step; pl.y+=dy/d*step; } else { pl.x=tx; pl.y=ty; } pl.vx=dx*0.05; }
-    else { if(keys.ArrowLeft||keys.a)mx-=1; if(keys.ArrowRight||keys.d)mx+=1;
-      if(keys.ArrowUp||keys.w)my-=1; if(keys.ArrowDown||keys.s)my+=1;
-      const m=Math.hypot(mx,my)||1; pl.x+=mx/m*spd*dt; pl.y+=my/m*spd*dt; pl.vx=mx; }
     pl.x=clamp(pl.x,16,W-16); pl.y=clamp(pl.y,H*0.16,H-40);
     // HEAVY slot operates the heavy energy meter and suppresses primary while engaged
     const heavyBusy=updateHeavy(pl,dt);
@@ -2636,7 +2637,7 @@ function drawStation(){ const st=station; if(!st)return; const x=st.x,y=st.y,r=3
   dot(bg,0,r*0.62,3*(0.6+0.4*Math.sin(hum*4)),COL.white);
   bg.shadowBlur=0; bg.restore();
 }
-function openRefit(){ state='refit'; Audio_.play&&Audio_.play('refit_open'); document.getElementById('touch').classList.add('hidden');
+function openRefit(){ state='refit'; try{ if(document.pointerLockElement) document.exitPointerLock(); }catch(e){} clearInput(); Audio_.play&&Audio_.play('refit_open'); document.getElementById('touch').classList.add('hidden');
   el('refitNext').textContent=roman(sector+1); buildRefit(); showOverlay('ovlRefit');
   const w=el('refitWrap'); if(w){ w.classList.remove('warp'); void w.offsetWidth; w.classList.add('warp'); }
   Audio_.power(); Audio_.lane('refit'); }
@@ -3477,6 +3478,8 @@ function refreshInitials(){ const box=el('initials'); [...box.children].forEach(
 
 /* ============================= input ============================= */
 const ptr={x:W/2,y:H-130,active:false};
+function clearInput(){ for(const k in keys) keys[k]=false; for(const h in held) held[h]=false; if(player){ player.beamOn=false; player.beamLock=false; } }
+window.addEventListener('blur',clearInput);
 let isTouch=('ontouchstart' in window)||navigator.maxTouchPoints>0;
 function toLogical(clientX,clientY){ const r=bgC.getBoundingClientRect(); return {x:(clientX-r.left)/r.width*W,y:(clientY-r.top)/r.height*H}; }
 function uiBlocked(){ const ids=['ovlOutfit','ovlSettings','ovlKeys','ovlBoard','ovlTut','ovlLog','ovlConfirm']; for(const id of ids){ const el2=document.getElementById(id); if(el2 && !el2.classList.contains('hidden')) return true; } return false; }
@@ -3575,7 +3578,7 @@ el('btnParry').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropa
 el('btnPause').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();pauseToggle();},{passive:false});
 el('launchBtn').addEventListener('click',()=>{ if(state==='refit')launchFromRefit(); });
 
-function pauseToggle(){ if(state==='play'||state==='pause'){ Audio_.play&&Audio_.play('pause'); } if(state==='play'){ state='pause'; if(Audio_.stopAllLoops)Audio_.stopAllLoops(); showOverlay('ovlPause'); try{ if(document.pointerLockElement) document.exitPointerLock(); }catch(e){}
+function pauseToggle(){ if(state==='play'||state==='pause'){ Audio_.play&&Audio_.play('pause'); } if(state==='play'){ state='pause'; clearInput(); if(Audio_.stopAllLoops)Audio_.stopAllLoops(); showOverlay('ovlPause'); try{ if(document.pointerLockElement) document.exitPointerLock(); }catch(e){}
     const pmb=document.getElementById('pauseMuteBtn'); if(pmb)pmb.textContent='SOUND: '+(Audio_.muted?'OFF':'ON'); }
   else if(state==='pause'){ state='play'; showOverlay(null); document.getElementById('touch').classList.toggle('hidden',!isTouch);
     if(boss){document.getElementById('bossbar').style.display='block';document.getElementById('bossname').style.display='block';} } }

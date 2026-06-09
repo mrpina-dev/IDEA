@@ -192,6 +192,7 @@ Each faction is a Bosco Tech pathway made hostile. Identity table is in
 - DEV mode is student-facing by design: a visible creative/sandbox mode for
   exploring the game deeply. It is never ranked and sends no telemetry. Do not
   gate it behind secrets or hide it from students.
+- Keyboard movement is always authoritative: WASD/arrows override mouse-follow and pointer-lock every frame. Entering REFIT or any menu releases pointer lock so the cursor is usable, and held input is cleared on focus loss so keys never stick.
 
 ---
 
