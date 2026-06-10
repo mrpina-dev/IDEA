@@ -54,6 +54,8 @@ Locked design forks (do not re-litigate):
 - Sitting still should get you killed. Aimed faction fire, bullet curtains, and
   enemy pacing all exist to punish a stationary ship.
 - A missed parry costs a longer re-arm cooldown (already in code, ~0.95s vs ~0.3s on a catch); no health penalty for whiffing (rejected as too punishing for the classroom).
+- Enemy HP compounds (+6% per sector past 6) so the field never evaporates
+  faster than it can shoot back; dead grunts fire zero bullets.
 
 ### Pillar 2: Readability before everything
 - Every enemy must be instantly identifiable as its faction and tech identity.
@@ -118,11 +120,14 @@ Locked design forks (do not re-litigate):
 - Ship modules unlock per-run behind a sector threshold plus an in-run feat that demonstrates the module's playstyle (e.g. DUELIST after beating a boss, VAMPIRE FRAME after 3 perfect parries). Unlocks reset every run so no player carries a structural advantage, and the feat teaches the mechanic the module rewards.
 
 ### Pillar 5: Danger never goes away
-- Boss HP follows the derived quadratic (90 + 24s + 24s^2), built backward
-  from target time-to-kill (7-14s by sector), not vibes. The player power
+- Boss HP follows the derived quadratic (95 + 27s^2), rebuilt in the v119-era
+  balance overhaul backward from modeled effective player DPS with a target
+  time-to-kill of 8-16s rising by sector; the climbing wall past sector 10 is
+  intentional and is what ends runs. The player power
   curve is S-shaped; threat curves must be shaped against it, not linear.
 - The economy is tuned so the full upgrade tree cannot be bought by sector 3.
-  Kill-coin coefficient is the master income dial (currently 0.14).
+  Kill-coin coefficient is the master income dial (currently 0.10).
+  STYLE coin multipliers cap at 2.0x; STYLE score multipliers are untouched.
 - Support augments (DRONE, FLANK GUNS) scale with GUN POWER so they stay relevant late-game, but are tuned well below primary DPS so they never trivialize a fight.
 - Boss-delete buttons are bugs (the 7x bomb multiplier and Wave Motion
   precedent). No single purchase should trivialize a boss.
@@ -132,6 +137,9 @@ Locked design forks (do not re-litigate):
 - Balance proposals always state the numbers: named constants, exact values,
   and the fastest dials to turn if the change overshoots.
 - Formations carry a finite reinforcement budget (about one extra wave) and then deplete and retire. They never refill indefinitely, which previously allowed a safe coin/parry/style farm.
+- The global enemy-bullet budget (ebulCap, 30 + 9 x sector) is a named threat
+  dial. It was the hidden cause of safe bottom-screen camping when it sat at
+  12 + 5 x sector; never let it silently throttle aimed fire again.
 
 ---
 
