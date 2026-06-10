@@ -461,7 +461,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='120';
+const W=630,H=840; const VERSION='121';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 /* ============================= BAL: central balance registry =============================
    Every shipped balance value lives here and is read live in all modes. NORMAL/HARDCORE/
@@ -684,6 +684,7 @@ let rebindAction=null;
 let shotsFired, shotsHit, runTime, runKills=0, runBosses=0, deathSlow=0, killerInfo=null, hitStop=0;
 let runCoinsEarned=0, runCoinsSpent=0, runParryAtt=0, runParries=0, runPerfect=0, runHits=0, runBombs=0, runOverheats=0, runLivesUsed=0, runDwell={spread:0,lance:0,homing:0,rapid:0,flak:0,buzzsaw:0};
 let runHeavyUse={beam:0,tesla:0,rail:0,singularity:0,wave:0}, runBossTTK=[];
+let balDmgAccum=0, balEbulPrev=0, balEbulSpawned=0;   // TUNE meters: damage dealt + enemy bullets born
 let bgScroll=0; const stars=[
   Array.from({length:34},()=>({x:rnd(0,W),y:rnd(0,H),sp:14,sz:.6,al:.30,st:0})),
   Array.from({length:24},()=>({x:rnd(0,W),y:rnd(0,H),sp:34,sz:.9,al:.5,st:6})),
@@ -1554,6 +1555,7 @@ function startGame(){
   runKills=0; runBosses=0; deathSlow=0; killerInfo=null;
   runCoinsEarned=0; runCoinsSpent=0; runParryAtt=0; runParries=0; runPerfect=0; runHits=0; runBombs=0; runOverheats=0; runLivesUsed=0; runDwell={spread:0,lance:0,homing:0,rapid:0,flak:0,buzzsaw:0};
   runHeavyUse={beam:0,tesla:0,rail:0,singularity:0,wave:0}; runBossTTK=[]; window.__bossT0=0;
+  balDmgAccum=0; balEbulPrev=0; balEbulSpawned=0;
   resetPlayer(true);
   { let b=startBuild;
     if(gameMode!=='dev' && (startBuild.spent||0)>START_BUDGET) b=freshBuild();   // over-budget DEV build must not leak into ranked
@@ -2314,7 +2316,7 @@ function update(dt){
           ebul.push({x:e.x,y:e.y,vx:dx/mm*300,vy:dy/mm*300,c:e.c,r:3,owner:e}); e.flash=.1; Audio_.hit();
           for(let k=0;k<3;k++)parts.push({x:e.x,y:e.y,vx:rnd(-60,60),vy:rnd(-60,60),life:.18,max:.18,c:e.c,sz:1.6});
           hit=true; break; }
-        e.hp-=dmgEff*((player.modDuelist)?(((e.variant||0)>=2||e.fk==='foreman'||e.fk==='vector')?1.25:0.85):1); e.flash=.1; impactFX(b.x,b.y,e.c,b.vx,b.vy);
+        { const _dd=dmgEff*((player.modDuelist)?(((e.variant||0)>=2||e.fk==='foreman'||e.fk==='vector')?1.25:0.85):1); if(gameMode==='tune') balDmgAccum+=_dd; e.hp-=_dd; } e.flash=.1; impactFX(b.x,b.y,e.c,b.vx,b.vy);
         if(b.frag){ for(const e2 of enemies){ if(e2.dead||e2===e)continue; if(dist2(e2.x,e2.y,b.x,b.y)<900){ e2.hp-=dmgEff*0.5; e2.flash=.08; if(e2.hp<=0){ window.killSrc='spread'; killEnemy(e2); } } } rings.push({x:b.x,y:b.y,r:4,vr:160,life:.18,max:.18,c:COL.green}); }
         if(b.ramp){ b.dmg=Math.min((b.dmg||0)*1.15,(b.dmg0||b.dmg)*2.5); }
         if(b.scatter){ for(let s=0;s<3;s++){ const fa=(s-1)*0.5; pbul.push({x:b.x,y:b.y,vx:Math.sin(fa)*360,vy:-820,c:COL.cyan,r:2.4,dmg:(b.dmg0||b.dmg)*0.5,len:14,wt:'rail',gl:b.gl}); } b.scatter=false; }
@@ -2359,6 +2361,7 @@ function update(dt){
 
   nextSectorCheck(dt);
   if(gameOverT>0){ gameOverT-=dt; if(gameOverT<=0){ killer=null; endRun(); } }
+  if(gameMode==='tune'){ const _g=ebul.length-balEbulPrev; if(_g>0) balEbulSpawned+=_g; balEbulPrev=ebul.length; }
 }
 
 /* enemy shots */
@@ -2755,7 +2758,7 @@ function ampShockwave(phase){ const b=boss; if(!b) return; const cx=b.x, cy=b.y+
       ebul.push({x:cx,y:cy,vx:Math.cos(a)*sp2,vy:Math.sin(a)*sp2,c:COL.csee,r:3.4}); }
     rings.push({x:cx,y:cy,r:b.r*0.3,vr:sp2,life:.5,max:.5,c:COL.csee}); }
   Audio_.wub(); shake=Math.max(shake,9); bossFlash=Math.max(bossFlash,0.18); }
-function damageBoss(dmg){ const b=boss; if(!b||b.dying||b.entering||b.tT>0) return; if(player&&player.modDuelist) dmg*=1.25; b.flash=.08;
+function damageBoss(dmg){ const b=boss; if(!b||b.dying||b.entering||b.tT>0) return; if(player&&player.modDuelist) dmg*=1.25; if(gameMode==='tune') balDmgAccum+=dmg; b.flash=.08;
   if(b.fk==='bmet') b.regenT=1.6;
   if(b.plates>0){ b.plateHp-=dmg;
     if(b.plateHp<=0){ b.plates--; explode(b.x+rnd(-b.r,b.r),b.y+rnd(-b.r,b.r),b.c,false); Audio_.hit();
@@ -3916,14 +3919,16 @@ try{ if(localStorage.getItem('vanguard_mute')==='1'){Audio_.muted=true;const pmb
 (function(){
   let m; try{ m=localStorage.getItem('vanguard_mode')||'normal'; }catch(e){ m='normal'; }
   if(m!=='normal'&&m!=='hardcore'&&m!=='dev'&&m!=='tune') m='normal';
+  /* ?tune=1 forces TUNE (hidden dev balancing mode); it is not a title button */
+  try{ if(/[?&]tune=1\b/.test(location.search)) m='tune'; }catch(e){}
   gameMode=m;
   const wrap=document.getElementById('modeSel'); if(!wrap)return;
   const btns=[...wrap.querySelectorAll('.modebtn')];
   function apply(){ btns.forEach(b=>b.classList.toggle('sel',b.dataset.m===gameMode)); }
   btns.forEach(b=>b.addEventListener('click',ev=>{ ev.stopPropagation(); gameMode=b.dataset.m; try{localStorage.setItem('vanguard_mode',gameMode);}catch(e){} apply(); Audio_.hit(); }));
   apply();
-  /* hidden TUNE mode entry: Ctrl+Shift+T on the title screen toggles tune (dev-only shortcut) */
-  window.addEventListener('keydown',ev=>{ if(state!=='title')return; if(ev.ctrlKey&&ev.shiftKey&&(ev.key==='T'||ev.key==='t')){ ev.preventDefault(); gameMode=(gameMode==='tune')?'normal':'tune'; try{localStorage.setItem('vanguard_mode',gameMode);}catch(e){} apply(); Audio_.hit(); } });
+  /* TUNE is entered only via ?tune=1; the title shows a small indicator when active */
+  if(gameMode==='tune'){ try{ const ti=document.createElement('div'); ti.id='tuneTag'; ti.textContent='TUNE MODE'; ti.style.cssText='position:fixed;top:8px;left:8px;z-index:40;font:700 10px "Chakra Petch",sans-serif;letter-spacing:.12em;color:var(--gold);background:rgba(200,255,0,.1);border:1px solid var(--gold);border-radius:4px;padding:3px 8px;pointer-events:none'; document.body.appendChild(ti); }catch(e){} }
 })();
 
 /* starting build (outfit) */
@@ -4407,6 +4412,128 @@ requestAnimationFrame(frame);
       perfFoot.textContent='FPS '+fpsEMA.toFixed(0)+'  E:'+enemies.length+' EB:'+ebul.length+' PB:'+pbul.length+' P:'+parts.length; }
     requestAnimationFrame(vis); })();
 })();
+
+/* ============================= TUNE balancing panel ============================= */
+(function(){
+  const css=document.createElement('style'); css.textContent=
+   '#tunePanel{position:fixed;top:8px;left:8px;z-index:38;width:212px;max-height:90vh;overflow:auto;background:rgba(2,10,4,.94);border:1px solid var(--gold);border-radius:6px;padding:8px;font-family:"Share Tech Mono",monospace;color:var(--white);pointer-events:auto;display:none}'
+   +'#tunePanel h4{font-size:8px;letter-spacing:.16em;color:var(--gold);margin:8px 0 4px;border-bottom:1px solid rgba(200,255,0,.25);padding-bottom:2px}'
+   +'#tunePanel h4:first-child{margin-top:0}'
+   +'#tunePanel .trow{display:flex;flex-direction:column;gap:2px;margin-bottom:6px}'
+   +'#tunePanel .tlab{display:flex;justify-content:space-between;font-size:8px;color:var(--white)}'
+   +'#tunePanel .tlab .tval{color:var(--gold)} #tunePanel .tlab .tval.chg{color:var(--cyan)}'
+   +'#tunePanel .ttime{font-size:7px;letter-spacing:.04em;color:var(--dim)}'
+   +'#tunePanel input[type=range]{width:100%;height:14px;accent-color:#C8FF00;cursor:pointer}'
+   +'#tunePanel button{font-family:"Share Tech Mono",monospace;font-size:8px;background:rgba(0,20,8,.6);border:1px solid rgba(200,255,0,.4);color:var(--white);border-radius:3px;padding:4px 4px;cursor:pointer;pointer-events:auto}'
+   +'#tunePanel button:active{background:rgba(200,255,0,.2)}'
+   +'#tunePanel .tgrid{display:grid;grid-template-columns:1fr 1fr;gap:3px}'
+   +'#tunePanel .tmeter{display:flex;justify-content:space-between;font-size:8px;color:var(--cyan);padding:1px 0}'
+   +'#tunePanel .tmeter b{color:var(--gold);font-weight:400}'
+   +'#tunePanel .arr{font-size:8px;color:var(--dim);word-break:break-word}'
+   +'#tuneTab{position:fixed;top:8px;left:8px;z-index:38;font:700 9px "Chakra Petch",sans-serif;background:rgba(200,255,0,.12);border:1px solid var(--gold);color:var(--gold);border-radius:4px;padding:3px 8px;cursor:pointer;pointer-events:auto;display:none}';
+  document.head.appendChild(css);
+
+  const panel=document.createElement('div'); panel.id='tunePanel';
+  const tab=document.createElement('div'); tab.id='tuneTab'; tab.textContent='◂ TUNE';
+  document.body.appendChild(panel); document.body.appendChild(tab);
+  let shown=true;
+
+  const TIMING={PLAYER:'recalc now',ENEMY:'next spawn',BOSS:'next boss',ECONOMY:'instant',PACING:'next boss'};
+
+  function persist(){ const diff={}; for(const k in BAL_DEFAULTS){ if(JSON.stringify(BAL[k])!==JSON.stringify(BAL_DEFAULTS[k])) diff[k]=BAL[k]; } try{ localStorage.setItem('vanguard_baltune',JSON.stringify(diff)); }catch(e){} }
+  function applyLive(){ if(typeof applyUpgrades==='function' && player) applyUpgrades(); }
+
+  const valEls={};
+  function refreshVals(){ BAL_META.forEach(function(m){ const el=valEls[m.key]; if(!el)return; const v=BAL[m.key]; el.textContent=(m.type==='array')?('['+v.join(',')+']'):v; el.classList.toggle('chg', JSON.stringify(v)!==JSON.stringify(BAL_DEFAULTS[m.key])); }); }
+
+  const groups=[...new Set(BAL_META.map(function(m){ return m.group; }))];
+  let firstHeader=true;
+  groups.forEach(function(g){
+    const h=document.createElement('h4');
+    if(firstHeader){
+      firstHeader=false;
+      h.style.cssText='display:flex;justify-content:space-between;align-items:center';
+      const lbl=document.createElement('span'); lbl.textContent=g+' \xb7 '+TIMING[g];
+      const xb=document.createElement('button'); xb.textContent='×'; xb.style.cssText='border:none;background:none;color:var(--gold);font-size:11px;cursor:pointer;padding:0 2px;line-height:1';
+      xb.addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation();shown=false;});
+      h.appendChild(lbl); h.appendChild(xb);
+    } else { h.textContent=g+' \xb7 '+TIMING[g]; }
+    panel.appendChild(h);
+    BAL_META.filter(function(m){ return m.group===g; }).forEach(function(m){
+      const row=document.createElement('div'); row.className='trow';
+      const lab=document.createElement('div'); lab.className='tlab';
+      const nm=document.createElement('span'); nm.textContent=m.label;
+      const val=document.createElement('span'); val.className='tval'; valEls[m.key]=val;
+      lab.appendChild(nm); lab.appendChild(val); row.appendChild(lab);
+      if(m.type==='array'){
+        const note=document.createElement('div'); note.className='ttime'; note.textContent='array dial - export only'; row.appendChild(note);
+      } else {
+        const sl=document.createElement('input'); sl.type='range'; sl.min=m.min; sl.max=m.max; sl.step=m.step; sl.value=BAL[m.key];
+        m._sl=sl;
+        sl.addEventListener('input',function(){ BAL[m.key]=parseFloat(sl.value); if(m.group==='PLAYER')applyLive(); persist(); refreshVals(); });
+        row.appendChild(sl);
+      }
+      panel.appendChild(row);
+    });
+  });
+
+  // jump tools
+  const jh=document.createElement('h4'); jh.textContent='JUMP (feel-check)'; panel.appendChild(jh);
+  const jg=document.createElement('div'); jg.className='tgrid';
+  function jbtn(t,fn){ const b=document.createElement('button'); b.textContent=t; b.addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation();fn();}); return b; }
+  [['+1 SEC',1],['+3 SEC',3],['-1 SEC',-1]].forEach(function(p){ jg.appendChild(jbtn(p[0],function(){ if(state==='play'){ sector=clamp(sector+p[1],1,20); killsForBoss=killsForBossN(); triggerBanner(); } })); });
+  jg.appendChild(jbtn('SPAWN BOSS',function(){ if(state==='play'&&!boss){ if(typeof devBoss==='function') devBoss(sectorTheme().fk||'ace'); else spawnBoss(); } }));
+  panel.appendChild(jg);
+  const jn=document.createElement('div'); jn.className='ttime'; jn.style.marginTop='3px'; jn.textContent='economy dials still need natural play to judge'; panel.appendChild(jn);
+
+  // meters
+  const mh=document.createElement('h4'); mh.textContent='LIVE METERS (5s)'; panel.appendChild(mh);
+  const mDps=document.createElement('div'); mDps.className='tmeter'; mDps.innerHTML='DPS out <b id="tmDps">0</b>';
+  const mPrs=document.createElement('div'); mPrs.className='tmeter'; mPrs.innerHTML='pressure in/s <b id="tmPrs">0</b>';
+  const mInc=document.createElement('div'); mInc.className='tmeter'; mInc.innerHTML='i¢ / min <b id="tmInc">0</b>';
+  const mTtk=document.createElement('div'); mTtk.className='tmeter'; mTtk.innerHTML='last boss TTK <b id="tmTtk">-</b>';
+  [mDps,mPrs,mInc,mTtk].forEach(function(e){ panel.appendChild(e); });
+
+  // actions
+  const ah=document.createElement('h4'); ah.textContent='ACTIONS'; panel.appendChild(ah);
+  const ag=document.createElement('div'); ag.className='tgrid';
+  const arr=document.createElement('div'); arr.className='arr';
+  ag.appendChild(jbtn('EXPORT',function(){
+    const changed={}; for(const k in BAL_DEFAULTS){ if(JSON.stringify(BAL[k])!==JSON.stringify(BAL_DEFAULTS[k])) changed[k]=BAL[k]; }
+    const payload={ver:VERSION,changed:changed,session:{sectorReached:sector,bossTTK:runBossTTK.slice(),coinsEarned:runCoinsEarned,coinsPerMin:Math.round((runCoinsEarned/Math.max(1,runTime))*60),hitsTaken:runHits,kills:runKills}};
+    const json=JSON.stringify(payload);
+    try{ navigator.clipboard.writeText(json); arr.textContent='copied to clipboard'; }catch(e){ arr.textContent=json; }
+  }));
+  ag.appendChild(jbtn('RESET ALL',function(){
+    for(const k in BAL_DEFAULTS) BAL[k]=JSON.parse(JSON.stringify(BAL_DEFAULTS[k]));
+    try{localStorage.removeItem('vanguard_baltune');}catch(e){}
+    applyLive();
+    BAL_META.forEach(function(m){ if(m._sl) m._sl.value=BAL[m.key]; });
+    refreshVals(); arr.textContent='reset to defaults';
+  }));
+  panel.appendChild(ag); panel.appendChild(arr);
+
+  tab.addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation();shown=true;});
+
+  refreshVals();
+
+  let acc=0, lastT=0;
+  (function loop(ts){ ts=ts||0; const active=(gameMode==='tune');
+    panel.style.display=(active&&shown)?'block':'none';
+    tab.style.display=(active&&!shown)?'block':'none';
+    if(active){ const now=ts/1000; const d=lastT?now-lastT:0; lastT=now; acc+=d;
+      if(acc>=0.5){
+        const dpsEl=document.getElementById('tmDps'), prsEl=document.getElementById('tmPrs'), incEl=document.getElementById('tmInc'), ttkEl=document.getElementById('tmTtk');
+        if(state==='play'){ const dps=balDmgAccum/Math.max(0.001,acc); const prs=balEbulSpawned/Math.max(0.001,acc);
+          if(dpsEl)dpsEl.textContent=dps.toFixed(0); if(prsEl)prsEl.textContent=prs.toFixed(1);
+          balDmgAccum=0; balEbulSpawned=0; }
+        if(incEl)incEl.textContent=Math.round((runCoinsEarned/Math.max(1,runTime))*60);
+        if(ttkEl)ttkEl.textContent=runBossTTK.length?(runBossTTK[runBossTTK.length-1]+'s'):'-';
+        acc=0; }
+    } else { lastT=0; }
+    requestAnimationFrame(loop); })();
+})();
+
 })();
 </script>
 <script>
