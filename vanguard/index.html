@@ -78,16 +78,16 @@ body{background:#000;display:flex;align-items:center;justify-content:center;min-
 
 /* touch controls */
 .touch{position:absolute;inset:0;z-index:7;pointer-events:none}
-.tbtn{position:absolute;width:60px;height:60px;border-radius:50%;border:1.5px solid rgba(0,255,65,.4);
-  background:rgba(0,20,8,.45);color:var(--green);font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:10px;
+.tbtn{position:absolute;width:66px;height:66px;border-radius:50%;border:1.5px solid rgba(0,255,65,.4);
+  background:rgba(0,20,8,.45);color:var(--green);font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:11px;
   display:flex;align-items:center;justify-content:center;letter-spacing:.05em;pointer-events:auto;
   text-shadow:0 0 8px rgba(0,255,65,.6);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);touch-action:none}
 .tbtn:active{background:rgba(0,255,65,.18)}
-#btnBomb{left:14px;bottom:74px;border-color:rgba(200,255,0,.5);color:var(--gold)}
-#btnCharge{right:14px;bottom:74px;border-color:rgba(232,255,232,.5);color:var(--white)}
-#btnParry{right:14px;bottom:144px;border-color:rgba(0,240,255,.5);color:var(--cyan)}
-#btnWpn{left:14px;bottom:144px;border-color:rgba(0,240,255,.4);color:var(--cyan)}
-#btnHeavy{left:14px;bottom:204px;border-color:rgba(178,77,255,.5);color:#B24DFF}
+#btnBomb{left:14px;bottom:78px;border-color:rgba(200,255,0,.5);color:var(--gold)}
+#btnCharge{right:14px;bottom:166px;border-color:rgba(232,255,232,.5);color:var(--white)}
+#btnParry{right:14px;bottom:78px;width:76px;height:76px;font-size:12px;border-color:rgba(0,240,255,.7);color:var(--cyan);box-shadow:0 0 14px rgba(0,240,255,.25)}
+#btnWpn{left:14px;bottom:156px;border-color:rgba(0,240,255,.4);color:var(--cyan)}
+#btnHeavy{left:14px;bottom:234px;border-color:rgba(178,77,255,.5);color:#B24DFF}
 #btnPause{top:10px;left:50%;transform:translateX(-50%);width:34px;height:34px;font-size:9px;border-color:rgba(74,122,82,.7);color:var(--dim)}
 .hidden{display:none!important}
 
@@ -461,7 +461,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='122';
+const W=630,H=840; const VERSION='123';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 /* ============================= BAL: central balance registry =============================
    Every shipped balance value lives here and is read live in all modes. NORMAL/HARDCORE/
@@ -2081,7 +2081,7 @@ function update(dt){
     else if(moveMode_pref==='lock' && plocked){ const tx=clamp(ptr.lx==null?pl.x:ptr.lx,16,W-16), ty=clamp(ptr.ly==null?pl.y:ptr.ly,H*0.16,H-40);
       const dx=tx-pl.x, dy=ty-pl.y, d=Math.hypot(dx,dy)||1;
       const step=Math.min(spd*dt, d*Math.min(1,FOLLOW_RESP*dt)); if(d>step){ pl.x+=dx/d*step; pl.y+=dy/d*step; } else { pl.x=tx; pl.y=ty; } pl.vx=dx*0.05; }
-    else if(ptr.active){ const tx=ptr.x, ty=ptr.y-46; const dx=tx-pl.x, dy=ty-pl.y, d=Math.hypot(dx,dy)||1;
+    else if(ptr.active){ const tx=ptr.touch?clamp(ptr.lx==null?pl.x:ptr.lx,16,W-16):ptr.x, ty=ptr.touch?clamp(ptr.ly==null?pl.y:ptr.ly,H*0.16,H-40):(ptr.y-46); const dx=tx-pl.x, dy=ty-pl.y, d=Math.hypot(dx,dy)||1;
       const step=Math.min(spd*dt, d*Math.min(1,FOLLOW_RESP*dt)); if(d>step){ pl.x+=dx/d*step; pl.y+=dy/d*step; } else { pl.x=tx; pl.y=ty; } pl.vx=dx*0.05; }
     pl.x=clamp(pl.x,16,W-16); pl.y=clamp(pl.y,H*0.16,H-40);
     // HEAVY slot operates the heavy energy meter and suppresses primary while engaged
@@ -3771,7 +3771,7 @@ function cycleSlot(i){ const A='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 '; const cu
 function refreshInitials(){ const box=el('initials'); [...box.children].forEach((d,i)=>{ const c=curInitials[i]; d.textContent=(c===' '||c===undefined)?'_':c; d.classList.toggle('blank',c===' '||c===undefined); d.classList.toggle('sel',i===selSlot); }); }
 
 /* ============================= input ============================= */
-const ptr={x:W/2,y:H-130,active:false,id:null};
+const ptr={x:W/2,y:H-130,active:false,id:null,touch:false,dlx:null,dly:null,lx:null,ly:null};
 function clearInput(){ for(const k in keys) keys[k]=false; for(const h in held) held[h]=false; if(player){ player.beamOn=false; player.beamLock=false; } }
 window.addEventListener('blur',clearInput);
 let isTouch=('ontouchstart' in window)||navigator.maxTouchPoints>0;
@@ -3784,8 +3784,8 @@ stage.addEventListener('pointerdown',e=>{ Audio_.init(); Audio_.resume();
   if(state!=='play')return;
   if(e.pointerType==='mouse' && e.button!==0) return;
   if(moveMode_pref==='lock' && e.pointerType==='mouse'){ if(player){ptr.lx=player.x; ptr.ly=player.y;} try{bgC.requestPointerLock();}catch(_){ } return; }
-  const p=toLogical(e.clientX,e.clientY); ptr.x=p.x; ptr.y=p.y; ptr.active=true; ptr.id=e.pointerId; },{passive:true});
-stage.addEventListener('pointermove',e=>{ if(moveMode_pref==='lock' && plocked){ const r=bgC.getBoundingClientRect(); const s=r.width?W/r.width:1; ptr.lx=clamp((ptr.lx==null?W/2:ptr.lx)+e.movementX*s,16,W-16); ptr.ly=clamp((ptr.ly==null?H/2:ptr.ly)+e.movementY*s,H*0.16,H-40); return; } if(!ptr.active||e.pointerId!==ptr.id)return; const p=toLogical(e.clientX,e.clientY); ptr.x=p.x; ptr.y=p.y; },{passive:true});
+  const p=toLogical(e.clientX,e.clientY); ptr.x=p.x; ptr.y=p.y; ptr.active=true; ptr.id=e.pointerId; ptr.touch=(e.pointerType==='touch'); if(ptr.touch){ ptr.dlx=p.x; ptr.dly=p.y; if(ptr.lx==null&&player){ptr.lx=player.x; ptr.ly=player.y;} } },{passive:true});
+stage.addEventListener('pointermove',e=>{ if(moveMode_pref==='lock' && plocked){ const r=bgC.getBoundingClientRect(); const s=r.width?W/r.width:1; ptr.lx=clamp((ptr.lx==null?W/2:ptr.lx)+e.movementX*s,16,W-16); ptr.ly=clamp((ptr.ly==null?H/2:ptr.ly)+e.movementY*s,H*0.16,H-40); return; } if(!ptr.active||e.pointerId!==ptr.id)return; const p=toLogical(e.clientX,e.clientY); if(ptr.touch){ const ddx=p.x-(ptr.dlx==null?p.x:ptr.dlx), ddy=p.y-(ptr.dly==null?p.y:ptr.dly); ptr.dlx=p.x; ptr.dly=p.y; ptr.lx=clamp((ptr.lx==null?(player?player.x:W/2):ptr.lx)+ddx,16,W-16); ptr.ly=clamp((ptr.ly==null?(player?player.y:H/2):ptr.ly)+ddy,H*0.16,H-40); } else { ptr.x=p.x; ptr.y=p.y; } },{passive:true});
 window.addEventListener('pointerup',e=>{ if(ptr.id==null||e.pointerId===ptr.id){ ptr.active=false; ptr.id=null; } });
 window.addEventListener('pointercancel',e=>{ if(ptr.id==null||e.pointerId===ptr.id){ ptr.active=false; ptr.id=null; } });
 stage.addEventListener('contextmenu',e=>e.preventDefault());
@@ -4069,6 +4069,7 @@ function closeTut(){ el('ovlTut').classList.add('hidden'); try{localStorage.setI
 { const b=el('howtoBtn'); if(b) b.addEventListener('click',e=>{ e.stopPropagation(); openTut(); }); }
 
 const CHANGELOG=[
+ {ver:'123',date:'2026',items:['Mobile: ship steering is now relative drag. Your thumb moves the ship without covering it, and small drags give fine aim.','Mobile: touch buttons are larger and rearranged into thumb reach, with PARRY moved to the prime bottom-right spot.']},
  {ver:'122',date:'2026',items:['PARRY reworked. It is a precise timing tool now, not a button to mash. Pressing it no longer makes you briefly invincible, whiffing leaves you exposed and locks the parry longer, and only a PERFECT parry shortens the cooldown. Parry healing is trimmed so you can no longer turtle behind it.','Enemies that reach the bottom now loop off-screen and re-enter from the top or a flank, instead of stalling halfway up or getting stuck at the bottom.','Removed the SIEGE column-wall formation.','Mobile: the ship no longer freezes after a parry. Movement and the action buttons now track separate fingers.']},
  {ver:'119',date:'2026',items:['Full balance overhaul: boss and enemy durability rebuilt around measured damage curves - mid-run bosses no longer melt','Enemy fire pressure now scales hard with sector - camping the bottom of the screen will get you killed','Economy retuned: kill coins, STYLE coin bonus, CORE jackpots, and boss drops reduced; EXTRA LIFE costs 4000 and caps lower','GUN POWER, SPREAD top end, flank guns, drone, and PRISM BEAM trimmed to keep late sectors dangerous']},
  {ver:'118',date:'2026',items:['Graphics setting is now FULL / MED / LOW. MED keeps glow on ships, enemies, and bosses but drops it on bullets and effects for a big framerate gain.']},
