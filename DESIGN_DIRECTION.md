@@ -81,6 +81,12 @@ Locked design forks (do not re-litigate):
   overheat stakes), RAILSPIKE (charge-tap pierce), SWARM (hands-free but weak,
   frees attention for dodging).
 - Heavies are earned in-run, sector-gated, expensive. Commitment, not shopping.
+- Every weapon and combat system carries a this-or-that keystone fork, unlocked
+  at mastery 4+ and sector 3+. WAVE and BOMB forks are utility-shaped, never
+  boss-burst.
+- BUZZSAW is a pure melee weapon; ranged capability is an explicit upgrade
+  (BLADE LAUNCHER). SPREAD is the brawler shotgun: deterministic fan,
+  point-blank reward.
 
 ### Pillar 4: Fair competition
 - The playfield is FIXED (currently 630x840) for leaderboard fairness across
@@ -102,6 +108,10 @@ Locked design forks (do not re-litigate):
 - Weapon unlocks are sector-gated in-run. Runs start SPREAD-only.
 - Balance proposals always state the numbers: named constants, exact values,
   and the fastest dials to turn if the change overshoots.
+- No heavy weapon sustains near-100% uptime. The SINGULARITY one-active rule
+  and post-implosion lockout are the precedent.
+- Ambient extra lives drop only at low lives, max one per sector. Lives are
+  scarce by design.
 
 ---
 
@@ -181,6 +191,8 @@ Each faction is a Bosco Tech pathway made hostile. Identity table is in
 
 ## 6. Platform and UX Direction
 
+- PRISM BEAM is a standard heavy: it scales with HEAVY POWER and lives in the
+  HEAVY group. No dedicated BEAM tab.
 - **VANGUARD is a desktop browser game.** This is a commitment, not a default.
   The cabinet layout (fixed playfield flanked by console panels) is the visual
   language. Touch support exists but desktop drives design.
