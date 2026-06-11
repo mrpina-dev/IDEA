@@ -469,7 +469,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='135';
+const W=630,H=840; const VERSION='136';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 /* ============================= BAL: central balance registry =============================
    Every shipped balance value lives here and is read live in all modes. NORMAL/HARDCORE/
@@ -4583,37 +4583,37 @@ requestAnimationFrame(frame);
   if(Audio_._sfxLayer) return;
   Audio_._sfxLayer=true;
   var SFX={
-    fire_spread:["fire/fire_spread_1.ogg","fire/fire_spread_2.ogg"],
-    fire_rapid:["fire/fire_rapid_1.ogg","fire/fire_rapid_2.ogg"],
-    fire_lance:["fire/fire_lance_1.ogg","fire/fire_lance_2.ogg"],
-    fire_homing:["fire/fire_homing_1.ogg","fire/fire_homing_2.ogg"],
-    fire_flak:["fire/fire_flak_1.ogg","fire/fire_flak_2.ogg"],
-    fire_buzzsaw:["fire/fire_buzzsaw_1.ogg","fire/fire_buzzsaw_2.ogg"],
+    fire_spread:["fire/fire_spread_1.ogg"],
+    fire_rapid:["fire/fire_rapid_1.ogg"],
+    fire_lance:["fire/fire_lance_1.ogg"],
+    fire_homing:["fire/fire_homing_1.ogg"],
+    fire_flak:["fire/fire_flak_1.ogg"],
+    fire_buzzsaw:["fire/fire_buzzsaw_1.ogg"],
     overheat:["fire/overheat_1.ogg"],
     overheat_ready:["fire/overheat_ready_1.ogg"],
-    heavy_charge:["heavy/heavy_charge_1.ogg","heavy/heavy_charge_2.ogg"],
+    heavy_charge:["heavy/heavy_charge_1.ogg"],
     heavy_ready:["heavy/heavy_ready_1.ogg"],
     heavy_switch:["heavy/heavy_switch_1.ogg"],
-    beam:["heavy/beam_1.ogg","heavy/beam_2.ogg"],
-    rail:["heavy/rail_1.ogg","heavy/rail_2.ogg"],
-    tesla:["heavy/tesla_1.ogg","heavy/tesla_2.ogg"],
+    beam:["heavy/beam_1.ogg"],
+    rail:["heavy/rail_1.ogg"],
+    tesla:["heavy/tesla_1.ogg"],
     singularity:["heavy/singularity_1.ogg"],
-    wave:["heavy/wave_1.ogg","heavy/wave_2.ogg"],
+    wave:["heavy/wave_1.ogg"],
     whine:["heavy/whine_1.ogg"],
-    hit:["impact/hit_1.ogg","impact/hit_2.ogg"],
+    hit:["impact/hit_1.ogg"],
     blast:["impact/blast_1.ogg"],
-    enemy_fire:["impact/enemy_fire_1.ogg","impact/enemy_fire_2.ogg"],
+    enemy_fire:["impact/enemy_fire_1.ogg"],
     bomb:["impact/bomb_1.ogg"],
     thump:["impact/thump_1.ogg"],
     wub:["impact/wub_1.ogg"],
-    kill_ace:["death/kill_ace_1.ogg","death/kill_ace_2.ogg"],
-    kill_bmet:["death/kill_bmet_1.ogg","death/kill_bmet_2.ogg"],
-    kill_csee:["death/kill_csee_1.ogg","death/kill_csee_2.ogg"],
-    kill_mat:["death/kill_mat_1.ogg","death/kill_mat_2.ogg"],
-    kill_mset:["death/kill_mset_1.ogg","death/kill_mset_2.ogg"],
+    kill_ace:["death/kill_ace_1.ogg"],
+    kill_bmet:["death/kill_bmet_1.ogg"],
+    kill_csee:["death/kill_csee_1.ogg"],
+    kill_mat:["death/kill_mat_1.ogg"],
+    kill_mset:["death/kill_mset_1.ogg"],
     big:["death/big_1.ogg"],
     death:["death/death_1.ogg"],
-    boss_death:["boss/boss_death_1.ogg","boss/boss_death_2.ogg"],
+    boss_death:["boss/boss_death_1.ogg"],
     boss_phase:["boss/boss_phase_1.ogg"],
     boss_warn:["boss/boss_warn_1.ogg"],
     shield_hit:["defense/shield_hit_1.ogg"],
@@ -4621,7 +4621,7 @@ requestAnimationFrame(frame);
     player_hit:["defense/player_hit_1.ogg"],
     parry:["defense/parry_1.ogg"],
     parry_hit:["defense/parry_hit_1.ogg"],
-    coin:["pickup/coin_1.ogg","pickup/coin_2.ogg"],
+    coin:["pickup/coin_1.ogg"],
     life_up:["pickup/life_up_1.ogg"],
     shield_up:["pickup/shield_up_1.ogg"],
     style_up:["pickup/style_up_1.ogg"],
@@ -4630,7 +4630,7 @@ requestAnimationFrame(frame);
     weapon_switch:["ui/weapon_switch_1.ogg"],
     refit_open:["ui/refit_open_1.ogg"],
     buy:["ui/buy_1.ogg"],
-    buy_fail:["ui/buy_fail_1.ogg","ui/buy_fail_2.ogg"],
+    buy_fail:["ui/buy_fail_1.ogg"],
     pause:["ui/pause_1.ogg"],
     ui_click:["ui/ui_click_1.ogg"],
     sector_clear:["event/sector_clear_1.ogg"]
