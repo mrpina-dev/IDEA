@@ -86,15 +86,15 @@ body{background:#000;display:flex;align-items:center;justify-content:center;min-
 .stick{position:absolute;width:104px;height:104px;border-radius:50%;border:2px solid rgba(0,255,65,.35);background:radial-gradient(circle,rgba(0,255,65,.07),transparent 70%);transform:translate(-50%,-50%);z-index:6;pointer-events:none;opacity:0;transition:opacity .07s}
 .stick.live{opacity:1}
 .stickknob{position:absolute;left:50%;top:50%;width:46px;height:46px;border-radius:50%;background:rgba(0,255,65,.20);border:2px solid rgba(0,255,65,.75);box-shadow:0 0 12px rgba(0,255,65,.45);transform:translate(-50%,-50%)}
-#btnParry{right:14px;bottom:14px;width:76px;height:76px;font-size:12px;border-color:rgba(0,240,255,.7);color:var(--cyan);box-shadow:0 0 14px rgba(0,240,255,.25)}
-#btnCharge{right:98px;bottom:20px;width:58px;height:58px;border-color:rgba(232,255,232,.5);color:var(--white)}
-#btnBomb{right:24px;bottom:98px;width:56px;height:56px;border-color:rgba(200,255,0,.5);color:var(--gold)}
-#btnWpn{right:96px;bottom:100px;width:50px;height:50px;font-size:10px;border-color:rgba(0,240,255,.4);color:var(--cyan)}
-#btnHeavy{right:42px;bottom:156px;width:48px;height:48px;font-size:10px;border-color:rgba(178,77,255,.5);color:#B24DFF}
+#btnParry{right:16px;bottom:18px;width:74px;height:74px;font-size:12px;border-color:rgba(0,240,255,.7);color:var(--cyan);box-shadow:0 0 14px rgba(0,240,255,.25)}
+#btnCharge{right:114px;bottom:26px;width:58px;height:58px;border-color:rgba(232,255,232,.5);color:var(--white)}
+#btnBomb{right:22px;bottom:116px;width:56px;height:56px;border-color:rgba(200,255,0,.5);color:var(--gold)}
+#btnWpn{right:118px;bottom:124px;width:50px;height:50px;font-size:10px;border-color:rgba(0,240,255,.4);color:var(--cyan)}
+#btnHeavy{right:58px;bottom:174px;width:52px;height:52px;font-size:10px;border-color:rgba(178,77,255,.5);color:#B24DFF}
 #btnPause{top:14px;left:50%;transform:translateX(-50%);width:44px;height:44px;font-size:13px;border-color:rgba(0,255,65,.55);color:var(--green)}
 body.touchdev #cabinet{flex-direction:column;justify-content:flex-start;align-items:center;gap:0}
-body.touchdev #stage{width:min(100vw, calc((100dvh - 214px) * 3 / 4));max-height:none;flex:0 0 auto}
-body.touchdev #touch{position:relative;inset:auto;z-index:auto;width:100%;flex:1 1 auto;min-height:206px;pointer-events:auto;touch-action:none;background:linear-gradient(180deg,rgba(0,18,7,.30),rgba(2,10,4,.55));border-top:1px solid rgba(0,255,65,.18)}
+body.touchdev #stage{width:min(100vw, calc((100dvh - 238px) * 3 / 4));max-height:none;flex:0 0 auto}
+body.touchdev #touch{position:relative;inset:auto;z-index:auto;width:100%;flex:1 1 auto;min-height:230px;pointer-events:auto;touch-action:none;background:linear-gradient(180deg,rgba(0,18,7,.30),rgba(2,10,4,.55));border-top:1px solid rgba(0,255,65,.18)}
 .hidden{display:none!important}
 
 /* overlays */
@@ -469,7 +469,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='133';
+const W=630,H=840; const VERSION='134';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 /* ============================= BAL: central balance registry =============================
    Every shipped balance value lives here and is read live in all modes. NORMAL/HARDCORE/
@@ -4088,6 +4088,7 @@ function closeTut(){ el('ovlTut').classList.add('hidden'); try{localStorage.setI
 { const b=el('howtoBtn'); if(b) b.addEventListener('click',e=>{ e.stopPropagation(); openTut(); }); }
 
 const CHANGELOG=[
+ {ver:'134',date:'2026',items:['Mobile: spaced out the right-thumb action buttons and gave the control deck a bit more height, for more comfortable reach and fewer mis-taps.']},
  {ver:'133',date:'2026',items:['Mobile: now defaults to LOW graphics for smoother performance on phones. You can still switch it back up in the options.']},
  {ver:'132',date:'2026',items:['Mobile: pause button moved to the top-center of the control deck and made larger and brighter, so it no longer overlaps the action buttons and is easy to find.']},
  {ver:'131',date:'2026',items:['Mobile: fixed the joystick not responding on the control deck - dragging is no longer swallowed by the browser as a scroll gesture.']},
