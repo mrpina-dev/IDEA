@@ -469,7 +469,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='136';
+const W=630,H=840; const VERSION='137';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 /* ============================= BAL: central balance registry =============================
    Every shipped balance value lives here and is read live in all modes. NORMAL/HARDCORE/
@@ -4641,7 +4641,7 @@ requestAnimationFrame(frame);
       SFX[slot].forEach(function(rel){ fetch('audio/sfx/'+rel).then(function(r){return r.arrayBuffer();})
         .then(function(ab){return A.ctx.decodeAudioData(ab);})
         .then(function(b){A.sfxBuf[slot].push(b);}).catch(function(){}); }); }); };
-  Audio_._lvl={ overheat_ready:-3, heavy_charge:1, heavy_ready:-2, heavy_switch:-3, beam:1, rail:1, tesla:1, singularity:1, wave:1, whine:1, blast:1, enemy_fire:-3, bomb:1, big:1, death:2, boss_death:2, boss_phase:1, boss_warn:1, shield_break:1, coin:-6, life_up:-5, shield_up:-5, style_up:-5, core:-2, powerup:-5, weapon_switch:-5, refit_open:-4, buy:-4, buy_fail:-4, pause:-5, ui_click:-7, sector_clear:-2 };  // per-slot mix level in dB, missing slots default to 0
+  Audio_._lvl={ overheat_ready:-3, heavy_charge:1, heavy_ready:-2, heavy_switch:-3, beam:1, rail:1, tesla:2, singularity:4, wave:2, whine:1, blast:-4, bomb:1, thump:5, wub:1, kill_bmet:2, kill_mat:1, kill_mset:-1, big:-1, death:4, boss_death:3, boss_phase:2, boss_warn:3, shield_hit:4, shield_break:3, player_hit:3, parry_hit:-2, coin:-3, life_up:1, shield_up:12, style_up:-7, core:-1, weapon_switch:8, refit_open:5, buy:6, buy_fail:2, pause:5, ui_click:-3, sector_clear:8 };  // per-slot mix level in dB, missing slots default to 0
   Audio_.play=function(slot){ var list=this.sfxBuf[slot]; if(!list||!list.length) return false;
     if(this.muted) return true; if(!this.ctx) return true;
     var now=this.ctx.currentTime, A=this;
