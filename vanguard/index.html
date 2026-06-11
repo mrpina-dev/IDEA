@@ -94,7 +94,7 @@ body{background:#000;display:flex;align-items:center;justify-content:center;min-
 #btnPause{top:8px;right:10px;width:32px;height:32px;font-size:9px;border-color:rgba(74,122,82,.7);color:var(--dim)}
 body.touchdev #cabinet{flex-direction:column;justify-content:flex-start;align-items:center;gap:0}
 body.touchdev #stage{width:min(100vw, calc((100dvh - 214px) * 3 / 4));max-height:none;flex:0 0 auto}
-body.touchdev #touch{position:relative;inset:auto;z-index:auto;width:100%;flex:1 1 auto;min-height:206px;pointer-events:auto;background:linear-gradient(180deg,rgba(0,18,7,.30),rgba(2,10,4,.55));border-top:1px solid rgba(0,255,65,.18)}
+body.touchdev #touch{position:relative;inset:auto;z-index:auto;width:100%;flex:1 1 auto;min-height:206px;pointer-events:auto;touch-action:none;background:linear-gradient(180deg,rgba(0,18,7,.30),rgba(2,10,4,.55));border-top:1px solid rgba(0,255,65,.18)}
 .hidden{display:none!important}
 
 /* overlays */
@@ -469,7 +469,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='130';
+const W=630,H=840; const VERSION='131';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 /* ============================= BAL: central balance registry =============================
    Every shipped balance value lives here and is read live in all modes. NORMAL/HARDCORE/
@@ -4088,6 +4088,7 @@ function closeTut(){ el('ovlTut').classList.add('hidden'); try{localStorage.setI
 { const b=el('howtoBtn'); if(b) b.addEventListener('click',e=>{ e.stopPropagation(); openTut(); }); }
 
 const CHANGELOG=[
+ {ver:'131',date:'2026',items:['Mobile: fixed the joystick not responding on the control deck - dragging is no longer swallowed by the browser as a scroll gesture.']},
  {ver:'130',date:'2026',items:['Mobile: fixed the v129 control deck - it now actually sits below the playfield. The buttons and stick no longer overlap the play area, and movement works again.']},
  {ver:'129',date:'2026',items:['Mobile: controls moved to a dedicated deck below the playfield. The play area up top is now fully unobstructed, with the movement stick on the left of the deck and the action buttons on the right.']},
  {ver:'128',date:'2026',items:['Mobile: finer joystick control - small thumb movements now give slow, precise steering. Also fixed the score screen so SUBMIT is always reachable, which was stopping mobile runs from posting to the leaderboard.']},

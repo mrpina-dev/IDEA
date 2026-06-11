@@ -26,7 +26,10 @@
       "PowerShell(git ls-tree *)",
       "Bash(git rebase *)",
       "Bash(git rm *)",
-      "Bash(git mv *)"
+      "Bash(git mv *)",
+      "PowerShell($node = Get-Command node -ErrorAction SilentlyContinue; if\\($node\\){\"node: $\\($node.Source\\)\"}else{\"no node\"}; $py = Get-Command python -ErrorAction SilentlyContinue; if\\($py\\){\"python: $\\($py.Source\\)\"}else{\"no python\"}; $chrome = @\\(\"$env:ProgramFiles\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe\",\"${env:ProgramFiles\\(x86\\)}\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe\",\"$env:LOCALAPPDATA\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe\"\\) | Where-Object {Test-Path $_}; if\\($chrome\\){\"chrome: $\\($chrome[0]\\)\"}else{\"no chrome\"}; $edge = \"${env:ProgramFiles\\(x86\\)}\\\\Microsoft\\\\Edge\\\\Application\\\\msedge.exe\"; if\\(Test-Path $edge\\){\"edge: $edge\"}else{\"no edge\"})",
+      "PowerShell($chrome = \"$env:ProgramFiles\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe\"; if\\(-not \\(Test-Path $chrome\\)\\){ $chrome = \"$env:LOCALAPPDATA\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe\" }; & $chrome --headless=new --disable-gpu --window-size=400,800 --screenshot=\"G:\\\\My Drive\\\\IDEA-git\\\\IDEA\\\\_layouttest.png\" \"G:\\\\My Drive\\\\IDEA-git\\\\IDEA\\\\_layouttest.html\" 2>&1 | Out-String; if\\(Test-Path \"G:\\\\My Drive\\\\IDEA-git\\\\IDEA\\\\_layouttest.png\"\\){\"screenshot OK\"}else{\"FAILED\"})",
+      "PowerShell(Out-Null *)"
     ]
   }
 }
