@@ -469,7 +469,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='134';
+const W=630,H=840; const VERSION='135';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 /* ============================= BAL: central balance registry =============================
    Every shipped balance value lives here and is read live in all modes. NORMAL/HARDCORE/
@@ -2208,7 +2208,7 @@ function update(dt){
         for(let q=0;q<count;q++){ const g=groups.find(gr=>gr.length>0); if(!g)break; const e=g.splice((Math.random()*g.length)|0,1)[0];
           if(e&&e.state==='form'){ e.state='dive'; e.vy=80; e.vx=rnd(-40,40); e.fire=0.25; } }
       } }
-    if(fleet.y>H+60){ fleet=null; }
+    if(fleet.y>H+60){ for(const e of enemies){ if(!e.dead && (e.state==='form'||e.state==='reenter')){ e.dead=true; e.dt=0; e.gone=true; } } fleet=null; }
   }
 
   /* ----- enemies ----- */
@@ -2296,6 +2296,7 @@ function update(dt){
   });
   // recycle / refill formation
   for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];
+    if(!e.dead && e.y>H+90){ e.dead=true; e.dt=0; e.gone=true; }   // watchdog: nothing should linger below the playfield (weave despawns at H+40, dives pull out at H-110)
     if(e.dead&&e.dt<=0){ if(e.slot>=0&&refill&&refill.length>e.slot) refill[e.slot]=Math.max(refill[e.slot],0.6); enemies.splice(i,1); } }
   if(fleet&&!fleet.retiring&&refill){ let anyAlive=false;
     for(let i=0;i<slots.length;i++){ if(refill[i]>0){ refill[i]-=dt; } else if(!slotFilled(i)){ if((fleet.refillBudget||0)>0){ spawnFormationOccupant(i,true); fleet.refillBudget--; } } if(slotFilled(i)) anyAlive=true; }
@@ -4088,6 +4089,7 @@ function closeTut(){ el('ovlTut').classList.add('hidden'); try{localStorage.setI
 { const b=el('howtoBtn'); if(b) b.addEventListener('click',e=>{ e.stopPropagation(); openTut(); }); }
 
 const CHANGELOG=[
+ {ver:'135',date:'2026',items:['Fixed a soft-lock where stragglers from a retreating formation could freeze just below the bottom edge, become unhittable, and stop new waves from spawning. They now clear properly and the action keeps coming.']},
  {ver:'134',date:'2026',items:['Mobile: spaced out the right-thumb action buttons and gave the control deck a bit more height, for more comfortable reach and fewer mis-taps.']},
  {ver:'133',date:'2026',items:['Mobile: now defaults to LOW graphics for smoother performance on phones. You can still switch it back up in the options.']},
  {ver:'132',date:'2026',items:['Mobile: pause button moved to the top-center of the control deck and made larger and brighter, so it no longer overlaps the action buttons and is easy to find.']},
