@@ -469,7 +469,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='132';
+const W=630,H=840; const VERSION='133';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 /* ============================= BAL: central balance registry =============================
    Every shipped balance value lives here and is read live in all modes. NORMAL/HARDCORE/
@@ -532,7 +532,7 @@ const stage=document.getElementById('stage');
 const bgC=document.getElementById('bg'), fxC=document.getElementById('fx');
 const bg=bgC.getContext('2d'), fx=fxC.getContext('2d');
 window.__fps=60; window.__ms=0;   // FPS readout vars (display gated by SETTINGS.showFps)
-let GFX='full'; try{ const _g=localStorage.getItem('vanguard_gfx'); if(_g==='full'||_g==='med'||_g==='low') GFX=_g; else if(localStorage.getItem('vanguard_lowfx')==='1') GFX='low'; }catch(e){}
+let GFX='full'; try{ const _g=localStorage.getItem('vanguard_gfx'); if(_g==='full'||_g==='med'||_g==='low') GFX=_g; else if(localStorage.getItem('vanguard_lowfx')==='1') GFX='low'; else if(('ontouchstart' in window)||navigator.maxTouchPoints>0) GFX='low'; }catch(e){}
 let LOWFX=(GFX==='low');
 (function(){ try{ [[bg,false],[fx,true]].forEach(function(pair){ var ctx=pair[0], isFx=pair[1]; var proto=Object.getPrototypeOf(ctx); var desc=Object.getOwnPropertyDescriptor(proto,'shadowBlur'); if(desc&&desc.set){ Object.defineProperty(ctx,'shadowBlur',{configurable:true, get:function(){return desc.get.call(ctx);}, set:function(v){ var off=(GFX==='low')||(isFx&&GFX==='med'); desc.set.call(ctx, off?0:v); }}); } }); }catch(e){} })();
 const REDUCED=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -4088,6 +4088,7 @@ function closeTut(){ el('ovlTut').classList.add('hidden'); try{localStorage.setI
 { const b=el('howtoBtn'); if(b) b.addEventListener('click',e=>{ e.stopPropagation(); openTut(); }); }
 
 const CHANGELOG=[
+ {ver:'133',date:'2026',items:['Mobile: now defaults to LOW graphics for smoother performance on phones. You can still switch it back up in the options.']},
  {ver:'132',date:'2026',items:['Mobile: pause button moved to the top-center of the control deck and made larger and brighter, so it no longer overlaps the action buttons and is easy to find.']},
  {ver:'131',date:'2026',items:['Mobile: fixed the joystick not responding on the control deck - dragging is no longer swallowed by the browser as a scroll gesture.']},
  {ver:'130',date:'2026',items:['Mobile: fixed the v129 control deck - it now actually sits below the playfield. The buttons and stick no longer overlap the play area, and movement works again.']},
