@@ -308,16 +308,6 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
     </div>
   </div>
 
-  <div class="touch hidden" id="touch">
-    <div class="stick" id="stick"><i class="stickknob" id="stickknob"></i></div>
-    <div class="tbtn" id="btnBomb">BOMB</div>
-    <div class="tbtn" id="btnCharge">HEAVY</div>
-    <div class="tbtn" id="btnParry">PARRY</div>
-    <div class="tbtn" id="btnWpn">WPN</div>
-    <div class="tbtn" id="btnHeavy">SWAP</div>
-    <div class="tbtn" id="btnPause">| |</div>
-  </div>
-
   <!-- TITLE -->
   <div class="ovl" id="ovlTitle">
     <div class="title-wm"><div class="a">VANGUARD</div><div class="b">I D E A</div></div>
@@ -454,6 +444,17 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
     <button class="obtn" id="logClose">CLOSE</button>
   </div>
   </div><!-- /stage -->
+
+  <div class="touch hidden" id="touch">
+    <div class="stick" id="stick"><i class="stickknob" id="stickknob"></i></div>
+    <div class="tbtn" id="btnBomb">BOMB</div>
+    <div class="tbtn" id="btnCharge">HEAVY</div>
+    <div class="tbtn" id="btnParry">PARRY</div>
+    <div class="tbtn" id="btnWpn">WPN</div>
+    <div class="tbtn" id="btnHeavy">SWAP</div>
+    <div class="tbtn" id="btnPause">| |</div>
+  </div>
+
   <aside class="console right">
     <div class="conhdr" id="cabVer" style="margin-top:0">BUILD ----</div>
     <div class="conhdr">FIELD TIPS</div>
@@ -468,7 +469,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='129';
+const W=630,H=840; const VERSION='130';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 /* ============================= BAL: central balance registry =============================
    Every shipped balance value lives here and is read live in all modes. NORMAL/HARDCORE/
@@ -4087,6 +4088,7 @@ function closeTut(){ el('ovlTut').classList.add('hidden'); try{localStorage.setI
 { const b=el('howtoBtn'); if(b) b.addEventListener('click',e=>{ e.stopPropagation(); openTut(); }); }
 
 const CHANGELOG=[
+ {ver:'130',date:'2026',items:['Mobile: fixed the v129 control deck - it now actually sits below the playfield. The buttons and stick no longer overlap the play area, and movement works again.']},
  {ver:'129',date:'2026',items:['Mobile: controls moved to a dedicated deck below the playfield. The play area up top is now fully unobstructed, with the movement stick on the left of the deck and the action buttons on the right.']},
  {ver:'128',date:'2026',items:['Mobile: finer joystick control - small thumb movements now give slow, precise steering. Also fixed the score screen so SUBMIT is always reachable, which was stopping mobile runs from posting to the leaderboard.']},
  {ver:'127',date:'2026',items:['Mobile: fixed the movement stick cancelling on the first drag, so steering now holds for the whole press.','Renamed the HVY touch button to SWAP.']},
