@@ -469,7 +469,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='138';
+const W=630,H=840; const VERSION='139';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 /* ============================= BAL: central balance registry =============================
    Every shipped balance value lives here and is read live in all modes. NORMAL/HARDCORE/
@@ -1376,29 +1376,37 @@ function triggerBanner(){ sectorBanner=2.4; bannerSec=sector; warpT=0.8; buildCe
 function enemyHpMul(){ return (1+sector*BAL.enemyHpLin)*Math.pow(BAL.enemyHpComp,Math.max(0,sector-BAL.enemyHpCompFrom)); }
 function ebulCap(){ return BAL.ebulCapBase+sector*BAL.ebulCapPer; }
 function enemyFireScale(){ return (1+sector*BAL.fireCadenceScale)*(gameMode==='hardcore'?1.25:1); }
+function ebulSpeedMul(){ return 1+Math.min(0.45,sector*0.015); }
 function killsForBossN(){ return BAL.killsBase+sector*BAL.killsPer; }
 function makeEnemy(fk,variant,x,y,behavior){
   const F=FACTIONS[fk];
   return {fk,c:F.c,draw:F.draw,variant,pts:F.pts*(variant===2?6:variant===1?2:1),
     r:F.r[variant]+rnd(-1,1), x,y, hp:Math.round(F.hp[variant]*enemyHpMul()), maxhp:Math.round(F.hp[variant]*enemyHpMul()),
     core:rnd(0,6.28), spin:rnd(-.4,.4), bob:rnd(0,6.28), flash:0, dead:false, dt:0, gone:false,
-    state:behavior||'free', slot:-1, vx:0, vy:rnd(40,70), fire:rnd(.6,1.6), bank:0, t:0};
+    state:behavior||'free', slot:-1, vx:0, vy:rnd(40,70)*(1+Math.min(0.9,sector*0.03)), fire:rnd(.6,1.6), bank:0, t:0};
+}
+function maybeMutate(e){
+  if(sector<8||Math.random()>=Math.min(0.35,0.04*(sector-7))) return;
+  const roll=Math.random();
+  if(roll<0.33){ e.mut='vet'; e.hp=Math.round(e.hp*2.2); e.maxhp=e.hp; e.r*=1.15; e.pts=Math.round(e.pts*3); }
+  else if(roll<0.66){ e.mut='mar'; e.vy*=1.5; e.pts=Math.round(e.pts*2); }
+  else { e.mut='gun'; e.fireMul=0.55; e.pts=Math.round(e.pts*2); }
 }
 function factionForSector(){ const th=sectorTheme();
   if(th.fk && Math.random()<0.55) return th.fk;
   const n=Math.min(sector+1,5); return FKEYS[(Math.random()*n)|0]; }
 
 function buildFormation(arch){
-  const N=12; slots=[];
-  if(arch==='pincer'){ const oys=[0,44,88,132,176];
-    for(const side of [-1,1]){ for(let i=0;i<5;i++){ slots.push({ox:side*140+rnd(-8,8),oy:oys[i],sx:side<0?-40:W+40,sy:-40}); } } }
-  else if(arch==='siege'){ const cols=6,rows=2,dx=72,dy=46;
+  const N=12+Math.min(4,Math.max(0,Math.floor((sector-8)/3))); slots=[];
+  if(arch==='pincer'){ const levels=N>12?8:5; const oys=Array.from({length:levels},(_,i)=>i*44);
+    for(const side of [-1,1]){ for(let i=0;i<levels;i++){ slots.push({ox:side*140+rnd(-8,8),oy:oys[i],sx:side<0?-40:W+40,sy:-40}); } } }
+  else if(arch==='siege'){ const cols=6,rows=N>12?3:2,dx=72,dy=46;
     for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){ const ox=(c-(cols-1)/2)*dx, oy=r*dy; slots.push({ox,oy,col:c,sx:W/2+ox,sy:-40-oy}); } }
-  else if(arch==='swarm'){ const cols=4,rows=3,dx=58,dy=46;
+  else if(arch==='swarm'){ const cols=4,rows=N>12?4:3,dx=58,dy=46;
     for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){ const ox=(c-(cols-1)/2)*dx+rnd(-18,18), oy=r*dy+rnd(-18,18); slots.push({ox,oy,sx:W/2+ox+rnd(-30,30),sy:-40-oy-rnd(0,60)}); } }
-  else if(arch==='flank'){ const oys=[0,46,92,138,184];
-    for(const side of [-1,1]){ for(let i=0;i<5;i++){ const oy=oys[i]; slots.push({ox:side*150,oy,sx:side<0?-40:W+40,sy:120+oy}); } } }
-  else { const widths=[5,4,3],dx=56,dy=42; /* spear */
+  else if(arch==='flank'){ const levels=N>12?8:5; const oys=Array.from({length:levels},(_,i)=>i*46);
+    for(const side of [-1,1]){ for(let i=0;i<levels;i++){ const oy=oys[i]; slots.push({ox:side*150,oy,sx:side<0?-40:W+40,sy:120+oy}); } } }
+  else { const widths=N>12?[5,4,4,3]:[5,4,3],dx=56,dy=42; /* spear */
     widths.forEach((w,r)=>{ for(let c=0;c<w;c++){ const ox=(c-(w-1)/2)*dx, oy=r*dy; slots.push({ox,oy,sx:W/2+ox,sy:-40-oy}); } }); }
   slots=slots.slice(0,N);
   const fk=waveFk||runFactionSeq[0]||FKEYS[0];
@@ -1414,7 +1422,8 @@ function spawnFormationOccupant(i,fromTop){
   else { let variant; if(role==='rusher')variant=0; else if(role==='zoner')variant=2; else variant=(Math.random()<0.4)?1:0;
     const mv = sector<=1?0 : sector<=3?1 : 2; variant=Math.min(variant,mv);
     e=makeEnemy(s.fk,variant, sx, sy, st); e.role=role||'grunt';
-    if(variant===2){ e.hp=Math.round(e.hp*1.25); e.maxhp=e.hp; e.fire=Math.max(0.3,(e.fire||1)*0.7); } }
+    if(variant===2){ e.hp=Math.round(e.hp*1.25); e.maxhp=e.hp; e.fire=Math.max(0.3,(e.fire||1)*0.7); }
+    maybeMutate(e); }
   e.slot=i; enemies.push(e);
 }
 function slotFilled(i){ for(const e of enemies) if(!e.dead && e.slot===i) return true; return false; }
@@ -1423,7 +1432,6 @@ function startClimb(e){
   e.loops=(e.loops||0)+1;
   const slotted = e.slot>=0 && fleet && !fleet.retiring;
   for(let k=0;k<7;k++) parts.push({x:e.x+rnd(-e.r*0.4,e.r*0.4),y:e.y+e.r*0.5,vx:rnd(-30,30),vy:rnd(120,230),life:.3,max:.3,c:Math.random()<0.5?COL.cyan:e.c,sz:rnd(1.6,2.6)});
-  if(!slotted && e.loops>2){ e.dead=true; e.dt=0; e.gone=true; return; }
   if(slotted){
     const s=slots[e.slot]; e.x=fleet.x+(s?s.ox:0)+rnd(-18,18); e.y=-40-Math.random()*30; e.state='reenter'; e.vx=0; e.vy=0;
   } else if(Math.random()<0.35){
@@ -1476,12 +1484,12 @@ function startStreamWave(){
     const fk=waveFk; const n=10+Math.min(sector*2,14); const baseX=rnd(80,W-80); const dir=Math.random()<.5?1:-1;
     for(let i=0;i<n;i++){ const e=makeEnemy(fk,0, baseX, -30-i*54, 'weave');
       e.vy=110+sector*8; e.amp=rnd(40,90); e.freq=rnd(1.2,2.0); e.phase=i*0.5; e.baseX=baseX; e.wdir=dir;
-      e.fire=0.8+i*0.2; enemies.push(e); }
+      e.fire=0.8+i*0.2; maybeMutate(e); enemies.push(e); }
 }
 function startSweepWave(){
     const fk=waveFk; const n=8+Math.min(sector,8); const side=Math.random()<.5?-1:1; const y0=rnd(110,260);
     for(let i=0;i<n;i++){ const e=makeEnemy(fk,0, side<0?-30-i*42:W+30+i*42, y0+i*8, 'strafe');
-      e.vx=side*(165+sector*10); e.vy=22; e.fire=(gameMode==='hardcore'?0.2+i*0.12:0.4+i*0.18); enemies.push(e); }
+      e.vx=side*(165+sector*10); e.vy=22; e.fire=(gameMode==='hardcore'?0.2+i*0.12:0.4+i*0.18); maybeMutate(e); enemies.push(e); }
 }
 
 function spawnBoss(forceFk){
@@ -1605,7 +1613,7 @@ function nextSectorCheck(dt){
       for(const e of enemies){ if(e.dead)continue; e.slot=-1; e.state='free'; e.vy=Math.max(60,Math.abs(e.vy)||60); }
     } else {
       waveTimer-=dt;
-      if(alive<6 && waveTimer<=0 && !(gameMode==='dev' && window.__devNoSpawn)){ spawnWave(); waveTimer=rnd(1.3,2.3); }
+      if(alive<(sector>=10?9:6) && waveTimer<=0 && !(gameMode==='dev' && window.__devNoSpawn)){ spawnWave(); waveTimer=rnd(1.3,2.3); }
     }
   } else {
     waveTimer-=dt;
@@ -1616,8 +1624,8 @@ function nextSectorCheck(dt){
     hybridTimer-=dt;
     if(hybridTimer<=0){
       const ha=enemies.filter(e=>!e.dead&&(e.fk==='foreman'||e.fk==='vector')).length;
-      if(ha<2) spawnHybrid();
-      hybridTimer=rnd(11,17);
+      if(ha<(sector>=10?3:2)) spawnHybrid();
+      hybridTimer=(sector>=10?rnd(8,13):rnd(11,17));
     }
   }
 }
@@ -2261,7 +2269,7 @@ function update(dt){
         for(let q=0;q<count;q++){ const g=groups.find(gr=>gr.length>0); if(!g)break; const e=g.splice((Math.random()*g.length)|0,1)[0];
           if(e&&e.state==='form'){ e.state='dive'; e.vy=80; e.vx=rnd(-40,40); e.fire=0.25; } }
       } }
-    if(fleet.y>H+60){ for(const e of enemies){ if(!e.dead && (e.state==='form'||e.state==='reenter')){ e.dead=true; e.dt=0; e.gone=true; } } fleet=null; }
+    if(fleet.y>H+60){ for(const e of enemies){ if(!e.dead && (e.state==='form'||e.state==='reenter')){ e.slot=-1; e.state='free'; e.vy=Math.max(60,Math.abs(e.vy)||60); } } fleet=null; }
   }
 
   /* ----- enemies ----- */
@@ -2275,31 +2283,31 @@ function update(dt){
     if(e.state==='form'){
       const s=slots[e.slot], hx=fleet?fleet.x+(s?s.ox:0):e.x, hy=fleet?fleet.y+(s?s.oy:0):e.y;
       e.x+=(hx-e.x)*Math.min(1,dt*6); e.y+=(hy+Math.sin(e.bob)*3-e.y)*Math.min(1,dt*6); e.bank=(hx-e.x)*0.4;
-      e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(2.0,3.0)/enemyFireScale()); if(Math.random()<0.85) factionFire(e); }
+      e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(2.0,3.0)/enemyFireScale()*(e.fireMul||1)); if(Math.random()<0.85) factionFire(e); }
     } else if(e.state==='reenter'){
       if(!fleet){ e.slot=-1; e.state='free'; e.vy=Math.max(70,e.climbV0||70); }
       else { const s=slots[e.slot], hx=fleet.x+(s?s.ox:0), hy=fleet.y+(s?s.oy:0);
         e.x+=(hx-e.x)*Math.min(1,dt*3.2); e.y+=(hy-e.y)*Math.min(1,dt*3.2);
         if(Math.abs(e.x-hx)<3&&Math.abs(e.y-hy)<3) e.state='form'; }
     } else if(e.state==='dive'){
-      e.vy+=240*dt; if(e.y<H*0.62) e.vx+=(player.x-e.x)*dt*1.6; e.vx*=0.99; e.x+=e.vx*dt; e.y+=e.vy*dt; e.bank=e.vx*0.05;
-      e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(1.8,2.8)/enemyFireScale()); factionFire(e); }
+      e.vy+=(240+Math.min(180,sector*6))*dt; if(e.y<H*0.62) e.vx+=(player.x-e.x)*dt*(1.6*(e.mut==='mar'?1.4:1)); e.vx*=0.99; e.x+=e.vx*dt; e.y+=e.vy*dt; e.bank=e.vx*0.05;
+      e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(1.8,2.8)/enemyFireScale()*(e.fireMul||1)); factionFire(e); }
       if(e.vy>0 && e.y>H-110){ startClimb(e); }   // pull out instead of dropping off the bottom
     } else if(e.state==='climb'){
       e.climbT+=dt; const k=clamp(e.climbT/0.5,0,1);
       e.vy=e.climbV0+(-160-e.climbV0)*k;                                   // ramp vy to a climb over 0.5s
       let tx; if(e.slot>=0){ const s=slots[e.slot]; tx=fleet?fleet.x+(s?s.ox:0):e.x; } else { tx=(e.x<W/2)?40:W-40; }   // slot x, or nearest edge for free
       e.vx+=(tx-e.x)*dt*2.2; e.vx*=0.95; e.x+=e.vx*dt; e.y+=e.vy*dt; e.bank=e.vx*0.05;
-      if(e.y<H*0.70){ e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(2.0,3.0)/enemyFireScale()); factionFire(e); } }   // no fire while low
+      if(e.y<H*0.70){ e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(2.0,3.0)/enemyFireScale()*(e.fireMul||1)); factionFire(e); } }   // no fire while low
       if(e.y<H*0.45){ if(e.slot>=0){ e.state='reenter'; } else { e.state='free'; e.vy=Math.max(40,e.climbV0); } }   // handoff back to slot / free
     } else if(e.state==='weave'){
       e.y+=e.vy*dt; e.x=e.baseX+Math.sin(e.t*e.freq+e.phase)*e.amp*e.wdir; e.bank=Math.cos(e.t*e.freq+e.phase)*8*e.wdir;
-      e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(2.5,3.5)/enemyFireScale()); if(e.y>0&&e.y<H*0.7) factionFire(e); }
-      if(e.y>H+40){ e.dead=true; e.dt=0; e.gone=true; }
+      e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(2.5,3.5)/enemyFireScale()*(e.fireMul||1)); if(e.y>0&&e.y<H*0.7) factionFire(e); }
+      if(e.y>H+40){ e.y=-40-rnd(0,40); e.baseX=rnd(40,W-40); e.x=e.baseX; }
     } else if(e.state==='strafe'){
       e.x+=e.vx*dt; e.y+=e.vy*dt; e.bank=e.vx*0.04;
-      e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(2.0,3.0)/enemyFireScale()); if(e.x>0&&e.x<W) enemyShot(e,0,1); }
-      if(e.x<-50||e.x>W+50){ e.dead=true; e.dt=0; e.gone=true; }
+      e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(2.0,3.0)/enemyFireScale()*(e.fireMul||1)); if(e.x>0&&e.x<W) enemyShot(e,0,1); }
+      if(e.x<-50||e.x>W+50){ e.x=clamp(player.x+rnd(-120,120),30,W-30); e.y=-40-rnd(0,30); e.state='dive'; e.vy=80; e.vx=rnd(-30,30); e.fire=0.4; }
     } else if(e.state==='retreat'){
       e.x+=e.vx*dt; e.y+=e.vy*dt; e.vy-=dt*70; e.bank=e.vx*0.05;
       if(e.x<-60||e.x>W+60||e.y<-60){ e.dead=true; e.dt=0; e.gone=true; }
@@ -2339,7 +2347,7 @@ function update(dt){
       e.r=br*(1+0.18*Math.abs(Math.sin(e.celT*7)));
       if(Math.random()<0.6) parts.push({x:e.x+rnd(-br,br),y:e.y-rnd(0,br),vx:rnd(-55,55),vy:rnd(-120,-30),life:.6,max:.6,c:e.c,sz:1.9});
     } else { // free
-      e.y+=e.vy*dt; e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(2.0,3.5)/enemyFireScale()); factionFire(e); }
+      e.y+=e.vy*dt; e.fire-=dt; if(e.fire<=0){ e.fire=Math.max(0.2,rnd(2.0,3.5)/enemyFireScale()*(e.fireMul||1)); factionFire(e); }
       if(e.vy>0 && e.y>H-110){ startClimb(e); }   // pull out instead of dropping off the bottom
     }
     // contact with player (disabled for the first 0.4s of a pull-out climb)
@@ -2349,7 +2357,7 @@ function update(dt){
   });
   // recycle / refill formation
   for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];
-    if(!e.dead && e.y>H+90){ e.dead=true; e.dt=0; e.gone=true; }   // watchdog: nothing should linger below the playfield (weave despawns at H+40, dives pull out at H-110)
+    if(!e.dead && e.y>H+90 && e.state!=='retreat'){ e.x=clamp(player.x+rnd(-120,120),30,W-30); e.y=-40-rnd(0,30); e.state='dive'; e.vy=80; e.vx=rnd(-30,30); e.fire=0.4; }   // watchdog: recycle off-bottom (retreat excepted)
     if(e.dead&&e.dt<=0){ if(e.slot>=0&&refill&&refill.length>e.slot) refill[e.slot]=Math.max(refill[e.slot],0.6); enemies.splice(i,1); } }
   if(fleet&&!fleet.retiring&&refill){ let anyAlive=false;
     for(let i=0;i<slots.length;i++){ if(refill[i]>0){ refill[i]-=dt; } else if(!slotFilled(i)){ if((fleet.refillBudget||0)>0){ spawnFormationOccupant(i,true); fleet.refillBudget--; } } if(slotFilled(i)) anyAlive=true; }
@@ -2437,54 +2445,54 @@ function update(dt){
 
 /* enemy shots */
 function enemyShot(e,ang,spdMul){ if(ebul.length>=ebulCap()) return; if(sector<=1&&Math.random()<0.3) return;
-  e.fireFlash=0.12; const sp=(255+sector*14)*(spdMul||1);
+  e.fireFlash=0.12; const sp=(255+sector*14)*(spdMul||1)*ebulSpeedMul();
   ebul.push({x:e.x,y:e.y+e.r*0.6,vx:Math.sin(ang||0)*sp,vy:Math.cos(ang||0)*sp,c:e.c,r:3,owner:e}); }
 function enemyAimShot(e){ if(ebul.length>=ebulCap()) return; if(sector<=1&&Math.random()<0.3) return;
-  e.fireFlash=0.12; if(Audio_.play)Audio_.play('enemy_fire'); const dx=player.x-e.x,dy=player.y-e.y,m=Math.hypot(dx,dy)||1,sp=270+sector*14;
+  e.fireFlash=0.12; if(Audio_.play)Audio_.play('enemy_fire'); const dx=player.x-e.x,dy=player.y-e.y,m=Math.hypot(dx,dy)||1,sp=(270+sector*14)*ebulSpeedMul();
   ebul.push({x:e.x,y:e.y,vx:dx/m*sp,vy:dy/m*sp,c:e.c,r:3,owner:e}); }
 
 /* faction-specific attacks */
 function aceAttack(e){
   if(ebul.length>=ebulCap())return; if(sector<=1&&Math.random()<0.3)return;
-  e.fireFlash=0.12;
+  e.fireFlash=0.12; const _sm=ebulSpeedMul();
   const dx=player.x-e.x,dy=player.y-e.y,m=Math.hypot(dx,dy)||1,base=Math.atan2(dy,dx);
-  if(e.variant===0){ /* SAWHORSE: one heavy aimed dart */ const sp=260+sector*9; ebul.push({x:e.x,y:e.y,vx:dx/m*sp,vy:dy/m*sp,c:e.c,r:4,owner:e}); }
-  else if(e.variant===1){ /* TRUSS: braced parallel pair */ const sp=300+sector*10, ux=dx/m, uy=dy/m, px=-uy, py=ux;
+  if(e.variant===0){ /* SAWHORSE: one heavy aimed dart */ const sp=(260+sector*9)*_sm; ebul.push({x:e.x,y:e.y,vx:dx/m*sp,vy:dy/m*sp,c:e.c,r:4,owner:e}); }
+  else if(e.variant===1){ /* TRUSS: braced parallel pair */ const sp=(300+sector*10)*_sm, ux=dx/m, uy=dy/m, px=-uy, py=ux;
     for(const s of [-1,1]){ ebul.push({x:e.x+s*0.5*e.r*px,y:e.y+s*0.5*e.r*py,vx:ux*sp,vy:uy*sp,c:e.c,r:3,owner:e}); } }
   else { /* CLINKER: debris hazard + two slow darts */ if(hazards.length<12) hazards.push({x:clamp(player.x,40,W-40),y:player.y,r:26,life:2.0,max:2.0,c:e.c});
-    const sp=180+sector*7; for(const s of [-1,1]){ const a=base+s*0.07; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:4,owner:e}); } }
+    const sp=(180+sector*7)*_sm; for(const s of [-1,1]){ const a=base+s*0.07; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:4,owner:e}); } }
 }
 function bmetAttack(e){
   if(ebul.length>=ebulCap())return; if(sector<=1&&Math.random()<0.3)return;
-  e.fireFlash=0.12;
+  e.fireFlash=0.12; const _sm=ebulSpeedMul();
   const dx=player.x-e.x,dy=player.y-e.y,m=Math.hypot(dx,dy)||1,base=Math.atan2(dy,dx);
-  if(e.variant===0){ /* SPORE: soft puff of 4 slow spores */ const sp=120+sector*5, n=4; for(let i=0;i<n;i++){ const a=base+rnd(-0.25,0.25); ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:3.2,owner:e}); } }
-  else if(e.variant===1){ /* PHAGE: lone homing seeker */ const sp=130+sector*5; ebul.push({x:e.x,y:e.y,vx:dx/m*sp,vy:dy/m*sp,c:e.c,r:3.4,seeker:true,homeT:1.5,owner:e}); }
-  else { /* STRATUM: horizontal layer drifting down */ const vy=160+sector*6, n=5; for(let i=0;i<n;i++){ const x=clamp(e.x-80+i*40,20,W-20); ebul.push({x,y:e.y,vx:0,vy,c:e.c,r:3.5,owner:e}); } }
+  if(e.variant===0){ /* SPORE: soft puff of 4 slow spores */ const sp=(120+sector*5)*_sm, n=4; for(let i=0;i<n;i++){ const a=base+rnd(-0.25,0.25); ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:3.2,owner:e}); } }
+  else if(e.variant===1){ /* PHAGE: lone homing seeker */ const sp=(130+sector*5)*_sm; ebul.push({x:e.x,y:e.y,vx:dx/m*sp,vy:dy/m*sp,c:e.c,r:3.4,seeker:true,homeT:1.5,owner:e}); }
+  else { /* STRATUM: horizontal layer drifting down */ const vy=(160+sector*6)*_sm, n=5; for(let i=0;i<n;i++){ const x=clamp(e.x-80+i*40,20,W-20); ebul.push({x,y:e.y,vx:0,vy,c:e.c,r:3.5,owner:e}); } }
 }
 function cseeAttack(e){
   if(ebul.length>=ebulCap())return; if(sector<=1&&Math.random()<0.3)return;
-  e.fireFlash=0.12;
+  e.fireFlash=0.12; const _sm=ebulSpeedMul();
   const dx=player.x-e.x,dy=player.y-e.y,m=Math.hypot(dx,dy)||1,base=Math.atan2(dy,dx);
-  if(e.variant===0){ /* NODE: one fast precise packet */ const sp=360+sector*13; ebul.push({x:e.x,y:e.y,vx:dx/m*sp,vy:dy/m*sp,c:e.c,r:2.8,owner:e}); }
-  else if(e.variant===1){ /* RELAY: rapid 3-round stream */ const sp=330+sector*12; for(let k=0;k<3;k++){ const a=base+rnd(-0.04,0.04), s=sp+rnd(-20,20); ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,c:e.c,r:2.6,owner:e}); } }
-  else { /* TOROID: clean full-circle ring */ const sp=170+sector*6, n=10+Math.floor(sector/3); for(let i=0;i<n;i++){ const a=e.core+i/n*6.2832; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:3,owner:e}); } }
+  if(e.variant===0){ /* NODE: one fast precise packet */ const sp=(360+sector*13)*_sm; ebul.push({x:e.x,y:e.y,vx:dx/m*sp,vy:dy/m*sp,c:e.c,r:2.8,owner:e}); }
+  else if(e.variant===1){ /* RELAY: rapid 3-round stream */ const sp=(330+sector*12)*_sm; for(let k=0;k<3;k++){ const a=base+rnd(-0.04,0.04), s=sp+rnd(-20,20); ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,c:e.c,r:2.6,owner:e}); } }
+  else { /* TOROID: clean full-circle ring */ const sp=(170+sector*6)*_sm, n=10+Math.floor(sector/3); for(let i=0;i<n;i++){ const a=e.core+i/n*6.2832; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:3,owner:e}); } }
 }
 function matAttack(e){
   if(ebul.length>=ebulCap())return; if(sector<=1&&Math.random()<0.3)return;
-  e.fireFlash=0.12;
+  e.fireFlash=0.12; const _sm=ebulSpeedMul();
   const dx=player.x-e.x,dy=player.y-e.y,m=Math.hypot(dx,dy)||1,base=Math.atan2(dy,dx);
-  if(e.variant===0){ /* LENS: one very fast thin streak */ const sp=420+sector*14; ebul.push({x:e.x,y:e.y,vx:dx/m*sp,vy:dy/m*sp,c:e.c,r:2.4,owner:e}); }
-  else if(e.variant===1){ /* PROJECTOR: wide fan of 5 */ const sp=300+sector*10, n=5; for(let i=0;i<n;i++){ const a=base-0.5+(i/(n-1))*1.0; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:3,owner:e}); } }
-  else { /* BROADCASTER: omnidirectional pulse */ const sp=200+sector*7, n=10; for(let i=0;i<n;i++){ const a=e.core+i/n*6.2832; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:2.8,owner:e}); } }
+  if(e.variant===0){ /* LENS: one very fast thin streak */ const sp=(420+sector*14)*_sm; ebul.push({x:e.x,y:e.y,vx:dx/m*sp,vy:dy/m*sp,c:e.c,r:2.4,owner:e}); }
+  else if(e.variant===1){ /* PROJECTOR: wide fan of 5 */ const sp=(300+sector*10)*_sm, n=5; for(let i=0;i<n;i++){ const a=base-0.5+(i/(n-1))*1.0; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:3,owner:e}); } }
+  else { /* BROADCASTER: omnidirectional pulse */ const sp=(200+sector*7)*_sm, n=10; for(let i=0;i<n;i++){ const a=e.core+i/n*6.2832; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:2.8,owner:e}); } }
 }
 function msetAttack(e){
   if(ebul.length>=ebulCap())return; if(sector<=1&&Math.random()<0.3)return;
-  e.fireFlash=0.12;
+  e.fireFlash=0.12; const _sm=ebulSpeedMul();
   const dx=player.x-e.x,dy=player.y-e.y,m=Math.hypot(dx,dy)||1,base=Math.atan2(dy,dx);
-  if(e.variant===0){ /* TORCH: tight fast forward jet */ const sp=320+sector*11, n=3; for(let i=0;i<n;i++){ const a=base+(i-(n-1)/2)*0.1; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:2.6,owner:e}); } }
-  else if(e.variant===1){ /* PENDULUM: sweeping arc of 5 */ const sp=240+sector*8, n=5; for(let i=0;i<n;i++){ const a=base-0.4+(i/(n-1))*0.8; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:3,owner:e}); } }
-  else { /* DENDRITE: branching fork */ const sp=260+sector*9; for(const off of [-0.22,0,0.22]){ const a=base+off; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:3.2,split:true,owner:e}); } }
+  if(e.variant===0){ /* TORCH: tight fast forward jet */ const sp=(320+sector*11)*_sm, n=3; for(let i=0;i<n;i++){ const a=base+(i-(n-1)/2)*0.1; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:2.6,owner:e}); } }
+  else if(e.variant===1){ /* PENDULUM: sweeping arc of 5 */ const sp=(240+sector*8)*_sm, n=5; for(let i=0;i<n;i++){ const a=base-0.4+(i/(n-1))*0.8; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:3,owner:e}); } }
+  else { /* DENDRITE: branching fork */ const sp=(260+sector*9)*_sm; for(const off of [-0.22,0,0.22]){ const a=base+off; ebul.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,c:e.c,r:3.2,split:true,owner:e}); } }
 }
 function factionFire(e){
   if(Audio_.play)Audio_.play('enemy_fire');
@@ -2493,6 +2501,7 @@ function factionFire(e){
     case 'csee': cseeAttack(e); break; case 'mat': matAttack(e); break;
     case 'mset': msetAttack(e); break; default: enemyAimShot(e);
   }
+  if(e.mut==='gun') enemyAimShot(e);
 }
 
 /* boss */
@@ -3192,6 +3201,12 @@ function drawBG(){
   enemies.forEach(e=>{ if(e.dead||!e.buffed)return;
     bg.save(); bg.globalAlpha=e.buffed*0.8; bg.strokeStyle=COL.mat; bg.shadowColor=COL.mat; bg.shadowBlur=10; bg.lineWidth=1.5;
     bg.beginPath(); bg.arc(e.x,e.y,e.r+7,0,6.28); bg.stroke(); bg.restore(); });
+  // MUTATOR elite rings (VETERAN=white, MARAUDER=mset, GUNNER=bmet)
+  enemies.forEach(e=>{ if(e.dead||!e.mut)return;
+    const mc=e.mut==='vet'?COL.white:e.mut==='mar'?COL.mset:COL.bmet;
+    const ma=0.35+0.35*Math.abs(Math.sin(t*4.5+e.core));
+    bg.save(); bg.globalAlpha=ma; bg.strokeStyle=mc; bg.shadowColor=mc; bg.shadowBlur=10; bg.lineWidth=1.8;
+    bg.beginPath(); bg.arc(e.x,e.y,e.r+10,0,6.28); bg.stroke(); bg.restore(); });
   // SUPPORT ANCHOR field + halo + tethers to buffed allies
   enemies.forEach(e=>{ if(e.dead||e.role!=='anchor')return; const pul=0.5+0.5*Math.sin(t*2.2);
     bg.save(); bg.globalCompositeOperation='lighter';
@@ -4151,6 +4166,7 @@ function closeTut(){ el('ovlTut').classList.add('hidden'); try{localStorage.setI
 { const b=el('howtoBtn'); if(b) b.addEventListener('click',e=>{ e.stopPropagation(); openTut(); }); }
 
 const CHANGELOG=[
+ {ver:'139',date:'2026',items:['Enemies no longer vanish off-screen - they loop around and come back for you','Late sectors bite back: faster enemies, faster fire, bigger formations','Mutator elites from sector 8: VETERANS, MARAUDERS, and GUNNERS wear glowing rings','Hybrid elites press harder from sector 10']},
  {ver:'138',date:'2026',items:['SINGULARITY tamed: one hole at a time, a real recharge cost, and a cooldown after the implosion','PRISM BEAM joins the HEAVY family, scales with HEAVY POWER, and gets its own keystone fork','FLAK, BUZZSAW, TESLA, SWARM, DRONE, and FLANK GUNS all hit harder','BUZZSAW is now a true melee weapon - buy BLADE LAUNCHER to throw blades','New keystone forks for PRISM BEAM, WAVE MOTION, FLANK GUNS, and BOMB','SPREAD reworked into a brawler shotgun with a point-blank bonus','Keystones now unlock deeper into a run; PIERCE ROUNDS no longer drills forever','Extra lives are rare again - they only drop when you are nearly out','Mashing PARRY on cooldown now jams it','Modules unlock later and can be uninstalled for a fee','RAILSPIKE and BUZZSAW arrive earlier - commit to a strategy by sector 2-3']},
  {ver:'135',date:'2026',items:['Fixed a soft-lock where stragglers from a retreating formation could freeze just below the bottom edge, become unhittable, and stop new waves from spawning. They now clear properly and the action keeps coming.']},
  {ver:'134',date:'2026',items:['Mobile: spaced out the right-thumb action buttons and gave the control deck a bit more height, for more comfortable reach and fewer mis-taps.']},

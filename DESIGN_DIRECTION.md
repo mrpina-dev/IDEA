@@ -112,6 +112,8 @@ Locked design forks (do not re-litigate):
   and post-implosion lockout are the precedent.
 - Ambient extra lives drop only at low lives, max one per sector. Lives are
   scarce by design.
+- Enemies never silently despawn off the playfield (panic retreats excepted). They recycle and return; escape is not a cleanup mechanic.
+- Late-game escalation is layered: speed, bullet speed, density, and ringed mutator elites (VETERAN/MARAUDER/GUNNER) from sector 8+. Mutators always wear a signature ring — readability survives escalation.
 
 ---
 
