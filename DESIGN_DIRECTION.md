@@ -184,6 +184,11 @@ Each faction is a Bosco Tech pathway made hostile. Identity table is in
 - **VANGUARD is a desktop browser game.** This is a commitment, not a default.
   The cabinet layout (fixed playfield flanked by console panels) is the visual
   language. Touch support exists but desktop drives design.
+- Mobile controls are a twin-zone virtual gamepad: a floating velocity joystick
+  under the left thumb (steers a direction; the ship moves at its own speed and
+  never teleports to the finger) and all combat actions clustered under the
+  right thumb. Position-follow and relative-drag touch steering were both tried
+  and rejected as too weak for a fast shmup.
 - Single self-contained file (`vanguard/index.html`) stays the architecture.
   Assets (audio) may live alongside it in the repo; game logic does not split.
 - No redundant UI. Information appears once in the layout (precedent: duplicate

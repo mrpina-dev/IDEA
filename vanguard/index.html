@@ -83,12 +83,14 @@ body{background:#000;display:flex;align-items:center;justify-content:center;min-
   display:flex;align-items:center;justify-content:center;letter-spacing:.05em;pointer-events:auto;
   text-shadow:0 0 8px rgba(0,255,65,.6);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);touch-action:none}
 .tbtn:active{background:rgba(0,255,65,.18)}
-#btnBomb{left:14px;bottom:78px;border-color:rgba(200,255,0,.5);color:var(--gold)}
-#btnCharge{right:14px;bottom:166px;border-color:rgba(232,255,232,.5);color:var(--white)}
-#btnParry{right:14px;bottom:78px;width:76px;height:76px;font-size:12px;border-color:rgba(0,240,255,.7);color:var(--cyan);box-shadow:0 0 14px rgba(0,240,255,.25)}
-#btnWpn{left:14px;bottom:156px;border-color:rgba(0,240,255,.4);color:var(--cyan)}
-#btnHeavy{left:14px;bottom:234px;border-color:rgba(178,77,255,.5);color:#B24DFF}
-#btnPause{top:10px;left:50%;transform:translateX(-50%);width:34px;height:34px;font-size:9px;border-color:rgba(74,122,82,.7);color:var(--dim)}
+.stick{position:absolute;width:104px;height:104px;border-radius:50%;border:2px solid rgba(0,255,65,.35);background:radial-gradient(circle,rgba(0,255,65,.07),transparent 70%);transform:translate(-50%,-50%);z-index:6;pointer-events:none}
+.stickknob{position:absolute;left:50%;top:50%;width:46px;height:46px;border-radius:50%;background:rgba(0,255,65,.20);border:2px solid rgba(0,255,65,.75);box-shadow:0 0 12px rgba(0,255,65,.45);transform:translate(-50%,-50%)}
+#btnParry{right:16px;bottom:92px;width:78px;height:78px;font-size:12px;border-color:rgba(0,240,255,.7);color:var(--cyan);box-shadow:0 0 14px rgba(0,240,255,.25)}
+#btnCharge{right:104px;bottom:108px;width:62px;height:62px;border-color:rgba(232,255,232,.5);color:var(--white)}
+#btnBomb{right:30px;bottom:188px;width:62px;height:62px;border-color:rgba(200,255,0,.5);color:var(--gold)}
+#btnWpn{right:120px;bottom:198px;width:56px;height:56px;font-size:10px;border-color:rgba(0,240,255,.4);color:var(--cyan)}
+#btnHeavy{right:60px;bottom:280px;width:56px;height:56px;font-size:10px;border-color:rgba(178,77,255,.5);color:#B24DFF}
+#btnPause{top:10px;right:12px;width:34px;height:34px;font-size:9px;border-color:rgba(74,122,82,.7);color:var(--dim)}
 .hidden{display:none!important}
 
 /* overlays */
@@ -303,6 +305,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
   </div>
 
   <div class="touch hidden" id="touch">
+    <div class="stick hidden" id="stick"><i class="stickknob" id="stickknob"></i></div>
     <div class="tbtn" id="btnBomb">BOMB</div>
     <div class="tbtn" id="btnCharge">HEAVY</div>
     <div class="tbtn" id="btnParry">PARRY</div>
@@ -461,7 +464,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='124';
+const W=630,H=840; const VERSION='125';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 /* ============================= BAL: central balance registry =============================
    Every shipped balance value lives here and is read live in all modes. NORMAL/HARDCORE/
@@ -2081,7 +2084,7 @@ function update(dt){
     else if(moveMode_pref==='lock' && plocked){ const tx=clamp(ptr.lx==null?pl.x:ptr.lx,16,W-16), ty=clamp(ptr.ly==null?pl.y:ptr.ly,H*0.16,H-40);
       const dx=tx-pl.x, dy=ty-pl.y, d=Math.hypot(dx,dy)||1;
       const step=Math.min(spd*dt, d*Math.min(1,FOLLOW_RESP*dt)); if(d>step){ pl.x+=dx/d*step; pl.y+=dy/d*step; } else { pl.x=tx; pl.y=ty; } pl.vx=dx*0.05; }
-    else if(ptr.active && ptr.touch){ const tx=clamp(ptr.x,16,W-16), ty=clamp(ptr.y-64,H*0.16,H-40); pl.vx=(tx-pl.x)*0.06; pl.x=tx; pl.y=ty; }
+    else if(stick.on && (stick.dx||stick.dy)){ pl.x+=stick.dx*spd*dt; pl.y+=stick.dy*spd*dt; pl.vx=stick.dx; }
     else if(ptr.active){ const tx=ptr.x, ty=ptr.y-46; const dx=tx-pl.x, dy=ty-pl.y, d=Math.hypot(dx,dy)||1;
       const step=Math.min(spd*dt, d*Math.min(1,FOLLOW_RESP*dt)); if(d>step){ pl.x+=dx/d*step; pl.y+=dy/d*step; } else { pl.x=tx; pl.y=ty; } pl.vx=dx*0.05; }
     pl.x=clamp(pl.x,16,W-16); pl.y=clamp(pl.y,H*0.16,H-40);
@@ -3773,10 +3776,14 @@ function refreshInitials(){ const box=el('initials'); [...box.children].forEach(
 
 /* ============================= input ============================= */
 const ptr={x:W/2,y:H-130,active:false,id:null,touch:false,dlx:null,dly:null,lx:null,ly:null};
+const stick={on:false,id:null,ox:0,oy:0,dx:0,dy:0};
 function clearInput(){ for(const k in keys) keys[k]=false; for(const h in held) held[h]=false; if(player){ player.beamOn=false; player.beamLock=false; } }
 window.addEventListener('blur',clearInput);
 let isTouch=('ontouchstart' in window)||navigator.maxTouchPoints>0;
 function toLogical(clientX,clientY){ const r=bgC.getBoundingClientRect(); return {x:(clientX-r.left)/r.width*W,y:(clientY-r.top)/r.height*H}; }
+function showStick(x,y){ const s=document.getElementById('stick'); if(!s)return; s.style.left=(x/W*100)+'%'; s.style.top=(y/H*100)+'%'; s.classList.remove('hidden'); moveStickKnob(); }
+function hideStick(){ const s=document.getElementById('stick'); if(s)s.classList.add('hidden'); }
+function moveStickKnob(){ const k=document.getElementById('stickknob'); if(k)k.style.transform='translate(-50%,-50%) translate('+(stick.dx*34).toFixed(1)+'px,'+(stick.dy*34).toFixed(1)+'px)'; }
 function uiBlocked(){ const ids=['ovlOutfit','ovlSettings','ovlKeys','ovlBoard','ovlTut','ovlLog','ovlConfirm']; for(const id of ids){ const el2=document.getElementById(id); if(el2 && !el2.classList.contains('hidden')) return true; } return false; }
 function typingInField(){ const a=document.activeElement; return !!a && ((window.__devInput&&a===window.__devInput) || (a.classList&&a.classList.contains('fbinline'))); }
 stage.addEventListener('pointerdown',e=>{ Audio_.init(); Audio_.resume();
@@ -3785,10 +3792,12 @@ stage.addEventListener('pointerdown',e=>{ Audio_.init(); Audio_.resume();
   if(state!=='play')return;
   if(e.pointerType==='mouse' && e.button!==0) return;
   if(moveMode_pref==='lock' && e.pointerType==='mouse'){ if(player){ptr.lx=player.x; ptr.ly=player.y;} try{bgC.requestPointerLock();}catch(_){ } return; }
-  const p=toLogical(e.clientX,e.clientY); ptr.x=p.x; ptr.y=p.y; ptr.active=true; ptr.id=e.pointerId; ptr.touch=(e.pointerType==='touch'); },{passive:true});
-stage.addEventListener('pointermove',e=>{ if(moveMode_pref==='lock' && plocked){ const r=bgC.getBoundingClientRect(); const s=r.width?W/r.width:1; ptr.lx=clamp((ptr.lx==null?W/2:ptr.lx)+e.movementX*s,16,W-16); ptr.ly=clamp((ptr.ly==null?H/2:ptr.ly)+e.movementY*s,H*0.16,H-40); return; } if(!ptr.active||e.pointerId!==ptr.id)return; const p=toLogical(e.clientX,e.clientY); ptr.x=p.x; ptr.y=p.y; },{passive:true});
-window.addEventListener('pointerup',e=>{ if(ptr.id==null||e.pointerId===ptr.id){ ptr.active=false; ptr.id=null; } });
-window.addEventListener('pointercancel',e=>{ if(ptr.id==null||e.pointerId===ptr.id){ ptr.active=false; ptr.id=null; } });
+  const p=toLogical(e.clientX,e.clientY);
+  if(e.pointerType==='touch'){ if(p.x < W*0.55){ stick.on=true; stick.id=e.pointerId; stick.ox=p.x; stick.oy=p.y; stick.dx=0; stick.dy=0; showStick(p.x,p.y); } return; }
+  ptr.x=p.x; ptr.y=p.y; ptr.active=true; ptr.id=e.pointerId; ptr.touch=false; },{passive:true});
+stage.addEventListener('pointermove',e=>{ if(stick.on && e.pointerId===stick.id){ const p=toLogical(e.clientX,e.clientY); const vx=p.x-stick.ox, vy=p.y-stick.oy, d=Math.hypot(vx,vy); const DZ=6, MR=70; if(d<DZ){ stick.dx=0; stick.dy=0; } else { const m=Math.min(1,(d-DZ)/(MR-DZ)); stick.dx=vx/d*m; stick.dy=vy/d*m; } moveStickKnob(); return; } if(moveMode_pref==='lock' && plocked){ const r=bgC.getBoundingClientRect(); const s=r.width?W/r.width:1; ptr.lx=clamp((ptr.lx==null?W/2:ptr.lx)+e.movementX*s,16,W-16); ptr.ly=clamp((ptr.ly==null?H/2:ptr.ly)+e.movementY*s,H*0.16,H-40); return; } if(!ptr.active||e.pointerId!==ptr.id)return; const p=toLogical(e.clientX,e.clientY); ptr.x=p.x; ptr.y=p.y; },{passive:true});
+window.addEventListener('pointerup',e=>{ if(stick.on && e.pointerId===stick.id){ stick.on=false; stick.id=null; stick.dx=0; stick.dy=0; hideStick(); } if(ptr.id==null||e.pointerId===ptr.id){ ptr.active=false; ptr.id=null; } });
+window.addEventListener('pointercancel',e=>{ if(stick.on && e.pointerId===stick.id){ stick.on=false; stick.id=null; stick.dx=0; stick.dy=0; hideStick(); } if(ptr.id==null||e.pointerId===ptr.id){ ptr.active=false; ptr.id=null; } });
 stage.addEventListener('contextmenu',e=>e.preventDefault());
 stage.addEventListener('mousedown',e=>{ const tk='Mouse'+e.button;
   if(rebindAction){ e.preventDefault();
@@ -4070,6 +4079,7 @@ function closeTut(){ el('ovlTut').classList.add('hidden'); try{localStorage.setI
 { const b=el('howtoBtn'); if(b) b.addEventListener('click',e=>{ e.stopPropagation(); openTut(); }); }
 
 const CHANGELOG=[
+ {ver:'125',date:'2026',items:['Mobile: new control scheme. A floating movement stick lives under your left thumb and steers the ship at full speed without teleporting, and all combat buttons moved to a right-thumb cluster with PARRY on the prime corner.']},
  {ver:'124',date:'2026',items:['Mobile: steering reworked to direct 1:1 touch. The ship tracks your thumb instantly and sits just above it, so a flick crosses the screen instead of crawling. Buttons enlarged and moved into thumb reach, with PARRY on the prime bottom-right spot.']},
  {ver:'122',date:'2026',items:['PARRY reworked. It is a precise timing tool now, not a button to mash. Pressing it no longer makes you briefly invincible, whiffing leaves you exposed and locks the parry longer, and only a PERFECT parry shortens the cooldown. Parry healing is trimmed so you can no longer turtle behind it.','Enemies that reach the bottom now loop off-screen and re-enter from the top or a flank, instead of stalling halfway up or getting stuck at the bottom.','Removed the SIEGE column-wall formation.','Mobile: the ship no longer freezes after a parry. Movement and the action buttons now track separate fingers.']},
  {ver:'119',date:'2026',items:['Full balance overhaul: boss and enemy durability rebuilt around measured damage curves - mid-run bosses no longer melt','Enemy fire pressure now scales hard with sector - camping the bottom of the screen will get you killed','Economy retuned: kill coins, STYLE coin bonus, CORE jackpots, and boss drops reduced; EXTRA LIFE costs 4000 and caps lower','GUN POWER, SPREAD top end, flank guns, drone, and PRISM BEAM trimmed to keep late sectors dangerous']},
