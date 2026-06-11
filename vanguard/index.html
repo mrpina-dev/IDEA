@@ -86,12 +86,15 @@ body{background:#000;display:flex;align-items:center;justify-content:center;min-
 .stick{position:absolute;width:104px;height:104px;border-radius:50%;border:2px solid rgba(0,255,65,.35);background:radial-gradient(circle,rgba(0,255,65,.07),transparent 70%);transform:translate(-50%,-50%);z-index:6;pointer-events:none;opacity:0;transition:opacity .07s}
 .stick.live{opacity:1}
 .stickknob{position:absolute;left:50%;top:50%;width:46px;height:46px;border-radius:50%;background:rgba(0,255,65,.20);border:2px solid rgba(0,255,65,.75);box-shadow:0 0 12px rgba(0,255,65,.45);transform:translate(-50%,-50%)}
-#btnParry{right:16px;bottom:92px;width:78px;height:78px;font-size:12px;border-color:rgba(0,240,255,.7);color:var(--cyan);box-shadow:0 0 14px rgba(0,240,255,.25)}
-#btnCharge{right:104px;bottom:108px;width:62px;height:62px;border-color:rgba(232,255,232,.5);color:var(--white)}
-#btnBomb{right:30px;bottom:188px;width:62px;height:62px;border-color:rgba(200,255,0,.5);color:var(--gold)}
-#btnWpn{right:120px;bottom:198px;width:56px;height:56px;font-size:10px;border-color:rgba(0,240,255,.4);color:var(--cyan)}
-#btnHeavy{right:60px;bottom:280px;width:56px;height:56px;font-size:10px;border-color:rgba(178,77,255,.5);color:#B24DFF}
-#btnPause{top:10px;right:12px;width:34px;height:34px;font-size:9px;border-color:rgba(74,122,82,.7);color:var(--dim)}
+#btnParry{right:14px;bottom:14px;width:76px;height:76px;font-size:12px;border-color:rgba(0,240,255,.7);color:var(--cyan);box-shadow:0 0 14px rgba(0,240,255,.25)}
+#btnCharge{right:98px;bottom:20px;width:58px;height:58px;border-color:rgba(232,255,232,.5);color:var(--white)}
+#btnBomb{right:24px;bottom:98px;width:56px;height:56px;border-color:rgba(200,255,0,.5);color:var(--gold)}
+#btnWpn{right:96px;bottom:100px;width:50px;height:50px;font-size:10px;border-color:rgba(0,240,255,.4);color:var(--cyan)}
+#btnHeavy{right:42px;bottom:156px;width:48px;height:48px;font-size:10px;border-color:rgba(178,77,255,.5);color:#B24DFF}
+#btnPause{top:8px;right:10px;width:32px;height:32px;font-size:9px;border-color:rgba(74,122,82,.7);color:var(--dim)}
+body.touchdev #cabinet{flex-direction:column;justify-content:flex-start;align-items:center;gap:0}
+body.touchdev #stage{width:min(100vw, calc((100dvh - 214px) * 3 / 4));max-height:none;flex:0 0 auto}
+body.touchdev #touch{position:relative;inset:auto;z-index:auto;width:100%;flex:1 1 auto;min-height:206px;pointer-events:auto;background:linear-gradient(180deg,rgba(0,18,7,.30),rgba(2,10,4,.55));border-top:1px solid rgba(0,255,65,.18)}
 .hidden{display:none!important}
 
 /* overlays */
@@ -465,7 +468,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='128';
+const W=630,H=840; const VERSION='129';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 /* ============================= BAL: central balance registry =============================
    Every shipped balance value lives here and is read live in all modes. NORMAL/HARDCORE/
@@ -3780,11 +3783,15 @@ const ptr={x:W/2,y:H-130,active:false,id:null,touch:false,dlx:null,dly:null,lx:n
 const stick={on:false,id:null,ox:0,oy:0,dx:0,dy:0};
 function clearInput(){ for(const k in keys) keys[k]=false; for(const h in held) held[h]=false; if(player){ player.beamOn=false; player.beamLock=false; } }
 window.addEventListener('blur',clearInput);
-let isTouch=('ontouchstart' in window)||navigator.maxTouchPoints>0;
+let isTouch=('ontouchstart' in window)||navigator.maxTouchPoints>0; if(isTouch){ try{document.body.classList.add('touchdev');}catch(_){ } }
 function toLogical(clientX,clientY){ const r=bgC.getBoundingClientRect(); return {x:(clientX-r.left)/r.width*W,y:(clientY-r.top)/r.height*H}; }
-function showStick(x,y){ const s=document.getElementById('stick'); if(!s)return; s.style.left=(x/W*100)+'%'; s.style.top=(y/H*100)+'%'; s.classList.add('live'); moveStickKnob(); }
+function showStick(x,y){ const s=document.getElementById('stick'); if(!s)return; s.style.left=x+'px'; s.style.top=y+'px'; s.classList.add('live'); moveStickKnob(); }
 function hideStick(){ const s=document.getElementById('stick'); if(s)s.classList.remove('live'); }
 function moveStickKnob(){ const k=document.getElementById('stickknob'); if(k)k.style.transform='translate(-50%,-50%) translate('+(stick.dx*34).toFixed(1)+'px,'+(stick.dy*34).toFixed(1)+'px)'; }
+(function(){ const deck=document.getElementById('touch'); if(!deck)return;
+  deck.addEventListener('pointerdown',e=>{ if(state!=='play')return; if(e.target.closest('.tbtn'))return; if(e.pointerType==='mouse')return; const r=deck.getBoundingClientRect(); const lx=e.clientX-r.left, ly=e.clientY-r.top; if(lx>r.width*0.5)return; try{e.preventDefault();}catch(_){ } try{deck.setPointerCapture(e.pointerId);}catch(_){ } stick.on=true; stick.id=e.pointerId; stick.ox=lx; stick.oy=ly; stick.dx=0; stick.dy=0; showStick(lx,ly); },{passive:false});
+  deck.addEventListener('pointermove',e=>{ if(!stick.on||e.pointerId!==stick.id)return; const r=deck.getBoundingClientRect(); const lx=e.clientX-r.left, ly=e.clientY-r.top; const vx=lx-stick.ox, vy=ly-stick.oy, d=Math.hypot(vx,vy); const DZ=5, MR=92; if(d<DZ){ stick.dx=0; stick.dy=0; } else { const m=Math.min(1,(d-DZ)/(MR-DZ)), mc=m*m; stick.dx=vx/d*mc; stick.dy=vy/d*mc; } moveStickKnob(); },{passive:false});
+})();
 function uiBlocked(){ const ids=['ovlOutfit','ovlSettings','ovlKeys','ovlBoard','ovlTut','ovlLog','ovlConfirm']; for(const id of ids){ const el2=document.getElementById(id); if(el2 && !el2.classList.contains('hidden')) return true; } return false; }
 function typingInField(){ const a=document.activeElement; return !!a && ((window.__devInput&&a===window.__devInput) || (a.classList&&a.classList.contains('fbinline'))); }
 stage.addEventListener('pointerdown',e=>{ Audio_.init(); Audio_.resume();
@@ -3794,9 +3801,9 @@ stage.addEventListener('pointerdown',e=>{ Audio_.init(); Audio_.resume();
   if(e.pointerType==='mouse' && e.button!==0) return;
   if(moveMode_pref==='lock' && e.pointerType==='mouse'){ if(player){ptr.lx=player.x; ptr.ly=player.y;} try{bgC.requestPointerLock();}catch(_){ } return; }
   const p=toLogical(e.clientX,e.clientY);
-  if(e.pointerType==='touch'){ if(p.x < W*0.55){ try{e.preventDefault();}catch(_){ } try{stage.setPointerCapture(e.pointerId);}catch(_){ } stick.on=true; stick.id=e.pointerId; stick.ox=p.x; stick.oy=p.y; stick.dx=0; stick.dy=0; showStick(p.x,p.y); } return; }
+  if(e.pointerType==='touch'){ return; }
   ptr.x=p.x; ptr.y=p.y; ptr.active=true; ptr.id=e.pointerId; ptr.touch=false; },{passive:false});
-stage.addEventListener('pointermove',e=>{ if(stick.on && e.pointerId===stick.id){ const p=toLogical(e.clientX,e.clientY); const vx=p.x-stick.ox, vy=p.y-stick.oy, d=Math.hypot(vx,vy); const DZ=5, MR=92; if(d<DZ){ stick.dx=0; stick.dy=0; } else { const m=Math.min(1,(d-DZ)/(MR-DZ)), mc=m*m; stick.dx=vx/d*mc; stick.dy=vy/d*mc; } moveStickKnob(); return; } if(moveMode_pref==='lock' && plocked){ const r=bgC.getBoundingClientRect(); const s=r.width?W/r.width:1; ptr.lx=clamp((ptr.lx==null?W/2:ptr.lx)+e.movementX*s,16,W-16); ptr.ly=clamp((ptr.ly==null?H/2:ptr.ly)+e.movementY*s,H*0.16,H-40); return; } if(!ptr.active||e.pointerId!==ptr.id)return; const p=toLogical(e.clientX,e.clientY); ptr.x=p.x; ptr.y=p.y; },{passive:true});
+stage.addEventListener('pointermove',e=>{ if(moveMode_pref==='lock' && plocked){ const r=bgC.getBoundingClientRect(); const s=r.width?W/r.width:1; ptr.lx=clamp((ptr.lx==null?W/2:ptr.lx)+e.movementX*s,16,W-16); ptr.ly=clamp((ptr.ly==null?H/2:ptr.ly)+e.movementY*s,H*0.16,H-40); return; } if(!ptr.active||e.pointerId!==ptr.id)return; const p=toLogical(e.clientX,e.clientY); ptr.x=p.x; ptr.y=p.y; },{passive:true});
 window.addEventListener('pointerup',e=>{ if(stick.on && e.pointerId===stick.id){ stick.on=false; stick.id=null; stick.dx=0; stick.dy=0; hideStick(); } if(ptr.id==null||e.pointerId===ptr.id){ ptr.active=false; ptr.id=null; } });
 window.addEventListener('pointercancel',e=>{ if(stick.on && e.pointerId===stick.id){ stick.on=false; stick.id=null; stick.dx=0; stick.dy=0; hideStick(); } if(ptr.id==null||e.pointerId===ptr.id){ ptr.active=false; ptr.id=null; } });
 stage.addEventListener('contextmenu',e=>e.preventDefault());
@@ -4080,6 +4087,7 @@ function closeTut(){ el('ovlTut').classList.add('hidden'); try{localStorage.setI
 { const b=el('howtoBtn'); if(b) b.addEventListener('click',e=>{ e.stopPropagation(); openTut(); }); }
 
 const CHANGELOG=[
+ {ver:'129',date:'2026',items:['Mobile: controls moved to a dedicated deck below the playfield. The play area up top is now fully unobstructed, with the movement stick on the left of the deck and the action buttons on the right.']},
  {ver:'128',date:'2026',items:['Mobile: finer joystick control - small thumb movements now give slow, precise steering. Also fixed the score screen so SUBMIT is always reachable, which was stopping mobile runs from posting to the leaderboard.']},
  {ver:'127',date:'2026',items:['Mobile: fixed the movement stick cancelling on the first drag, so steering now holds for the whole press.','Renamed the HVY touch button to SWAP.']},
  {ver:'125',date:'2026',items:['Mobile: new control scheme. A floating movement stick lives under your left thumb and steers the ship at full speed without teleporting, and all combat buttons moved to a right-thumb cluster with PARRY on the prime corner.']},
