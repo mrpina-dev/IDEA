@@ -95,7 +95,7 @@ body{background:#000;display:flex;align-items:center;justify-content:center;min-
 .hidden{display:none!important}
 
 /* overlays */
-.ovl{position:absolute;inset:0;z-index:9;display:flex;flex-direction:column;align-items:center;justify-content:center;
+.ovl{position:absolute;inset:0;z-index:9;display:flex;flex-direction:column;align-items:center;justify-content:safe center;overflow-y:auto;
   text-align:center;padding:24px;gap:14px;background:rgba(2,10,4,.62);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
 .title-wm{font-family:'Chakra Petch',sans-serif;font-weight:700;letter-spacing:.14em;line-height:1.05}
 .title-wm .a{font-size:34px;color:var(--green);text-shadow:0 0 20px rgba(0,255,65,.7)}
@@ -121,8 +121,8 @@ body{background:#000;display:flex;align-items:center;justify-content:center;min-
 h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;letter-spacing:.1em;color:var(--green);text-shadow:0 0 14px rgba(0,255,65,.6)}
 .go-stat{font-size:12px;color:var(--white);letter-spacing:.06em}
 .go-stat b{font-family:'Chakra Petch',sans-serif;color:var(--gold)}
-.initials{display:flex;gap:4px;margin:6px 0;flex-wrap:nowrap;justify-content:center;max-width:none}
-.slot{width:26px;height:36px;border:1.5px solid rgba(0,255,65,.45);display:flex;align-items:center;justify-content:center;
+.initials{display:flex;gap:3px;margin:6px 0;flex-wrap:nowrap;justify-content:center;max-width:100%}
+.slot{width:22px;height:32px;flex:0 0 auto;border:1.5px solid rgba(0,255,65,.45);display:flex;align-items:center;justify-content:center;
   font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:18px;color:var(--green);text-shadow:0 0 12px rgba(0,255,65,.6);
   background:rgba(0,20,8,.4);cursor:pointer;touch-action:none}
 .slot.sel{border-color:var(--gold);color:var(--gold);box-shadow:0 0 14px rgba(200,255,0,.5)}
@@ -465,7 +465,7 @@ h2.ovh{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;lett
 (function(){
 "use strict";
 /* ============================= setup ============================= */
-const W=630,H=840; const VERSION='127';
+const W=630,H=840; const VERSION='128';
 try{var _cv=document.getElementById('cabVer'); if(_cv)_cv.textContent='BUILD '+VERSION;}catch(e){}
 /* ============================= BAL: central balance registry =============================
    Every shipped balance value lives here and is read live in all modes. NORMAL/HARDCORE/
@@ -3796,7 +3796,7 @@ stage.addEventListener('pointerdown',e=>{ Audio_.init(); Audio_.resume();
   const p=toLogical(e.clientX,e.clientY);
   if(e.pointerType==='touch'){ if(p.x < W*0.55){ try{e.preventDefault();}catch(_){ } try{stage.setPointerCapture(e.pointerId);}catch(_){ } stick.on=true; stick.id=e.pointerId; stick.ox=p.x; stick.oy=p.y; stick.dx=0; stick.dy=0; showStick(p.x,p.y); } return; }
   ptr.x=p.x; ptr.y=p.y; ptr.active=true; ptr.id=e.pointerId; ptr.touch=false; },{passive:false});
-stage.addEventListener('pointermove',e=>{ if(stick.on && e.pointerId===stick.id){ const p=toLogical(e.clientX,e.clientY); const vx=p.x-stick.ox, vy=p.y-stick.oy, d=Math.hypot(vx,vy); const DZ=6, MR=70; if(d<DZ){ stick.dx=0; stick.dy=0; } else { const m=Math.min(1,(d-DZ)/(MR-DZ)); stick.dx=vx/d*m; stick.dy=vy/d*m; } moveStickKnob(); return; } if(moveMode_pref==='lock' && plocked){ const r=bgC.getBoundingClientRect(); const s=r.width?W/r.width:1; ptr.lx=clamp((ptr.lx==null?W/2:ptr.lx)+e.movementX*s,16,W-16); ptr.ly=clamp((ptr.ly==null?H/2:ptr.ly)+e.movementY*s,H*0.16,H-40); return; } if(!ptr.active||e.pointerId!==ptr.id)return; const p=toLogical(e.clientX,e.clientY); ptr.x=p.x; ptr.y=p.y; },{passive:true});
+stage.addEventListener('pointermove',e=>{ if(stick.on && e.pointerId===stick.id){ const p=toLogical(e.clientX,e.clientY); const vx=p.x-stick.ox, vy=p.y-stick.oy, d=Math.hypot(vx,vy); const DZ=5, MR=92; if(d<DZ){ stick.dx=0; stick.dy=0; } else { const m=Math.min(1,(d-DZ)/(MR-DZ)), mc=m*m; stick.dx=vx/d*mc; stick.dy=vy/d*mc; } moveStickKnob(); return; } if(moveMode_pref==='lock' && plocked){ const r=bgC.getBoundingClientRect(); const s=r.width?W/r.width:1; ptr.lx=clamp((ptr.lx==null?W/2:ptr.lx)+e.movementX*s,16,W-16); ptr.ly=clamp((ptr.ly==null?H/2:ptr.ly)+e.movementY*s,H*0.16,H-40); return; } if(!ptr.active||e.pointerId!==ptr.id)return; const p=toLogical(e.clientX,e.clientY); ptr.x=p.x; ptr.y=p.y; },{passive:true});
 window.addEventListener('pointerup',e=>{ if(stick.on && e.pointerId===stick.id){ stick.on=false; stick.id=null; stick.dx=0; stick.dy=0; hideStick(); } if(ptr.id==null||e.pointerId===ptr.id){ ptr.active=false; ptr.id=null; } });
 window.addEventListener('pointercancel',e=>{ if(stick.on && e.pointerId===stick.id){ stick.on=false; stick.id=null; stick.dx=0; stick.dy=0; hideStick(); } if(ptr.id==null||e.pointerId===ptr.id){ ptr.active=false; ptr.id=null; } });
 stage.addEventListener('contextmenu',e=>e.preventDefault());
@@ -4080,6 +4080,7 @@ function closeTut(){ el('ovlTut').classList.add('hidden'); try{localStorage.setI
 { const b=el('howtoBtn'); if(b) b.addEventListener('click',e=>{ e.stopPropagation(); openTut(); }); }
 
 const CHANGELOG=[
+ {ver:'128',date:'2026',items:['Mobile: finer joystick control - small thumb movements now give slow, precise steering. Also fixed the score screen so SUBMIT is always reachable, which was stopping mobile runs from posting to the leaderboard.']},
  {ver:'127',date:'2026',items:['Mobile: fixed the movement stick cancelling on the first drag, so steering now holds for the whole press.','Renamed the HVY touch button to SWAP.']},
  {ver:'125',date:'2026',items:['Mobile: new control scheme. A floating movement stick lives under your left thumb and steers the ship at full speed without teleporting, and all combat buttons moved to a right-thumb cluster with PARRY on the prime corner.']},
  {ver:'124',date:'2026',items:['Mobile: steering reworked to direct 1:1 touch. The ship tracks your thumb instantly and sits just above it, so a flick crosses the screen instead of crawling. Buttons enlarged and moved into thumb reach, with PARRY on the prime bottom-right spot.']},
