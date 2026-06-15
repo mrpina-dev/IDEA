@@ -1595,6 +1595,7 @@ function startGame(){
   player.coins += Math.max(0, START_BUDGET-(startBuild.spent||0));   // unspent pre-game budget carries into the run
   if(gameMode==='hardcore'){ player.lives=0; } else if(gameMode==='dev'){ player.lives=99; player.coins=99999; player.heavyUnlocked={beam:1,rail:1,tesla:1,singularity:1,wave:1}; }
   window.__devTime=1; window.__devStep=false; window.__devNoSpawn=false;
+  if(gameMode!=='dev'){ if(window.__devSetGod){ window.__devSetGod(false); } else { window.__devGod=false; } }   // god mode is dev-only; never carries into normal/ranked runs
   envGrid=[0,255,65]; lastSec=-1; initBackdrop(); triggerBanner();
   showOverlay(null);
   fetchOnline();
@@ -4340,6 +4341,7 @@ requestAnimationFrame(frame);
   panel.appendChild(hdr('TOOLS'));
   const tg=document.createElement('div'); tg.className='dgrid';
   function godToggle(){ window.__devGod=!window.__devGod; godBtn.classList.toggle('on',!!window.__devGod); }
+  window.__devSetGod=function(v){ window.__devGod=!!v; godBtn.classList.toggle('on',!!v); };
   function healFn(){ if(player){player.armor=player.maxArmor;player.shieldHits=Math.max(player.shieldHits,1);player.beamE=player.beamMax;player.lives=Math.max(player.lives,3);} }
   const godBtn=mk('GOD',()=>godToggle());
   tg.appendChild(godBtn);
